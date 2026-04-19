@@ -1,24 +1,55 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const defaultClaudeModel = process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-latest'
+const fallbackClaudeModel = 'claude-3-haiku-20240307'
+const defaultClaudeModel = process.env.ANTHROPIC_MODEL || fallbackClaudeModel
+
+function extractTextFromResponse(response: Awaited<ReturnType<typeof anthropic.messages.create>>): string {
+  const textBlock = response.content.find((c) => c.type === 'text')
+  return textBlock && textBlock.type === 'text' ? textBlock.text : ''
+}
+
+function isModelNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  return /not_found_error|model:/i.test(error.message)
+}
 
 export async function askClaudeForText(systemPrompt: string, userPrompt: string) {
-  const response = await anthropic.messages.create({
-    model: defaultClaudeModel,
+  const requestPayload = {
     max_tokens: 1800,
     temperature: 0.2,
     system: systemPrompt,
     messages: [
       {
-        role: 'user',
+        role: 'user' as const,
         content: userPrompt,
       },
     ],
-  })
+  }
 
-  const textBlock = response.content.find((c) => c.type === 'text')
-  return textBlock && textBlock.type === 'text' ? textBlock.text : ''
+  try {
+    const response = await anthropic.messages.create({
+      model: defaultClaudeModel,
+      ...requestPayload,
+    })
+    return extractTextFromResponse(response)
+  } catch (error) {
+    const shouldRetryWithFallback =
+      defaultClaudeModel !== fallbackClaudeModel && isModelNotFoundError(error)
+
+    if (!shouldRetryWithFallback) {
+      throw error
+    }
+
+    const fallbackResponse = await anthropic.messages.create({
+      model: fallbackClaudeModel,
+      ...requestPayload,
+    })
+    return extractTextFromResponse(fallbackResponse)
+  }
 }
 
 export async function askClaudeForJson(systemPrompt: string, userPrompt: string) {
