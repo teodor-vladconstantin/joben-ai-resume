@@ -59,7 +59,8 @@ export async function GET() {
   const resendConfigured = Boolean(process.env.RESEND_API_KEY)
   const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRO_PRICE_ID)
   const cronConfigured = Boolean(process.env.CRON_SECRET)
-  const latexServiceAuthConfigured = process.env.NODE_ENV !== 'production' || Boolean(process.env.LATEX_SERVICE_SECRET)
+  const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
+  const latexServiceAuthConfigured = !requireLatexServiceAuth || Boolean(process.env.LATEX_SERVICE_SECRET)
 
   let rateLimitBackend: ServiceProbe = 'skipped'
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
