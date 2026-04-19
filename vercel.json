@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/followup-7d",
-      "schedule": "0 * * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
