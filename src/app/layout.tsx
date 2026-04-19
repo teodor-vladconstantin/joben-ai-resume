@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -83,6 +84,7 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: stripInjectedAttrScript }}
           />
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
