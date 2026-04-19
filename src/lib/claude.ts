@@ -4,9 +4,25 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const fallbackClaudeModel = 'claude-3-haiku-20240307'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || fallbackClaudeModel
 
-function extractTextFromResponse(response: Awaited<ReturnType<typeof anthropic.messages.create>>): string {
+function extractTextFromResponse(response: Anthropic.Message): string {
   const textBlock = response.content.find((c) => c.type === 'text')
   return textBlock && textBlock.type === 'text' ? textBlock.text : ''
+}
+
+async function createMessage(model: string, systemPrompt: string, userPrompt: string): Promise<Anthropic.Message> {
+  return anthropic.messages.create({
+    model,
+    max_tokens: 1800,
+    temperature: 0.2,
+    system: systemPrompt,
+    stream: false,
+    messages: [
+      {
+        role: 'user',
+        content: userPrompt,
+      },
+    ],
+  })
 }
 
 function isModelNotFoundError(error: unknown): boolean {
@@ -18,23 +34,8 @@ function isModelNotFoundError(error: unknown): boolean {
 }
 
 export async function askClaudeForText(systemPrompt: string, userPrompt: string) {
-  const requestPayload = {
-    max_tokens: 1800,
-    temperature: 0.2,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user' as const,
-        content: userPrompt,
-      },
-    ],
-  }
-
   try {
-    const response = await anthropic.messages.create({
-      model: defaultClaudeModel,
-      ...requestPayload,
-    })
+    const response = await createMessage(defaultClaudeModel, systemPrompt, userPrompt)
     return extractTextFromResponse(response)
   } catch (error) {
     const shouldRetryWithFallback =
@@ -44,10 +45,7 @@ export async function askClaudeForText(systemPrompt: string, userPrompt: string)
       throw error
     }
 
-    const fallbackResponse = await anthropic.messages.create({
-      model: fallbackClaudeModel,
-      ...requestPayload,
-    })
+    const fallbackResponse = await createMessage(fallbackClaudeModel, systemPrompt, userPrompt)
     return extractTextFromResponse(fallbackResponse)
   }
 }
