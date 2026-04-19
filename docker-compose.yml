@@ -1,0 +1,12 @@
+services:
+  latex-compiler:
+    build: 
+      context: ./latex-service
+    ports:
+      - "3005:3001"
+    environment:
+      - PORT=3001
+    volumes:
+      - ./latex-service:/app
+      - /app/node_modules
+    restart: unless-stopped

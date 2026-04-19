@@ -1,0 +1,14 @@
+.git
+.gitignore
+.next
+node_modules
+npm-debug.log
+.env
+.env.local
+.env.*.local
+*.md
+.DS_Store
+latex-service
+supabase
+docker-compose*.yml
+Dockerfile*
