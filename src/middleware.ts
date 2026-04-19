@@ -7,11 +7,17 @@ const isProtectedRoute = createRouteMatcher([
   '/ai-review(.*)',
 ])
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect()
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (isProtectedRoute(req)) {
+      await auth.protect()
+    }
+  },
+  {
+    signInUrl: '/sign-in',
+    signUpUrl: '/sign-up',
   }
-})
+)
 
 export const config = {
   matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
