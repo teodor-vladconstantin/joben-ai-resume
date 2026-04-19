@@ -1,0 +1,33 @@
+##############################################################
+# Joben — LaTeX Compiler Service (Docker)
+# The Next.js app runs on Vercel; only this service needs Docker.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Requires: .env.prod with LATEX_SERVICE_SECRET
+##############################################################
+
+networks:
+  latex-net:
+    driver: bridge
+
+services:
+  latex-service:
+    build:
+      context: ./latex-service
+    container_name: joben-latex
+    restart: unless-stopped
+    networks: [latex-net]
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      LATEX_SERVICE_SECRET: ${LATEX_SERVICE_SECRET}
+    mem_limit: 512m
+    cpus: "0.75"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

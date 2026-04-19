@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --brand-black: #020202;
+  --brand-deep: #0a0f0d;
+  --brand-mid: #101715;
+  --brand-accent: #0a9548;
+  --brand-accent-bright: #16db65;
+  --brand-white: #ffffff;
+
+  --background: var(--brand-black);
+  --surface: var(--brand-deep);
+  --surface-strong: var(--brand-mid);
+  --foreground: var(--brand-white);
+  --muted: color-mix(in srgb, var(--brand-white) 72%, transparent);
+  --muted-2: color-mix(in srgb, var(--brand-white) 58%, transparent);
+  --border: color-mix(in srgb, var(--brand-white) 10%, transparent);
+  --accent: var(--brand-accent);
+  --accent-strong: var(--brand-accent-bright);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-accent) 75%, black) color-mix(in srgb, var(--brand-white) 8%, transparent);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--brand-white) 6%, transparent);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--brand-accent-bright), var(--brand-accent));
+  border: 2px solid color-mix(in srgb, var(--brand-black) 88%, transparent);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 75%, black));
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-accent) 82%, black) color-mix(in srgb, var(--brand-white) 6%, transparent);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--brand-white) 6%, transparent);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--brand-accent-bright), var(--brand-accent));
+  border-radius: 9999px;
+}
+
+.tabs-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-accent) 90%, black) color-mix(in srgb, var(--brand-accent) 18%, transparent);
+}
+
+.tabs-scrollbar::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.tabs-scrollbar::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--brand-accent) 16%, transparent);
+  border-radius: 9999px;
+}
+
+.tabs-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, var(--brand-accent-bright), var(--brand-accent));
+  border-radius: 9999px;
+}
+
+.tabs-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 74%, black));
+}
+
+@media print {
+  @page {
+    margin: 0;
+    size: A4;
+  }
+}
