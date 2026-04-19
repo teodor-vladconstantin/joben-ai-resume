@@ -69,13 +69,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider
-      appearance={clerkAppearance}
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
-    >
+    <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={`${inter.className} bg-(--background) text-(--foreground) min-h-screen flex flex-col`} suppressHydrationWarning>
           <Script
