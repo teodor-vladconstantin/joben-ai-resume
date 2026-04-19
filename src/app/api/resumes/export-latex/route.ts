@@ -241,10 +241,11 @@ export async function POST(req: Request) {
     // Call the local LaTeX microservice running on Docker
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
+    const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
     const isProduction = process.env.NODE_ENV === 'production'
 
-    if (isProduction && !latexServiceSecret) {
-      logger.error('LATEX_SERVICE_SECRET missing in production', {
+    if (requireLatexServiceAuth && !latexServiceSecret) {
+      logger.error('LATEX_SERVICE_SECRET missing while latex auth is required', {
         requestId,
         route: '/api/resumes/export-latex',
         userId,
@@ -254,6 +255,14 @@ export async function POST(req: Request) {
         503,
         requestId
       )
+    }
+
+    if (isProduction && !requireLatexServiceAuth && !latexServiceSecret) {
+      logger.warn('LATEX_SERVICE_SECRET missing, continuing without latex auth', {
+        requestId,
+        route: '/api/resumes/export-latex',
+        userId,
+      })
     }
 
     const headers: Record<string, string> = {
