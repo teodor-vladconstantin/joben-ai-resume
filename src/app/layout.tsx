@@ -3,6 +3,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
+import { clerkAppearance } from '@/lib/clerk-appearance'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -67,7 +68,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={clerkAppearance}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={`${inter.className} bg-(--background) text-(--foreground) min-h-screen flex flex-col`} suppressHydrationWarning>
           <Script

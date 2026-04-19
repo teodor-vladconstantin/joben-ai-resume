@@ -9,7 +9,14 @@ export default function SignUpPage() {
           <h1 className="text-3xl font-bold text-white mb-2">Create your account</h1>
           <p className="text-white/50 text-sm">Start building ATS-optimized resumes for free</p>
         </div>
-        <SignUp appearance={clerkAppearance} />
+        <SignUp
+          appearance={clerkAppearance}
+          routing="path"
+          path="/sign-up"
+          signInUrl="/sign-in"
+          fallbackRedirectUrl="/dashboard"
+          signInFallbackRedirectUrl="/dashboard"
+        />
       </div>
     </div>
   )

@@ -32,6 +32,7 @@
 
 ## Done
 
+- [DONE] Debugged production Clerk auth issue and hardened custom auth routing defaults in app/middleware/env template
 - [DONE] Switched deployment to Vercel (removed VPS/Traefik/self-hosted Supabase from docker-compose; added vercel.json with cron config; updated CI/CD workflow)
 - [DONE] DB migration `20260419193000_add_users_stripe_last_event_created.sql` applied to Supabase Cloud (ResumeAIMax / vdgjxejunpfxvnpxyazq)
 - [DONE] docker-compose.prod.yml reduced to LaTeX service only
