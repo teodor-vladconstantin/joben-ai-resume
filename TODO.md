@@ -32,6 +32,7 @@
 
 ## Done
 
+- [DONE] Fixed redeem-code configuration detection to support legacy env keys and ignore placeholder values (without exposing code)
 - [DONE] Updated legal support contact email to admin@joben.eu in Terms and Privacy pages
 - [DONE] Added Terms and Conditions + Privacy Policy pages and integrated mandatory legal consent checkbox before sign-up redirect
 - [DONE] Hardened AI review fix actions with direct href fallback navigation for Auto-Fix and Apply this fix
