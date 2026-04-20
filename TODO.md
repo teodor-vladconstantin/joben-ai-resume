@@ -32,7 +32,7 @@
 
 ## Done
 
-- [DONE] Removed all public JOBEN100 mentions, removed redeem fallback default, and required private env-configured code
+- [DONE] Removed all public redeem-code hints, removed redeem fallback default, and required private env-configured code
 - [DONE] Implemented private redeem flow for instant lifetime Recruiting access (DB migration + API + dashboard UI + Stripe webhook protection + tests)
 - [DONE] Diagnosed bullet AI prompt/call path and clarified rate-limit vs Anthropic-call behavior in API/UI messaging
 - [DONE] Debugged production Clerk auth issue and hardened custom auth routing defaults in app/middleware/env template
