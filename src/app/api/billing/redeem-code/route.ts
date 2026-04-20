@@ -5,9 +5,35 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 export const runtime = 'nodejs'
 
 const LIFETIME_RECRUITING_CODE_ID = 'private_recruiting_lifetime_code'
+const REDEEM_CODE_ENV_KEYS = [
+  'RECRUITING_LIFETIME_CODE',
+  'LIFETIME_RECRUITING_CODE',
+  'REDEEM_ACCESS_CODE',
+  'REDEEM_CODE',
+] as const
+
+const PLACEHOLDER_CODE_VALUES = [
+  'CHANGE_ME',
+  'CHANGE_ME_PRIVATE_REDEEM_CODE',
+  'YOUR_PRIVATE_REDEEM_CODE',
+] as const
 
 function normalizeCode(input: string | null | undefined): string {
   return (input || '').trim().toUpperCase()
+}
+
+function resolveExpectedCode(): { code: string | null; sourceKey: string | null } {
+  for (const key of REDEEM_CODE_ENV_KEYS) {
+    const normalized = normalizeCode(process.env[key])
+    if (!normalized) continue
+
+    const isPlaceholder = PLACEHOLDER_CODE_VALUES.some((placeholder) => normalized.includes(placeholder))
+    if (isPlaceholder) continue
+
+    return { code: normalized, sourceKey: key }
+  }
+
+  return { code: null, sourceKey: null }
 }
 
 export async function POST(req: Request) {
@@ -31,12 +57,13 @@ export async function POST(req: Request) {
     return jsonWithRequestId({ error: 'code is required' }, 400, requestId)
   }
 
-  const expectedCode = normalizeCode(process.env.RECRUITING_LIFETIME_CODE)
+  const { code: expectedCode, sourceKey } = resolveExpectedCode()
   if (!expectedCode) {
     logger.error('Redeem code config missing', {
       requestId,
       route: '/api/billing/redeem-code',
       userId,
+      checkedEnvKeys: REDEEM_CODE_ENV_KEYS,
     })
     return jsonWithRequestId({ error: 'Redeem code is not configured.' }, 500, requestId)
   }
@@ -105,6 +132,7 @@ export async function POST(req: Request) {
     route: '/api/billing/redeem-code',
     userId,
     codeId: LIFETIME_RECRUITING_CODE_ID,
+    configuredFromEnvKey: sourceKey,
   })
 
   return jsonWithRequestId(

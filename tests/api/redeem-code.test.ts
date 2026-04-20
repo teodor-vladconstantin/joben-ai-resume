@@ -20,6 +20,9 @@ describe('redeem code API', () => {
     currentUserMock.mockReset()
     createServerClientMock.mockReset()
     process.env.RECRUITING_LIFETIME_CODE = 'PRIVATE_TEST_REDEEM_CODE'
+    delete process.env.LIFETIME_RECRUITING_CODE
+    delete process.env.REDEEM_ACCESS_CODE
+    delete process.env.REDEEM_CODE
   })
 
   it('returns 401 when user is missing', async () => {
@@ -102,6 +105,64 @@ describe('redeem code API', () => {
       }),
       { onConflict: 'clerk_id' }
     )
+  })
+
+  it('accepts legacy env alias keys when canonical key is absent', async () => {
+    delete process.env.RECRUITING_LIFETIME_CODE
+    process.env.LIFETIME_RECRUITING_CODE = 'PRIVATE_TEST_REDEEM_CODE'
+
+    authMock.mockResolvedValue({ userId: 'user_legacy' })
+    currentUserMock.mockResolvedValue({
+      emailAddresses: [{ emailAddress: 'legacy@example.com' }],
+    })
+
+    const maybeSingleMock = vi.fn().mockResolvedValue({
+      data: { lifetime_recruiting_unlocked: false },
+      error: null,
+    })
+    const upsertMock = vi.fn().mockResolvedValue({ error: null })
+
+    createServerClientMock.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: maybeSingleMock,
+          })),
+        })),
+        upsert: upsertMock,
+      })),
+    })
+
+    const { POST } = await import('@/app/api/billing/redeem-code/route')
+
+    const response = await POST(
+      new Request('http://localhost/api/billing/redeem-code', {
+        method: 'POST',
+        body: JSON.stringify({ code: 'private_test_redeem_code' }),
+      })
+    )
+
+    const payload = (await response.json()) as { success?: boolean }
+
+    expect(response.status).toBe(200)
+    expect(payload.success).toBe(true)
+    expect(upsertMock).toHaveBeenCalled()
+  })
+
+  it('returns 500 when code env is placeholder-only', async () => {
+    process.env.RECRUITING_LIFETIME_CODE = 'CHANGE_ME_PRIVATE_REDEEM_CODE'
+    authMock.mockResolvedValue({ userId: 'user_123' })
+
+    const { POST } = await import('@/app/api/billing/redeem-code/route')
+
+    const response = await POST(
+      new Request('http://localhost/api/billing/redeem-code', {
+        method: 'POST',
+        body: JSON.stringify({ code: 'PRIVATE_TEST_REDEEM_CODE' }),
+      })
+    )
+
+    expect(response.status).toBe(500)
   })
 
   it('is idempotent when recruiting lifetime already active', async () => {
