@@ -592,7 +592,6 @@ export function ResumeBuilder() {
         limit?: number
         remaining?: number
         resetAt?: number
-        aiCallAttempted?: boolean
       }
 
       if (!response.ok || !payload.bullet) {
@@ -605,10 +604,6 @@ export function ResumeBuilder() {
 
           if (typeof payload.resetAt === 'number') {
             details.push(`Resets at: ${new Date(payload.resetAt).toLocaleString()}`)
-          }
-
-          if (payload.aiCallAttempted === false) {
-            details.push('No Anthropic API call was made for this attempt.')
           }
 
           const rateLimitMessage = details.join('\n')
