@@ -588,9 +588,43 @@ export function ResumeBuilder() {
         bullet?: string
         showUpgrade?: boolean
         error?: string
+        currentPlan?: 'free' | 'pro' | 'recruiting'
+        limit?: number
+        remaining?: number
+        resetAt?: number
+        aiCallAttempted?: boolean
       }
 
       if (!response.ok || !payload.bullet) {
+        if (response.status === 429) {
+          const details: string[] = [payload.error || 'Daily limit reached. Try again later.']
+
+          if (typeof payload.remaining === 'number' && typeof payload.limit === 'number') {
+            details.push(`Remaining in current window: ${payload.remaining}/${payload.limit}`)
+          }
+
+          if (typeof payload.resetAt === 'number') {
+            details.push(`Resets at: ${new Date(payload.resetAt).toLocaleString()}`)
+          }
+
+          if (payload.aiCallAttempted === false) {
+            details.push('No Anthropic API call was made for this attempt.')
+          }
+
+          const rateLimitMessage = details.join('\n')
+
+          if (payload.showUpgrade && payload.currentPlan !== 'pro') {
+            setUpgradeMessage(rateLimitMessage)
+            setShowUpgradeModal(true)
+            setImprovingExperienceId(null)
+            return
+          }
+
+          alert(rateLimitMessage)
+          setImprovingExperienceId(null)
+          return
+        }
+
         if (payload.showUpgrade) {
           setUpgradeMessage(payload.error || 'Bullet rewrite is available on Pro.')
           setShowUpgradeModal(true)
