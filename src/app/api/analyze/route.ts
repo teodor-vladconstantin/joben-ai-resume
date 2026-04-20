@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { askClaudeForJson } from '@/lib/claude'
+import { ClaudeJsonParseError } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
@@ -17,6 +18,13 @@ Score across 5 categories:
 
 Note: scores are out of 20/40/10/25/5 (total 100).
 Be strict. 85+ should be rare.
+Keep output compact:
+- strengths: exactly 3 short items
+- improvements: max 3 items
+- keywords_found: max 10 items
+- keywords_missing: max 10 items
+- ats_warnings: max 5 items
+- feedback strings: max 2 short sentences
 
 Return:
 {
@@ -96,7 +104,8 @@ export async function POST(req: Request) {
 
   try {
     const prompt = `Resume:\n${body.resumeText}\n\nJob description:\n${body.jobDescription || 'N/A'}`
-    const analysis = await askClaudeForJson(ANALYZE_SYSTEM_PROMPT, prompt)
+    const analysis = (await askClaudeForJson(ANALYZE_SYSTEM_PROMPT, prompt)) as
+      Record<string, unknown> & { overall_score?: number }
 
     const supabase = createServerClient()
     const { data: createdReview, error: insertError } = await supabase
@@ -140,13 +149,17 @@ export async function POST(req: Request) {
 
     return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
   } catch (error) {
-    const message = (error as Error).message
+    const message = error instanceof ClaudeJsonParseError
+      ? 'AI response format was invalid. Please retry.'
+      : (error as Error).message
+
     logger.error('Analyze route failed', {
       requestId,
       userId,
       route: '/api/analyze',
-      error: message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     })
+
     return jsonWithRequestId({ error: message }, 500, requestId)
   }
 }
