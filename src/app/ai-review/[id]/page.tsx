@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import { ResumeAnalyzer, type AnalyzerReview } from '@/components/analyzer/ResumeAnalyzer'
 
 export default function AIReviewEditorPage() {
   const params = useParams<{ id: string }>()
+  const router = useRouter()
   const [review, setReview] = useState<AnalyzerReview | null>(null)
   const [comparison, setComparison] = useState<{
     previousScore: number | null
@@ -59,11 +60,33 @@ export default function AIReviewEditorPage() {
     }
   }, [params?.id])
 
+  const reviewId = params?.id || ''
+  const canApplyFixes = Boolean(reviewId)
+
+  const handleApplyFix = () => {
+    if (!reviewId) return
+
+    const targetResumeId = review?.resume_id
+    const nextUrl = targetResumeId
+      ? `/resumes/${targetResumeId}?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
+      : `/resumes/new?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
+
+    router.push(nextUrl)
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#020202]">
       <Navbar />
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-20">
-        <ResumeAnalyzer review={review} comparison={comparison} isLoading={isLoading} error={error} />
+        <ResumeAnalyzer
+          review={review}
+          comparison={comparison}
+          isLoading={isLoading}
+          error={error}
+          canApplyFixes={canApplyFixes}
+          onApplyFix={handleApplyFix}
+          onAutoFix={handleApplyFix}
+        />
       </main>
     </div>
   )

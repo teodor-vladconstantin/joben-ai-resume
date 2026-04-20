@@ -32,6 +32,7 @@
 
 ## Done
 
+- [DONE] Fixed AI review + builder UX blockers (functional AI upload, Apply-fix navigation, import/export responsiveness guards, dynamic dashboard score label, removed General Optimization option)
 - [DONE] Hardened LaTeX export layout for long imported content (wrapping subheadings + text normalization/clamping + multiline bullet splitting)
 - [DONE] Removed all public redeem-code hints, removed redeem fallback default, and required private env-configured code
 - [DONE] Implemented private redeem flow for instant lifetime Recruiting access (DB migration + API + dashboard UI + Stripe webhook protection + tests)
