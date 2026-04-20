@@ -37,9 +37,27 @@ type LatexResumeData = {
 
 const MAX_EXPORT_PAYLOAD_CHARS = 250_000
 
-function escapeLatex(text: string | undefined): string {
+function normalizeLatexText(text: string | undefined): string {
   if (!text) return ''
+
   return text
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function clampLatexText(text: string | undefined, maxChars: number): string {
+  const normalized = normalizeLatexText(text)
+  if (normalized.length <= maxChars) return normalized
+  return `${normalized.slice(0, Math.max(maxChars - 3, 0)).trimEnd()}...`
+}
+
+function escapeLatex(text: string | undefined): string {
+  const normalized = normalizeLatexText(text)
+  if (!normalized) return ''
+
+  return normalized
     .replace(/\\/g, '\\textbackslash ')
     .replace(/&/g, '\\&')
     .replace(/%/g, '\\%')
@@ -52,144 +70,176 @@ function escapeLatex(text: string | undefined): string {
     .replace(/\^/g, '\\textasciicircum ')
 }
 
+function normalizeBulletCandidate(text: string): string {
+  return clampLatexText(
+    text
+      .replace(/\*\*/g, '')
+      .replace(/^[-*•]\s*/, '')
+      .replace(/^['"`]+|['"`]+$/g, ''),
+    260
+  )
+}
+
+function extractSafeBullets(exp: LatexExperienceEntry): string[] {
+  const fromBullets = Array.isArray(exp.bullets)
+    ? exp.bullets
+        .flatMap((bullet: unknown) => (typeof bullet === 'string' ? bullet.split(/\r?\n+/) : []))
+        .map((bullet: string) => normalizeBulletCandidate(bullet))
+        .filter((bullet: string) => Boolean(bullet) && /[\p{L}\p{N}]/u.test(bullet))
+    : []
+
+  if (fromBullets.length > 0) {
+    return fromBullets
+  }
+
+  const fallback = normalizeBulletCandidate(typeof exp.description === 'string' ? exp.description : '')
+  return fallback ? [fallback] : []
+}
+
 function generateLatex(data: LatexResumeData): string {
   const { personal, experience, dynamicSections = [] } = data
 
-  const fullName = `${personal?.firstName || ''} ${personal?.lastName || ''}`.trim()
-  
-  // This is a simplified "Jake's Resume" style professional template in LaTeX
-  let tex = `\\documentclass[letterpaper,11pt]{article}
+  const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
+  const contactParts = [
+    clampLatexText(personal?.phone, 40),
+    clampLatexText(personal?.email, 120),
+    clampLatexText(personal?.title, 90),
+  ].filter(Boolean)
+  const contactLine = contactParts.map((value) => escapeLatex(value)).join(' $|$ ')
+  const contactBlock = contactLine
+    ? String.raw`    \small ${contactLine}
+`
+    : ''
 
-\\usepackage{latexsym}
-\\usepackage[empty]{fullpage}
-\\usepackage{titlesec}
-\\usepackage{marvosym}
-\\usepackage[usenames,dvipsnames]{color}
-\\usepackage{verbatim}
-\\usepackage{enumitem}
-\\usepackage[hidelinks]{hyperref}
-\\usepackage{fancyhdr}
-\\usepackage[english]{babel}
-\\usepackage{tabularx}
+  let tex = String.raw`\documentclass[letterpaper,11pt]{article}
 
-\\pagestyle{fancy}
-\\fancyhf{} 
-\\fancyfoot{}
-\\renewcommand{\\headrulewidth}{0pt}
-\\renewcommand{\\footrulewidth}{0pt}
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
 
 % Adjust margins
-\\addtolength{\\oddsidemargin}{-0.5in}
-\\addtolength{\\evensidemargin}{-0.5in}
-\\addtolength{\\textwidth}{1in}
-\\addtolength{\\topmargin}{-.5in}
-\\addtolength{\\textheight}{1.0in}
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
 
-\\urlstyle{same}
+\urlstyle{same}
 
-\\raggedbottom
-\\raggedright
-\\setlength{\\tabcolsep}{0in}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+\setlength{\emergencystretch}{3em}
 
 % Sections formatting
-\\titleformat{\\section}{
-  \\vspace{-4pt}\\scshape\\raggedright\\large
-}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
 
-\\newcommand{\\resumeItem}[1]{
-  \\item\\small{
-    {#1 \\vspace{-2pt}}
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
   }
 }
 
-\\newcommand{\\resumeSubheading}[4]{
-  \\vspace{-2pt}\\item
-    \\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
-      \\textbf{#1} & #2 \\\\
-      \\textit{\\small#3} & \\textit{\\small #4} \\\\
-    \\end{tabular*}\\vspace{-7pt}
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabularx}{0.97\textwidth}[t]{@{}Xr@{}}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabularx}\vspace{-7pt}
 }
 
-\\begin{document}
+\begin{document}
 
 %----------HEADING-----------------
-\\begin{center}
-    \\textbf{\\Huge \\scshape ${escapeLatex(fullName)}} \\\\ \\vspace{1pt}
-    \\small ${escapeLatex(personal?.phone)} $|$ \\href{mailto:${escapeLatex(personal?.email)}}{\\underline{${escapeLatex(personal?.email)}}} $|$ ${escapeLatex(personal?.title)}
-\\end{center}
+\begin{center}
+    \textbf{\Huge \scshape ${escapeLatex(fullName)}} \\ \vspace{1pt}
+${contactBlock}\end{center}
 
 `
 
   if (personal?.summary) {
-    tex += `
-\\section{Summary}
-\\small{${escapeLatex(personal.summary)}}
+    tex += String.raw`
+\section{Summary}
+\small{${escapeLatex(clampLatexText(personal.summary, 900))}}
 `
   }
 
   if (experience && experience.length > 0) {
-    tex += `
-\\section{Experience}
-  \\begin{itemize}[leftmargin=0.15in, label={}]
+    tex += String.raw`
+\section{Experience}
+  \begin{itemize}[leftmargin=0.15in, label={}]
 `
+
     for (const exp of experience) {
-      const normalizedBullets = Array.isArray(exp.bullets)
-        ? exp.bullets
-            .map((bullet: unknown) => (typeof bullet === 'string' ? bullet.trim() : ''))
-            .filter(Boolean)
-        : []
-      const safeBullets = normalizedBullets.length > 0
-        ? normalizedBullets
-        : [typeof exp.description === 'string' ? exp.description.trim() : ''].filter(Boolean)
+      const safeBullets = extractSafeBullets(exp)
       const bulletItems = safeBullets
-        .map((bullet: string) => `        \\resumeItem{${escapeLatex(bullet)}}`)
+        .map((bullet: string) => String.raw`        \resumeItem{${escapeLatex(bullet)}}`)
         .join('\n')
 
-      tex += `
-    \\resumeSubheading
-      {${escapeLatex(exp.title)}}{${escapeLatex(exp.period)}}
-      {${escapeLatex(exp.company)}}{}
-      \\begin{itemize}[leftmargin=0.15in, label={-}]
+      tex += String.raw`
+    \resumeSubheading
+      {${escapeLatex(clampLatexText(exp.title, 140))}}{${escapeLatex(clampLatexText(exp.period, 50))}}
+      {${escapeLatex(clampLatexText(exp.company, 220))}}{}
+      \begin{itemize}[leftmargin=0.15in, label={-}]
 ${bulletItems}
-      \\end{itemize}
+      \end{itemize}
 `
     }
-    tex += `  \\end{itemize}
+
+    tex += String.raw`  \end{itemize}
 `
   }
 
-  // Add dynamic sections mapped out
   const groupedSections = dynamicSections.reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
-    if (!acc[current.type]) acc[current.type] = [];
-    acc[current.type].push(current);
-    return acc;
+    if (!acc[current.type]) acc[current.type] = []
+    acc[current.type].push(current)
+    return acc
   }, {})
 
   for (const [type, sections] of Object.entries(groupedSections)) {
-    const list = sections
-    // Display section title from the first item of that type
     const sectionTitle = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')
-    
-    tex += `\\section{${escapeLatex(sectionTitle)}}\n`
-    if (type === 'education' || type === 'projects' || type === 'certifications') {
-        tex += `  \\begin{itemize}[leftmargin=0.15in, label={}]\n`
-        for (const section of list) {
-             tex += `
-    \\resumeSubheading
-      {${escapeLatex(section.title)}}{ }
-      {${escapeLatex(section.content)}}{ }
+
+    tex += String.raw`\section{${escapeLatex(sectionTitle)}}
 `
-        }
-        tex += `  \\end{itemize}\n`
+
+    if (type === 'education' || type === 'projects' || type === 'certifications') {
+      tex += String.raw`  \begin{itemize}[leftmargin=0.15in, label={}]
+`
+      for (const section of sections) {
+        tex += String.raw`
+    \resumeSubheading
+      {${escapeLatex(clampLatexText(section.title, 120))}}{ }
+      {${escapeLatex(clampLatexText(section.content, 260))}}{ }
+`
+      }
+      tex += String.raw`  \end{itemize}
+`
     } else {
-        for (const section of list) {
-            tex += `\\textbf{${escapeLatex(section.title)}}: ${escapeLatex(section.content)} \\\\ \\vspace{2pt}\n`
-        }
+      for (const section of sections) {
+        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatex(clampLatexText(section.content, 520))} \\ \vspace{2pt}
+`
+      }
     }
   }
 
-  tex += `
-\\end{document}
+  tex += String.raw`
+\end{document}
 `
   return tex
 }
@@ -237,8 +287,7 @@ export async function POST(req: Request) {
     }
 
     const texStr = generateLatex(data)
-    
-    // Call the local LaTeX microservice running on Docker
+
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
     const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
@@ -272,12 +321,11 @@ export async function POST(req: Request) {
     if (latexServiceSecret) {
       headers.Authorization = `Bearer ${latexServiceSecret}`
     }
-    
+
     const response = await fetch(latexServiceUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify({ tex: texStr }),
-      // Important to expect binary response
     })
 
     if (!response.ok) {
@@ -285,7 +333,9 @@ export async function POST(req: Request) {
       try {
         const errJson = (await response.json()) as { details?: string; error?: string }
         errStr = errJson.details || errJson.error || errStr
-      } catch {}
+      } catch {
+        // Keep generic message if JSON parse fails.
+      }
 
       logger.error('LaTeX service compile failed', {
         requestId,
@@ -310,16 +360,15 @@ export async function POST(req: Request) {
         dynamicSections: Array.isArray(data?.dynamicSections) ? data.dynamicSections.length : 0,
       },
     })
-    
+
     const pdfResponse = new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'inline; filename="resume.pdf"'
-      }
+        'Content-Disposition': 'inline; filename="resume.pdf"',
+      },
     })
     pdfResponse.headers.set('x-request-id', requestId)
     return pdfResponse
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error exporting to PDF'
     logger.error('Resume export route failed', {
