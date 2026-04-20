@@ -1,5 +1,5 @@
 "use client"
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
@@ -108,6 +108,7 @@ const tabSectionMap: Record<string, AddableSection['type'][]> = {
 
 
 export function ResumeBuilder() {
+  const importInputRef = useRef<HTMLInputElement | null>(null)
   const [activeTab, setActiveTab] = useState('experience')
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData)
   const [isPending] = useTransition()
@@ -117,9 +118,10 @@ export function ResumeBuilder() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false)
   const [tailorJobDescription, setTailorJobDescription] = useState('')
-  const [tailorType, setTailorType] = useState<'job_specific' | 'general'>('job_specific')
   const [isTailoring, setIsTailoring] = useState(false)
   const [improvingExperienceId, setImprovingExperienceId] = useState<string | null>(null)
+  const [isImportingPdf, setIsImportingPdf] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
   const params = useParams<{ id: string }>()
@@ -254,13 +256,13 @@ export function ResumeBuilder() {
   }, [derivedTitle, isCreateMode, resumeData, resumeId, routeResumeId, router])
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading || isImportingPdf || isExportingPdf) return
     const handle = setTimeout(() => {
       void persistResume()
     }, 800)
 
     return () => clearTimeout(handle)
-  }, [isLoading, persistResume])
+  }, [isExportingPdf, isImportingPdf, isLoading, persistResume])
 
   const updatePersonalField = (field: keyof typeof initialResumeData.personal, value: string) => {
     setResumeData((prev) => ({
@@ -296,6 +298,10 @@ export function ResumeBuilder() {
   }
 
   const exportAsLatexPdf = async () => {
+    if (isExportingPdf) return
+
+    setIsExportingPdf(true)
+
     try {
       setSaveStatus('saving')
       const payload = {
@@ -337,6 +343,8 @@ export function ResumeBuilder() {
     } catch {
       alert('Network error while exporting PDF')
       setSaveStatus('error')
+    } finally {
+      setIsExportingPdf(false)
     }
   }
 
@@ -476,12 +484,18 @@ export function ResumeBuilder() {
   }
 
   const handleImportPdf = async (file: File) => {
+    if (isImportingPdf) return
+
+    setIsImportingPdf(true)
+
     try {
       const data = await importPdfClientSide(file)
       handleOnboardingImport(data)
       setActiveTab('personal')
     } catch (err) {
       alert(err instanceof Error ? err.message : 'PDF import failed. Please try again.')
+    } finally {
+      setIsImportingPdf(false)
     }
   }
 
@@ -502,7 +516,7 @@ export function ResumeBuilder() {
         body: JSON.stringify({
           resumeData,
           jobDescription: tailorJobDescription,
-          optimizationType: tailorType,
+          optimizationType: 'job_specific',
         }),
       })
 
@@ -660,6 +674,7 @@ export function ResumeBuilder() {
       {/* Editor Sidebar */}
       <div className="w-full min-h-0 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden" suppressHydrationWarning>
         <input
+          ref={importInputRef}
           id="pdf-import-input"
           type="file"
           accept="application/pdf"
@@ -710,10 +725,11 @@ export function ResumeBuilder() {
               + Add Section
             </button>
             <button
-              onClick={() => document.getElementById('pdf-import-input')?.click()}
-              className="flex-1 rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-white/88 hover:bg-white/5"
+              onClick={() => importInputRef.current?.click()}
+              disabled={isImportingPdf}
+              className="flex-1 rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-white/88 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Import from PDF
+              {isImportingPdf ? 'Importing PDF...' : 'Import from PDF'}
             </button>
             <button
               onClick={() => setIsTailorModalOpen(true)}
@@ -888,8 +904,12 @@ export function ResumeBuilder() {
           <button onClick={() => void persistResume()} className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
             <Save className="w-4 h-4" /> Save
           </button>
-          <button onClick={exportAsLatexPdf} className="flex-1 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2.5 rounded-xl font-medium transition-opacity hover:opacity-90 flex items-center justify-center gap-2 text-sm shadow-lg shadow-[#0A9548]/20">
-            <Download className="w-4 h-4" /> Export PDF
+          <button
+            onClick={exportAsLatexPdf}
+            disabled={isExportingPdf || isImportingPdf}
+            className="flex-1 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2.5 rounded-xl font-medium transition-opacity hover:opacity-90 flex items-center justify-center gap-2 text-sm shadow-lg shadow-[#0A9548]/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
           </button>
         </div>
       </div>
@@ -917,29 +937,6 @@ export function ResumeBuilder() {
           <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-white">AI Resume Tailor</h3>
             <p className="mt-1 text-sm text-[#FFFFFF]/82">Paste a job description and tailor your resume bullets for this role.</p>
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setTailorType('job_specific')}
-                className={`rounded-lg border px-3 py-2 text-sm ${
-                  tailorType === 'job_specific'
-                    ? 'border-[#0A9548]/50 bg-[#0A9548]/10 text-[#0A9548]'
-                    : 'border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/72'
-                }`}
-              >
-                Job Specific
-              </button>
-              <button
-                onClick={() => setTailorType('general')}
-                className={`rounded-lg border px-3 py-2 text-sm ${
-                  tailorType === 'general'
-                    ? 'border-[#0A9548]/50 bg-[#0A9548]/10 text-[#0A9548]'
-                    : 'border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/72'
-                }`}
-              >
-                General Optimization
-              </button>
-            </div>
 
             <textarea
               value={tailorJobDescription}

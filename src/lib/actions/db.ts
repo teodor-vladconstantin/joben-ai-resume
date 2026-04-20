@@ -32,7 +32,16 @@ export type LatestReviewSummary = {
   totalScore: number
   grade: string
   breakdown: ScoreBreakdown
+  resumeTitle: string | null
 } | null
+
+type JoinedResume = { title?: string } | Array<{ title?: string }> | null
+
+function getJoinedResumeTitle(value: JoinedResume | undefined): string | null {
+  if (!value) return null
+  if (Array.isArray(value)) return value[0]?.title || null
+  return value.title || null
+}
 
 export type RecentDocument = {
   id: string
@@ -173,7 +182,7 @@ export async function getLatestReviewSummary(userId: string): Promise<LatestRevi
 
     const { data } = await supabase
       .from('ai_reviews')
-      .select('score, feedback')
+      .select('score, feedback, resumes(title)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -189,6 +198,7 @@ export async function getLatestReviewSummary(userId: string): Promise<LatestRevi
       totalScore: Number(feedback?.overall_score || data.score || breakdownTotal || 0),
       grade: feedback?.grade || 'Unknown',
       breakdown,
+      resumeTitle: getJoinedResumeTitle((data as { resumes?: JoinedResume }).resumes),
     }
   } catch (error) {
     logger.error('Supabase latest review fetch failed', {

@@ -44,6 +44,7 @@ export default async function DashboardPage() {
 
   const totalScore = latestReview?.totalScore || stats.averageScore || 0
   const hasReviewData = stats.aiReviews > 0 && totalScore > 0
+  const latestReviewLabel = latestReview?.resumeTitle?.trim() || 'Latest Reviewed Resume'
 
   return (
     <div className="min-h-screen flex flex-col pb-20">
@@ -137,7 +138,7 @@ export default async function DashboardPage() {
                    <span className="text-4xl font-black text-white">{totalScore}</span>
                 </div>
                 <p className="text-[#0A9548] font-bold uppercase tracking-wider text-sm mb-1">{latestReview?.grade || 'Good'}</p>
-                <p className="text-[#FFFFFF]/82 text-xs mb-4">Software Engineer Resume</p>
+                <p className="text-[#FFFFFF]/82 text-xs mb-4">{latestReviewLabel}</p>
                 <Link href="/ai-review" className="text-[#0A9548] hover:text-[#16DB65] text-sm font-medium">{dashboardContent.yourScore.cta}</Link>
               </>
             ) : (

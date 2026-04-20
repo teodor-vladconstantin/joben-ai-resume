@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Navbar } from '@/components/ui/Navbar'
-import { History, Star, TrendingUp, Upload, Target, Gauge, Search } from 'lucide-react'
+import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } from 'lucide-react'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
 import { startProCheckout } from '@/lib/client-billing'
+import { importPdfClientSide } from '@/lib/pdf-import'
 
 type ResumeItem = {
   id: string
@@ -66,9 +67,14 @@ function extractResumeText(data: unknown) {
 
 export default function AIReviewPage() {
   const router = useRouter()
+  const uploadInputRef = useRef<HTMLInputElement | null>(null)
   const [resumes, setResumes] = useState<ResumeItem[]>([])
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [selectedResumeId, setSelectedResumeId] = useState('')
+  const [uploadedResumeText, setUploadedResumeText] = useState('')
+  const [uploadedFileName, setUploadedFileName] = useState('')
+  const [isProcessingUpload, setIsProcessingUpload] = useState(false)
+  const [isDraggingUpload, setIsDraggingUpload] = useState(false)
   const [jobDescription, setJobDescription] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState('')
@@ -110,28 +116,75 @@ export default function AIReviewPage() {
     return Math.round(total / reviews.length)
   }, [reviews])
 
+  async function handleUploadFile(file: File) {
+    setError('')
+
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    if (!isPdf) {
+      setError('Only PDF files are supported at the moment.')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('PDF must be under 10 MB.')
+      return
+    }
+
+    setIsProcessingUpload(true)
+
+    try {
+      const parsed = await importPdfClientSide(file)
+      const text = extractResumeText(parsed)
+
+      if (!text.trim()) {
+        setError('Could not extract text from this PDF.')
+        setUploadedResumeText('')
+        setUploadedFileName('')
+        setIsProcessingUpload(false)
+        return
+      }
+
+      setUploadedResumeText(text)
+      setUploadedFileName(file.name)
+      setSelectedResumeId('')
+    } catch (e) {
+      setUploadedResumeText('')
+      setUploadedFileName('')
+      setError((e as Error).message || 'Failed to parse uploaded PDF.')
+    }
+
+    setIsProcessingUpload(false)
+  }
+
   async function handleAnalyze(targetResumeId?: string) {
     setError('')
-    const resumeId = targetResumeId || selectedResumeId
-    if (!resumeId) {
-      setError('Select a resume first.')
+    const uploadedText = !targetResumeId ? uploadedResumeText.trim() : ''
+    const resumeId = uploadedText ? '' : (targetResumeId || selectedResumeId)
+
+    if (!uploadedText && !resumeId) {
+      setError('Upload a resume PDF or select an existing resume first.')
       return
     }
 
     setIsAnalyzing(true)
 
     try {
-      const detailRes = await fetch(`/api/resumes/${resumeId}`, { cache: 'no-store' })
-      if (!detailRes.ok) {
-        setError('Could not load the selected resume.')
-        setIsAnalyzing(false)
-        return
+      let resumeText = uploadedText
+
+      if (!resumeText) {
+        const detailRes = await fetch(`/api/resumes/${resumeId}`, { cache: 'no-store' })
+        if (!detailRes.ok) {
+          setError('Could not load the selected resume.')
+          setIsAnalyzing(false)
+          return
+        }
+
+        const detail = (await detailRes.json()) as { resume?: { data?: unknown } }
+        resumeText = extractResumeText(detail.resume?.data)
       }
 
-      const detail = (await detailRes.json()) as { resume?: { data?: unknown } }
-      const resumeText = extractResumeText(detail.resume?.data)
       if (!resumeText.trim()) {
-        setError('Selected resume has no content to analyze.')
+        setError('This resume has no extractable content to analyze.')
         setIsAnalyzing(false)
         return
       }
@@ -142,7 +195,7 @@ export default function AIReviewPage() {
         body: JSON.stringify({
           resumeText,
           jobDescription,
-          resumeId,
+          resumeId: resumeId || null,
         }),
       })
 
@@ -221,10 +274,62 @@ export default function AIReviewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           <div className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-5">
             <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Upload className="w-4 h-4 text-[#0A9548]" /> Upload New Resume</h3>
-            <div className="rounded-xl border border-dashed border-white/10 bg-[#0A0F0D] p-8 text-center">
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  void handleUploadFile(file)
+                }
+                e.currentTarget.value = ''
+              }}
+            />
+            <div
+              role="button"
+              tabIndex={0}
+              className={`rounded-xl border border-dashed bg-[#0A0F0D] p-8 text-center transition-colors ${
+                isDraggingUpload
+                  ? 'border-[#16DB65]/60 bg-[#0A9548]/10'
+                  : 'border-white/10 hover:border-[#16DB65]/40'
+              }`}
+              onClick={() => uploadInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  uploadInputRef.current?.click()
+                }
+              }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDraggingUpload(true)
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault()
+                setIsDraggingUpload(false)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDraggingUpload(false)
+                const file = e.dataTransfer.files?.[0]
+                if (file) {
+                  void handleUploadFile(file)
+                }
+              }}
+            >
               <Upload className="mx-auto w-6 h-6 text-[#FFFFFF]/60 mb-3" />
               <p className="text-white font-semibold">Drag & drop or click to browse</p>
-              <p className="text-xs text-[#FFFFFF]/60">PDF or DOCX - Max 10MB</p>
+              <p className="text-xs text-[#FFFFFF]/60">PDF only - Max 10MB</p>
+              {isProcessingUpload ? (
+                <p className="mt-3 inline-flex items-center gap-2 text-sm text-[#0A9548]">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Reading PDF...
+                </p>
+              ) : null}
+              {!isProcessingUpload && uploadedFileName ? (
+                <p className="mt-3 text-sm text-[#16DB65]">Ready: {uploadedFileName}</p>
+              ) : null}
             </div>
             <textarea
               value={jobDescription}
@@ -235,10 +340,10 @@ export default function AIReviewPage() {
             {error ? <p className="text-sm text-red-400 mt-3">{error}</p> : null}
             <button
               onClick={() => void handleAnalyze()}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || isProcessingUpload}
               className="mt-4 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-5 py-2.5 rounded-xl font-semibold transition-opacity hover:opacity-90 inline-flex items-center gap-2 disabled:opacity-60"
             >
-              <Star className="w-4 h-4 fill-white" /> {isAnalyzing ? 'Analyzing...' : 'Start Review'}
+              <Star className="w-4 h-4 fill-white" /> {isAnalyzing ? 'Analyzing...' : uploadedFileName ? 'Review Uploaded PDF' : 'Start Review'}
             </button>
           </div>
 
