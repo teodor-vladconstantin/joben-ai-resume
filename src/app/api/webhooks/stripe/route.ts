@@ -99,7 +99,7 @@ export async function POST(req: Request) {
   ): Promise<Response | null> => {
     const { data: user, error: userLookupError } = await supabase
       .from('users')
-      .select('id, stripe_last_event_created')
+      .select('id, stripe_last_event_created, lifetime_recruiting_unlocked')
       .eq('stripe_customer_id', customerId)
       .maybeSingle()
 
@@ -136,6 +136,41 @@ export async function POST(req: Request) {
         userId: user.id,
         lastProcessedAt: user.stripe_last_event_created,
         eventCreated,
+      })
+      return null
+    }
+
+    if (user.lifetime_recruiting_unlocked) {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          plan: 'recruiting',
+          stripe_subscription_id: subscription.id,
+          stripe_customer_id: customerId,
+          stripe_last_event_created: eventCreated,
+        })
+        .eq('id', user.id)
+
+      if (error) {
+        logger.error('Stripe webhook lifetime recruiting sync failed', {
+          requestId,
+          route: '/api/webhooks/stripe',
+          customerId,
+          subscriptionId: subscription.id,
+          eventId: event.id,
+          eventType: event.type,
+          error: error.message,
+        })
+        return withRequestId(new NextResponse('Webhook Error: database update failed', { status: 500 }), requestId)
+      }
+
+      logger.info('Skipped stripe plan downgrade due to lifetime recruiting override', {
+        requestId,
+        route: '/api/webhooks/stripe',
+        customerId,
+        userId: user.id,
+        eventId: event.id,
+        eventType: event.type,
       })
       return null
     }
@@ -178,7 +213,7 @@ export async function POST(req: Request) {
       if (userId) {
         const { data: user, error: userLookupError } = await supabase
           .from('users')
-          .select('id, stripe_last_event_created')
+          .select('id, stripe_last_event_created, lifetime_recruiting_unlocked')
           .eq('clerk_id', userId)
           .maybeSingle()
 
@@ -224,7 +259,9 @@ export async function POST(req: Request) {
           stripe_last_event_created?: number
         } = {}
 
-        if (planId) {
+        if (user?.lifetime_recruiting_unlocked) {
+          updatePayload.plan = 'recruiting'
+        } else if (planId) {
           updatePayload.plan = planId
         } else if (typeof session.subscription === 'string') {
           updatePayload.plan = 'pro'

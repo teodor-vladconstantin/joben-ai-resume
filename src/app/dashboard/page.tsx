@@ -11,6 +11,8 @@ import Link from 'next/link'
 import { getLatestReviewSummary, getRecentDocuments, getUserDashboardStats } from '@/lib/actions/db'
 import { dashboardContent } from '@/lib/dashboard-content'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
+import { RedeemCodeCard } from '@/components/dashboard/RedeemCodeCard'
+import { getUserPlan } from '@/lib/plans'
 
 const icons: { [key: string]: React.ElementType } = {
   Plus,
@@ -22,6 +24,11 @@ export default async function DashboardPage() {
   const user = await currentUser()
   const firstName = user?.firstName || 'There'
   const userId = user?.id || 'guest'
+  const userEmailHint = user?.emailAddresses?.[0]?.emailAddress
+
+  const currentPlan = user?.id
+    ? await getUserPlan(user.id, userEmailHint)
+    : 'free'
 
   const stats = await getUserDashboardStats(userId)
   const recentDocs = await getRecentDocuments(userId)
@@ -49,6 +56,7 @@ export default async function DashboardPage() {
         </div>
 
         <ProfileCompletion stats={stats} />
+  <RedeemCodeCard currentPlan={currentPlan} />
         <StatCards stats={stats} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
