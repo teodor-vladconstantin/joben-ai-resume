@@ -67,20 +67,15 @@ export async function POST(req: Request) {
         limit: apiLimit.limit,
         remaining: apiLimit.remaining,
         resetAt: apiLimit.resetAt,
-        aiCallAttempted: false,
-        blockedBy: 'rate_limit',
       },
       apiLimit.status,
       requestId
     )
   }
 
-  let aiCallAttempted = false
-
   try {
     const hasNumericEvidence = /\d/.test(`${body.bullet} ${body.context || ''}`)
 
-    aiCallAttempted = true
     const text = await askClaudeForText(
       IMPROVE_BULLET_SYSTEM_PROMPT,
       `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
@@ -100,7 +95,7 @@ export async function POST(req: Request) {
       },
     })
 
-    return jsonWithRequestId({ bullet: text.trim(), aiCallAttempted: true }, 200, requestId)
+    return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
   } catch (error) {
     const message = (error as Error).message
     logger.error('Improve-bullet route failed', {
@@ -109,6 +104,6 @@ export async function POST(req: Request) {
       route: '/api/improve-bullet',
       error: message,
     })
-    return jsonWithRequestId({ error: message, aiCallAttempted }, 500, requestId)
+    return jsonWithRequestId({ error: message }, 500, requestId)
   }
 }
