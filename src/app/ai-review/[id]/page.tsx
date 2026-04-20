@@ -60,18 +60,18 @@ export default function AIReviewEditorPage() {
     }
   }, [params?.id])
 
-  const reviewId = params?.id || ''
+  const rawReviewId = params?.id
+  const reviewId = Array.isArray(rawReviewId) ? (rawReviewId[0] || '') : (rawReviewId || '')
   const canApplyFixes = Boolean(reviewId)
+  const fixHref = reviewId
+    ? review?.resume_id
+      ? `/resumes/${review.resume_id}?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
+      : `/resumes/new?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
+    : ''
 
   const handleApplyFix = () => {
-    if (!reviewId) return
-
-    const targetResumeId = review?.resume_id
-    const nextUrl = targetResumeId
-      ? `/resumes/${targetResumeId}?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
-      : `/resumes/new?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
-
-    router.push(nextUrl)
+    if (!fixHref) return
+    router.push(fixHref)
   }
 
   return (
@@ -83,6 +83,7 @@ export default function AIReviewEditorPage() {
           comparison={comparison}
           isLoading={isLoading}
           error={error}
+          fixHref={fixHref}
           canApplyFixes={canApplyFixes}
           onApplyFix={handleApplyFix}
           onAutoFix={handleApplyFix}
