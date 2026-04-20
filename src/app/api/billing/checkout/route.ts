@@ -3,6 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 
 export const runtime = 'nodejs'
 
@@ -18,9 +19,23 @@ const stripe = stripeSecretKey
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
+  const { userId, sessionClaims } = await auth()
   if (!userId) {
     return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+  }
+
+  const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+  const plan = await getUserPlan(userId, emailHint)
+  if (plan === 'recruiting') {
+    return jsonWithRequestId(
+      {
+        error: 'Recruiting lifetime plan is already active for your account.',
+        alreadyActive: true,
+        currentPlan: plan,
+      },
+      409,
+      requestId
+    )
   }
 
   if (!stripe || !stripePriceId) {

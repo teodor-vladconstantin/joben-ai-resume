@@ -95,7 +95,7 @@ export async function getUserPlan(userId: string, userEmailHint?: string | null)
   const supabase = createServerClient()
   const { data, error } = await supabase
     .from('users')
-    .select('plan, email')
+    .select('plan, email, lifetime_recruiting_unlocked')
     .eq('clerk_id', userId)
     .maybeSingle()
 
@@ -110,6 +110,14 @@ export async function getUserPlan(userId: string, userEmailHint?: string | null)
 
   if (isGodModeEmailAddress(data?.email as string | undefined)) {
     logger.info('Applied GOD MODE plan override', {
+      source: 'getUserPlan',
+      userId,
+    })
+    return 'recruiting'
+  }
+
+  if (data?.lifetime_recruiting_unlocked) {
+    logger.info('Applied lifetime recruiting override', {
       source: 'getUserPlan',
       userId,
     })
