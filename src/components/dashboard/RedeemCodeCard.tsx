@@ -89,7 +89,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           type="text"
           value={code}
           onChange={(event) => setCode(event.target.value)}
-          placeholder="Enter code (example: JOBEN100)"
+          placeholder="Enter private access code"
           disabled={isSubmitting || alreadyRecruiting}
           className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none disabled:opacity-60"
         />

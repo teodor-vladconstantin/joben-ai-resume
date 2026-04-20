@@ -4,7 +4,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 
 export const runtime = 'nodejs'
 
-const DEFAULT_RECRUITING_LIFETIME_CODE = 'JOBEN100'
+const LIFETIME_RECRUITING_CODE_ID = 'private_recruiting_lifetime_code'
 
 function normalizeCode(input: string | null | undefined): string {
   return (input || '').trim().toUpperCase()
@@ -31,7 +31,16 @@ export async function POST(req: Request) {
     return jsonWithRequestId({ error: 'code is required' }, 400, requestId)
   }
 
-  const expectedCode = normalizeCode(process.env.RECRUITING_LIFETIME_CODE || DEFAULT_RECRUITING_LIFETIME_CODE)
+  const expectedCode = normalizeCode(process.env.RECRUITING_LIFETIME_CODE)
+  if (!expectedCode) {
+    logger.error('Redeem code config missing', {
+      requestId,
+      route: '/api/billing/redeem-code',
+      userId,
+    })
+    return jsonWithRequestId({ error: 'Redeem code is not configured.' }, 500, requestId)
+  }
+
   if (submittedCode !== expectedCode) {
     return jsonWithRequestId({ error: 'Invalid code' }, 400, requestId)
   }
@@ -76,7 +85,7 @@ export async function POST(req: Request) {
       plan: 'recruiting',
       lifetime_recruiting_unlocked: true,
       lifetime_recruiting_unlocked_at: new Date().toISOString(),
-      lifetime_recruiting_code: submittedCode,
+      lifetime_recruiting_code: LIFETIME_RECRUITING_CODE_ID,
     },
     { onConflict: 'clerk_id' }
   )
@@ -95,7 +104,7 @@ export async function POST(req: Request) {
     requestId,
     route: '/api/billing/redeem-code',
     userId,
-    code: submittedCode,
+    codeId: LIFETIME_RECRUITING_CODE_ID,
   })
 
   return jsonWithRequestId(
