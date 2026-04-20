@@ -5,7 +5,12 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan, hasBulletRewriteAccess } from '@/lib/plans'
 
-const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet under 20 words using a strong action verb. Include a metric only if implied by the source. Return only the rewritten bullet.`
+const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
+If numeric evidence is present and the source supports it, prefer this structure: [Action verb] X by Y using Z.
+Example: Increased sales by 27% using email automation. (Action verb=Increased, X=sales, Y=27%, Z=email automation)
+Do not invent metrics, tools, or outcomes. Include a metric only if implied by the source.
+If the structure cannot be supported by the source, return the best concise action-impact bullet.
+Return only the rewritten bullet.`
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
@@ -42,6 +47,18 @@ export async function POST(req: Request) {
   })
 
   if (!apiLimit.allowed) {
+    logger.warn('Improve-bullet request blocked by rate limit', {
+      requestId,
+      userId,
+      route: '/api/improve-bullet',
+      plan,
+      status: apiLimit.status,
+      period: apiLimit.period,
+      limit: apiLimit.limit,
+      remaining: apiLimit.remaining,
+      resetAt: apiLimit.resetAt,
+    })
+
     return jsonWithRequestId(
       {
         error: apiLimit.error || 'Daily limit reached. Try again tomorrow.',
@@ -50,14 +67,24 @@ export async function POST(req: Request) {
         limit: apiLimit.limit,
         remaining: apiLimit.remaining,
         resetAt: apiLimit.resetAt,
+        aiCallAttempted: false,
+        blockedBy: 'rate_limit',
       },
       apiLimit.status,
       requestId
     )
   }
 
+  let aiCallAttempted = false
+
   try {
-    const text = await askClaudeForText(IMPROVE_BULLET_SYSTEM_PROMPT, `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}`)
+    const hasNumericEvidence = /\d/.test(`${body.bullet} ${body.context || ''}`)
+
+    aiCallAttempted = true
+    const text = await askClaudeForText(
+      IMPROVE_BULLET_SYSTEM_PROMPT,
+      `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
+    )
     logger.info('Bullet improved', {
       requestId,
       userId,
@@ -73,7 +100,7 @@ export async function POST(req: Request) {
       },
     })
 
-    return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
+    return jsonWithRequestId({ bullet: text.trim(), aiCallAttempted: true }, 200, requestId)
   } catch (error) {
     const message = (error as Error).message
     logger.error('Improve-bullet route failed', {
@@ -82,6 +109,6 @@ export async function POST(req: Request) {
       route: '/api/improve-bullet',
       error: message,
     })
-    return jsonWithRequestId({ error: message }, 500, requestId)
+    return jsonWithRequestId({ error: message, aiCallAttempted }, 500, requestId)
   }
 }
