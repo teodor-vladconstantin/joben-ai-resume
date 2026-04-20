@@ -32,6 +32,7 @@
 
 ## Done
 
+- [DONE] Updated legal support contact email to admin@joben.eu in Terms and Privacy pages
 - [DONE] Added Terms and Conditions + Privacy Policy pages and integrated mandatory legal consent checkbox before sign-up redirect
 - [DONE] Hardened AI review fix actions with direct href fallback navigation for Auto-Fix and Apply this fix
 - [DONE] Fixed AI review + builder UX blockers (functional AI upload, Apply-fix navigation, import/export responsiveness guards, dynamic dashboard score label, removed General Optimization option)

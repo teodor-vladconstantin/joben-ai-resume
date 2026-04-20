@@ -67,7 +67,7 @@ const sections = [
   {
     title: '13. Contact',
     content:
-      'For privacy requests or questions, contact us at support@joben.app.',
+      'For privacy requests or questions, contact us at admin@joben.eu.',
   },
 ]
 
