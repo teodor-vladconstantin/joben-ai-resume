@@ -1,8 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const primaryClaudeModel = 'claude-haiku-4-5-20251001'
 const fallbackClaudeModel = 'claude-3-haiku-20240307'
-const defaultClaudeModel = process.env.ANTHROPIC_MODEL || fallbackClaudeModel
+const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel
 
 function extractTextFromResponse(response: Anthropic.Message): string {
   const textBlock = response.content.find((c) => c.type === 'text')
