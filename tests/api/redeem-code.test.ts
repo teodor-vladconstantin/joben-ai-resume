@@ -19,7 +19,7 @@ describe('redeem code API', () => {
     authMock.mockReset()
     currentUserMock.mockReset()
     createServerClientMock.mockReset()
-    process.env.RECRUITING_LIFETIME_CODE = 'JOBEN100'
+    process.env.RECRUITING_LIFETIME_CODE = 'PRIVATE_TEST_REDEEM_CODE'
   })
 
   it('returns 401 when user is missing', async () => {
@@ -29,7 +29,7 @@ describe('redeem code API', () => {
     const response = await POST(
       new Request('http://localhost/api/billing/redeem-code', {
         method: 'POST',
-        body: JSON.stringify({ code: 'JOBEN100' }),
+        body: JSON.stringify({ code: 'PRIVATE_TEST_REDEEM_CODE' }),
       })
     )
 
@@ -78,7 +78,7 @@ describe('redeem code API', () => {
     const response = await POST(
       new Request('http://localhost/api/billing/redeem-code', {
         method: 'POST',
-        body: JSON.stringify({ code: 'joben100' }),
+        body: JSON.stringify({ code: 'private_test_redeem_code' }),
       })
     )
 
@@ -98,7 +98,7 @@ describe('redeem code API', () => {
         email: 'user@example.com',
         plan: 'recruiting',
         lifetime_recruiting_unlocked: true,
-        lifetime_recruiting_code: 'JOBEN100',
+        lifetime_recruiting_code: 'private_recruiting_lifetime_code',
       }),
       { onConflict: 'clerk_id' }
     )
@@ -127,7 +127,7 @@ describe('redeem code API', () => {
     const response = await POST(
       new Request('http://localhost/api/billing/redeem-code', {
         method: 'POST',
-        body: JSON.stringify({ code: 'JOBEN100' }),
+        body: JSON.stringify({ code: 'PRIVATE_TEST_REDEEM_CODE' }),
       })
     )
 
