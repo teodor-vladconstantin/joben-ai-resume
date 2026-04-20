@@ -248,6 +248,10 @@ export default function Home() {
             <AuthAwareSignupLink className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90">{footerContent.ctaPrimary}</AuthAwareSignupLink>
             <Link href="/dashboard" className="bg-[#0A0F0D] border border-white/10 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10">{footerContent.ctaSecondary}</Link>
           </div>
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-[#FFFFFF]/72" suppressHydrationWarning>
+            <Link href="/terms" className="hover:text-[#16DB65]">Terms & Conditions</Link>
+            <Link href="/privacy" className="hover:text-[#16DB65]">Privacy Policy</Link>
+          </div>
           <p className="mt-12 text-sm text-white/50 font-medium tracking-wide">{footerContent.creatorCredit}</p>
         </div>
       </footer>
