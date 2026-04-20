@@ -67,6 +67,7 @@ type ResumeAnalyzerProps = {
   } | null
   isLoading?: boolean
   error?: string
+  fixHref?: string
   onApplyFix?: () => void
   onAutoFix?: () => void
   canApplyFixes?: boolean
@@ -77,6 +78,7 @@ export function ResumeAnalyzer({
   comparison = null,
   isLoading = false,
   error = '',
+  fixHref,
   onApplyFix,
   onAutoFix,
   canApplyFixes = false,
@@ -154,13 +156,22 @@ export function ResumeAnalyzer({
             </div>
           ) : null}
 
-          <button
-            onClick={onAutoFix || onApplyFix}
-            disabled={!canApplyFixes}
-            className="w-full mt-8 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Zap className="w-5 h-5 fill-current" /> Auto-Fix Resume
-          </button>
+          {fixHref ? (
+            <a
+              href={fixHref}
+              className="w-full mt-8 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              <Zap className="w-5 h-5 fill-current" /> Auto-Fix Resume
+            </a>
+          ) : (
+            <button
+              onClick={onAutoFix || onApplyFix}
+              disabled={!canApplyFixes}
+              className="w-full mt-8 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Zap className="w-5 h-5 fill-current" /> Auto-Fix Resume
+            </button>
+          )}
         </div>
 
         <div className="bg-[#0A0F0D] rounded-2xl border border-white/10 p-6">
@@ -247,13 +258,22 @@ export function ResumeAnalyzer({
                     <div key={`${c.label || 'insight'}-${idx}`} className="bg-[#0A0F0D] rounded-xl border border-orange-500/20 p-4">
                       <p className="text-white font-medium mb-1">{c.label || 'Category'}</p>
                       <p className="text-sm text-[#FFFFFF]/72">{c.feedback}</p>
-                      <button
-                        onClick={onApplyFix}
-                        disabled={!canApplyFixes}
-                        className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1 mt-3 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Apply this fix <ArrowRight className="w-4 h-4" />
-                      </button>
+                      {fixHref ? (
+                        <a
+                          href={fixHref}
+                          className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1 mt-3"
+                        >
+                          Apply this fix <ArrowRight className="w-4 h-4" />
+                        </a>
+                      ) : (
+                        <button
+                          onClick={onApplyFix}
+                          disabled={!canApplyFixes}
+                          className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1 mt-3 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Apply this fix <ArrowRight className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ) : null
                 )}
