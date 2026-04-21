@@ -11,6 +11,7 @@ import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
+import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 
 type ResumeTemplate = 'harvard'
 
@@ -127,6 +128,8 @@ export function ResumeBuilder() {
   const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
   const [highlightedBulletIndex, setHighlightedBulletIndex] = useState<number | null>(null)
   const [fixBanner, setFixBanner] = useState<string | null>(null)
+  const [fixPatches, setFixPatches] = useState<FixPatchWithContext[]>([])
+  const [showBeforeAfterModal, setShowBeforeAfterModal] = useState(false)
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -206,6 +209,22 @@ export function ResumeBuilder() {
     const source = searchParams?.get('source')
     if (source !== 'ai-review') return
 
+    // Read Before/After patches from sessionStorage and show modal
+    const SESSION_KEY = 'ai-fix-patches'
+    try {
+      const stored = sessionStorage.getItem(SESSION_KEY)
+      if (stored) {
+        const patches = JSON.parse(stored) as FixPatchWithContext[]
+        if (Array.isArray(patches) && patches.length > 0) {
+          setFixPatches(patches)
+          setShowBeforeAfterModal(true)
+        }
+        sessionStorage.removeItem(SESSION_KEY)
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+
     // Banner for auto-fix or single fix
     const fixesApplied = searchParams?.get('fixesApplied')
     const fixApplied = searchParams?.get('fixApplied')
@@ -213,11 +232,11 @@ export function ResumeBuilder() {
       const count = parseInt(fixesApplied, 10)
       setFixBanner(
         count > 0
-          ? `AI a aplicat ${count} îmbunătățire${count === 1 ? '' : 'i'} CV-ului tău.`
-          : 'Auto-fix finalizat — nicio modificare necesară.'
+          ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
+          : 'Auto-fix complete — no changes needed.'
       )
     } else if (fixApplied === 'true') {
-      setFixBanner('Fix aplicat cu succes.')
+      setFixBanner('Fix applied successfully.')
     }
 
     // Switch to correct tab
@@ -1048,6 +1067,10 @@ export function ResumeBuilder() {
           </div>
         </div>
       ) : null}
+
+      {showBeforeAfterModal && fixPatches.length > 0 && (
+        <BeforeAfterModal patches={fixPatches} onClose={() => setShowBeforeAfterModal(false)} />
+      )}
 
       <UpgradeModal
         open={showUpgradeModal}

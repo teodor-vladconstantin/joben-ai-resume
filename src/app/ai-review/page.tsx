@@ -381,24 +381,46 @@ export default function AIReviewPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {visibleResumes.map((resume) => {
-              const matchedReview = reviews.find((review) => review.resume_id === resume.id)
+              const resumeReviews = reviews
+                .filter((review) => review.resume_id === resume.id)
+                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+              const latestReview = resumeReviews.at(-1)
+              const hasReviews = resumeReviews.length > 0
+              const scoreHistory = resumeReviews.map((r) => Number(r.score || 0)).filter((s) => s > 0)
               return (
                 <div key={resume.id} className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
                   <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
-                  <p className="text-xs text-[#FFFFFF]/60 mt-1">{matchedReview ? `Score ${Number(matchedReview.score || 0)}` : 'Not reviewed yet'}</p>
-                  {matchedReview ? (
-                    <Link href={`/ai-review/${matchedReview.id}`} className="mt-3 w-full rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-2 text-sm text-white font-semibold inline-flex items-center justify-center">
-                      View Results
-                    </Link>
+                  {hasReviews ? (
+                    <p className="text-xs text-[#FFFFFF]/60 mt-1 flex items-center gap-1 flex-wrap">
+                      {scoreHistory.length > 1 ? (
+                        <>
+                          <TrendingUp className="w-3 h-3 text-[#0A9548] shrink-0" />
+                          {scoreHistory.join(' → ')}
+                        </>
+                      ) : (
+                        `Score ${scoreHistory[0] ?? 0}`
+                      )}
+                    </p>
                   ) : (
+                    <p className="text-xs text-[#FFFFFF]/60 mt-1">Not reviewed yet</p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    {hasReviews && latestReview && (
+                      <Link
+                        href={`/ai-review/${latestReview.id}`}
+                        className="flex-1 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-2 text-sm text-white font-semibold inline-flex items-center justify-center"
+                      >
+                        View Latest
+                      </Link>
+                    )}
                     <button
                       onClick={() => void handleAnalyze(resume.id)}
                       disabled={isAnalyzing}
-                      className="mt-3 w-full rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm text-[#0A9548] font-semibold disabled:opacity-60"
+                      className={`${hasReviews ? 'flex-1' : 'w-full'} rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm text-[#0A9548] font-semibold disabled:opacity-60`}
                     >
-                      Start Review
+                      {hasReviews ? 'Re-review' : 'Start Review'}
                     </button>
-                  )}
+                  </div>
                 </div>
               )
             })}

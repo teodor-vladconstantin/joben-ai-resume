@@ -18,10 +18,10 @@ const fallbackClaudeModel = 'claude-3-haiku-20240307'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel
 
 const FEATURE_LABEL: Record<Feature, string> = {
-  covers: 'scrisori',
-  jds: 'JD-uri',
-  bullets: 'bullet-uri',
-  cvs: 'CV-uri',
+  covers: 'cover letters',
+  jds: 'job tailoring uses',
+  bullets: 'bullet rewrites',
+  cvs: 'resume analyses',
 }
 
 export type MessageParam = Anthropic.MessageParam
@@ -59,9 +59,9 @@ function isModelNotFoundError(error: unknown): boolean {
 function buildResetMonthLabel(resetAt: string): string {
   try {
     const date = new Date(resetAt)
-    return date.toLocaleString('ro-RO', { month: 'long', timeZone: 'UTC' })
+    return date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
   } catch {
-    return 'luna urmatoare'
+    return 'next month'
   }
 }
 
@@ -111,7 +111,7 @@ export async function callAnthropicWithLimits(params: {
 
   if (inputLength > limits.maxRawChars || estimatedInputTokens > limits.maxInputTokensPerCall) {
     throwRateLimit({
-      error: 'Documentul este prea lung. Maxim 32.000 de caractere (~8 pagini A4).',
+      error: 'The document is too long. Maximum 32,000 characters (~8 A4 pages).',
       limitType: 'input_too_long',
       resetAt,
     })
@@ -125,7 +125,7 @@ export async function callAnthropicWithLimits(params: {
 
       if (featureCheck.blocked) {
         throwRateLimit({
-          error: 'Accesul la acest feature a fost suspendat temporar. Contacteaza suportul.',
+          error: 'Access to this feature has been temporarily suspended. Please contact support.',
           limitType: 'blocked',
           feature: params.feature,
           resetAt,
@@ -133,7 +133,7 @@ export async function callAnthropicWithLimits(params: {
       }
 
       throwRateLimit({
-        error: `Ai utilizat toate cele ${featureCheck.limit || 0} ${FEATURE_LABEL[params.feature]} disponibile luna aceasta.`,
+        error: `You have used all ${featureCheck.limit || 0} ${FEATURE_LABEL[params.feature]} available this month.`,
         limitType: 'feature',
         feature: params.feature,
         used: featureCheck.used,
@@ -150,7 +150,7 @@ export async function callAnthropicWithLimits(params: {
 
     if (limitType === 'hard_cap') {
       throwRateLimit({
-        error: 'Limita absoluta lunara a fost atinsa. Contacteaza suportul.',
+        error: 'The absolute monthly limit has been reached. Please contact support.',
         limitType,
         resetAt,
       })
@@ -158,7 +158,7 @@ export async function callAnthropicWithLimits(params: {
 
     const monthLabel = buildResetMonthLabel(resetAt)
     throwRateLimit({
-      error: `Ai atins limita lunara de AI. Upgradeaza planul sau asteapta resetarea pe 1 ${monthLabel}.`,
+      error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
       limitType,
       resetAt,
     })
@@ -171,7 +171,7 @@ export async function callAnthropicWithLimits(params: {
     await recordLimitHit(params.userId, 'tokens')
     const monthLabel = buildResetMonthLabel(resetAt)
     throwRateLimit({
-      error: `Ai atins limita lunara de AI. Upgradeaza planul sau asteapta resetarea pe 1 ${monthLabel}.`,
+      error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
       limitType: 'tokens',
       resetAt,
     })

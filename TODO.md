@@ -3,6 +3,10 @@
 - [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
 - [ ] Apply supabase migration: 20260421000000_add_resume_analyses_table.sql (run `npx supabase db push` or apply in Supabase dashboard)
 - [DONE] Live AI Auto-Fix + Apply this fix: /api/apply-fix and /api/auto-fix routes with Claude, per-improvement loading states, builder banner + highlight
+- [DONE] Before/After modal in builder showing every change made by auto-fix/apply-fix (Before red / After green), sessionStorage bridge from review page
+- [DONE] Re-review support: all resumes show Re-review button; score evolution displayed as chain (72 → 85 → 91) when multiple reviews exist
+- [DONE] English-only UI: translated AILoadingState, anthropic-with-limits rate-limit errors, and builder banner strings
+- [DONE] No-duplicate bullets: server-side isDuplicateOf() validation in apply-fix and auto-fix + English-only AI prompt instructions
 - [ ] Connect repo to Vercel (vercel.com/new), set all env vars in Vercel Dashboard
 - [ ] Add GitHub Actions secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID + NEXT_PUBLIC_* vars
 - [ ] Deploy LaTeX service Docker container (VPS/Railway/Fly.io), set LATEX_SERVICE_URL in Vercel env

@@ -32,28 +32,47 @@ type Improvement = {
   strong_example?: string
 }
 
-type FixPatch = {
+type RawPatch = {
   experienceId: string
   bulletIndex: number
   updatedBullet: string
 }
 
-type AutoFixResponse = {
-  patches: FixPatch[]
-  fixesApplied: number
+export type FixPatchWithContext = {
+  experienceId: string
+  bulletIndex: number
+  originalBullet: string
+  updatedBullet: string
+  experienceTitle?: string
+  company?: string
 }
 
-const AUTO_FIX_SYSTEM = `You are an expert resume editor. Apply ALL improvement suggestions to the resume bullets.
+function normalizeBullet(b: string): string {
+  return b.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function isDuplicateOf(candidate: string, existing: string): boolean {
+  const a = normalizeBullet(candidate)
+  const b = normalizeBullet(existing)
+  if (!a || !b) return false
+  if (a === b) return true
+  const longer = a.length > b.length ? a : b
+  const shorter = a.length > b.length ? b : a
+  return shorter.length > 20 && longer.includes(shorter)
+}
+
+const AUTO_FIX_SYSTEM = `You are an expert resume editor. Apply ALL improvement suggestions to the resume.
 
 Rules:
-- For each improvement, find the bullet that best matches the "weak_example" and improve it
-- Guided by "strong_example" but adapted to the ACTUAL original bullet text
-- Keep bullets under 20 words; start with action verb
-- NEVER invent metrics or numbers not present/implied in the original bullet
-- Each bullet can only be patched once (pick the best matching one per improvement)
-- Return ONLY valid JSON, no markdown, no preamble
+- For each improvement, find the bullet that best matches the "Weak example" and improve it
+- Guided by "Strong example" but adapted to the ACTUAL original text — do not copy verbatim
+- Keep bullets under 20 words; start with a strong action verb
+- NEVER invent metrics, numbers, or facts not present in the original bullet
+- Every updated bullet MUST be completely unique — do not duplicate or closely paraphrase any other existing bullet in the resume
+- Each bullet position should be patched at most once
+- If a genuine unique improvement cannot be made for a given suggestion, skip it
 
-Schema:
+Return ONLY valid JSON, no markdown:
 {
   "patches": [
     {
@@ -63,9 +82,7 @@ Schema:
     }
   ],
   "fixesApplied": 2
-}
-
-If no improvements can be applied, return: { "patches": [], "fixesApplied": 0 }`
+}`
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
@@ -109,7 +126,7 @@ export async function POST(req: Request) {
     const experience = resumeData.experience || []
 
     if (experience.length === 0) {
-      return jsonWithRequestId({ error: 'Resume has no experience to fix', fixesApplied: 0 }, 422, requestId)
+      return jsonWithRequestId({ error: 'Resume has no experience to fix', fixesApplied: 0, patches: [] }, 422, requestId)
     }
 
     const experienceForPrompt = experience.map((exp) => ({
@@ -144,33 +161,65 @@ ${improvementsText}`
     })
 
     const responseText = extractTextFromAnthropicMessage(aiResponse)
-    const result = parseClaudeJsonText(responseText) as AutoFixResponse
+    const result = parseClaudeJsonText(responseText) as { patches?: RawPatch[]; fixesApplied?: number }
+    const rawPatches: RawPatch[] = Array.isArray(result?.patches) ? result.patches : []
 
-    const patches: FixPatch[] = Array.isArray(result?.patches) ? result.patches : []
-
-    if (patches.length === 0) {
+    if (rawPatches.length === 0) {
       return jsonWithRequestId({ fixesApplied: 0, patches: [] }, 200, requestId)
     }
 
-    // Apply patches — validate each patch references a real experience entry and bullet
-    const patchMap = new Map<string, Map<number, string>>()
-    for (const patch of patches) {
-      if (!patch.experienceId || patch.bulletIndex === undefined || !patch.updatedBullet?.trim()) continue
+    // Build a flat list of all existing bullets for duplicate checking
+    const allExistingBullets = experience.flatMap((exp) => {
+      const bullets = Array.isArray(exp.bullets) && exp.bullets.length > 0
+        ? exp.bullets
+        : [exp.description || '']
+      return bullets.map((b, i) => ({ text: b, expId: exp.id, idx: i }))
+    })
 
-      const entry = experience.find((e) => e.id === patch.experienceId)
-      if (!entry) continue
+    // Validate + deduplicate patches
+    const patchMap = new Map<string, Map<number, string>>() // expId → (bulletIdx → updatedText)
+    const usedBulletTexts = new Set<string>() // track updated texts within this batch to prevent intra-batch dupes
 
-      const bullets = Array.isArray(entry.bullets) && entry.bullets.length > 0
-        ? entry.bullets
-        : [entry.description || '']
+    for (const raw of rawPatches) {
+      if (!raw.experienceId || raw.bulletIndex === undefined || !raw.updatedBullet?.trim()) continue
 
-      const idx = patch.bulletIndex >= 0 && patch.bulletIndex < bullets.length
-        ? patch.bulletIndex
-        : bullets.length - 1
+      const targetEntry = experience.find((e) => e.id === raw.experienceId)
+      if (!targetEntry) continue
 
-      if (!patchMap.has(patch.experienceId)) patchMap.set(patch.experienceId, new Map())
-      patchMap.get(patch.experienceId)!.set(idx, patch.updatedBullet.trim())
+      const targetBullets = Array.isArray(targetEntry.bullets) && targetEntry.bullets.length > 0
+        ? targetEntry.bullets
+        : [targetEntry.description || '']
+
+      const safeIdx = raw.bulletIndex >= 0 && raw.bulletIndex < targetBullets.length
+        ? raw.bulletIndex
+        : targetBullets.length - 1
+
+      // Skip if this position was already patched
+      if (patchMap.get(raw.experienceId)?.has(safeIdx)) continue
+
+      const updatedText = raw.updatedBullet.trim()
+
+      // Duplicate check against all OTHER existing bullets (not the one being replaced)
+      const otherBullets = allExistingBullets.filter(
+        ({ expId, idx }) => !(expId === raw.experienceId && idx === safeIdx)
+      )
+      const isExistingDuplicate = otherBullets.some(({ text }) => isDuplicateOf(updatedText, text))
+      if (isExistingDuplicate) {
+        logger.warn('auto-fix: skipping duplicate patch', { requestId, userId, experienceId: raw.experienceId })
+        continue
+      }
+
+      // Intra-batch duplicate check
+      const normalised = normalizeBullet(updatedText)
+      if (usedBulletTexts.has(normalised)) continue
+      usedBulletTexts.add(normalised)
+
+      if (!patchMap.has(raw.experienceId)) patchMap.set(raw.experienceId, new Map())
+      patchMap.get(raw.experienceId)!.set(safeIdx, updatedText)
     }
+
+    // Build enriched patches (with original + context) and apply to resume
+    const enrichedPatches: FixPatchWithContext[] = []
 
     const updatedExperience = experience.map((exp) => {
       const bulletPatches = patchMap.get(exp.id)
@@ -181,6 +230,14 @@ ${improvementsText}`
         : [exp.description || '']
 
       for (const [idx, text] of bulletPatches) {
+        enrichedPatches.push({
+          experienceId: exp.id,
+          bulletIndex: idx,
+          originalBullet: bullets[idx] || '',
+          updatedBullet: text,
+          experienceTitle: exp.title || '',
+          company: exp.company || '',
+        })
         bullets[idx] = text
       }
 
@@ -188,21 +245,23 @@ ${improvementsText}`
       return { ...exp, bullets, description: firstNonEmpty }
     })
 
-    const appliedCount = Array.from(patchMap.values()).reduce((sum, m) => sum + m.size, 0)
-    const updatedData: ResumeData = { ...resumeData, experience: updatedExperience }
+    const appliedCount = enrichedPatches.length
+
+    if (appliedCount === 0) {
+      return jsonWithRequestId({ fixesApplied: 0, patches: [] }, 200, requestId)
+    }
 
     const { error: updateError } = await supabase
       .from('resumes')
-      .update({ data: updatedData })
+      .update({ data: { ...resumeData, experience: updatedExperience } })
       .eq('id', body.resumeId)
       .eq('user_id', userId)
 
     if (updateError) {
-      logger.error('auto-fix: failed to save resume', { requestId, userId, error: updateError.message })
+      logger.error('auto-fix: save failed', { requestId, userId, error: updateError.message })
       return jsonWithRequestId({ error: updateError.message }, 500, requestId)
     }
 
-    // Record as applied (non-blocking)
     if (body.reviewId) {
       void supabase.from('resume_analyses').insert({
         user_id: userId,
@@ -210,7 +269,7 @@ ${improvementsText}`
         review_id: body.reviewId,
         status: 'applied',
         applied_at: new Date().toISOString(),
-        analysis_json: { fixesApplied: appliedCount, patches },
+        analysis_json: { fixesApplied: appliedCount },
       })
     }
 
@@ -218,7 +277,7 @@ ${improvementsText}`
       requestId, userId, resumeId: body.resumeId, appliedCount,
     })
 
-    return jsonWithRequestId({ fixesApplied: appliedCount, patches }, 200, requestId)
+    return jsonWithRequestId({ fixesApplied: appliedCount, patches: enrichedPatches }, 200, requestId)
   } catch (error) {
     if (isRateLimitExceededError(error)) {
       return jsonWithRequestId(error.payload, error.status, requestId)
