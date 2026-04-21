@@ -54,6 +54,12 @@ type ResumeData = {
 
 type SummaryGenerationMode = 'resume' | 'scratch'
 
+type BulletDraftState = {
+  draft: string
+  isLoading: boolean
+  error: string | null
+}
+
 function normalizeExperienceBullets(
   input: unknown,
   fallbackDescription?: string,
@@ -130,7 +136,7 @@ export function ResumeBuilder() {
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false)
   const [tailorJobDescription, setTailorJobDescription] = useState('')
   const [isTailoring, setIsTailoring] = useState(false)
-  const [improvingExperienceId, setImprovingExperienceId] = useState<string | null>(null)
+  const [bulletDraftStates, setBulletDraftStates] = useState<Record<string, BulletDraftState>>({})
   const [isImportingPdf, setIsImportingPdf] = useState(false)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -249,7 +255,7 @@ export function ResumeBuilder() {
       setFixBanner(
         count > 0
           ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
-          : 'Auto-fix complete — no changes needed.'
+          : 'Auto-fix complete - no changes needed.'
       )
     } else if (fixApplied === 'true') {
       setFixBanner('Fix applied successfully.')
@@ -493,6 +499,32 @@ export function ResumeBuilder() {
     }))
   }
 
+  const clearBulletDraftsForExperience = useCallback((experienceId: string) => {
+    setBulletDraftStates((prev) => {
+      const keys = Object.keys(prev)
+      let hasMatch = false
+
+      for (const key of keys) {
+        if (key.startsWith(`${experienceId}:`)) {
+          hasMatch = true
+          break
+        }
+      }
+
+      if (!hasMatch) {
+        return prev
+      }
+
+      const next: Record<string, BulletDraftState> = {}
+      for (const key of keys) {
+        if (!key.startsWith(`${experienceId}:`)) {
+          next[key] = prev[key]
+        }
+      }
+      return next
+    })
+  }, [])
+
   const addExperienceBullet = (experienceId: string) => {
     let nextKey: string | null = null
 
@@ -512,6 +544,8 @@ export function ResumeBuilder() {
           : exp
       ),
     }))
+
+    clearBulletDraftsForExperience(experienceId)
 
     if (nextKey) {
       setPendingBulletScrollKey(nextKey)
@@ -536,6 +570,8 @@ export function ResumeBuilder() {
         }
       }),
     }))
+
+    clearBulletDraftsForExperience(experienceId)
   }
 
   const handleDeleteExperience = (experienceId: string) => {
@@ -544,6 +580,7 @@ export function ResumeBuilder() {
         ...prevData,
         experience: prevData.experience.filter(exp => exp.id !== experienceId),
       }))
+      clearBulletDraftsForExperience(experienceId)
     }
   }
 
@@ -691,19 +728,34 @@ export function ResumeBuilder() {
     setIsTailoring(false)
   }
 
-  const handleImproveExperienceBullet = async (experienceId: string, bulletIndex = 0) => {
+  const handleGenerateBulletDraft = async (experienceId: string, bulletIndex = 0) => {
     const target = resumeData.experience.find((item) => item.id === experienceId)
     if (!target) return
 
     const targetBullets = getExperienceBullets(target)
     const targetBullet = targetBullets[bulletIndex] || ''
+    const draftKey = getBulletFieldKey(experienceId, bulletIndex)
 
     if (!targetBullet.trim()) {
-      alert('Add bullet text before using AI Improve.')
+      setBulletDraftStates((prev) => ({
+        ...prev,
+        [draftKey]: {
+          draft: prev[draftKey]?.draft || '',
+          isLoading: false,
+          error: 'Add bullet text before generating an AI draft.',
+        },
+      }))
       return
     }
 
-    setImprovingExperienceId(experienceId)
+    setBulletDraftStates((prev) => ({
+      ...prev,
+      [draftKey]: {
+        draft: prev[draftKey]?.draft || '',
+        isLoading: true,
+        error: null,
+      },
+    }))
 
     try {
       const response = await fetch('/api/improve-bullet', {
@@ -728,6 +780,8 @@ export function ResumeBuilder() {
       }
 
       if (!response.ok || !payload.bullet) {
+        let errorMessage = payload.error || 'Could not generate bullet draft.'
+
         if (response.status === 429) {
           const details: string[] = [payload.error || 'Daily limit reached. Try again later.']
 
@@ -739,53 +793,61 @@ export function ResumeBuilder() {
             details.push(`Resets at: ${new Date(payload.resetAt).toLocaleString()}`)
           }
 
-          const rateLimitMessage = details.join('\n')
+          errorMessage = details.join('\n')
 
           if (payload.showUpgrade && payload.currentPlan !== 'pro') {
-            setUpgradeMessage(rateLimitMessage)
+            setUpgradeMessage(errorMessage)
             setShowUpgradeModal(true)
-            setImprovingExperienceId(null)
-            return
           }
-
-          alert(rateLimitMessage)
-          setImprovingExperienceId(null)
-          return
-        }
-
-        if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || 'Bullet rewrite is available on Pro.')
+        } else if (payload.showUpgrade) {
+          errorMessage = payload.error || 'Bullet rewrite is available on Pro.'
+          setUpgradeMessage(errorMessage)
           setShowUpgradeModal(true)
-          setImprovingExperienceId(null)
-          return
         }
-        alert(payload.error || 'Could not improve bullet.')
-        setImprovingExperienceId(null)
+
+        setBulletDraftStates((prev) => ({
+          ...prev,
+          [draftKey]: {
+            draft: prev[draftKey]?.draft || '',
+            isLoading: false,
+            error: errorMessage,
+          },
+        }))
         return
       }
 
-      setResumeData((prev) => ({
+      setBulletDraftStates((prev) => ({
         ...prev,
-        experience: prev.experience.map((exp) => {
-          if (exp.id !== experienceId) return exp
-
-          const nextBullets = [...getExperienceBullets(exp)]
-          const safeIndex = Math.max(0, Math.min(bulletIndex, nextBullets.length - 1))
-          nextBullets[safeIndex] = payload.bullet || nextBullets[safeIndex]
-          const summaryBullet = nextBullets.find((bullet) => bullet.trim().length > 0) || nextBullets[0] || ''
-
-          return {
-            ...exp,
-            bullets: nextBullets,
-            description: summaryBullet,
-          }
-        }),
+        [draftKey]: {
+          draft: payload.bullet?.trim() || '',
+          isLoading: false,
+          error: null,
+        },
       }))
     } catch (error) {
-      alert(`Improve bullet failed: ${(error as Error).message}`)
+      setBulletDraftStates((prev) => ({
+        ...prev,
+        [draftKey]: {
+          draft: prev[draftKey]?.draft || '',
+          isLoading: false,
+          error: `Draft generation failed: ${(error as Error).message}`,
+        },
+      }))
     }
+  }
 
-    setImprovingExperienceId(null)
+  const handleAcceptBulletDraft = (experienceId: string, bulletIndex: number) => {
+    const draftKey = getBulletFieldKey(experienceId, bulletIndex)
+    const draft = bulletDraftStates[draftKey]?.draft?.trim()
+    if (!draft) return
+
+    updateExperienceBulletField(experienceId, bulletIndex, draft)
+
+    setBulletDraftStates((prev) => {
+      const next = { ...prev }
+      delete next[draftKey]
+      return next
+    })
   }
 
   const handleGenerateSummary = async (mode: SummaryGenerationMode) => {
@@ -914,7 +976,7 @@ export function ResumeBuilder() {
               onClick={() => setFixBanner(null)}
               className="text-[#FFFFFF]/60 hover:text-white text-xs shrink-0"
             >
-              ✕
+              x
             </button>
           </div>
         ) : null}
@@ -1027,7 +1089,7 @@ export function ResumeBuilder() {
                     )}
 
                     {summaryGenerationError ? (
-                      <p className="text-xs text-red-300">{summaryGenerationError}</p>
+                      <p className="text-xs text-[#16DB65]">{summaryGenerationError}</p>
                     ) : null}
 
                     <AnimatePresence>
@@ -1085,9 +1147,9 @@ export function ResumeBuilder() {
                        <button 
                          onClick={() => handleDeleteExperience(exp.id)}
                          disabled={isPending}
-                         className="text-red-500 hover:text-red-400 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                         className="text-[#16DB65] hover:text-[#2AEA7A] p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                        >
-                         {isPending ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
+                         {isPending ? <div className="w-4 h-4 border-2 border-[#16DB65] border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
                        </button>
                      </div>
                    </div>
@@ -1128,46 +1190,96 @@ export function ResumeBuilder() {
                        {experienceBullets.map((bullet, bulletIndex) => {
                          const globalIdx = globalBulletOffset + bulletIndex
                          const isHighlighted = highlightedBulletIndex === globalIdx
+                         const draftKey = getBulletFieldKey(exp.id, bulletIndex)
+                         const draftState = bulletDraftStates[draftKey]
+                         const hasDraft = Boolean(draftState?.draft?.trim())
                          return (
-                         <motion.div
-                           key={`${exp.id}-bullet-${bulletIndex}`}
-                           initial={{ opacity: 0, y: 8 }}
-                           animate={{ opacity: 1, y: 0 }}
-                           transition={{ duration: 0.2, ease: 'easeOut' }}
-                           className="flex items-start gap-2"
-                         >
-                           <span className="pt-2 text-[#0A9548]">•</span>
-                           <textarea
-                             ref={(node) => {
-                               bulletFieldRefs.current[getBulletFieldKey(exp.id, bulletIndex)] = node
-                             }}
-                             data-bullet-global-index={globalIdx}
-                             value={bullet}
-                             onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
-                             className={`h-20 w-full resize-none rounded-lg border bg-[#020202] px-3 py-2 text-sm text-white focus:outline-none transition-colors ${
-                               isHighlighted
-                                 ? 'border-[#16DB65] ring-2 ring-[#16DB65]/40 focus:border-[#16DB65]'
-                                 : 'border-white/10 focus:border-[#16DB65]'
-                             }`}
-                             placeholder="Describe measurable impact"
-                           />
-                           <div className="flex flex-col gap-1">
-                             <button
-                               onClick={() => void handleImproveExperienceBullet(exp.id, bulletIndex)}
-                               disabled={improvingExperienceId === exp.id}
-                               className="rounded-md border border-[#0A9548]/40 px-2 py-1 text-[11px] text-[#0A9548] hover:bg-[#0A9548]/10 disabled:cursor-not-allowed disabled:opacity-70"
-                             >
-                               AI
-                             </button>
-                             <button
-                               onClick={() => removeExperienceBullet(exp.id, bulletIndex)}
-                               disabled={experienceBullets.length === 1}
-                               className="rounded-md border border-red-500/40 px-2 py-1 text-[11px] text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-                             >
-                               Del
-                             </button>
-                           </div>
-                         </motion.div>
+                         <div key={`${exp.id}-bullet-${bulletIndex}`} className="space-y-2">
+                           <motion.div
+                             initial={{ opacity: 0, y: 8 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             transition={{ duration: 0.2, ease: 'easeOut' }}
+                             className="flex items-start gap-2"
+                           >
+                             <span className="pt-2 text-[#0A9548]">•</span>
+                             <textarea
+                               ref={(node) => {
+                                 bulletFieldRefs.current[draftKey] = node
+                               }}
+                               data-bullet-global-index={globalIdx}
+                               value={bullet}
+                               onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
+                               className={`h-20 w-full resize-none rounded-lg border bg-[#020202] px-3 py-2 text-sm text-white focus:outline-none transition-colors ${
+                                 isHighlighted
+                                   ? 'border-[#16DB65] ring-2 ring-[#16DB65]/40 focus:border-[#16DB65]'
+                                   : 'border-white/10 focus:border-[#16DB65]'
+                               }`}
+                               placeholder="Describe measurable impact"
+                             />
+                             <div className="flex flex-col gap-1">
+                               <button
+                                 onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
+                                 disabled={Boolean(draftState?.isLoading)}
+                                 className="rounded-md border border-[#0A9548]/40 px-2 py-1 text-[11px] text-[#0A9548] hover:bg-[#0A9548]/10 disabled:cursor-not-allowed disabled:opacity-70"
+                               >
+                                 {draftState?.isLoading ? 'AI...' : 'AI Draft'}
+                               </button>
+                               <button
+                                 onClick={() => removeExperienceBullet(exp.id, bulletIndex)}
+                                 disabled={experienceBullets.length === 1}
+                                 className="rounded-md border border-[#16DB65]/35 px-2 py-1 text-[11px] text-[#16DB65] hover:bg-[#0A9548]/12 disabled:cursor-not-allowed disabled:opacity-40"
+                               >
+                                 Del
+                               </button>
+                             </div>
+                           </motion.div>
+
+                           <p className="pl-5 text-[11px] text-[#7CFFB2]/90">
+                             AI Draft and Regenerate each consume 1 bullet rewrite credit.
+                           </p>
+
+                           {draftState?.isLoading ? (
+                             <div className="ml-5 rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-xs text-[#FFFFFF]/82">
+                               Generating AI draft...
+                             </div>
+                           ) : null}
+
+                           {draftState?.error ? (
+                             <p className="ml-5 text-xs text-[#16DB65] whitespace-pre-line">{draftState.error}</p>
+                           ) : null}
+
+                           <AnimatePresence>
+                             {hasDraft ? (
+                               <motion.div
+                                 initial={{ opacity: 0, y: 8 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 exit={{ opacity: 0, y: 8 }}
+                                 transition={{ duration: 0.2, ease: 'easeOut' }}
+                                 className="ml-5 rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/8 p-3 space-y-2"
+                               >
+                                 <div className="flex items-center justify-between gap-2">
+                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-[#16DB65]">AI Draft</p>
+                                   <p className="text-[11px] text-[#7CFFB2]/90">Regenerate uses 1 credit</p>
+                                 </div>
+                                 <p className="text-sm text-white/95 leading-relaxed">{draftState?.draft}</p>
+                                 <div className="flex items-center justify-end gap-2 pt-1">
+                                   <button
+                                     onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
+                                     className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
+                                   >
+                                     Regenerate
+                                   </button>
+                                   <button
+                                     onClick={() => handleAcceptBulletDraft(exp.id, bulletIndex)}
+                                     className="rounded-md bg-[#16DB65] px-3 py-1.5 text-xs font-semibold text-[#052A14] hover:bg-[#2AEA7A]"
+                                   >
+                                     Accept
+                                   </button>
+                                 </div>
+                               </motion.div>
+                             ) : null}
+                           </AnimatePresence>
+                         </div>
                        )
                        })}
                      </div>
@@ -1285,4 +1397,5 @@ export function ResumeBuilder() {
     </div>
   )
 }
+
 

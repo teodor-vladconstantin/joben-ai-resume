@@ -17,7 +17,7 @@ export function QuickTip() {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Lightbulb className="text-yellow-500 w-5 h-5" /> Quick Tip
+            <Lightbulb className="text-[#16DB65] w-5 h-5" /> Quick Tip
           </h3>
           <button onClick={() => setIdx((idx + 1) % tips.length)} className="text-[#FFFFFF]/82 hover:text-white p-1">
             <RefreshCw className="w-4 h-4" />
@@ -31,5 +31,6 @@ export function QuickTip() {
     </div>
   )
 }
+
 
 

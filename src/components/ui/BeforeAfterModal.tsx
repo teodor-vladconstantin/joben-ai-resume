@@ -58,8 +58,8 @@ export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
 
               <div className="p-4 space-y-2">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-red-400 font-semibold mb-1.5">Before</p>
-                  <p className="text-sm bg-red-500/10 text-red-200 border-l-2 border-red-500 px-3 py-2 rounded-r leading-relaxed">
+                  <p className="text-[10px] uppercase tracking-widest text-[#16DB65] font-semibold mb-1.5">Before</p>
+                  <p className="text-sm bg-[#0A9548]/12 text-[#C8FFD9] border-l-2 border-[#16DB65] px-3 py-2 rounded-r leading-relaxed">
                     {patch.originalBullet || <span className="italic opacity-60">(empty)</span>}
                   </p>
                 </div>
@@ -92,3 +92,4 @@ export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
     </div>
   )
 }
+

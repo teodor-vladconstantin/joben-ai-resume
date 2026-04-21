@@ -263,11 +263,11 @@ export default function AIReviewPage() {
             <p className="text-3xl font-black text-[#0A9548] mt-2">{bestScore}</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
-            <p className="text-xs text-[#FFFFFF]/82 flex items-center gap-2"><History className="w-4 h-4 text-blue-400" /> Reviews</p>
+            <p className="text-xs text-[#FFFFFF]/82 flex items-center gap-2"><History className="w-4 h-4 text-[#16DB65]" /> Reviews</p>
             <p className="text-3xl font-black text-white mt-2">{reviews.length}</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
-            <p className="text-xs text-[#FFFFFF]/82 flex items-center gap-2"><Gauge className="w-4 h-4 text-yellow-400" /> Avg Score</p>
+            <p className="text-xs text-[#FFFFFF]/82 flex items-center gap-2"><Gauge className="w-4 h-4 text-[#16DB65]" /> Avg Score</p>
             <p className="text-3xl font-black text-white mt-2">{averageScore}<span className="text-sm text-[#FFFFFF]/82"> /100</span></p>
           </div>
         </div>
@@ -338,7 +338,7 @@ export default function AIReviewPage() {
               className="mt-4 w-full h-24 bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white resize-none"
               placeholder="Optional job description for more accurate analysis"
             />
-            {error ? <p className="text-sm text-red-400 mt-3">{error}</p> : null}
+            {error ? <p className="text-sm text-[#16DB65] mt-3">{error}</p> : null}
             {isAnalyzing ? (
               <div className="mt-4">
                 <AILoadingState stage="analyzing" />
@@ -395,7 +395,7 @@ export default function AIReviewPage() {
                       {scoreHistory.length > 1 ? (
                         <>
                           <TrendingUp className="w-3 h-3 text-[#0A9548] shrink-0" />
-                          {scoreHistory.join(' → ')}
+                          {scoreHistory.join(' -> ')}
                         </>
                       ) : (
                         `Score ${scoreHistory[0] ?? 0}`
@@ -438,4 +438,5 @@ export default function AIReviewPage() {
     </div>
   )
 }
+
 

@@ -1,8 +1,11 @@
+"use client"
+
 import { Navbar } from '@/components/ui/Navbar'
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent } from '@/lib/content'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import { motion } from 'framer-motion'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -12,23 +15,40 @@ const icons: { [key: string]: React.ElementType } = {
 };
 
 export default function Home() {
+  const reveal = {
+    initial: { opacity: 0, y: 18 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.2 },
+    transition: { duration: 0.5, ease: 'easeOut' as const },
+  }
+
   return (
     <div className="flex flex-col min-h-screen" suppressHydrationWarning>
       <Navbar />
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>
         {/* HERO SECTION */}
-        <section className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
+        <motion.section
+          {...reveal}
+          className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20"
+          suppressHydrationWarning
+        >
           <div className="absolute inset-0 -z-10 flex items-center justify-center" suppressHydrationWarning>
-            <div className="w-150 h-150 bg-[#0A9548]/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
-            <div className="w-100 h-100 bg-[#16DB65]/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
+            <div className="float-orb w-120 h-120 opacity-70 pointer-events-none" suppressHydrationWarning></div>
+            <div className="float-orb w-82 h-82 opacity-60 pointer-events-none -ml-28 mt-16" suppressHydrationWarning></div>
+            <div className="float-orb w-56 h-56 opacity-45 pointer-events-none ml-20 -mt-20" suppressHydrationWarning></div>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white max-w-4xl mx-auto leading-tight"
-              dangerouslySetInnerHTML={{ __html: heroContent.heading.replace("AI Resume Builder", `<span class="text-transparent bg-clip-text bg-linear-to-r from-[#0A9548] to-[#04471C] underline decoration-[#0A9548]/35 underline-offset-8">AI Resume Builder</span>`) }}
-          />
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+            className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 max-w-4xl mx-auto leading-tight text-brand-gradient"
+          >
+            {heroContent.heading}
+          </motion.h1>
           
-          <p className="text-xl text-white/72 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-white/78 mb-10 max-w-2xl mx-auto">
             {heroContent.subheading}
           </p>
           
@@ -54,26 +74,34 @@ export default function Home() {
             {statCards.map((card, index) => {
               const Icon = icons[card.icon];
               return (
-                <div key={index} className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10" suppressHydrationWarning>
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.42, ease: 'easeOut', delay: index * 0.06 }}
+                  className="glass-panel p-6 rounded-2xl border border-white/10"
+                  suppressHydrationWarning
+                >
                   <div className="w-12 h-12 bg-[#0A9548]/10 rounded-xl flex items-center justify-center mb-4">
                     <Icon className="text-[#0A9548] w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
                   <p className="text-white/72">{card.description}</p>
-                </div>
+                </motion.div>
               );
             })}
           </div>
-        </section>
+        </motion.section>
 
         {/* ATS PREVIEW SECTION */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <motion.section {...reveal} className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
           <div className="text-center mb-12" suppressHydrationWarning>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{atsPreviewContent.heading}</h2>
             <p className="text-white/72 max-w-2xl mx-auto">{atsPreviewContent.subheading}</p>
           </div>
           
-          <div className="relative overflow-hidden bg-[#0A0F0D] rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl" suppressHydrationWarning>
+          <div className="relative overflow-hidden glass-panel rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl" suppressHydrationWarning>
             <div className="pointer-events-none absolute -left-16 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full bg-[#0A9548]/14 blur-3xl" suppressHydrationWarning></div>
 
             <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.2fr_1fr]" suppressHydrationWarning>
@@ -96,7 +124,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4" suppressHydrationWarning>
+                <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4 glass-panel" suppressHydrationWarning>
                   <div className="mx-auto rounded-md border border-black/20 bg-white px-4 py-3 font-serif text-[#1F2937] shadow-[0_10px_28px_rgba(0,0,0,0.28)]" suppressHydrationWarning>
                     <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
                       <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">John Doe</p>
@@ -162,19 +190,19 @@ export default function Home() {
               </div>
               
               <div suppressHydrationWarning>
-                <h3 className="text-[#f59e0b] font-bold mb-2">How to Improve</h3>
-                <div className="bg-[#020202] rounded-xl p-4 border border-[#f59e0b]/30" suppressHydrationWarning>
-                  <p className="text-sm text-white/78 mb-2">Change: <span className="text-red-400 line-through">{atsPreviewContent.improvement.before}</span></p>
+                <h3 className="text-[#16DB65] font-bold mb-2">How to Improve</h3>
+                <div className="bg-[#020202] rounded-xl p-4 border border-[#16DB65]/30 glass-panel" suppressHydrationWarning>
+                  <p className="text-sm text-white/78 mb-2">Change: <span className="text-[#16DB65]/80 line-through">{atsPreviewContent.improvement.before}</span></p>
                   <p className="text-sm text-white/78">To: <span className="text-[#0A9548] font-medium">{atsPreviewContent.improvement.after}</span></p>
                 </div>
               </div>
             </div>
           </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* PRICING */}
-        <section id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <motion.section {...reveal} id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
           <div className="text-center mb-16" suppressHydrationWarning>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
             <p className="text-white/72 max-w-2xl mx-auto">Start for free, upgrade when you need the competitive edge.</p>
@@ -183,7 +211,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto" suppressHydrationWarning>
             {pricingPlans.map((plan, index) => (
               <div key={index} className={`
-                ${plan.isPrimary ? 'bg-[#0A0F0D] transform md:-translate-y-4 shadow-xl shadow-[#0A9548]/20' : plan.isBestValue ? 'bg-[#0A0F0D] border-2 border-white/10 shadow-lg shadow-[#0A9548]/25' : 'bg-[#0A0F0D]'}
+                ${plan.isPrimary ? 'glass-panel transform md:-translate-y-4 shadow-xl shadow-[#0A9548]/20' : plan.isBestValue ? 'glass-panel border-2 border-white/10 shadow-lg shadow-[#0A9548]/25' : 'glass-panel'}
                 p-8 rounded-3xl border border-white/10 flex flex-col relative
               `} suppressHydrationWarning>
                 {plan.isBestValue && (
@@ -200,7 +228,7 @@ export default function Home() {
                     <li key={fIndex} className="flex gap-3 text-white/78"><CheckCircle2 className="text-[#0A9548] w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                   ))}
                   {plan.excludedFeatures.map((feature, fIndex) => (
-                    <li key={`excluded-${fIndex}`} className="flex gap-3 text-white/42 line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                    <li key={`excluded-${fIndex}`} className="flex gap-3 text-white/42 line-through"><X className="text-[#16DB65] w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                   ))}
                 </ul>
                 <AuthAwareSignupLink className={`w-full py-3 rounded-xl text-center font-medium text-white transition-colors ${
@@ -211,10 +239,10 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* FAQ */}
-        <section id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <motion.section {...reveal} id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
           <div className="text-center mb-12" suppressHydrationWarning>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
             <p className="text-white/72 max-w-2xl mx-auto">Everything you need to know before building your next resume.</p>
@@ -224,7 +252,7 @@ export default function Home() {
             {faqItems.map((item, index) => (
               <details
                 key={index}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-[#0A0F0D]"
+                className="group overflow-hidden rounded-2xl border border-white/10 glass-panel"
                 suppressHydrationWarning
               >
                 <summary
@@ -238,7 +266,7 @@ export default function Home() {
               </details>
             ))}
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <footer className="bg-[#020202] py-12 border-t border-white/10 text-center" suppressHydrationWarning>
@@ -246,7 +274,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-white mb-4">{footerContent.heading}</h2>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8" suppressHydrationWarning>
             <AuthAwareSignupLink className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90">{footerContent.ctaPrimary}</AuthAwareSignupLink>
-            <Link href="/dashboard" className="bg-[#0A0F0D] border border-white/10 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10">{footerContent.ctaSecondary}</Link>
+            <Link href="/dashboard" className="glass-panel border border-white/10 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10">{footerContent.ctaSecondary}</Link>
           </div>
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-[#FFFFFF]/72" suppressHydrationWarning>
             <Link href="/terms" className="hover:text-[#16DB65]">Terms & Conditions</Link>

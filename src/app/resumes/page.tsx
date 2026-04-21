@@ -247,7 +247,7 @@ export default function ResumesPage() {
         </div>
 
         {actionError ? (
-          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <div className="mb-4 rounded-lg border border-[#16DB65]/30 bg-[#0A9548]/12 px-3 py-2 text-sm text-[#16DB65]">
             {actionError}
           </div>
         ) : null}
@@ -260,13 +260,13 @@ export default function ResumesPage() {
           ) : (
             <div className="divide-y divide-[#0A9548]">
               {visibleResumes.map((resume) => (
-                <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[#131f35] transition-colors">
+                <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[#0A0F0D] transition-colors">
                   <div className="min-w-0">
                     <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
                     <p className="text-xs text-[#FFFFFF]/60">Updated {new Date(resume.updated_at).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${Number(resume.score || 0) >= 80 ? 'bg-[#0A9548]/10 text-[#16DB65]' : 'bg-orange-500/10 text-orange-400'}`}>
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${Number(resume.score || 0) >= 80 ? 'bg-[#0A9548]/10 text-[#16DB65]' : 'bg-[#16DB65]/10 text-[#16DB65]'}`}>
                       {Number(resume.score || 0)}
                     </span>
                     <span className="text-xs text-[#FFFFFF]/82 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
@@ -283,7 +283,7 @@ export default function ResumesPage() {
                     <button
                       onClick={() => handleDelete(resume.id)}
                       disabled={isPending}
-                      className="text-red-400 hover:text-red-300 disabled:opacity-50"
+                      className="text-[#16DB65] hover:text-[#16DB65] disabled:opacity-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -305,4 +305,5 @@ export default function ResumesPage() {
     </div>
   )
 }
+
 

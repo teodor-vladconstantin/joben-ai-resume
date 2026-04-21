@@ -45,7 +45,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
                 <p className="text-sm font-medium text-white">Paragraph {index + 1}</p>
                 <button
                   onClick={() => removeParagraph(index)}
-                  className="rounded-md border border-red-500/30 bg-red-500/10 p-1 text-red-400 hover:bg-red-500/20"
+                  className="rounded-md border border-[#16DB65]/30 bg-[#0A9548]/12 p-1 text-[#16DB65] hover:bg-[#0A9548]/18"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -77,5 +77,6 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
     </div>
   )
 }
+
 
 
