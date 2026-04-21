@@ -5,6 +5,14 @@ import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import { ResumeAnalyzer, type AnalyzerReview } from '@/components/analyzer/ResumeAnalyzer'
 
+const SECTION_FOR_CATEGORY_INDEX: Record<number, string> = {
+  0: 'experience', // ats_structure
+  1: 'experience', // content_quality
+  2: 'experience', // writing_quality
+  3: 'experience', // job_match
+  4: 'personal',   // application_ready
+}
+
 export default function AIReviewEditorPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
@@ -16,6 +24,7 @@ export default function AIReviewEditorPage() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isSavingAutoFix, setIsSavingAutoFix] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -62,16 +71,60 @@ export default function AIReviewEditorPage() {
 
   const rawReviewId = params?.id
   const reviewId = Array.isArray(rawReviewId) ? (rawReviewId[0] || '') : (rawReviewId || '')
-  const canApplyFixes = Boolean(reviewId)
-  const fixHref = reviewId
-    ? review?.resume_id
-      ? `/resumes/${review.resume_id}?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
-      : `/resumes/new?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
-    : ''
 
-  const handleApplyFix = () => {
-    if (!fixHref) return
-    router.push(fixHref)
+  function builderHref(section?: string, bulletIndex?: number): string {
+    if (!review?.resume_id) return ''
+    const base = `/resumes/${review.resume_id}?source=ai-review&reviewId=${encodeURIComponent(reviewId)}`
+    if (section !== undefined) {
+      return `${base}&section=${encodeURIComponent(section)}${bulletIndex !== undefined ? `&bulletIndex=${bulletIndex}` : ''}`
+    }
+    return base
+  }
+
+  const handleAutoFix = async () => {
+    if (!reviewId || !review) return
+    setIsSavingAutoFix(true)
+
+    try {
+      await fetch('/api/resume-analyses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reviewId,
+          resumeId: review.resume_id || undefined,
+          analysisJson: review.feedback as Record<string, unknown> | undefined,
+          status: 'pending',
+        }),
+      })
+    } catch {
+      // non-blocking — proceed with navigation even if save fails
+    }
+
+    setIsSavingAutoFix(false)
+    const href = builderHref()
+    if (href) router.push(href)
+  }
+
+  const handleApplyFix = async (improvementIndex: number) => {
+    if (!reviewId || !review?.resume_id) return
+
+    try {
+      await fetch('/api/resume-analyses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reviewId,
+          resumeId: review.resume_id,
+          analysisJson: review.feedback as Record<string, unknown> | undefined,
+          status: 'applied',
+        }),
+      })
+    } catch {
+      // non-blocking
+    }
+
+    const section = SECTION_FOR_CATEGORY_INDEX[improvementIndex] ?? 'experience'
+    router.push(builderHref(section, improvementIndex))
   }
 
   return (
@@ -83,10 +136,10 @@ export default function AIReviewEditorPage() {
           comparison={comparison}
           isLoading={isLoading}
           error={error}
-          fixHref={fixHref}
-          canApplyFixes={canApplyFixes}
+          canApplyFixes={Boolean(reviewId && review?.resume_id)}
+          isSavingAutoFix={isSavingAutoFix}
+          onAutoFix={handleAutoFix}
           onApplyFix={handleApplyFix}
-          onAutoFix={handleApplyFix}
         />
       </main>
     </div>

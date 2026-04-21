@@ -1,6 +1,7 @@
 ## Active
 
 - [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
+- [ ] Apply supabase migration: 20260421000000_add_resume_analyses_table.sql (run `npx supabase db push` or apply in Supabase dashboard)
 - [ ] Connect repo to Vercel (vercel.com/new), set all env vars in Vercel Dashboard
 - [ ] Add GitHub Actions secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID + NEXT_PUBLIC_* vars
 - [ ] Deploy LaTeX service Docker container (VPS/Railway/Fly.io), set LATEX_SERVICE_URL in Vercel env
@@ -32,6 +33,11 @@
 
 ## Done
 
+- [DONE] Enabled unlimited PDF export copy consistency on landing and clarified localhost Clerk live-key domain constraint
+- [DONE] Enabled unlimited PDF exports across plans and added Clerk localhost/live-key guard with troubleshooting notes
+- [DONE] Rewrote landing pricing and FAQ limits in natural language (CVs, cover letters, tailoring, bullet rewrites)
+- [DONE] Aligned manual Redis rate limiting to final spec (free AI access + admin/user payload shape + hard-cap exhaustion + @upstash/ratelimit cleanup)
+- [DONE] Implemented manual Redis rate-limiting system (tokens/features/admin controls + route migrations + edge-case tests)
 - [DONE] Hardened AI review JSON parsing with robust extraction, fallback repair pass, safe error messaging, and edge-case tests
 - [DONE] Fixed redeem-code configuration detection to support legacy env keys and ignore placeholder values (without exposing code)
 - [DONE] Updated legal support contact email to admin@joben.eu in Terms and Privacy pages

@@ -1,11 +1,16 @@
 import { auth } from '@clerk/nextjs/server'
-import { askClaudeForJson } from '@/lib/claude'
-import { ClaudeJsonParseError } from '@/lib/claude-json'
+import {
+  callAnthropicWithLimits,
+  extractTextFromAnthropicMessage,
+  isRateLimitExceededError,
+  MessageParam,
+} from '@/lib/anthropic-with-limits'
+import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
-import { enforceApiRateLimit } from '@/lib/api-rate-limit'
-import { getEmailHintFromSessionClaims, getUserPlan, hasResumeAnalysisAccess } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { estimateRequestCost } from '@/lib/token-estimator'
 
 const ANALYZE_SYSTEM_PROMPT = `You are an elite resume analyst and ATS expert. Analyze the resume and return ONLY valid JSON, no markdown, no preamble.
 
@@ -68,44 +73,35 @@ export async function POST(req: Request) {
   }
 
   const plan = await getUserPlan(userId, emailHint)
-  if (!hasResumeAnalysisAccess(plan)) {
-    return jsonWithRequestId(
-      {
-        error: 'Resume analysis is available on Pro and Recruiting plans.',
-        showUpgrade: true,
-        requiredPlan: 'pro',
-        currentPlan: plan,
-      },
-      403,
-      requestId
-    )
-  }
 
-  const apiLimit = await enforceApiRateLimit({
-    route: 'analyze',
-    userId,
-    plan,
-  })
-
-  if (!apiLimit.allowed) {
-    return jsonWithRequestId(
-      {
-        error: apiLimit.error || 'Daily limit reached. Try again tomorrow.',
-        showUpgrade: apiLimit.showUpgrade || false,
-        currentPlan: plan,
-        limit: apiLimit.limit,
-        remaining: apiLimit.remaining,
-        resetAt: apiLimit.resetAt,
-      },
-      apiLimit.status,
-      requestId
-    )
+  const costEstimate = estimateRequestCost(body.resumeText, body.jobDescription, 'resume_analysis')
+  if (!costEstimate.withinLimit) {
+    const suggested = costEstimate.suggestedMaxChars ?? 16000
+    const label = costEstimate.limitType === 'jd_too_long'
+      ? `Job description-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
+      : `CV-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
+    return jsonWithRequestId({ error: label, limitType: 'input_too_long' }, 429, requestId)
   }
 
   try {
     const prompt = `Resume:\n${body.resumeText}\n\nJob description:\n${body.jobDescription || 'N/A'}`
-    const analysis = (await askClaudeForJson(ANALYZE_SYSTEM_PROMPT, prompt)) as
-      Record<string, unknown> & { overall_score?: number }
+    const messages: MessageParam[] = [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ]
+
+    const aiResponse = await callAnthropicWithLimits({
+      userId,
+      plan,
+      inputText: prompt,
+      messages,
+      system: ANALYZE_SYSTEM_PROMPT,
+    })
+
+    const analysisText = extractTextFromAnthropicMessage(aiResponse)
+    const analysis = parseClaudeJsonText(analysisText) as Record<string, unknown> & { overall_score?: number }
 
     const supabase = createServerClient()
     const { data: createdReview, error: insertError } = await supabase
@@ -149,6 +145,10 @@ export async function POST(req: Request) {
 
     return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return jsonWithRequestId(error.payload, error.status, requestId)
+    }
+
     const message = error instanceof ClaudeJsonParseError
       ? 'AI response format was invalid. Please retry.'
       : (error as Error).message

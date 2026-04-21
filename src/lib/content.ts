@@ -50,37 +50,38 @@ export const atsPreviewContent = {
 export const pricingPlans = [
   {
     name: "Free",
-    description: "Perfect for building your first professional resume.",
+    description: "Best for building your first polished application.",
     price: "$0",
     price_period: "/forever",
     features: [
       "Manual resume builder",
-      "3 resumes with 1 PDF download",
-      "AI bullet rewrites: 2/day, 30/month",
+      "Save 1 CV",
+      "Unlimited PDF exports",
+      "5 AI cover letters / month",
+      "5 resume-tailoring runs (CV vs JD) / month",
+      "30 AI bullet rewrites / month",
       "1 basic ATS-optimized template",
     ],
     excludedFeatures: [
-      "Cover letter generation",
-      "Resume vs JD analysis",
-      "Unlimited resumes & downloads",
+      "Priority email support",
+      "Unlimited saved CVs",
+      "Full template library",
     ],
     cta: "Start Free",
     isPrimary: false,
   },
   {
     name: "Pro",
-    description: "Powerful AI limits for the active job seeker.",
+    description: "For active job seekers applying consistently.",
     price: "$12",
     price_period: "/month",
     features: [
       "Everything in Free, plus:",
-      "Bullet rewrites: 10/day, 150/month",
-      "Cover letters: 3/day, 20/month",
-      "Resume vs JD analysis: 5/day, 30/month",
-      "AI bullet point generator",
-      "AI summary & headline writer",
-      "ATS keyword optimization & scoring",
-      "Unlimited resumes & exports",
+      "Save up to 3 CVs",
+      "Unlimited PDF exports",
+      "60 AI cover letters / month",
+      "60 resume-tailoring runs (CV vs JD) / month",
+      "200 AI bullet rewrites / month",
       "Priority email support",
     ],
     excludedFeatures: [],
@@ -89,15 +90,16 @@ export const pricingPlans = [
   },
   {
     name: "Recruiting Plan",
-    description: "Long-term access for serious career builders.",
+    description: "6-month plan for high-volume applications.",
     price: "$60",
     price_period: "/6 months",
     features: [
       "Everything in Pro included",
-      "Higher AI limits",
-      "AI bullet point generator",
-      "ATS keyword optimization",
-      "Unlimited resumes & exports",
+      "Unlimited saved CVs",
+      "Unlimited AI cover letters",
+      "Unlimited resume-tailoring runs (CV vs JD)",
+      "Unlimited AI bullet rewrites",
+      "Unlimited PDF exports",
       "Full template library access",
       "Priority email support",
     ],
@@ -112,17 +114,17 @@ export const faqItems = [
   {
     question: "Is Joben really free to start?",
     answer:
-      "Yes. The Free plan lets you build resumes manually, keep up to 3 resumes, and export 1 PDF. You can also try limited AI bullet rewrites.",
+      "Yes. Free includes 1 saved CV, unlimited PDF exports, 5 cover letters/month, 5 CV-tailoring runs/month, and 30 bullet rewrites/month.",
   },
   {
     question: "What do I get with Pro?",
     answer:
-      "Pro unlocks higher AI limits, resume vs job description analysis, cover letter generation, and unlimited resumes and exports.",
+      "Pro gives you 3 saved CVs, unlimited exports, 60 cover letters/month, 60 CV-tailoring runs/month, and 200 bullet rewrites/month.",
   },
   {
     question: "How do AI limits work?",
     answer:
-      "AI features use both daily and monthly limits based on your plan. This keeps performance stable and pricing transparent.",
+      "Each plan has clear monthly usage counters for cover letters, CV tailoring, and bullet rewrites. Counters reset at the start of each month.",
   },
   {
     question: "Are the resumes ATS-friendly?",
@@ -137,7 +139,7 @@ export const faqItems = [
   {
     question: "Can I generate cover letters too?",
     answer:
-      "Yes, on paid plans. Joben can generate targeted cover letters using your resume and the job details.",
+      "Yes. All plans can generate cover letters, with monthly limits based on your plan.",
   },
   {
     question: "Can I cancel my paid plan anytime?",

@@ -115,6 +115,13 @@ curl -X POST "https://your-domain.com/api/cron/followup-7d?limit=100&retries=1" 
 - Verify `CLERK_WEBHOOK_SECRET` is configured.
 - Replay event and confirm dedup rows in `webhook_events`.
 
+### Clerk error: "Production Keys are only allowed for domain ..."
+- Cause: using `pk_live`/`sk_live` on `localhost`.
+- Fix for local development:
+	- use a Clerk development instance (`pk_test_...`, `sk_test_...`) in `.env.local`
+	- keep live keys only in production environments/domains
+- Alternative: run the app from an allowed production subdomain with matching origin.
+
 ### Email sends fail or duplicate
 - Check `email_events.status`, `error`, and `source_event_id`.
 - Confirm Resend credentials and sender identity are valid.

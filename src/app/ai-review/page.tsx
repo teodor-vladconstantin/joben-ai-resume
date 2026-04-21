@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Navbar } from '@/components/ui/Navbar'
 import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } from 'lucide-react'
+import { AILoadingState } from '@/components/ui/AILoadingState'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
 import { startProCheckout } from '@/lib/client-billing'
 import { importPdfClientSide } from '@/lib/pdf-import'
@@ -338,13 +339,19 @@ export default function AIReviewPage() {
               placeholder="Optional job description for more accurate analysis"
             />
             {error ? <p className="text-sm text-red-400 mt-3">{error}</p> : null}
-            <button
-              onClick={() => void handleAnalyze()}
-              disabled={isAnalyzing || isProcessingUpload}
-              className="mt-4 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-5 py-2.5 rounded-xl font-semibold transition-opacity hover:opacity-90 inline-flex items-center gap-2 disabled:opacity-60"
-            >
-              <Star className="w-4 h-4 fill-white" /> {isAnalyzing ? 'Analyzing...' : uploadedFileName ? 'Review Uploaded PDF' : 'Start Review'}
-            </button>
+            {isAnalyzing ? (
+              <div className="mt-4">
+                <AILoadingState stage="analyzing" />
+              </div>
+            ) : (
+              <button
+                onClick={() => void handleAnalyze()}
+                disabled={isProcessingUpload}
+                className="mt-4 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-5 py-2.5 rounded-xl font-semibold transition-opacity hover:opacity-90 inline-flex items-center gap-2 disabled:opacity-60"
+              >
+                <Star className="w-4 h-4 fill-white" /> {uploadedFileName ? 'Review Uploaded PDF' : 'Start Review'}
+              </button>
+            )}
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-5">

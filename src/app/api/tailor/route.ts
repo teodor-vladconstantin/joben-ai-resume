@@ -1,8 +1,13 @@
 import { auth } from '@clerk/nextjs/server'
-import { askClaudeForJson } from '@/lib/claude'
-import { enforceApiRateLimit } from '@/lib/api-rate-limit'
+import {
+  callAnthropicWithLimits,
+  extractTextFromAnthropicMessage,
+  isRateLimitExceededError,
+  MessageParam,
+} from '@/lib/anthropic-with-limits'
+import { parseClaudeJsonText } from '@/lib/claude-json'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { getEmailHintFromSessionClaims, getUserPlan, hasAtsOptimizationAccess } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 
 const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
 {
@@ -20,18 +25,6 @@ export async function POST(req: Request) {
   const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
   const plan = await getUserPlan(userId, emailHint)
-  if (!hasAtsOptimizationAccess(plan)) {
-    return jsonWithRequestId(
-      {
-        error: 'ATS optimization is available on Pro and Recruiting plans.',
-        showUpgrade: true,
-        requiredPlan: 'pro',
-        currentPlan: plan,
-      },
-      403,
-      requestId
-    )
-  }
 
   const body = (await req.json()) as {
     resumeData?: Record<string, unknown>
@@ -43,30 +36,25 @@ export async function POST(req: Request) {
     return jsonWithRequestId({ error: 'resumeData and jobDescription are required' }, 400, requestId)
   }
 
-  const apiLimit = await enforceApiRateLimit({
-    route: 'tailor',
-    userId,
-    plan,
-  })
-
-  if (!apiLimit.allowed) {
-    return jsonWithRequestId(
-      {
-        error: apiLimit.error || 'Daily limit reached. Try again tomorrow.',
-        showUpgrade: apiLimit.showUpgrade || false,
-        currentPlan: plan,
-        limit: apiLimit.limit,
-        remaining: apiLimit.remaining,
-        resetAt: apiLimit.resetAt,
-      },
-      apiLimit.status,
-      requestId
-    )
-  }
-
   try {
     const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(body.resumeData)}\n\nJob description:\n${body.jobDescription}`
-    const result = await askClaudeForJson(TAILOR_SYSTEM_PROMPT, prompt)
+    const messages: MessageParam[] = [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ]
+
+    const aiResponse = await callAnthropicWithLimits({
+      userId,
+      plan,
+      feature: 'jds',
+      inputText: prompt,
+      messages,
+      system: TAILOR_SYSTEM_PROMPT,
+    })
+
+    const result = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
     logger.info('Tailor request completed', {
       requestId,
       userId,
@@ -75,6 +63,10 @@ export async function POST(req: Request) {
     })
     return jsonWithRequestId({ result }, 200, requestId)
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return jsonWithRequestId(error.payload, error.status, requestId)
+    }
+
     const message = (error as Error).message
     logger.error('Tailor route failed', {
       requestId,

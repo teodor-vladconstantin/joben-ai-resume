@@ -1,6 +1,7 @@
 "use client"
 
 import { CheckCircle2, AlertTriangle, XCircle, ArrowRight, Zap } from 'lucide-react'
+import { AILoadingState } from '@/components/ui/AILoadingState'
 
 type CategoryItem = {
   score?: number
@@ -68,9 +69,10 @@ type ResumeAnalyzerProps = {
   isLoading?: boolean
   error?: string
   fixHref?: string
-  onApplyFix?: () => void
-  onAutoFix?: () => void
+  onApplyFix?: (improvementIndex: number) => void
+  onAutoFix?: () => void | Promise<void>
   canApplyFixes?: boolean
+  isSavingAutoFix?: boolean
 }
 
 export function ResumeAnalyzer({
@@ -82,11 +84,12 @@ export function ResumeAnalyzer({
   onApplyFix,
   onAutoFix,
   canApplyFixes = false,
+  isSavingAutoFix = false,
 }: ResumeAnalyzerProps) {
   if (isLoading) {
     return (
-      <div className="bg-[#0A0F0D] rounded-2xl border border-white/10 p-10 text-center text-[#FFFFFF]/72">
-        Loading AI review...
+      <div className="bg-[#0A0F0D] rounded-2xl border border-white/10 p-10 text-center">
+        <AILoadingState stage="generating" />
       </div>
     )
   }
@@ -156,7 +159,11 @@ export function ResumeAnalyzer({
             </div>
           ) : null}
 
-          {fixHref ? (
+          {isSavingAutoFix ? (
+            <div className="w-full mt-8">
+              <AILoadingState stage="saving" />
+            </div>
+          ) : fixHref ? (
             <a
               href={fixHref}
               className="w-full mt-8 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
@@ -165,8 +172,8 @@ export function ResumeAnalyzer({
             </a>
           ) : (
             <button
-              onClick={onAutoFix || onApplyFix}
-              disabled={!canApplyFixes}
+              onClick={() => void onAutoFix?.()}
+              disabled={!canApplyFixes || isSavingAutoFix}
               className="w-full mt-8 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Zap className="w-5 h-5 fill-current" /> Auto-Fix Resume
@@ -222,6 +229,16 @@ export function ResumeAnalyzer({
                       <p className="text-sm text-[#FFFFFF]/82 mb-2">Suggested:</p>
                       <p className="text-sm bg-[#0A9548]/10 text-[#0A9548] border-l-2 border-white/10 px-3 py-2">{imp.strong_example || 'N/A'}</p>
                     </div>
+                    <div className="pt-1">
+                      {onApplyFix ? (
+                        <button
+                          onClick={() => onApplyFix(idx)}
+                          className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1"
+                        >
+                          Apply this fix <ArrowRight className="w-4 h-4" />
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 ))
               )}
@@ -258,22 +275,14 @@ export function ResumeAnalyzer({
                     <div key={`${c.label || 'insight'}-${idx}`} className="bg-[#0A0F0D] rounded-xl border border-orange-500/20 p-4">
                       <p className="text-white font-medium mb-1">{c.label || 'Category'}</p>
                       <p className="text-sm text-[#FFFFFF]/72">{c.feedback}</p>
-                      {fixHref ? (
-                        <a
-                          href={fixHref}
+                      {onApplyFix ? (
+                        <button
+                          onClick={() => onApplyFix(idx)}
                           className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1 mt-3"
                         >
                           Apply this fix <ArrowRight className="w-4 h-4" />
-                        </a>
-                      ) : (
-                        <button
-                          onClick={onApplyFix}
-                          disabled={!canApplyFixes}
-                          className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65] flex items-center gap-1 mt-3 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Apply this fix <ArrowRight className="w-4 h-4" />
                         </button>
-                      )}
+                      ) : null}
                     </div>
                   ) : null
                 )}
@@ -285,5 +294,3 @@ export function ResumeAnalyzer({
     </div>
   )
 }
-
-

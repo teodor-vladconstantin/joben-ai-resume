@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const authMock = vi.fn()
 const createServerClientMock = vi.fn()
+const checkFeatureLimitMock = vi.fn()
+const incrementFeatureCounterMock = vi.fn()
+const recordLimitHitMock = vi.fn()
+const getMonthlyResetAtIsoMock = vi.fn()
 
 vi.mock('@clerk/nextjs/server', () => ({
   auth: authMock,
@@ -11,11 +15,30 @@ vi.mock('@/lib/supabase/server', () => ({
   createServerClient: createServerClientMock,
 }))
 
+vi.mock('@/lib/ratelimit', () => ({
+  checkFeatureLimit: checkFeatureLimitMock,
+  incrementFeatureCounter: incrementFeatureCounterMock,
+  recordLimitHit: recordLimitHitMock,
+  getMonthlyResetAtIso: getMonthlyResetAtIsoMock,
+}))
+
 describe('CRUD smoke tests for resumes and cover letters APIs', () => {
   beforeEach(() => {
     vi.resetModules()
     authMock.mockReset()
     createServerClientMock.mockReset()
+    checkFeatureLimitMock.mockReset()
+    incrementFeatureCounterMock.mockReset()
+    recordLimitHitMock.mockReset()
+    getMonthlyResetAtIsoMock.mockReset()
+
+    checkFeatureLimitMock.mockResolvedValue({
+      allowed: true,
+      used: 0,
+      limit: 1,
+      blocked: false,
+    })
+    getMonthlyResetAtIsoMock.mockReturnValue('2026-05-01T00:00:00Z')
   })
 
   it('creates a resume successfully', async () => {
@@ -97,8 +120,14 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
     expect(payload.resume?.id).toBe('resume_1')
   })
 
-  it('blocks resume creation when free plan quota is reached', async () => {
+  it('blocks resume creation when cv feature limit is reached', async () => {
     authMock.mockResolvedValue({ userId: 'user_123' })
+    checkFeatureLimitMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 1,
+      limit: 1,
+      blocked: false,
+    })
 
     createServerClientMock.mockReturnValue({
       from: vi.fn((table: string) => {
@@ -158,16 +187,18 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
 
     const payload = (await response.json()) as {
       error?: string
-      showUpgrade?: boolean
+      limitType?: string
+      feature?: string
       limit?: number
       used?: number
     }
 
-    expect(response.status).toBe(403)
-    expect(payload.showUpgrade).toBe(true)
-    expect(payload.limit).toBe(3)
-    expect(payload.used).toBe(3)
-    expect(payload.error).toContain('Free plan allows up to 3 resumes')
+    expect(response.status).toBe(429)
+    expect(payload.limitType).toBe('feature')
+    expect(payload.feature).toBe('cvs')
+    expect(payload.limit).toBe(1)
+    expect(payload.used).toBe(1)
+    expect(payload.error).toContain('Ai utilizat toate cele 1 CV-uri')
   })
 
   it('returns 400 when deleting resume without id', async () => {

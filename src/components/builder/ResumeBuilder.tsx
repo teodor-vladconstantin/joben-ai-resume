@@ -1,12 +1,13 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
@@ -124,7 +125,9 @@ export function ResumeBuilder() {
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
+  const [highlightedBulletIndex, setHighlightedBulletIndex] = useState<number | null>(null)
   const params = useParams<{ id: string }>()
+  const searchParams = useSearchParams()
   const router = useRouter()
   const routeResumeId = params?.id
   const isCreateMode = routeResumeId === 'new' || !routeResumeId
@@ -195,6 +198,38 @@ export function ResumeBuilder() {
       cancelled = true
     }
   }, [isCreateMode, routeResumeId])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const section = searchParams?.get('section')
+    const bulletIndexParam = searchParams?.get('bulletIndex')
+
+    if (!section) return
+
+    const validTabs = ['personal', 'experience', 'education', 'skills', 'projects', 'certifications', 'sections']
+    if (validTabs.includes(section)) {
+      setActiveTab(section)
+    }
+
+    if (bulletIndexParam !== null) {
+      const idx = parseInt(bulletIndexParam, 10)
+      if (!isNaN(idx) && idx >= 0) {
+        setHighlightedBulletIndex(idx)
+
+        setTimeout(() => {
+          const el = document.querySelector<HTMLElement>(`[data-bullet-global-index="${idx}"]`)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            el.focus()
+          }
+        }, 150)
+
+        const clearTimer = setTimeout(() => setHighlightedBulletIndex(null), 3000)
+        return () => clearTimeout(clearTimer)
+      }
+    }
+  }, [isLoading, searchParams])
 
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
@@ -731,12 +766,13 @@ export function ResumeBuilder() {
             >
               {isImportingPdf ? 'Importing PDF...' : 'Import from PDF'}
             </button>
-            <button
+            <FeatureButton
+              feature="jds"
               onClick={() => setIsTailorModalOpen(true)}
               className="flex-1 rounded-lg border border-white/12 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-[#0A9548] hover:bg-[#0A0F0D]"
             >
               AI Tailor
-            </button>
+            </FeatureButton>
           </div>
         </div>
         
@@ -787,8 +823,11 @@ export function ResumeBuilder() {
                 <button onClick={handleAddRole} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Role</button>
               </div>
               
-              {resumeData.experience.map((exp) => {
+              {resumeData.experience.map((exp, expIndex) => {
                 const experienceBullets = getExperienceBullets(exp)
+                const globalBulletOffset = resumeData.experience
+                  .slice(0, expIndex)
+                  .reduce((sum, e) => sum + getExperienceBullets(e).length, 0)
 
                 return (
                  <div key={exp.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
@@ -838,13 +877,21 @@ export function ResumeBuilder() {
                          </button>
                        </div>
 
-                       {experienceBullets.map((bullet, bulletIndex) => (
+                       {experienceBullets.map((bullet, bulletIndex) => {
+                         const globalIdx = globalBulletOffset + bulletIndex
+                         const isHighlighted = highlightedBulletIndex === globalIdx
+                         return (
                          <div key={`${exp.id}-bullet-${bulletIndex}`} className="flex items-start gap-2">
                            <span className="pt-2 text-[#0A9548]">•</span>
                            <textarea
+                             data-bullet-global-index={globalIdx}
                              value={bullet}
                              onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
-                             className="h-20 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                             className={`h-20 w-full resize-none rounded-lg border bg-[#020202] px-3 py-2 text-sm text-white focus:outline-none transition-colors ${
+                               isHighlighted
+                                 ? 'border-[#16DB65] ring-2 ring-[#16DB65]/40 focus:border-[#16DB65]'
+                                 : 'border-white/10 focus:border-[#16DB65]'
+                             }`}
                              placeholder="Describe measurable impact"
                            />
                            <div className="flex flex-col gap-1">
@@ -864,7 +911,8 @@ export function ResumeBuilder() {
                              </button>
                            </div>
                          </div>
-                       ))}
+                       )
+                       })}
                      </div>
                    </div>
                 </div>
@@ -952,14 +1000,15 @@ export function ResumeBuilder() {
               >
                 Cancel
               </button>
-              <button
-                onClick={() => void handleTailorResume()}
+              <FeatureButton
+                feature="jds"
+                onClick={handleTailorResume}
                 disabled={isTailoring}
                 className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Sparkles className="h-4 w-4" />
                 {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
-              </button>
+              </FeatureButton>
             </div>
           </div>
         </div>

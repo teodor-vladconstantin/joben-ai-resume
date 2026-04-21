@@ -1,9 +1,13 @@
 import { auth } from '@clerk/nextjs/server'
-import { askClaudeForText } from '@/lib/claude'
-import { enforceApiRateLimit } from '@/lib/api-rate-limit'
+import {
+  callAnthropicWithLimits,
+  extractTextFromAnthropicMessage,
+  isRateLimitExceededError,
+  MessageParam,
+} from '@/lib/anthropic-with-limits'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
-import { getEmailHintFromSessionClaims, getUserPlan, hasBulletRewriteAccess } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 
 const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
 If numeric evidence is present and the source supports it, prefer this structure: [Action verb] X by Y using Z.
@@ -22,64 +26,32 @@ export async function POST(req: Request) {
   const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
   const plan = await getUserPlan(userId, emailHint)
-  if (!hasBulletRewriteAccess(plan)) {
-    return jsonWithRequestId(
-      {
-        error: 'AI bullet rewrite is not available on your current plan.',
-        showUpgrade: true,
-        requiredPlan: 'pro',
-        currentPlan: plan,
-      },
-      403,
-      requestId
-    )
-  }
 
   const body = (await req.json()) as { bullet?: string; context?: string }
   if (!body.bullet) {
     return jsonWithRequestId({ error: 'bullet is required' }, 400, requestId)
   }
 
-  const apiLimit = await enforceApiRateLimit({
-    route: 'improve-bullet',
-    userId,
-    plan,
-  })
-
-  if (!apiLimit.allowed) {
-    logger.warn('Improve-bullet request blocked by rate limit', {
-      requestId,
-      userId,
-      route: '/api/improve-bullet',
-      plan,
-      status: apiLimit.status,
-      period: apiLimit.period,
-      limit: apiLimit.limit,
-      remaining: apiLimit.remaining,
-      resetAt: apiLimit.resetAt,
-    })
-
-    return jsonWithRequestId(
-      {
-        error: apiLimit.error || 'Daily limit reached. Try again tomorrow.',
-        showUpgrade: apiLimit.showUpgrade || false,
-        currentPlan: plan,
-        limit: apiLimit.limit,
-        remaining: apiLimit.remaining,
-        resetAt: apiLimit.resetAt,
-      },
-      apiLimit.status,
-      requestId
-    )
-  }
-
   try {
     const hasNumericEvidence = /\d/.test(`${body.bullet} ${body.context || ''}`)
+    const userPrompt = `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
+    const messages: MessageParam[] = [
+      {
+        role: 'user',
+        content: userPrompt,
+      },
+    ]
 
-    const text = await askClaudeForText(
-      IMPROVE_BULLET_SYSTEM_PROMPT,
-      `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
-    )
+    const aiResponse = await callAnthropicWithLimits({
+      userId,
+      plan,
+      feature: 'bullets',
+      inputText: userPrompt,
+      messages,
+      system: IMPROVE_BULLET_SYSTEM_PROMPT,
+    })
+
+    const text = extractTextFromAnthropicMessage(aiResponse)
     logger.info('Bullet improved', {
       requestId,
       userId,
@@ -97,6 +69,10 @@ export async function POST(req: Request) {
 
     return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return jsonWithRequestId(error.payload, error.status, requestId)
+    }
+
     const message = (error as Error).message
     logger.error('Improve-bullet route failed', {
       requestId,
