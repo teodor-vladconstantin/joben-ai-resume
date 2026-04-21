@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 
 type CoverLetterSections = {
@@ -490,12 +491,20 @@ export function CoverLetterBuilder() {
             </div>
           </div>
 
-          <button
-            onClick={() => void generateDraft()}
-            className="mt-6 w-full bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-3 rounded-xl font-bold transition-opacity hover:opacity-90 flex items-center justify-center gap-2 shadow-lg shadow-[#0A9548]/20"
+          <FeatureButton
+            feature="covers"
+            onClick={generateDraft}
+            disabled={isGenerating}
+            className="mt-6 w-full bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-3 rounded-xl font-bold hover:opacity-90 shadow-lg shadow-[#0A9548]/20"
           >
-            {isGenerating ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <><Play className="w-4 h-4 fill-current"/> Generate Draft</>}
-          </button>
+            {isGenerating ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-current" /> Generate Draft
+              </>
+            )}
+          </FeatureButton>
         </div>
 
         <div className="p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4">

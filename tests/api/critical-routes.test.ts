@@ -6,11 +6,6 @@ vi.mock('@clerk/nextjs/server', () => ({
   auth: authMock,
 }))
 
-vi.mock('@/lib/upstash', () => ({
-  analyzeRatelimit: { limit: vi.fn() },
-  coverLetterRatelimit: { limit: vi.fn() },
-}))
-
 describe('critical API route guards', () => {
   beforeEach(() => {
     vi.resetModules()

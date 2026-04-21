@@ -5,8 +5,11 @@ import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
+import { validateEnv } from '@/lib/env'
 
 const inter = Inter({ subsets: ['latin'] })
+
+validateEnv()
 
 export const metadata: Metadata = {
   title: 'Joben | ATS-Optimized AI Resume Builder',

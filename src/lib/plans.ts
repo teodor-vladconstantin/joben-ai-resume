@@ -41,13 +41,13 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
   free: {
     id: 'free',
     label: 'Free',
-    aiContentGeneration: false,
+    aiContentGeneration: true,
     bulletRewriteAccess: true,
-    resumeAnalysisAccess: false,
-    coverLetterGenerationAccess: false,
-    atsKeywordOptimization: false,
-    maxResumes: 3,
-    maxResumeExports: 1,
+    resumeAnalysisAccess: true,
+    coverLetterGenerationAccess: true,
+    atsKeywordOptimization: true,
+    maxResumes: 1,
+    maxResumeExports: null,
     priorityEmailSupport: false,
     fullTemplateLibrary: false,
   },
@@ -59,7 +59,7 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     resumeAnalysisAccess: true,
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
-    maxResumes: null,
+    maxResumes: 3,
     maxResumeExports: null,
     priorityEmailSupport: true,
     fullTemplateLibrary: false,
@@ -227,8 +227,10 @@ export async function checkResumeCreationQuota(
   }
 
   if (used >= limit) {
+    const planLabel = PLAN_DEFINITIONS[plan].label
+    const nextPlan = plan === 'free' ? 'Pro' : 'Recruiting'
     return deniedQuota(
-      `Free plan allows up to ${limit} resumes. Upgrade to Pro for unlimited resumes.`,
+      `${planLabel} plan allows up to ${limit} resumes. Upgrade to ${nextPlan} for more resumes.`,
       limit,
       used
     )

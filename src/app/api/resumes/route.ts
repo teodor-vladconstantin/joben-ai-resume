@@ -3,7 +3,8 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
-import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { checkFeatureLimit, getMonthlyResetAtIso, incrementFeatureCounter, recordLimitHit } from '@/lib/ratelimit'
 
 function isMissingRelation(error: unknown): boolean {
   const err = error as { code?: string; message?: string }
@@ -42,18 +43,33 @@ export async function POST(req: Request) {
 
   const emailHint = getEmailHintFromSessionClaims(sessionClaims)
   const plan = await getUserPlan(userId, emailHint)
-  const quotaCheck = await checkResumeCreationQuota(userId, plan)
-  if (!quotaCheck.allowed) {
+  const featureCheck = await checkFeatureLimit(userId, 'cvs', plan)
+  if (!featureCheck.allowed) {
+    await recordLimitHit(userId, 'cvs')
+
+    if (featureCheck.blocked) {
+      return jsonWithRequestId(
+        {
+          error: 'Accesul la acest feature a fost suspendat temporar. Contacteaza suportul.',
+          limitType: 'blocked',
+          feature: 'cvs',
+          resetAt: getMonthlyResetAtIso(),
+        },
+        429,
+        requestId
+      )
+    }
+
     return jsonWithRequestId(
       {
-        error: quotaCheck.error || 'Could not validate plan limits right now. Please try again.',
-        showUpgrade: quotaCheck.showUpgrade || false,
-        limit: quotaCheck.limit,
-        used: quotaCheck.used,
-        remaining: quotaCheck.remaining,
-        currentPlan: plan,
+        error: `Ai utilizat toate cele ${featureCheck.limit || 0} CV-uri disponibile pe acest plan.`,
+        limitType: 'feature',
+        feature: 'cvs',
+        used: featureCheck.used,
+        limit: featureCheck.limit,
+        resetAt: getMonthlyResetAtIso(),
       },
-      quotaCheck.status,
+      429,
       requestId
     )
   }
@@ -81,6 +97,12 @@ export async function POST(req: Request) {
     }
     return jsonWithRequestId({ error: error.message }, 500, requestId)
   }
+
+  if (!data?.id) {
+    return jsonWithRequestId({ error: 'Failed to create resume.' }, 500, requestId)
+  }
+
+  await incrementFeatureCounter(userId, 'cvs')
 
   await trackProductEvent({
     userId,

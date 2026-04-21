@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { askClaudeForJson } from '@/lib/claude'
-import { enforceApiRateLimit } from '@/lib/api-rate-limit'
-import { getEmailHintFromSessionClaims, getUserPlan, hasCoverLetterGenerationAccess } from '@/lib/plans'
+import {
+  callAnthropicWithLimits,
+  extractTextFromAnthropicMessage,
+  isRateLimitExceededError,
+  MessageParam,
+} from '@/lib/anthropic-with-limits'
+import { parseClaudeJsonText } from '@/lib/claude-json'
+import { getRequestId, jsonWithRequestId } from '@/lib/logger'
+import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 
 const COVER_LETTER_SYSTEM_PROMPT = `Generate a cover letter JSON with this exact shape:
 {
@@ -17,9 +22,10 @@ Rules:
 - Keep language specific and concise.`
 
 export async function POST(req: Request) {
+  const requestId = getRequestId(req)
   const { userId, sessionClaims } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
   }
 
   const emailHint = getEmailHintFromSessionClaims(sessionClaims)
@@ -33,47 +39,36 @@ export async function POST(req: Request) {
   }
 
   if (!body.company || !body.position || !body.jobDescription) {
-    return NextResponse.json({ error: 'company, position and jobDescription are required' }, { status: 400 })
+    return jsonWithRequestId({ error: 'company, position and jobDescription are required' }, 400, requestId)
   }
 
   const plan = await getUserPlan(userId, emailHint)
-  if (!hasCoverLetterGenerationAccess(plan)) {
-    return NextResponse.json(
-      {
-        error: 'AI cover letter generation is available on Pro and Recruiting plans.',
-        showUpgrade: true,
-        requiredPlan: 'pro',
-        currentPlan: plan,
-      },
-      { status: 403 }
-    )
-  }
-
-  const apiLimit = await enforceApiRateLimit({
-    route: 'cover-letter',
-    userId,
-    plan,
-  })
-
-  if (!apiLimit.allowed) {
-    return NextResponse.json(
-      {
-        error: apiLimit.error || 'Daily limit reached. Try again tomorrow.',
-        showUpgrade: apiLimit.showUpgrade || false,
-        currentPlan: plan,
-        limit: apiLimit.limit,
-        remaining: apiLimit.remaining,
-        resetAt: apiLimit.resetAt,
-      },
-      { status: apiLimit.status }
-    )
-  }
 
   try {
     const prompt = `Resume:\n${body.resumeText || 'N/A'}\n\nCompany: ${body.company}\nPosition: ${body.position}\nTone: ${body.tone || 'professional'}\n\nJob description:\n${body.jobDescription}`
-    const generated = await askClaudeForJson(COVER_LETTER_SYSTEM_PROMPT, prompt)
-    return NextResponse.json({ result: generated }, { status: 200 })
+    const messages: MessageParam[] = [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ]
+
+    const aiResponse = await callAnthropicWithLimits({
+      userId,
+      plan,
+      feature: 'covers',
+      inputText: prompt,
+      messages,
+      system: COVER_LETTER_SYSTEM_PROMPT,
+    })
+
+    const generated = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
+    return jsonWithRequestId({ result: generated }, 200, requestId)
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+    if (isRateLimitExceededError(error)) {
+      return jsonWithRequestId(error.payload, error.status, requestId)
+    }
+
+    return jsonWithRequestId({ error: (error as Error).message }, 500, requestId)
   }
 }

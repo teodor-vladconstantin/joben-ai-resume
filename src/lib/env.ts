@@ -15,6 +15,48 @@ const PLACEHOLDER_VALUES = [
   'price_CHANGE_ME',
 ]
 
+function isLocalAppUrl(value: string | undefined): boolean {
+  if (!value) return true
+
+  try {
+    const url = new URL(value)
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+  } catch {
+    return value.includes('localhost') || value.includes('127.0.0.1')
+  }
+}
+
+export function validateClerkLocalConfig() {
+  if (process.env.NODE_ENV === 'production') {
+    return
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || ''
+  const secretKey = process.env.CLERK_SECRET_KEY || ''
+  const bypassGuard = process.env.ALLOW_CLERK_LIVE_ON_LOCALHOST === 'true'
+
+  if (bypassGuard) {
+    return
+  }
+
+  const isLocal = isLocalAppUrl(appUrl)
+  const usesLiveKeys = publishableKey.startsWith('pk_live_') || secretKey.startsWith('sk_live_')
+
+  if (isLocal && usesLiveKeys) {
+    throw new Error(
+      [
+        'Clerk live keys detected with a localhost app URL.',
+        'This is blocked by Clerk and causes browser origin errors.',
+        'Use a Clerk development instance for local dev:',
+        '  - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_... ',
+        '  - CLERK_SECRET_KEY=sk_test_... ',
+        'Or run the app on an allowed production domain/subdomain.',
+      ].join('\n')
+    )
+  }
+}
+
 export function validateEnv() {
   const missing = REQUIRED.filter((key) => !process.env[key])
   if (missing.length > 0) {
@@ -22,6 +64,8 @@ export function validateEnv() {
       `Missing required environment variables:\n${missing.map((k) => `  - ${k}`).join('\n')}\nSet them in .env.local before starting the app.`
     )
   }
+
+  validateClerkLocalConfig()
 }
 
 export function isEnvSet(key: string): boolean {
