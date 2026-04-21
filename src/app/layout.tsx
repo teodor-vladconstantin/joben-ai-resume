@@ -6,6 +6,7 @@ import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
+import { PostHogProvider } from '@/components/PostHogProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -80,7 +81,9 @@ export default function RootLayout({
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: stripInjectedAttrScript }}
           />
-          {children}
+          <PostHogProvider>
+            {children}
+          </PostHogProvider>
           <Analytics />
         </body>
       </html>

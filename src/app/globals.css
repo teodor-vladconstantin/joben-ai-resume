@@ -107,6 +107,29 @@ body {
   background: linear-gradient(90deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 74%, black));
 }
 
+.builder-panel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-accent) 86%, black) color-mix(in srgb, var(--brand-white) 5%, transparent);
+}
+
+.builder-panel-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.builder-panel-scrollbar::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--brand-white) 5%, transparent);
+  border-radius: 9999px;
+}
+
+.builder-panel-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-accent-bright) 92%, white), var(--brand-accent));
+  border-radius: 9999px;
+}
+
+.builder-panel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 74%, black));
+}
+
 @media print {
   @page {
     margin: 0;

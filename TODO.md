@@ -38,6 +38,8 @@
 
 ## Done
 
+- [DONE] AI Summary generator + independent left panel scroll in resume builder
+- [DONE] PostHog setup alignment (Next.js instrumentation-client + session replay + env cleanup)
 - [DONE] Enabled unlimited PDF export copy consistency on landing and clarified localhost Clerk live-key domain constraint
 - [DONE] Enabled unlimited PDF exports across plans and added Clerk localhost/live-key guard with troubleshooting notes
 - [DONE] Rewrote landing pricing and FAQ limits in natural language (CVs, cover letters, tailoring, bullet rewrites)
