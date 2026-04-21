@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { validateEnv } from '@/lib/env'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -82,6 +83,7 @@ export default function RootLayout({
           />
           {children}
           <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
