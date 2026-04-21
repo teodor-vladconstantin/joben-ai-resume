@@ -2,7 +2,21 @@
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import posthog from 'posthog-js'
 import * as Sentry from "@sentry/nextjs";
+
+const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
+
+if (posthogProjectToken) {
+  posthog.init(posthogProjectToken, {
+    api_host: '/ingest',
+    ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    defaults: '2026-01-30',
+    capture_pageview: 'history_change',
+    capture_pageleave: true,
+    disable_session_recording: false,
+  })
+}
 
 Sentry.init({
   dsn: "https://39e304482d48c2d9aeb663a996b3d8ea@o4511258775388160.ingest.de.sentry.io/4511258779254864",

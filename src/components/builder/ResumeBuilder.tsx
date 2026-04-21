@@ -1,5 +1,6 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
@@ -12,6 +13,7 @@ import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
+import { AILoadingState } from '@/components/ui/AILoadingState'
 
 type ResumeTemplate = 'harvard'
 
@@ -49,6 +51,8 @@ type ResumeData = {
   experience: ExperienceEntry[]
   dynamicSections: DynamicSection[]
 }
+
+type SummaryGenerationMode = 'resume' | 'scratch'
 
 function normalizeExperienceBullets(
   input: unknown,
@@ -93,6 +97,10 @@ function getExperienceBullets(entry: ExperienceEntry): string[] {
   return normalizeExperienceBullets(entry.bullets, entry.description, { keepEmpty: true })
 }
 
+function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
+  return `${experienceId}:${bulletIndex}`
+}
+
 const initialResumeData: ResumeData = {
   template: 'harvard',
   personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '' },
@@ -111,6 +119,7 @@ const tabSectionMap: Record<string, AddableSection['type'][]> = {
 
 export function ResumeBuilder() {
   const importInputRef = useRef<HTMLInputElement | null>(null)
+  const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData)
   const [isPending] = useTransition()
@@ -130,6 +139,13 @@ export function ResumeBuilder() {
   const [fixBanner, setFixBanner] = useState<string | null>(null)
   const [fixPatches, setFixPatches] = useState<FixPatchWithContext[]>([])
   const [showBeforeAfterModal, setShowBeforeAfterModal] = useState(false)
+  const [isSummaryGeneratorOpen, setIsSummaryGeneratorOpen] = useState(false)
+  const [summaryGenerationMode, setSummaryGenerationMode] = useState<SummaryGenerationMode>('resume')
+  const [summaryRoleDescription, setSummaryRoleDescription] = useState('')
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
+  const [generatedSummaryDraft, setGeneratedSummaryDraft] = useState('')
+  const [summaryGenerationError, setSummaryGenerationError] = useState<string | null>(null)
+  const [pendingBulletScrollKey, setPendingBulletScrollKey] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -272,6 +288,21 @@ export function ResumeBuilder() {
       }
     }
   }, [isLoading, searchParams, resumeData.experience])
+
+  useEffect(() => {
+    if (!pendingBulletScrollKey) return
+
+    const frameId = requestAnimationFrame(() => {
+      const targetField = bulletFieldRefs.current[pendingBulletScrollKey]
+      if (targetField) {
+        targetField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        targetField.focus()
+      }
+      setPendingBulletScrollKey(null)
+    })
+
+    return () => cancelAnimationFrame(frameId)
+  }, [pendingBulletScrollKey])
 
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
@@ -463,17 +494,28 @@ export function ResumeBuilder() {
   }
 
   const addExperienceBullet = (experienceId: string) => {
+    let nextKey: string | null = null
+
     setResumeData((prev) => ({
       ...prev,
       experience: prev.experience.map((exp) =>
         exp.id === experienceId
-          ? {
-              ...exp,
-              bullets: [...getExperienceBullets(exp), ''],
-            }
+          ? (() => {
+              const nextBullets = [...getExperienceBullets(exp), '']
+              nextKey = getBulletFieldKey(exp.id, nextBullets.length - 1)
+
+              return {
+                ...exp,
+                bullets: nextBullets,
+              }
+            })()
           : exp
       ),
     }))
+
+    if (nextKey) {
+      setPendingBulletScrollKey(nextKey)
+    }
   }
 
   const removeExperienceBullet = (experienceId: string, bulletIndex: number) => {
@@ -746,10 +788,57 @@ export function ResumeBuilder() {
     setImprovingExperienceId(null)
   }
 
+  const handleGenerateSummary = async (mode: SummaryGenerationMode) => {
+    setSummaryGenerationMode(mode)
+    setSummaryGenerationError(null)
+
+    if (mode === 'scratch' && !summaryRoleDescription.trim()) {
+      setSummaryGenerationError('Please describe the target role before generating from scratch.')
+      return
+    }
+
+    setIsGeneratingSummary(true)
+    setGeneratedSummaryDraft('')
+
+    try {
+      const response = await fetch('/api/generate-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mode,
+          roleDescription: mode === 'scratch' ? summaryRoleDescription : undefined,
+          resumeData: mode === 'resume' ? resumeData : undefined,
+        }),
+      })
+
+      const payload = (await response.json()) as {
+        summary?: string
+        error?: string
+      }
+
+      if (!response.ok || !payload.summary) {
+        setSummaryGenerationError(payload.error || 'Could not generate summary. Please retry.')
+        setIsGeneratingSummary(false)
+        return
+      }
+
+      setGeneratedSummaryDraft(payload.summary)
+    } catch (error) {
+      setSummaryGenerationError(`Summary generation failed: ${(error as Error).message}`)
+    }
+
+    setIsGeneratingSummary(false)
+  }
+
   return (
     <div className="w-full h-full min-h-0 flex flex-col lg:min-w-315 lg:flex-row print:block" suppressHydrationWarning>
       {/* Editor Sidebar */}
-      <div className="w-full min-h-0 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden" suppressHydrationWarning>
+      <div
+        className="w-full min-h-0 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
+        suppressHydrationWarning
+      >
         <input
           ref={importInputRef}
           id="pdf-import-input"
@@ -831,7 +920,7 @@ export function ResumeBuilder() {
         ) : null}
 
         <div
-          className="min-h-0 grow p-6 overflow-y-auto custom-scrollbar"
+          className="min-h-0 grow p-6 overflow-y-auto custom-scrollbar builder-panel-scrollbar"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
@@ -864,8 +953,113 @@ export function ResumeBuilder() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#FFFFFF]/82">Professional Summary</label>
-                <textarea value={resumeData.personal.summary} onChange={(e) => updatePersonalField('summary', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors h-28 resize-none" placeholder="Professional summary" />
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-sm font-medium text-[#FFFFFF]/82">Professional Summary</label>
+                  <button
+                    onClick={() => setIsSummaryGeneratorOpen((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#0A9548]/40 bg-[#0A9548]/10 px-2.5 py-1 text-xs font-semibold text-[#16DB65] hover:bg-[#0A9548]/20"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Generate with AI
+                  </button>
+                </div>
+
+                <textarea
+                  value={resumeData.personal.summary}
+                  onChange={(e) => updatePersonalField('summary', e.target.value)}
+                  className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors h-28 resize-none"
+                  placeholder="Professional summary"
+                />
+
+                {isSummaryGeneratorOpen ? (
+                  <div className="rounded-xl border border-white/10 bg-[#020202] p-3 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setSummaryGenerationMode('resume')}
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          summaryGenerationMode === 'resume'
+                            ? 'border border-[#0A9548]/40 bg-[#0A9548]/15 text-[#16DB65]'
+                            : 'border border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/78 hover:text-white'
+                        }`}
+                      >
+                        Based on my resume
+                      </button>
+                      <button
+                        onClick={() => setSummaryGenerationMode('scratch')}
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          summaryGenerationMode === 'scratch'
+                            ? 'border border-[#0A9548]/40 bg-[#0A9548]/15 text-[#16DB65]'
+                            : 'border border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/78 hover:text-white'
+                        }`}
+                      >
+                        Write from scratch
+                      </button>
+                    </div>
+
+                    {summaryGenerationMode === 'scratch' ? (
+                      <textarea
+                        value={summaryRoleDescription}
+                        onChange={(e) => setSummaryRoleDescription(e.target.value)}
+                        className="h-24 w-full resize-none rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Describe your target role, level, and focus areas..."
+                      />
+                    ) : null}
+
+                    {isGeneratingSummary ? (
+                      <div className="rounded-lg border border-white/10 bg-[#0A0F0D]">
+                        <AILoadingState stage="generating" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setIsSummaryGeneratorOpen(false)}
+                          className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
+                        >
+                          Close
+                        </button>
+                        <button
+                          onClick={() => void handleGenerateSummary(summaryGenerationMode)}
+                          className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                        >
+                          Generate summary
+                        </button>
+                      </div>
+                    )}
+
+                    {summaryGenerationError ? (
+                      <p className="text-xs text-red-300">{summaryGenerationError}</p>
+                    ) : null}
+
+                    <AnimatePresence>
+                      {generatedSummaryDraft ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
+                          className="rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/8 p-3 space-y-2"
+                        >
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[#16DB65]">AI Draft</p>
+                          <p className="text-sm text-white/95 leading-relaxed">{generatedSummaryDraft}</p>
+                          <div className="flex items-center justify-end gap-2 pt-1">
+                            <button
+                              onClick={() => void handleGenerateSummary(summaryGenerationMode)}
+                              className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
+                            >
+                              Regenerate
+                            </button>
+                            <button
+                              onClick={() => updatePersonalField('summary', generatedSummaryDraft)}
+                              className="rounded-md bg-[#16DB65] px-3 py-1.5 text-xs font-semibold text-[#052A14] hover:bg-[#2AEA7A]"
+                            >
+                              Accept summary
+                            </button>
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}
@@ -935,9 +1129,18 @@ export function ResumeBuilder() {
                          const globalIdx = globalBulletOffset + bulletIndex
                          const isHighlighted = highlightedBulletIndex === globalIdx
                          return (
-                         <div key={`${exp.id}-bullet-${bulletIndex}`} className="flex items-start gap-2">
+                         <motion.div
+                           key={`${exp.id}-bullet-${bulletIndex}`}
+                           initial={{ opacity: 0, y: 8 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           transition={{ duration: 0.2, ease: 'easeOut' }}
+                           className="flex items-start gap-2"
+                         >
                            <span className="pt-2 text-[#0A9548]">•</span>
                            <textarea
+                             ref={(node) => {
+                               bulletFieldRefs.current[getBulletFieldKey(exp.id, bulletIndex)] = node
+                             }}
                              data-bullet-global-index={globalIdx}
                              value={bullet}
                              onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
@@ -964,7 +1167,7 @@ export function ResumeBuilder() {
                                Del
                              </button>
                            </div>
-                         </div>
+                         </motion.div>
                        )
                        })}
                      </div>
