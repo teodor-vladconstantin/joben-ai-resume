@@ -126,6 +126,7 @@ export function ResumeBuilder() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
   const [highlightedBulletIndex, setHighlightedBulletIndex] = useState<number | null>(null)
+  const [fixBanner, setFixBanner] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -202,34 +203,56 @@ export function ResumeBuilder() {
   useEffect(() => {
     if (isLoading) return
 
+    const source = searchParams?.get('source')
+    if (source !== 'ai-review') return
+
+    // Banner for auto-fix or single fix
+    const fixesApplied = searchParams?.get('fixesApplied')
+    const fixApplied = searchParams?.get('fixApplied')
+    if (fixesApplied !== null) {
+      const count = parseInt(fixesApplied, 10)
+      setFixBanner(
+        count > 0
+          ? `AI a aplicat ${count} îmbunătățire${count === 1 ? '' : 'i'} CV-ului tău.`
+          : 'Auto-fix finalizat — nicio modificare necesară.'
+      )
+    } else if (fixApplied === 'true') {
+      setFixBanner('Fix aplicat cu succes.')
+    }
+
+    // Switch to correct tab
     const section = searchParams?.get('section')
-    const bulletIndexParam = searchParams?.get('bulletIndex')
-
-    if (!section) return
-
     const validTabs = ['personal', 'experience', 'education', 'skills', 'projects', 'certifications', 'sections']
-    if (validTabs.includes(section)) {
+    if (section && validTabs.includes(section)) {
       setActiveTab(section)
     }
 
-    if (bulletIndexParam !== null) {
-      const idx = parseInt(bulletIndexParam, 10)
-      if (!isNaN(idx) && idx >= 0) {
-        setHighlightedBulletIndex(idx)
+    // Precise highlight via experienceId + bulletIndex
+    const experienceId = searchParams?.get('experienceId')
+    const bulletIndexParam = searchParams?.get('bulletIndex')
+    if (experienceId && bulletIndexParam !== null) {
+      const bulletIndex = parseInt(bulletIndexParam, 10)
+      const expIdx = resumeData.experience.findIndex((e) => e.id === experienceId)
+      if (expIdx >= 0 && !isNaN(bulletIndex) && bulletIndex >= 0) {
+        const globalOffset = resumeData.experience
+          .slice(0, expIdx)
+          .reduce((sum, e) => sum + getExperienceBullets(e).length, 0)
+        const globalIdx = globalOffset + bulletIndex
+        setHighlightedBulletIndex(globalIdx)
 
         setTimeout(() => {
-          const el = document.querySelector<HTMLElement>(`[data-bullet-global-index="${idx}"]`)
+          const el = document.querySelector<HTMLElement>(`[data-bullet-global-index="${globalIdx}"]`)
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' })
             el.focus()
           }
         }, 150)
 
-        const clearTimer = setTimeout(() => setHighlightedBulletIndex(null), 3000)
+        const clearTimer = setTimeout(() => setHighlightedBulletIndex(null), 3500)
         return () => clearTimeout(clearTimer)
       }
     }
-  }, [isLoading, searchParams])
+  }, [isLoading, searchParams, resumeData.experience])
 
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
@@ -776,6 +799,18 @@ export function ResumeBuilder() {
           </div>
         </div>
         
+        {fixBanner ? (
+          <div className="shrink-0 mx-4 mt-3 rounded-xl border border-[#0A9548]/40 bg-[#0A9548]/10 px-4 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-sm text-[#16DB65] font-medium">{fixBanner}</p>
+            <button
+              onClick={() => setFixBanner(null)}
+              className="text-[#FFFFFF]/60 hover:text-white text-xs shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        ) : null}
+
         <div
           className="min-h-0 grow p-6 overflow-y-auto custom-scrollbar"
           suppressHydrationWarning
