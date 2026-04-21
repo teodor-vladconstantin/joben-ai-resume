@@ -8,7 +8,7 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
       {[
         { label: 'Resumes', count: stats.resumes.toString(), icon: FileText, href: '/resumes', color: 'text-[#0A9548]', bg: 'bg-[#0A9548]/10' },
         { label: 'Cover Letters', count: stats.coverLetters.toString(), icon: Mail, href: '/cover-letters', color: 'text-[#0A9548]', bg: 'bg-[#0A0F0D]' },
-        { label: 'Reviews', count: stats.aiReviews.toString(), icon: FileSearch, href: '/ai-review', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+        { label: 'Reviews', count: stats.aiReviews.toString(), icon: FileSearch, href: '/ai-review', color: 'text-[#16DB65]', bg: 'bg-[#0A9548]/12' },
         { label: 'Avg Score', count: `${stats.averageScore}/100`, icon: TrendingUp, href: '/ai-review', color: 'text-[#0A9548]', bg: 'bg-[#0A9548]/10' }
       ].map((stat, i) => (
         <Link key={i} href={stat.href} className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 hover:border-[#16DB65]/60 transition-colors group flex items-center justify-between" suppressHydrationWarning>
@@ -24,5 +24,6 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
     </div>
   )
 }
+
 
 

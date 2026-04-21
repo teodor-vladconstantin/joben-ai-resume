@@ -90,9 +90,9 @@ export default async function DashboardPage() {
                            <span className="text-[#FFFFFF]/82">{score}/{item.max}</span>
                          </div>
                          <div className="w-full bg-[#020202] rounded-full h-2 mb-1">
-                           <div className={`${isWarning ? 'bg-orange-500' : 'bg-[#16DB65]'} h-2 rounded-full`} style={{ width: `${(score/item.max)*100}%` }}></div>
+                           <div className={`${isWarning ? 'bg-[#16DB65]' : 'bg-[#16DB65]'} h-2 rounded-full`} style={{ width: `${(score/item.max)*100}%` }}></div>
                          </div>
-                           {isWarning && <p className="text-xs text-orange-500">Warning: Better match job keywords</p>}
+                           {isWarning && <p className="text-xs text-[#16DB65]">Warning: Better match job keywords</p>}
                        </div>
                      );
                    })}
@@ -160,5 +160,6 @@ export default async function DashboardPage() {
     </div>
   )
 }
+
 
 

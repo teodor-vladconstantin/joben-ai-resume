@@ -14,10 +14,10 @@ export function StanfordTemplate({ data }: StanfordTemplateProps) {
   return (
     <div className="p-12 text-black font-sans h-full">
       <div className="flex gap-5">
-        <div className="w-1 bg-blue-600 rounded"></div>
+        <div className="w-1 bg-[#0A9548] rounded"></div>
         <div className="flex-1">
           <h1 className="text-5xl font-black tracking-tight">{data.personal.firstName} {data.personal.lastName}</h1>
-          <h2 className="text-xl text-blue-700 font-semibold mt-1">{data.personal.title}</h2>
+          <h2 className="text-xl text-[#0A9548] font-semibold mt-1">{data.personal.title}</h2>
           <p className="text-sm text-gray-600 mt-3">{data.personal.email}  -  {data.personal.phone}</p>
         </div>
       </div>
@@ -56,4 +56,5 @@ export function StanfordTemplate({ data }: StanfordTemplateProps) {
     </div>
   )
 }
+
 

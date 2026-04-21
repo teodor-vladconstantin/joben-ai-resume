@@ -124,7 +124,7 @@ export default function CoverLettersPage() {
           ) : (
             <div className="divide-y divide-[#0A9548]">
               {visibleLetters.map((letter) => (
-                <div key={letter.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[#131f35] transition-colors">
+                <div key={letter.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[#0A0F0D] transition-colors">
                   <div className="min-w-0">
                     <p className="text-white font-semibold truncate">{letter.title || 'Untitled Cover Letter'}</p>
                     <p className="text-xs text-[#FFFFFF]/60">Updated {new Date(letter.updated_at).toLocaleDateString()}</p>
@@ -137,7 +137,7 @@ export default function CoverLettersPage() {
                     <button
                       onClick={() => handleDelete(letter.id)}
                       disabled={isPending}
-                      className="text-red-400 hover:text-red-300 disabled:opacity-50"
+                      className="text-[#16DB65] hover:text-[#16DB65] disabled:opacity-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -151,4 +151,5 @@ export default function CoverLettersPage() {
     </div>
   )
 }
+
 

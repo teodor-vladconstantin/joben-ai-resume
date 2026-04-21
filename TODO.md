@@ -38,6 +38,8 @@
 
 ## Done
 
+- [DONE] App-wide style refresh: futuristic green glassmorphism system + framer-motion polish + encoding cleanup (style-only)
+- [DONE] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [DONE] AI Summary generator + independent left panel scroll in resume builder
 - [DONE] PostHog setup alignment (Next.js instrumentation-client + session replay + env cleanup)
 - [DONE] Enabled unlimited PDF export copy consistency on landing and clarified localhost Clerk live-key domain constraint

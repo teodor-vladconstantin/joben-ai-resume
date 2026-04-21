@@ -43,7 +43,7 @@ export function UpgradeModal({
           <X className="h-4 w-4" />
         </button>
 
-        <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-400">
+        <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#16DB65]/35 bg-[#0A9548]/12 text-[#16DB65]">
           <Crown className="h-5 w-5" />
         </div>
 
@@ -76,5 +76,6 @@ export function UpgradeModal({
     </div>
   )
 }
+
 
 

@@ -47,16 +47,16 @@ function getResumeTitle(value: AnalyzerReview['resumes']) {
 
 function statusColor(status?: string) {
   if (status === 'good') return 'bg-[#0A9548]'
-  if (status === 'ok') return 'bg-[#f59e0b]'
-  return 'bg-[#ef4444]'
+  if (status === 'ok') return 'bg-[#16DB65]'
+  return 'bg-[#0A9548]'
 }
 
 function scoreColor(score: number) {
-  if (score >= 90) return '#3b82f6'
+  if (score >= 90) return '#16DB65'
   if (score >= 75) return '#0A9548'
-  if (score >= 65) return '#eab308'
-  if (score >= 50) return '#f97316'
-  return '#ef4444'
+  if (score >= 65) return '#0A9548'
+  if (score >= 50) return '#0A9548'
+  return '#0A9548'
 }
 
 type ResumeAnalyzerProps = {
@@ -100,7 +100,7 @@ export function ResumeAnalyzer({
 
   if (error) {
     return (
-      <div className="bg-[#0A0F0D] rounded-2xl border border-red-500/30 p-10 text-center text-red-300">
+      <div className="bg-[#0A0F0D] rounded-2xl border border-[#16DB65]/30 p-10 text-center text-[#16DB65]">
         {error}
       </div>
     )
@@ -159,7 +159,7 @@ export function ResumeAnalyzer({
               {comparison.delta === null ? (
                 <p className="mt-1 text-sm text-[#FFFFFF]/72">First review for this resume.</p>
               ) : (
-                <p className={`mt-1 text-sm font-semibold ${comparison.delta >= 0 ? 'text-[#16DB65]' : 'text-red-300'}`}>
+                <p className={`mt-1 text-sm font-semibold ${comparison.delta >= 0 ? 'text-[#16DB65]' : 'text-[#16DB65]'}`}>
                   {comparison.delta >= 0 ? '+' : ''}{comparison.delta} pts
                   <span className="ml-2 text-xs font-normal text-[#FFFFFF]/72">
                     (prev: {comparison.previousScore ?? 0})
@@ -183,7 +183,7 @@ export function ResumeAnalyzer({
               </button>
             )}
             {autoFixError ? (
-              <p className="mt-2 text-xs text-red-400">{autoFixError}</p>
+              <p className="mt-2 text-xs text-[#16DB65]">{autoFixError}</p>
             ) : null}
           </div>
         </div>
@@ -219,12 +219,12 @@ export function ResumeAnalyzer({
 
           {/* Priority Improvements */}
           <div className="mb-8">
-            <h3 className="text-[#ef4444] font-bold flex items-center gap-2 mb-4">
+            <h3 className="text-[#0A9548] font-bold flex items-center gap-2 mb-4">
               <XCircle className="w-5 h-5" /> Priority Improvements
             </h3>
             <div className="space-y-4">
               {improvements.length === 0 ? (
-                <div className="bg-[#0A0F0D] rounded-xl border border-red-500/20 p-4 text-sm text-[#FFFFFF]/72">
+                <div className="bg-[#0A0F0D] rounded-xl border border-[#16DB65]/20 p-4 text-sm text-[#FFFFFF]/72">
                   No improvement suggestions were returned.
                 </div>
               ) : (
@@ -236,13 +236,13 @@ export function ResumeAnalyzer({
                     <div
                       key={`${imp.issue || 'issue'}-${idx}`}
                       className={`bg-[#0A0F0D] rounded-xl border p-4 space-y-3 transition-colors ${
-                        isThisLoading ? 'border-[#0A9548]/40' : 'border-red-500/20'
+                        isThisLoading ? 'border-[#0A9548]/40' : 'border-[#16DB65]/20'
                       }`}
                     >
                       <p className="text-sm text-[#FFFFFF]/72">{imp.issue || 'Improve clarity and impact.'}</p>
                       <div>
                         <p className="text-sm text-[#FFFFFF]/82 mb-2">Current:</p>
-                        <p className="text-sm bg-red-500/10 text-red-200 border-l-2 border-red-500 px-3 py-2">
+                        <p className="text-sm bg-[#0A9548]/12 text-[#C8FFD9] border-l-2 border-[#16DB65] px-3 py-2">
                           {imp.weak_example || 'N/A'}
                         </p>
                       </div>
@@ -261,7 +261,7 @@ export function ResumeAnalyzer({
                         ) : (
                           <>
                             {thisError ? (
-                              <p className="text-xs text-red-400 mb-2">{thisError}</p>
+                              <p className="text-xs text-[#16DB65] mb-2">{thisError}</p>
                             ) : null}
                             {onApplyFix ? (
                               <button
@@ -305,13 +305,13 @@ export function ResumeAnalyzer({
           {/* Category Insights */}
           {categories.some((c) => c.feedback) ? (
             <div className="mt-8">
-              <h3 className="text-[#f59e0b] font-bold flex items-center gap-2 mb-4">
+              <h3 className="text-[#16DB65] font-bold flex items-center gap-2 mb-4">
                 <AlertTriangle className="w-5 h-5" /> Category Insights
               </h3>
               <div className="space-y-3">
                 {categories.map((c, idx) =>
                   c.feedback ? (
-                    <div key={`${c.label || 'insight'}-${idx}`} className="bg-[#0A0F0D] rounded-xl border border-orange-500/20 p-4">
+                    <div key={`${c.label || 'insight'}-${idx}`} className="bg-[#0A0F0D] rounded-xl border border-[#16DB65]/25 p-4">
                       <p className="text-white font-medium mb-1">{c.label || 'Category'}</p>
                       <p className="text-sm text-[#FFFFFF]/72">{c.feedback}</p>
                     </div>
@@ -325,3 +325,4 @@ export function ResumeAnalyzer({
     </div>
   )
 }
+

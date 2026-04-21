@@ -62,7 +62,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           <Target className="text-[#0A9548] w-5 h-5" /> Weekly Goals
         </h3>
         <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-          streak > 0 ? 'bg-orange-500/10 text-orange-500' : 'bg-white/5 text-white/40'
+          streak > 0 ? 'bg-[#16DB65]/10 text-[#16DB65]' : 'bg-white/5 text-white/40'
         }`}>
           <Flame className="w-4 h-4" />
           {streak} {streak === 1 ? 'day' : 'days'}
@@ -98,10 +98,11 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           {goalsCompleted === 3
             ? 'All goals done! Keep it up!'
             : goalsCompleted > 0
-            ? 'Keep going — you\'re on track!'
+            ? 'Keep going - you\'re on track!'
             : 'Start your streak today!'}
         </p>
       </div>
     </div>
   )
 }
+

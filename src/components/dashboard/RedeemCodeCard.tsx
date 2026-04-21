@@ -105,7 +105,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       </div>
 
       {errorMessage ? (
-        <p className="mt-3 text-sm text-red-400">{errorMessage}</p>
+        <p className="mt-3 text-sm text-[#16DB65]">{errorMessage}</p>
       ) : null}
 
       {successMessage ? (
@@ -114,3 +114,4 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
     </div>
   )
 }
+

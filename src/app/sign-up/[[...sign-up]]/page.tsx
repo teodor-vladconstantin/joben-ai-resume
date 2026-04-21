@@ -89,7 +89,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
             </label>
 
             {showLegalError ? (
-              <p className="text-sm text-red-400">You must accept the terms and privacy policy to continue.</p>
+              <p className="text-sm text-[#16DB65]">You must accept the terms and privacy policy to continue.</p>
             ) : null}
 
             <button
