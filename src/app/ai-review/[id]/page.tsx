@@ -4,6 +4,17 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
+import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
+
+const SESSION_KEY = 'ai-fix-patches'
+
+function storePatches(patches: FixPatchWithContext[]) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(patches))
+  } catch {
+    // sessionStorage unavailable — silent fail, modal just won't show
+  }
+}
 
 export default function AIReviewEditorPage() {
   const params = useParams<{ id: string }>()
@@ -18,11 +29,9 @@ export default function AIReviewEditorPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Per-improvement state
   const [loadingImprovementIndex, setLoadingImprovementIndex] = useState<number | null>(null)
   const [fixErrors, setFixErrors] = useState<Record<number, string>>({})
 
-  // Auto-fix state
   const [isSavingAutoFix, setIsSavingAutoFix] = useState(false)
   const [autoFixError, setAutoFixError] = useState('')
 
@@ -31,29 +40,18 @@ export default function AIReviewEditorPage() {
 
     async function loadReview() {
       const id = params?.id
-      if (!id) {
-        setError('Missing review id')
-        setIsLoading(false)
-        return
-      }
+      if (!id) { setError('Missing review id'); setIsLoading(false); return }
 
       const response = await fetch(`/api/ai-reviews/${id}`, { cache: 'no-store' })
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        if (!cancelled) {
-          setError(payload.error || 'Failed to load review')
-          setIsLoading(false)
-        }
+        if (!cancelled) { setError(payload.error || 'Failed to load review'); setIsLoading(false) }
         return
       }
 
       const payload = (await response.json()) as {
         review?: AnalyzerReview
-        comparison?: {
-          previousScore: number | null
-          previousReviewId: string | null
-          delta: number | null
-        } | null
+        comparison?: { previousScore: number | null; previousReviewId: string | null; delta: number | null } | null
       }
 
       if (!cancelled) {
@@ -71,24 +69,18 @@ export default function AIReviewEditorPage() {
   const reviewId = Array.isArray(rawReviewId) ? (rawReviewId[0] || '') : (rawReviewId || '')
   const resumeId = review?.resume_id || null
 
-  function builderUrl(params: Record<string, string>): string {
+  function builderUrl(extra: Record<string, string> = {}): string {
     if (!resumeId) return ''
-    const base = `/resumes/${resumeId}`
-    const query = new URLSearchParams({ source: 'ai-review', reviewId, ...params })
-    return `${base}?${query.toString()}`
+    const q = new URLSearchParams({ source: 'ai-review', reviewId, ...extra })
+    return `/resumes/${resumeId}?${q.toString()}`
   }
 
   const handleApplyFix = async (improvementIndex: number) => {
     if (!resumeId || !reviewId) return
-    const improvements = review?.feedback?.improvements || []
-    const improvement: Improvement = improvements[improvementIndex] || {}
+    const improvement: Improvement = (review?.feedback?.improvements || [])[improvementIndex] || {}
 
     setLoadingImprovementIndex(improvementIndex)
-    setFixErrors((prev) => {
-      const next = { ...prev }
-      delete next[improvementIndex]
-      return next
-    })
+    setFixErrors((prev) => { const next = { ...prev }; delete next[improvementIndex]; return next })
 
     try {
       const res = await fetch('/api/apply-fix', {
@@ -102,18 +94,27 @@ export default function AIReviewEditorPage() {
         applied?: boolean
         experienceId?: string
         bulletIndex?: number
-        limitType?: string
+        originalBullet?: string
+        updatedBullet?: string
+        experienceTitle?: string
+        company?: string
       }
 
       if (!res.ok || !payload.applied) {
-        setFixErrors((prev) => ({
-          ...prev,
-          [improvementIndex]: payload.error || 'Could not apply this fix. Try again.',
-        }))
+        setFixErrors((prev) => ({ ...prev, [improvementIndex]: payload.error || 'Could not apply this fix. Try again.' }))
         return
       }
 
-      // Navigate to builder, land on the fixed bullet
+      // Store before/after for modal in builder
+      storePatches([{
+        experienceId: payload.experienceId!,
+        bulletIndex: payload.bulletIndex!,
+        originalBullet: payload.originalBullet || '',
+        updatedBullet: payload.updatedBullet!,
+        experienceTitle: payload.experienceTitle || '',
+        company: payload.company || '',
+      }])
+
       const url = builderUrl({
         fixApplied: 'true',
         ...(payload.experienceId ? { experienceId: payload.experienceId } : {}),
@@ -121,10 +122,7 @@ export default function AIReviewEditorPage() {
       })
       if (url) router.push(url)
     } catch {
-      setFixErrors((prev) => ({
-        ...prev,
-        [improvementIndex]: 'Network error. Please retry.',
-      }))
+      setFixErrors((prev) => ({ ...prev, [improvementIndex]: 'Network error. Please retry.' }))
     } finally {
       setLoadingImprovementIndex(null)
     }
@@ -148,6 +146,7 @@ export default function AIReviewEditorPage() {
       const payload = (await res.json()) as {
         error?: string
         fixesApplied?: number
+        patches?: FixPatchWithContext[]
       }
 
       if (!res.ok) {
@@ -155,17 +154,17 @@ export default function AIReviewEditorPage() {
         return
       }
 
-      const count = payload.fixesApplied ?? 0
-      const url = builderUrl({ fixesApplied: String(count) })
-      if (url) router.push(url)
+      if (Array.isArray(payload.patches) && payload.patches.length > 0) {
+        storePatches(payload.patches)
+      }
+
+      router.push(builderUrl({ fixesApplied: String(payload.fixesApplied ?? 0) }))
     } catch {
       setAutoFixError('Network error. Please retry.')
     } finally {
       setIsSavingAutoFix(false)
     }
   }
-
-  const canApplyFixes = Boolean(reviewId && resumeId)
 
   return (
     <div className="min-h-screen flex flex-col bg-[#020202]">
@@ -176,7 +175,7 @@ export default function AIReviewEditorPage() {
           comparison={comparison}
           isLoading={isLoading}
           error={error}
-          canApplyFixes={canApplyFixes}
+          canApplyFixes={Boolean(reviewId && resumeId)}
           isSavingAutoFix={isSavingAutoFix}
           autoFixError={autoFixError}
           loadingImprovementIndex={loadingImprovementIndex}

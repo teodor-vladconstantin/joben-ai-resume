@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react'
 type AILoadingStage = 'analyzing' | 'generating' | 'saving'
 
 const STAGE_MESSAGES: Record<AILoadingStage, string> = {
-  analyzing: 'Analizăm CV-ul tău...',
-  generating: 'Generăm sugestii...',
-  saving: 'Salvăm analiza...',
+  analyzing: 'Analyzing your resume...',
+  generating: 'Generating suggestions...',
+  saving: 'Saving analysis...',
 }
 
 interface AILoadingStateProps {
