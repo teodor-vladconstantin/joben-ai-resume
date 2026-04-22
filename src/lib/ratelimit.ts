@@ -75,15 +75,15 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     cvs: 3,
   },
   recruiting: {
-    tokenBudget: null,
+    tokenBudget: 3_000_000,
     hardCapTokens: 7_500_000,
     maxInputTokensPerCall: 8_000,
     maxOutputTokensPerCall: 2_000,
     maxRawChars: 32_000,
-    covers: null,
-    jds: null,
-    bullets: null,
-    cvs: null,
+    covers: 300,
+    jds: 300,
+    bullets: 1_000,
+    cvs: 15,
   },
 }
 

@@ -77,11 +77,15 @@ async function createMessage(
     maxTokens: number
   }
 ): Promise<Message> {
+  const system = input.system
+    ? [{ type: 'text' as const, text: input.system, cache_control: { type: 'ephemeral' as const } }]
+    : undefined
+
   return anthropic.messages.create({
     model,
     max_tokens: input.maxTokens,
     temperature: 0.2,
-    system: input.system,
+    system,
     stream: false,
     messages: input.messages,
   })
