@@ -98,7 +98,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           {goalsCompleted === 3
             ? 'All goals done! Keep it up!'
             : goalsCompleted > 0
-            ? 'Keep going â€” you\'re on track!'
+            ? 'Keep going — you\'re on track!'
             : 'Start your streak today!'}
         </p>
       </div>

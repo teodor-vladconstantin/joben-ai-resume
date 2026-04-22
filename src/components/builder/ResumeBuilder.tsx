@@ -255,7 +255,7 @@ export function ResumeBuilder() {
       setFixBanner(
         count > 0
           ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
-          : 'Auto-fix complete â€” no changes needed.'
+          : 'Auto-fix complete — no changes needed.'
       )
     } else if (fixApplied === 'true') {
       setFixBanner('Fix applied successfully.')
@@ -1201,7 +1201,7 @@ export function ResumeBuilder() {
                              transition={{ duration: 0.2, ease: 'easeOut' }}
                              className="flex items-start gap-2"
                            >
-                             <span className="pt-2 text-[#0A9548]">â€¢</span>
+                             <span className="pt-2 text-[#0A9548]">•</span>
                              <textarea
                                ref={(node) => {
                                  bulletFieldRefs.current[draftKey] = node
