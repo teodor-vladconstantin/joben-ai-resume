@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
@@ -24,12 +25,19 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#020202]/70 backdrop-blur-xl">
+    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#020202]/90 backdrop-blur-md">
       <section className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <section className="flex items-center space-x-8">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-tr from-[#16DB65] via-[#0A9548] to-[#04471C] text-sm font-bold text-white shadow-lg shadow-[#0A9548]/30">
-              J
+            <span className="relative h-8 w-8 overflow-hidden rounded-lg shadow-lg shadow-[#0A9548]/25">
+              <Image
+                src="/jobeneu_logo.jpg"
+                alt="Joben logo"
+                fill
+                sizes="32px"
+                className="object-cover"
+                priority
+              />
             </span>
             <span className="text-2xl font-bold tracking-tight text-white">Joben</span>
           </Link>
@@ -39,7 +47,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-[#FFFFFF]/75 transition-colors hover:bg-white/10 hover:text-[#FFFFFF]"
+                className="rounded-md px-3 py-2 text-sm font-medium text-[#FFFFFF]/75 transition-colors hover:bg-[#0A0F0D] hover:text-[#FFFFFF]"
               >
                 {link.label}
               </Link>
@@ -54,7 +62,7 @@ export function Navbar() {
                 Log in
               </Link>
               <AuthAwareSignupLink
-                className="rounded-md bg-linear-to-r from-[#16DB65] via-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Get Started Free
               </AuthAwareSignupLink>
@@ -65,7 +73,7 @@ export function Navbar() {
             <>
               <Link
                 href="/resumes/new"
-                className="hidden items-center space-x-1 rounded-md bg-linear-to-r from-[#16DB65] via-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
+                className="hidden items-center space-x-1 rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
               >
                 <Plus className="h-4 w-4" />
                 <span>Create New</span>

@@ -395,7 +395,7 @@ export default function AIReviewPage() {
                       {scoreHistory.length > 1 ? (
                         <>
                           <TrendingUp className="w-3 h-3 text-[#0A9548] shrink-0" />
-                          {scoreHistory.join(' -> ')}
+                          {scoreHistory.join(' â†’ ')}
                         </>
                       ) : (
                         `Score ${scoreHistory[0] ?? 0}`

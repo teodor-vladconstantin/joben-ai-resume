@@ -5,6 +5,10 @@ export type ResumePersonal = {
   email: string
   phone: string
   summary: string
+  location?: string
+  linkedin?: string
+  github?: string
+  website?: string
 }
 
 export type ResumeExperience = {

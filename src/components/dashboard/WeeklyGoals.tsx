@@ -74,7 +74,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           <div key={i}>
             <div className="flex justify-between items-center mb-1.5">
               <span className={`text-sm ${goal.done ? 'text-[#16DB65]' : 'text-white/70'}`}>
-                {goal.done ? '✓ ' : ''}{goal.label}
+                {goal.done ? 'âœ“ ' : ''}{goal.label}
               </span>
               <span className="text-white/50 text-xs">
                 {Math.min(goal.current, goal.target)}/{goal.target}
@@ -98,7 +98,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           {goalsCompleted === 3
             ? 'All goals done! Keep it up!'
             : goalsCompleted > 0
-            ? 'Keep going - you\'re on track!'
+            ? 'Keep going â€” you\'re on track!'
             : 'Start your streak today!'}
         </p>
       </div>

@@ -255,7 +255,7 @@ export function ResumeBuilder() {
       setFixBanner(
         count > 0
           ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
-          : 'Auto-fix complete - no changes needed.'
+          : 'Auto-fix complete â€” no changes needed.'
       )
     } else if (fixApplied === 'true') {
       setFixBanner('Fix applied successfully.')
@@ -976,7 +976,7 @@ export function ResumeBuilder() {
               onClick={() => setFixBanner(null)}
               className="text-[#FFFFFF]/60 hover:text-white text-xs shrink-0"
             >
-              x
+              âœ•
             </button>
           </div>
         ) : null}
@@ -1201,7 +1201,7 @@ export function ResumeBuilder() {
                              transition={{ duration: 0.2, ease: 'easeOut' }}
                              className="flex items-start gap-2"
                            >
-                             <span className="pt-2 text-[#0A9548]">•</span>
+                             <span className="pt-2 text-[#0A9548]">â€¢</span>
                              <textarea
                                ref={(node) => {
                                  bulletFieldRefs.current[draftKey] = node
@@ -1234,7 +1234,7 @@ export function ResumeBuilder() {
                              </div>
                            </motion.div>
 
-                           <p className="pl-5 text-[11px] text-[#7CFFB2]/90">
+                           <p className="pl-5 text-[11px] text-amber-300/90">
                              AI Draft and Regenerate each consume 1 bullet rewrite credit.
                            </p>
 
@@ -1259,7 +1259,7 @@ export function ResumeBuilder() {
                                >
                                  <div className="flex items-center justify-between gap-2">
                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#16DB65]">AI Draft</p>
-                                   <p className="text-[11px] text-[#7CFFB2]/90">Regenerate uses 1 credit</p>
+                                   <p className="text-[11px] text-amber-300/90">Regenerate uses 1 credit</p>
                                  </div>
                                  <p className="text-sm text-white/95 leading-relaxed">{draftState?.draft}</p>
                                  <div className="flex items-center justify-end gap-2 pt-1">

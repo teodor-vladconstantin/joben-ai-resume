@@ -1,6 +1,9 @@
 ## Active
 
+- [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
+- [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interests/references/associations), 25 tests passing
 - [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
+- [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [ ] Apply supabase migration: 20260421000000_add_resume_analyses_table.sql (run `npx supabase db push` or apply in Supabase dashboard)
 - [DONE] Live AI Auto-Fix + Apply this fix: /api/apply-fix and /api/auto-fix routes with Claude, per-improvement loading states, builder banner + highlight
 - [DONE] Before/After modal in builder showing every change made by auto-fix/apply-fix (Before red / After green), sessionStorage bridge from review page
@@ -38,8 +41,6 @@
 
 ## Done
 
-- [DONE] App-wide style refresh: futuristic green glassmorphism system + framer-motion polish + encoding cleanup (style-only)
-- [DONE] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [DONE] AI Summary generator + independent left panel scroll in resume builder
 - [DONE] PostHog setup alignment (Next.js instrumentation-client + session replay + env cleanup)
 - [DONE] Enabled unlimited PDF export copy consistency on landing and clarified localhost Clerk live-key domain constraint
