@@ -252,7 +252,6 @@ export default function Home() {
             <Link href="/terms" className="hover:text-[#16DB65]">Terms & Conditions</Link>
             <Link href="/privacy" className="hover:text-[#16DB65]">Privacy Policy</Link>
           </div>
-          <p className="mt-12 text-sm text-white/50 font-medium tracking-wide">{footerContent.creatorCredit}</p>
         </div>
       </footer>
     </div>
