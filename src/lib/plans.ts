@@ -72,7 +72,7 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     resumeAnalysisAccess: true,
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
-    maxResumes: null,
+    maxResumes: 15,
     maxResumeExports: null,
     priorityEmailSupport: true,
     fullTemplateLibrary: true,
