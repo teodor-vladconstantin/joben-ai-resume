@@ -53,14 +53,14 @@ const FLAG_ORDER: FlagType[] = ['covers', 'jds', 'bullets', 'cvs', 'tokens', 'ha
 
 const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   free: {
-    tokenBudget: 60_000,
+    tokenBudget: 80_000,
     hardCapTokens: 1_500_000,
     maxInputTokensPerCall: 8_000,
     maxOutputTokensPerCall: 2_000,
     maxRawChars: 32_000,
-    covers: 5,
-    jds: 5,
-    bullets: 30,
+    covers: 10,
+    jds: 10,
+    bullets: 15,
     cvs: 1,
   },
   pro: {
