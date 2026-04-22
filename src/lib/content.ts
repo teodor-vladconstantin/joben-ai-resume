@@ -57,9 +57,9 @@ export const pricingPlans = [
       "Manual resume builder",
       "Save 1 CV",
       "Unlimited PDF exports",
-      "5 AI cover letters / month",
-      "5 resume-tailoring runs (CV vs JD) / month",
-      "30 AI bullet rewrites / month",
+      "10 AI cover letters / month",
+      "10 resume-tailoring runs (CV vs JD) / month",
+      "15 AI bullet rewrites / month",
       "1 basic ATS-optimized template",
     ],
     excludedFeatures: [
@@ -114,7 +114,7 @@ export const faqItems = [
   {
     question: "Is Joben really free to start?",
     answer:
-      "Yes. Free includes 1 saved CV, unlimited PDF exports, 5 cover letters/month, 5 CV-tailoring runs/month, and 30 bullet rewrites/month.",
+      "Yes. Free includes 1 saved CV, unlimited PDF exports, 10 cover letters/month, 10 CV-tailoring runs/month, and 15 bullet rewrites/month.",
   },
   {
     question: "What do I get with Pro?",
