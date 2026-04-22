@@ -18,7 +18,7 @@ export default function Home() {
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>
         {/* HERO SECTION */}
-        <section className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
+        <section id="builder" className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
           <div className="absolute inset-0 -z-10 flex items-center justify-center" suppressHydrationWarning>
             <div className="w-150 h-150 bg-[#0A9548]/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
             <div className="w-100 h-100 bg-[#16DB65]/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
@@ -67,7 +67,7 @@ export default function Home() {
         </section>
 
         {/* ATS PREVIEW SECTION */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <section id="analysis" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
           <div className="text-center mb-12" suppressHydrationWarning>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{atsPreviewContent.heading}</h2>
             <p className="text-white/72 max-w-2xl mx-auto">{atsPreviewContent.subheading}</p>
