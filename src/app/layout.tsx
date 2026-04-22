@@ -1,20 +1,25 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
-import { Space_Grotesk } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
 import { PostHogProvider } from '@/components/PostHogProvider'
 
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' })
+const inter = Inter({ subsets: ['latin'] })
 
 validateEnv()
 
 export const metadata: Metadata = {
   title: 'Joben | ATS-Optimized AI Resume Builder',
   description: 'The Only Free AI Resume Builder You\'ll Ever Need.',
+  icons: {
+    icon: '/jobeneu_logo.jpg',
+    shortcut: '/jobeneu_logo.jpg',
+    apple: '/jobeneu_logo.jpg',
+  },
 }
 
 const stripInjectedAttrScript = `(function () {
@@ -75,7 +80,7 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${spaceGrotesk.variable} theme-glass bg-(--background) text-(--foreground) min-h-screen flex flex-col antialiased`} suppressHydrationWarning>
+        <body className={`${inter.className} bg-(--background) text-(--foreground) min-h-screen flex flex-col`} suppressHydrationWarning>
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"

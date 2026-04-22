@@ -51,7 +51,7 @@ export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
               {(patch.experienceTitle || patch.company) && (
                 <div className="px-4 py-2 bg-white/5 border-b border-white/10">
                   <p className="text-xs font-medium text-[#FFFFFF]/60">
-                    {[patch.experienceTitle, patch.company].filter(Boolean).join(' · ')}
+                    {[patch.experienceTitle, patch.company].filter(Boolean).join(' Â· ')}
                   </p>
                 </div>
               )}
