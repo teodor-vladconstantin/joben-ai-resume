@@ -35,10 +35,6 @@ type LatexResumeData = {
   dynamicSections?: LatexDynamicSection[]
 }
 
-type LatexRenderOptions = {
-  watermarkText?: string
-}
-
 const MAX_EXPORT_PAYLOAD_CHARS = 250_000
 
 function normalizeLatexText(text: string | undefined): string {
@@ -100,18 +96,8 @@ function extractSafeBullets(exp: LatexExperienceEntry): string[] {
   return fallback ? [fallback] : []
 }
 
-function generateLatex(data: LatexResumeData, options: LatexRenderOptions = {}): string {
+function generateLatex(data: LatexResumeData): string {
   const { personal, experience, dynamicSections = [] } = data
-  const watermarkText = clampLatexText(options.watermarkText, 60)
-  const watermarkBlock = watermarkText
-    ? String.raw`
-\AddToShipoutPictureBG{
-  \AtPageLowerLeft{
-    \makebox(\paperwidth,0)[r]{\raisebox{1.2cm}{\textcolor[gray]{0.92}{\fontsize{10}{10}\selectfont ${escapeLatex(watermarkText)}}}}
-  }
-}
-`
-    : ''
 
   const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
   const contactParts = [
@@ -138,8 +124,6 @@ function generateLatex(data: LatexResumeData, options: LatexRenderOptions = {}):
 \usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
-\usepackage{graphicx}
-\usepackage{eso-pic}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -181,7 +165,6 @@ function generateLatex(data: LatexResumeData, options: LatexRenderOptions = {}):
 }
 
 \begin{document}
-${watermarkBlock}
 
 %----------HEADING-----------------
 \begin{center}
@@ -303,9 +286,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const texStr = generateLatex(data, {
-      watermarkText: plan === 'free' ? 'Joben' : undefined,
-    })
+    const texStr = generateLatex(data)
 
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
