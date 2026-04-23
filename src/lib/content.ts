@@ -1,13 +1,13 @@
 export const siteConfig = {
   name: "Joben",
-  description: "The Only Free AI Resume Builder You'll Ever Need. Build ATS-optimized resumes that pass the screen and get you the interview. Powered by advanced AI to perfectly tailor your experience.",
-  url: "https://joben.ai",
+  description: "Joben is the only free AI resume builder you'll ever need. Build ATS-optimized resumes and cover letters that pass the screen and get you the interview. Powered by advanced generative AI.",
+  url: "https://joben.eu",
 };
 
 export const heroContent = {
-  heading: "The Only Free AI Resume Builder You'll Ever Need",
-  subheading: "Build ATS-optimized resumes that pass the screen and get you the interview. Powered by advanced AI to perfectly tailor your experience.",
-  cta: "Get Started Free",
+  heading: "Your Resume Is Getting Rejected Before a Human Ever Reads It.",
+  subheading: "75% of applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
+  cta: "Check My ATS Score. It's Free",
   features: [
     { text: "No credit card required", icon: "CheckCircle2" },
     { text: "Free forever", icon: "CheckCircle2" },
@@ -56,10 +56,11 @@ export const pricingPlans = [
     features: [
       "Manual resume builder",
       "Save 1 CV",
-      "Unlimited PDF exports",
-      "10 AI cover letters / month",
-      "10 resume-tailoring runs (CV vs JD) / month",
+      "5 PDF exports",
+      "3 AI cover letters / month",
+      "3 resume-tailoring runs (CV vs JD) / month",
       "15 AI bullet rewrites / month",
+      "Subtle Joben watermark on exported pages",
       "1 basic ATS-optimized template",
     ],
     excludedFeatures: [
@@ -114,7 +115,7 @@ export const faqItems = [
   {
     question: "Is Joben really free to start?",
     answer:
-      "Yes. Free includes 1 saved CV, unlimited PDF exports, 10 cover letters/month, 10 CV-tailoring runs/month, and 15 bullet rewrites/month.",
+      "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month.",
   },
   {
     question: "What do I get with Pro?",

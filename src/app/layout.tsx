@@ -13,12 +13,42 @@ const inter = Inter({ subsets: ['latin'] })
 validateEnv()
 
 export const metadata: Metadata = {
-  title: 'Joben | ATS-Optimized AI Resume Builder',
-  description: 'The Only Free AI Resume Builder You\'ll Ever Need.',
+  metadataBase: new URL('https://joben.eu'),
+  title: 'Joben | Best Free AI Resume Builder for ATS Optimization',
+  description: 'Joben is a free AI resume builder that helps you create ATS-optimized resumes and cover letters in minutes. Pass resume screeners and get more interviews with our proven templates.',
+  keywords: ['AI resume builder', 'free resume maker', 'ATS resume format', 'CV builder', 'joben', 'resume templates', 'best AI resume builder'],
+  authors: [{ name: 'Joben' }],
+  creator: 'Joben',
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: '/jobeneu_logo.jpg',
     shortcut: '/jobeneu_logo.jpg',
     apple: '/jobeneu_logo.jpg',
+  },
+  openGraph: {
+    title: 'Joben | Best Free AI Resume Builder for ATS Optimization',
+    description: 'Joben is a free AI resume builder that helps you create ATS-optimized resumes and cover letters in minutes. Pass resume screeners and get more interviews with our proven templates.',
+    url: '/',
+    siteName: 'Joben',
+    images: [
+      {
+        url: '/jobeneu_logo.jpg', // Fallback, recommend adding a proper 1200x630 og-image.jpg
+        width: 800,
+        height: 600,
+        alt: 'Joben AI Resume Builder',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Joben | Best Free AI Resume Builder for ATS Optimization',
+    description: 'Joben is a free AI resume builder that helps you create ATS-optimized resumes and cover letters in minutes. Pass resume screeners and get more interviews with our proven templates.',
+    creator: '@joben_ai',
+    images: ['/jobeneu_logo.jpg'], // Fallback
   },
 }
 
@@ -85,6 +115,31 @@ export default function RootLayout({
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: stripInjectedAttrScript }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@graph': [
+                  {
+                    '@type': 'WebSite',
+                    '@id': 'https://joben.eu/#website',
+                    url: 'https://joben.eu/',
+                    name: 'Joben',
+                    description: 'Best Free AI Resume Builder for ATS Optimization',
+                    publisher: {
+                      '@type': 'Organization',
+                      name: 'Joben',
+                      logo: {
+                        '@type': 'ImageObject',
+                        url: 'https://joben.eu/jobeneu_logo.jpg'
+                      }
+                    }
+                  }
+                ]
+              })
+            }}
           />
           <PostHogProvider>
             {children}

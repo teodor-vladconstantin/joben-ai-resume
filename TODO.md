@@ -1,6 +1,7 @@
 ## Active
 
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
+- [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
 - [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interests/references/associations), 25 tests passing
 - [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
