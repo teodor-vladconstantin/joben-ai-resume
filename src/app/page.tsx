@@ -12,8 +12,51 @@ const icons: { [key: string]: React.ElementType } = {
 };
 
 export default function Home() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://joben.eu/'
+          }
+        ]
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Joben',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Any',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="flex flex-col min-h-screen" suppressHydrationWarning>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>
@@ -25,7 +68,7 @@ export default function Home() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white max-w-4xl mx-auto leading-tight"
-              dangerouslySetInnerHTML={{ __html: heroContent.heading.replace("AI Resume Builder", `<span class="text-transparent bg-clip-text bg-linear-to-r from-[#0A9548] to-[#04471C] underline decoration-[#0A9548]/35 underline-offset-8">AI Resume Builder</span>`) }}
+              dangerouslySetInnerHTML={{ __html: heroContent.heading.replace("Before a Human Ever Reads It.", `<span class="text-transparent bg-clip-text bg-linear-to-r from-[#0A9548] to-[#16DB65] underline decoration-[#0A9548]/35 underline-offset-8">Before a Human Ever Reads It.</span>`) }}
           />
           
           <p className="text-xl text-white/72 mb-10 max-w-2xl mx-auto">
@@ -50,6 +93,7 @@ export default function Home() {
           </div>
 
           {/* STAT CARDS */}
+          <h2 className="sr-only">Platform Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 text-left" suppressHydrationWarning>
             {statCards.map((card, index) => {
               const Icon = icons[card.icon];

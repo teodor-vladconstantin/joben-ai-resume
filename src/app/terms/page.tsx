@@ -1,5 +1,14 @@
 import Link from 'next/link'
 import { Navbar } from '@/components/ui/Navbar'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Terms and Conditions | Joben AI Resume Builder',
+  description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
+  alternates: {
+    canonical: '/terms',
+  },
+}
 
 const lastUpdated = 'April 20, 2026'
 

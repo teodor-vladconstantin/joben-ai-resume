@@ -47,7 +47,7 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
     maxResumes: 1,
-    maxResumeExports: null,
+    maxResumeExports: 5,
     priorityEmailSupport: false,
     fullTemplateLibrary: false,
   },
@@ -264,8 +264,9 @@ export async function checkResumeExportQuota(
   }
 
   if (used >= limit) {
+    const exportNoun = limit === 1 ? 'resume export' : 'resume exports'
     return deniedQuota(
-      `Free plan includes ${limit} resume export. Upgrade to Pro for unlimited exports.`,
+      `Free plan includes ${limit} ${exportNoun}. Upgrade to Pro for unlimited exports.`,
       limit,
       used
     )
