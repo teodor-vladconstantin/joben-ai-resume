@@ -60,7 +60,6 @@ export const pricingPlans = [
       "3 AI cover letters / month",
       "3 resume-tailoring runs (CV vs JD) / month",
       "15 AI bullet rewrites / month",
-      "Subtle Joben watermark on exported pages",
       "1 basic ATS-optimized template",
     ],
     excludedFeatures: [
