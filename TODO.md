@@ -42,6 +42,7 @@
 
 ## Done
 
+- [DONE] Maximized upload resume parser accuracy (two-column reconstruction, combined role/company/date lines, wrapped bullets, numeric date ranges) + added regression tests
 - [DONE] AI Summary generator + independent left panel scroll in resume builder
 - [DONE] PostHog setup alignment (Next.js instrumentation-client + session replay + env cleanup)
 - [DONE] Enabled unlimited PDF export copy consistency on landing and clarified localhost Clerk live-key domain constraint
@@ -100,3 +101,5 @@
 - [DONE] Improve PDF experience parsing into separate jobs and bullet points
 
 
+-   [ x ]   R e p l a c e   T y p e S c r i p t   r e s u m e   p a r s e r   w i t h   P y t h o n   m i c r o s e r v i c e   ( p d f p l u m b e r   +   s p a C y   +   r e g e x )   a n d   d e p l o y   t o   H e t z n e r  
+ 

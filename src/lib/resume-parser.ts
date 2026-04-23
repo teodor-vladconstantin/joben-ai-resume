@@ -20,19 +20,57 @@ export function reconstructLines(items: TextItem[]): string[] {
   // Sort by y descending (top of page first), then x ascending
   const sorted = [...items].sort((a, b) => b.y - a.y || a.x - b.x)
 
-  const lines: { y: number; parts: string[] }[] = []
+  const lines: { y: number; parts: TextItem[] }[] = []
   for (const item of sorted) {
     if (!item.str.trim()) continue
     const last = lines[lines.length - 1]
     // Items within 4 units of y are considered the same line
     if (last && Math.abs(last.y - item.y) < 4) {
-      last.parts.push(item.str)
+      last.parts.push(item)
     } else {
-      lines.push({ y: item.y, parts: [item.str] })
+      lines.push({ y: item.y, parts: [item] })
     }
   }
 
-  return lines.map((l) => l.parts.join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean)
+  const reconstructed: string[] = []
+
+  for (const line of lines) {
+    const byX = [...line.parts].sort((a, b) => a.x - b.x)
+    if (byX.length === 0) continue
+
+    // PDFs with two columns often place unrelated text on the same y-coordinate.
+    // Split very large horizontal gaps into separate logical lines.
+    const clusters: TextItem[][] = []
+    let currentCluster: TextItem[] = [byX[0]!]
+
+    for (let i = 1; i < byX.length; i += 1) {
+      const prev = byX[i - 1]!
+      const next = byX[i]!
+      const gap = next.x - prev.x
+
+      // 120 is a conservative threshold that avoids over-splitting normal text,
+      // while handling common two-column CV layouts.
+      if (gap > 120) {
+        clusters.push(currentCluster)
+        currentCluster = [next]
+      } else {
+        currentCluster.push(next)
+      }
+    }
+
+    clusters.push(currentCluster)
+
+    for (const cluster of clusters) {
+      const text = cluster
+        .map((item) => item.str)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+      if (text) reconstructed.push(text)
+    }
+  }
+
+  return reconstructed
 }
 
 // ─── Regex constants ──────────────────────────────────────────────────────────
@@ -63,16 +101,19 @@ const MONTH_RE_PART =
   '|Ianuarie|Februarie|Martie|Aprilie|Mai|Iunie|Iulie|August|Septembrie|Octombrie|Noiembrie|Decembrie)'
 
 const DATE_RE = new RegExp(
-  `(?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b`,
+  `(?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b|\\b(?:0?[1-9]|1[0-2])[\\/.]\\d{4}\\b`,
   'i',
 )
+
+const PERIOD_END_RE =
+  'Present|Current|Now|Ongoing|Till\\s+date|To\\s+date|Till\\s+now|Prezent|Actual|Curent|În\\s+prezent|In\\s+prezent|Pana\\s+in\\s+prezent'
 
 const DATE_RANGE_RE = new RegExp(
   `(?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b` +
     `\\s*[–\\-—]\\s*` +
     `(?:(?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b` +
-    `|Present|Current|Now|Ongoing|Till\\s+date|To\\s+date|Till\\s+now` +
-    `|Prezent|Actual|Curent|În\\s+prezent|In\\s+prezent|Pana\\s+in\\s+prezent)`,
+    `|${PERIOD_END_RE})` +
+    `|\\b(?:0?[1-9]|1[0-2])[\\/.]\\d{4}\\b\\s*[–\\-—]\\s*(?:\\b(?:0?[1-9]|1[0-2])[\\/.]\\d{4}\\b|${PERIOD_END_RE})`,
   'i',
 )
 
@@ -489,7 +530,15 @@ const COMPANY_LINE_RE =
 const RESPONSIBILITY_LINE_RE =
   /^(?:activitate(?:a)?\s+principal[aă]|tipul\s+de\s+activitate|atributii|atribu(?:t|ț)ii|responsabilit(?:ati|ăți)|responsibilities?|key\s+achievements?|main\s+activities?)\s*[:\-–—]?\s*(.*)$/i
 const LOOSE_DATE_RANGE_RE =
-  /\b(19|20)\d{2}\b[^\n]{0,25}[–\-—][^\n]{0,25}(?:\b(19|20)\d{2}\b|present|current|now|ongoing|till\s+date|to\s+date|prezent|actual|curent|in\s+prezent|în\s+prezent)/i
+  /(?:\b(19|20)\d{2}\b|\b(?:0?[1-9]|1[0-2])[\/.](19|20)\d{2}\b)[^\n]{0,30}[–\-—][^\n]{0,30}(?:\b(19|20)\d{2}\b|\b(?:0?[1-9]|1[0-2])[\/.](19|20)\d{2}\b|present|current|now|ongoing|till\s+date|to\s+date|prezent|actual|curent|in\s+prezent|în\s+prezent)/i
+
+const COMBINED_ROLE_COMPANY_DATE_RE =
+  /^([^|•]+?)\s*[|•]\s*([^|•]+?)\s*[|•]\s*(.+)$/
+
+const TRAILING_DATE_RANGE_RE = new RegExp(
+  `\\(?\\s*((?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b\\s*[–\\-—]\\s*(?:(?:${MONTH_RE_PART}[a-zA-Zăâîșşțţ]*\\.?\\s+)?\\b\\d{4}\\b|${PERIOD_END_RE})|\\b(?:0?[1-9]|1[0-2])[\\/.]\\d{4}\\b\\s*[–\\-—]\\s*(?:\\b(?:0?[1-9]|1[0-2])[\\/.]\\d{4}\\b|${PERIOD_END_RE}))\\s*\\)?\\s*$`,
+  'i',
+)
 
 function cleanFieldValue(value: string): string {
   return value.replace(/\s+/g, ' ').replace(/^[|:;\-–—]+\s*/, '').trim()
@@ -591,6 +640,107 @@ function looksLikeCompanyLine(line: string): boolean {
   return line.length <= 120 && !DATE_RE.test(line) && /,/.test(line)
 }
 
+function extractTrailingPeriod(line: string): { period: string; remainder: string } | null {
+  const match = line.match(TRAILING_DATE_RANGE_RE)
+  const period = cleanFieldValue(match?.[1] ?? '')
+  if (!period) return null
+
+  const remainder = cleanFieldValue(line.replace(TRAILING_DATE_RANGE_RE, '').replace(/[()]+$/g, ''))
+  return { period, remainder }
+}
+
+function normalizeWrappedBulletContinuation(line: string): string {
+  return line.replace(/^[,.;:()\-–—]+\s*/, '').trim()
+}
+
+function appendToLastBullet(current: DraftExperience, line: string): boolean {
+  if (current.bullets.length === 0) return false
+  if (BULLET_RE.test(line)) return false
+  if (isLikelyPeriodLine(line)) return false
+  if (extractTaggedValue(line, PERIOD_LINE_RE) !== null) return false
+  if (extractTaggedValue(line, ROLE_LINE_RE) !== null) return false
+  if (extractTaggedValue(line, COMPANY_LINE_RE) !== null) return false
+  if (extractTaggedValue(line, RESPONSIBILITY_LINE_RE) !== null) return false
+  if (line.length > 220) return false
+
+  const continuation = normalizeWrappedBulletContinuation(line)
+  if (!continuation) return false
+
+  const lastIdx = current.bullets.length - 1
+  current.bullets[lastIdx] = `${current.bullets[lastIdx]} ${continuation}`.replace(/\s+/g, ' ').trim()
+  return true
+}
+
+function tryParseCombinedExperienceLine(
+  line: string,
+  current: DraftExperience,
+): boolean {
+  const compact = cleanFieldValue(line)
+
+  const pipeMatch = compact.match(COMBINED_ROLE_COMPANY_DATE_RE)
+  if (pipeMatch) {
+    const left = cleanFieldValue(pipeMatch[1] ?? '')
+    const middle = cleanFieldValue(pipeMatch[2] ?? '')
+    const right = cleanFieldValue(pipeMatch[3] ?? '')
+
+    if (isLikelyPeriodLine(right)) {
+      current.title = current.title || left
+      current.company = current.company || middle
+      current.period = right
+      return true
+    }
+  }
+
+  const trailing = extractTrailingPeriod(compact)
+  if (trailing) {
+    const main = trailing.remainder
+      .replace(/[()]+$/g, '')
+      .replace(/\s+[|\-–—]\s+$/, '')
+      .trim()
+
+    // Pattern: "Company - Title" or "Title @ Company"
+    const atMatch = main.match(/^(.+?)\s+@\s+(.+)$/i)
+    if (atMatch) {
+      current.title = current.title || cleanFieldValue(atMatch[1] ?? '')
+      current.company = current.company || cleanFieldValue(atMatch[2] ?? '')
+      current.period = trailing.period
+      return true
+    }
+
+    const dashParts = main.split(/\s+[\-–—]\s+/).map((part) => cleanFieldValue(part)).filter(Boolean)
+    if (dashParts.length === 2) {
+      const [first, second] = dashParts
+      const firstCompanyLike = looksLikeCompanyLine(first)
+      const secondCompanyLike = looksLikeCompanyLine(second)
+
+      if (!firstCompanyLike && secondCompanyLike) {
+        current.title = current.title || first
+        current.company = current.company || second
+      } else if (firstCompanyLike && !secondCompanyLike) {
+        current.company = current.company || first
+        current.title = current.title || second
+      } else {
+        current.title = current.title || first
+        current.company = current.company || second
+      }
+      current.period = trailing.period
+      return true
+    }
+
+    if (main) {
+      if (looksLikeCompanyLine(main)) {
+        current.company = current.company || main
+      } else if (looksLikeStandaloneJobTitle(main)) {
+        current.title = current.title || main
+      }
+      current.period = trailing.period
+      return true
+    }
+  }
+
+  return false
+}
+
 function parseExperienceSection(lines: string[]): ResumeExperience[] {
   const jobs: ResumeExperience[] = []
   let expIndex = 0
@@ -679,6 +829,14 @@ function parseExperienceSection(lines: string[]): ResumeExperience[] {
 
     if (BULLET_RE.test(line)) {
       current.bullets.push(...splitInlineBullets(line.replace(BULLET_RE, '')))
+      continue
+    }
+
+    if (appendToLastBullet(current, line)) {
+      continue
+    }
+
+    if (tryParseCombinedExperienceLine(line, current)) {
       continue
     }
 
