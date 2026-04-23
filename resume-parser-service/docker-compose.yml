@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  resume-parser:
+    build: .
+    container_name: resume-parser
+    ports:
+      - "3002:3002"
+    restart: always

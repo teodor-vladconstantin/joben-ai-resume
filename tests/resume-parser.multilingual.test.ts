@@ -12,6 +12,17 @@ describe('resume parser multilingual support', () => {
     expect(lines).toEqual(['Ion Popescu', 'Software Engineer'])
   })
 
+  it('reconstructs two-column lines without merging unrelated text', () => {
+    const lines = reconstructLines([
+      { str: 'EXPERIENCE', x: 20, y: 700 },
+      { str: 'SKILLS', x: 350, y: 700 },
+      { str: 'Senior Engineer', x: 20, y: 680 },
+      { str: 'TypeScript, Node.js', x: 350, y: 680 },
+    ])
+
+    expect(lines).toEqual(['EXPERIENCE', 'SKILLS', 'Senior Engineer', 'TypeScript, Node.js'])
+  })
+
   it('maps romanian section headers and parses experience bullets', () => {
     const input = [
       'Ion Popescu',
@@ -236,6 +247,49 @@ describe('resume parser multilingual support', () => {
 
     const parsed = parseResumeTextToData(input)
     expect(parsed.experience[0]?.bullets?.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('parses combined role/company/period line with separators', () => {
+    const input = [
+      'WORK EXPERIENCE',
+      'Senior Software Engineer | Acme SRL | 01/2022 - Present',
+      '• Built high-throughput APIs',
+    ]
+
+    const parsed = parseResumeTextToData(input)
+    expect(parsed.experience.length).toBe(1)
+    expect(parsed.experience[0]?.title).toContain('Senior Software Engineer')
+    expect(parsed.experience[0]?.company).toContain('Acme')
+    expect(parsed.experience[0]?.period).toContain('01/2022')
+  })
+
+  it('parses title and company when period is trailing in parentheses', () => {
+    const input = [
+      'EXPERIENCE',
+      'Platform Engineer - Globex LLC (Jan 2021 - Dec 2023)',
+      '• Improved deployment reliability',
+    ]
+
+    const parsed = parseResumeTextToData(input)
+    expect(parsed.experience.length).toBe(1)
+    expect(parsed.experience[0]?.title).toContain('Platform Engineer')
+    expect(parsed.experience[0]?.company).toContain('Globex')
+    expect(parsed.experience[0]?.period).toContain('2021')
+  })
+
+  it('merges wrapped bullet continuation lines into the same bullet', () => {
+    const input = [
+      'EXPERIENCE',
+      '2022 - 2024',
+      'Software Engineer',
+      'Acme SRL',
+      '• Designed internal billing workflow',
+      'covering refunds and invoice reconciliation across regions.',
+    ]
+
+    const parsed = parseResumeTextToData(input)
+    expect(parsed.experience[0]?.bullets?.length).toBe(1)
+    expect(parsed.experience[0]?.bullets?.[0]).toContain('invoice reconciliation')
   })
 
   // ── New section types ───────────────────────────────────────────────────────
