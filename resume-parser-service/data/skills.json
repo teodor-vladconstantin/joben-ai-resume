@@ -1,0 +1,57 @@
+{
+  "javascript": {
+    "canonical": "JavaScript",
+    "aliases": ["JS", "js", "ECMAScript", "ES6+", "ECMAScript 6", "Javascript"],
+    "category": "programming"
+  },
+  "typescript": {
+    "canonical": "TypeScript",
+    "aliases": ["TS", "ts", "TypeScript"],
+    "category": "programming"
+  },
+  "python": {
+    "canonical": "Python",
+    "aliases": ["Py", "py", "Python3", "Python 3"],
+    "category": "programming"
+  },
+  "java": {
+    "canonical": "Java",
+    "aliases": ["JAVA", "Core Java", "Java SE"],
+    "category": "programming"
+  },
+  "react": {
+    "canonical": "React",
+    "aliases": ["React.js", "ReactJS", "react", "React."],
+    "category": "frontend"
+  },
+  "node.js": {
+    "canonical": "Node.js",
+    "aliases": ["Node", "node", "NodeJS", "NodeJs"],
+    "category": "backend"
+  },
+  "next.js": {
+    "canonical": "Next.js",
+    "aliases": ["NextJS", "Next", "next.js", "Nextjs"],
+    "category": "frontend"
+  },
+  "sql": {
+    "canonical": "SQL",
+    "aliases": ["Structured Query Language", "MySQL", "PostgreSQL", "Postgres"],
+    "category": "database"
+  },
+  "docker": {
+    "canonical": "Docker",
+    "aliases": ["Docker", "docker", "Docker Engine", "containerization"],
+    "category": "devops"
+  },
+  "kubernetes": {
+    "canonical": "Kubernetes",
+    "aliases": ["K8s", "k8s", "Kubernetes", "kube"],
+    "category": "devops"
+  },
+  "aws": {
+    "canonical": "AWS",
+    "aliases": ["Amazon Web Services", "AWS", "Amazon AWS", "AWS Cloud"],
+    "category": "cloud"
+  }
+}
