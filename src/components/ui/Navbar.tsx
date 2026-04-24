@@ -48,7 +48,7 @@ export function Navbar() {
                 key={link.href}
                 whileHover={{ scale: 1.05, y: -1 }}
                 whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.15, ease: "ease-out" }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <Link
                   href={link.href}
@@ -67,7 +67,7 @@ export function Navbar() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.15, ease: "ease-out" }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <Link href="/sign-in" className="text-sm font-medium text-[#FFFFFF]/75 hover:text-[#FFFFFF]">
                   Log in
@@ -76,7 +76,7 @@ export function Navbar() {
               <motion.div
                 whileHover={{ scale: 1.03, y: -1 }}
                 whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15, ease: "ease-out" }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <AuthAwareSignupLink
                   className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
@@ -92,7 +92,7 @@ export function Navbar() {
               <motion.div
                 whileHover={{ scale: 1.03, y: -1 }}
                 whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15, ease: "ease-out" }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <Link
                   href="/resumes/new"
