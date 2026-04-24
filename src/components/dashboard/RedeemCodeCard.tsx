@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Gift, Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { UserPlan } from '@/lib/plans'
 
 type RedeemCodeCardProps = {
@@ -67,7 +68,13 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
   }
 
   return (
-    <div className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 mb-8" suppressHydrationWarning>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "ease-out" }}
+      className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 mb-8"
+      suppressHydrationWarning
+    >
       <div className="flex items-start justify-between gap-4 mb-4" suppressHydrationWarning>
         <div>
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -85,23 +92,28 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3" suppressHydrationWarning>
-        <input
+        <motion.input
           type="text"
           value={code}
           onChange={(event) => setCode(event.target.value)}
           placeholder="Enter private access code"
           disabled={isSubmitting || alreadyRecruiting}
           className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none disabled:opacity-60"
+          whileFocus={{ scale: 1.01 }}
+          transition={{ duration: 0.15, ease: "ease-out" }}
         />
-        <button
+        <motion.button
           type="button"
           onClick={() => void handleRedeem()}
           disabled={isSubmitting || alreadyRecruiting}
           className="inline-flex min-w-36 items-center justify-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+          whileHover={{ scale: 1.02, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.15, ease: "ease-out" }}
         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {alreadyRecruiting ? 'Already Active' : isSubmitting ? 'Applying...' : 'Redeem Code'}
-        </button>
+        </motion.button>
       </div>
 
       {errorMessage ? (
@@ -111,7 +123,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       {successMessage ? (
         <p className="mt-3 text-sm text-[#16DB65]">{successMessage}</p>
       ) : null}
-    </div>
+    </motion.div>
   )
 }
 

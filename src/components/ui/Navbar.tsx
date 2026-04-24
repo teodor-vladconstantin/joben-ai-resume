@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import { motion } from 'framer-motion'
 
 export function Navbar() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -43,13 +44,19 @@ export function Navbar() {
 
           <section className="hidden items-center space-x-1 md:flex">
             {(isLoaded && isSignedIn ? appLinks : publicLinks).map((link) => (
-              <Link
+              <motion.div
                 key={link.href}
-                href={link.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-[#FFFFFF]/75 transition-colors hover:bg-[#0A0F0D] hover:text-[#FFFFFF]"
+                whileHover={{ scale: 1.05, y: -1 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.15, ease: "ease-out" }}
               >
-                {link.label}
-              </Link>
+                <Link
+                  href={link.href}
+                  className="block rounded-md px-3 py-2 text-sm font-medium text-[#FFFFFF]/75 transition-colors hover:bg-[#0A0F0D] hover:text-[#FFFFFF]"
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
           </section>
         </section>
@@ -57,26 +64,44 @@ export function Navbar() {
         <section className="flex items-center space-x-3">
           {isLoaded && !isSignedIn && (
             <>
-              <Link href="/sign-in" className="text-sm font-medium text-[#FFFFFF]/75 hover:text-[#FFFFFF]">
-                Log in
-              </Link>
-              <AuthAwareSignupLink
-                className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.15, ease: "ease-out" }}
               >
-                Get Started Free
-              </AuthAwareSignupLink>
+                <Link href="/sign-in" className="text-sm font-medium text-[#FFFFFF]/75 hover:text-[#FFFFFF]">
+                  Log in
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15, ease: "ease-out" }}
+              >
+                <AuthAwareSignupLink
+                  className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  Get Started Free
+                </AuthAwareSignupLink>
+              </motion.div>
             </>
           )}
 
           {isLoaded && isSignedIn && (
             <>
-              <Link
-                href="/resumes/new"
-                className="hidden items-center space-x-1 rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
+              <motion.div
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15, ease: "ease-out" }}
               >
-                <Plus className="h-4 w-4" />
-                <span>Create New</span>
-              </Link>
+                <Link
+                  href="/resumes/new"
+                  className="hidden items-center space-x-1 rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create New</span>
+                </Link>
+              </motion.div>
               <UserButton
                 appearance={{
                   elements: {
