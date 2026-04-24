@@ -8,19 +8,14 @@ const cardVariants = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: "easeOut" }
+    transition: { duration: 0.3 }
   }
 }
 
 const iconVariants = {
   initial: { scale: 1 },
   hover: {
-    scale: 1.15,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 10
-    }
+    scale: 1.15
   }
 }
 
@@ -55,6 +50,7 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
               className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}
               variants={iconVariants}
               whileHover="hover"
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </motion.div>
