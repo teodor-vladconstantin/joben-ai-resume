@@ -71,7 +71,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "ease-out" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 mb-8"
       suppressHydrationWarning
     >
@@ -100,7 +100,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           disabled={isSubmitting || alreadyRecruiting}
           className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none disabled:opacity-60"
           whileFocus={{ scale: 1.01 }}
-          transition={{ duration: 0.15, ease: "ease-out" }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
         />
         <motion.button
           type="button"
@@ -109,7 +109,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           className="inline-flex min-w-36 items-center justify-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.15, ease: "ease-out" }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {alreadyRecruiting ? 'Already Active' : isSubmitting ? 'Applying...' : 'Redeem Code'}
