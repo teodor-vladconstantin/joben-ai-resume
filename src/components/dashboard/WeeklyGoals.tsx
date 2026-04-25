@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useMemo } from 'react'
-import { Flame, Target } from 'lucide-react'
+import { Flame, Target, CheckCircle2 } from 'lucide-react'
 
 type Stats = { resumes: number; coverLetters: number; aiReviews: number }
 
@@ -74,7 +74,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
           <div key={i}>
             <div className="flex justify-between items-center mb-1.5">
               <span className={`text-sm ${goal.done ? 'text-[#16DB65]' : 'text-white/70'}`}>
-                {goal.done ? 'âœ“ ' : ''}{goal.label}
+                {goal.done && <CheckCircle2 className="w-4 h-4 inline mr-1.5" />}{goal.label}
               </span>
               <span className="text-white/50 text-xs">
                 {Math.min(goal.current, goal.target)}/{goal.target}
