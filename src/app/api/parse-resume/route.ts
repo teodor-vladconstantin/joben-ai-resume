@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { ResumeTemplateData } from '@/components/templates/types'
+import type { ResumeTemplateData, ResumeDynamicSection } from '@/components/templates/types'
 
 const PARSER_URL = process.env.PARSER_SERVICE_URL ?? 'http://localhost:3002'
 const PARSE_TIMEOUT_MS = 20_000
@@ -76,9 +76,9 @@ function mapPythonResponse(raw: Record<string, unknown>): ResumeTemplateData {
       description: String(e.description ?? ''),
       bullets:     Array.isArray(e.bullets) ? e.bullets.map(String) : [],
     })),
-    dynamicSections: dynamicSections.map((s: Record<string, unknown>) => ({
+    dynamicSections: dynamicSections.map((s: Record<string, unknown>): ResumeDynamicSection => ({
       id:      String(s.id      ?? crypto.randomUUID()),
-      type:    String(s.type    ?? 'leadership') as ResumeTemplateData['dynamicSections'][number]['type'],
+      type:    String(s.type    ?? 'leadership'),
       title:   String(s.title   ?? ''),
       content: String(s.content ?? ''),
     })),
