@@ -105,5 +105,5 @@
 - [DONE] Improve PDF experience parsing into separate jobs and bullet points
 
 
--   [ x ]   R e p l a c e   T y p e S c r i p t   r e s u m e   p a r s e r   w i t h   P y t h o n   m i c r o s e r v i c e   ( p d f p l u m b e r   +   s p a C y   +   r e g e x )   a n d   d e p l o y   t o   H e t z n e r  
- 
+
+

@@ -1,7 +1,7 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, X } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
