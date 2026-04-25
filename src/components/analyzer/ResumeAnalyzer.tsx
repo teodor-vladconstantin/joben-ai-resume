@@ -45,18 +45,17 @@ function getResumeTitle(value: AnalyzerReview['resumes']) {
   return value.title || 'Resume'
 }
 
-function statusColor(status?: string) {
-  if (status === 'good') return 'bg-[#0A9548]'
-  if (status === 'ok') return 'bg-[#16DB65]'
-  return 'bg-[#0A9548]'
+/** Hex color keyed to 0-100 score — used for ring, text, borders. */
+function scoreColor(score: number): string {
+  if (score >= 85) return '#16DB65'  // Excellent / Outstanding
+  if (score >= 70) return '#84CC16'  // Good
+  if (score >= 50) return '#F97316'  // Fair
+  return '#EF4444'                   // Poor / Critical
 }
 
-function scoreColor(score: number) {
-  if (score >= 90) return '#16DB65'
-  if (score >= 75) return '#0A9548'
-  if (score >= 65) return '#0A9548'
-  if (score >= 50) return '#0A9548'
-  return '#0A9548'
+/** Hex color for category progress bars based on fraction achieved. */
+function categoryColor(score: number, max: number): string {
+  return scoreColor(max > 0 ? Math.round((score / max) * 100) : 0)
 }
 
 type ResumeAnalyzerProps = {
@@ -159,7 +158,7 @@ export function ResumeAnalyzer({
               {comparison.delta === null ? (
                 <p className="mt-1 text-sm text-[#FFFFFF]/72">First review for this resume.</p>
               ) : (
-                <p className={`mt-1 text-sm font-semibold ${comparison.delta >= 0 ? 'text-[#16DB65]' : 'text-[#16DB65]'}`}>
+                <p className={`mt-1 text-sm font-semibold ${comparison.delta >= 0 ? 'text-[#16DB65]' : 'text-[#EF4444]'}`}>
                   {comparison.delta >= 0 ? '+' : ''}{comparison.delta} pts
                   <span className="ml-2 text-xs font-normal text-[#FFFFFF]/72">
                     (prev: {comparison.previousScore ?? 0})
@@ -203,7 +202,10 @@ export function ResumeAnalyzer({
                     <span className="text-white font-bold">{score}/{max}</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#020202] rounded-full">
-                    <div className={`h-1.5 rounded-full ${statusColor(item.status)}`} style={{ width: `${width}%` }} />
+                    <div
+                      className="h-1.5 rounded-full"
+                      style={{ width: `${width}%`, backgroundColor: categoryColor(score, max) }}
+                    />
                   </div>
                 </div>
               )
@@ -219,7 +221,7 @@ export function ResumeAnalyzer({
 
           {/* Priority Improvements */}
           <div className="mb-8">
-            <h3 className="text-[#0A9548] font-bold flex items-center gap-2 mb-4">
+            <h3 className="text-[#EF4444] font-bold flex items-center gap-2 mb-4">
               <XCircle className="w-5 h-5" /> Priority Improvements
             </h3>
             <div className="space-y-4">
