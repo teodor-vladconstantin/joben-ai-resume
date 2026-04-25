@@ -25,6 +25,10 @@
 - [x] npm run build passes
 - [x] TODO status updated (Active -> Done)
 
+- [DONE] Simplified PDF parsing: removed Python microservice dependency; server-side parsing now uses parse-pdf-server (TypeScript + pdfjs-dist)
+
+- [DONE] Simplified PDF parsing: removed Python microservice dependency; server-side parsing now uses parse-pdf-server (TypeScript + pdfjs-dist)
+
 ## Phase Backlog
 - [x] Phase 3 P0 (Owner: Platform): add test runner (Vitest) and npm test script
 - [x] Phase 3 P0 (Owner: Platform): add parser tests for multilingual resume extraction

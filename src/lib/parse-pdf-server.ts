@@ -1,5 +1,6 @@
 import { reconstructLines, parseResumeTextToData } from '@/lib/resume-parser'
 import type { ResumeTemplateData } from '@/components/templates/types'
+import { join } from 'path'
 
 type PdfjsTextItem = {
   str: string
@@ -7,23 +8,22 @@ type PdfjsTextItem = {
 }
 
 /**
- * Import a PDF resume entirely client-side.
- * Uses pdfjs-dist + robust line-reconstruction + strict parser heuristics.
+ * Server-side PDF parsing for Node.js.
+ * Uses pdfjs-dist with explicit worker path for Node.
  */
-export async function importPdfClientSide(file: File): Promise<ResumeTemplateData> {
-  if (file.type !== 'application/pdf') throw new Error('File must be a PDF')
-  if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be under 10 MB')
-
+export async function parsePdfBuffer(buffer: Buffer): Promise<ResumeTemplateData> {
   const pdfjsLib = await import('pdfjs-dist')
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-  ).toString()
+  // Configure worker for Node.js environment
+  pdfjsLib.GlobalWorkerOptions.workerSrc = join(
+    process.cwd(),
+    'node_modules',
+    'pdfjs-dist',
+    'build',
+    'pdf.worker.min.js'
+  )
 
-  const arrayBuffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
-
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
   const allLines: string[] = []
 
   for (let i = 1; i <= pdf.numPages; i++) {
