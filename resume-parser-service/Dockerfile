@@ -8,11 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
+# Install all deps including spaCy large models (specified via URL in requirements.txt)
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m spacy download en_core_web_sm
 
 COPY . .
 
 EXPOSE 3002
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3002"]
+# Use the structured app/ entrypoint
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3002"]
