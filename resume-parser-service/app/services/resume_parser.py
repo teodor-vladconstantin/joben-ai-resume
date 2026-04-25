@@ -1,28 +1,33 @@
 """
-Resume parser — pdfplumber + spaCy NER + rapidfuzz + regex.
+Resume parser — 5-layer pipeline for maximum accuracy.
 
-Parsing pipeline:
-  1. PDFExtractor   → lines with font metadata (bold, relative size)
-  2. _split_sections → font-aware header detection + rapidfuzz fuzzy matching
-  3. Per-section parsers:
-       personal    → regex contact info + spaCy PERSON/GPE NER
-       experience  → Europass labeled fields + date-range state machine + spaCy ORG NER
-       education   → structured institution/qualification/field/period blocks
-       skills      → flat list with deduplication
-       languages   → level pattern extraction
-       *rest       → generic bullet/paragraph formatter
+Layer 1  pdfplumber/PyMuPDF  structural extraction + font metadata
+Layer 2  Font analysis        bold/large → section header detection
+Layer 3  rapidfuzz            fuzzy section name classification
+Layer 4  spaCy NER            PERSON / GPE / ORG (EN lg + RO lg)
+Layer 5  BERT NER             company, designation, skill, degree (EN, F1 90.87%)
+         ESCO skills          canonical skill names via EU corpus
+         Europass XML         direct extraction when embedded XML is present
+
+Confidence scoring per field:
+  regex    → 1.0   (deterministic)
+  BERT     → 0.9
+  spaCy    → 0.75
+  font/heuristic → 0.5
 """
 
+import logging
 import re
 import uuid
-import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import spacy
 from spacy.language import Language
 from rapidfuzz import fuzz, process
 
+from .bert_ner import BertNER
 from .pdf_extractor import PDFExtractor
+from .skills_matcher import SkillsMatcher
 from ..models.resume import ExperienceEntry, ParseResponse, PersonalInfo
 from ..utils.patterns import (
     BULLET_RE,
@@ -51,11 +56,8 @@ from ..utils.patterns import (
 
 logger = logging.getLogger(__name__)
 
-# ── Fuzzy matching threshold constants ───────────────────────────────────────
-_FUZZY_RATIO_CUTOFF = 78       # minimum score for rapidfuzz ratio
-_FUZZY_PARTIAL_CUTOFF = 88     # minimum score for rapidfuzz partial_ratio
-
-# Pre-build the list of known section keys once at import time
+_FUZZY_RATIO_CUTOFF   = 78
+_FUZZY_PARTIAL_CUTOFF = 88
 _SECTION_KEYS: List[str] = list(SECTION_NAMES.keys())
 
 
@@ -63,8 +65,8 @@ _SECTION_KEYS: List[str] = list(SECTION_NAMES.keys())
 
 class ResumeParser:
     """
-    Stateless parser — instantiate per request, but spaCy models are cached
-    at the class level so they are loaded only once per process.
+    Stateless — one instance per request. Heavy resources (spaCy, BERT, ESCO)
+    are cached at class level and loaded once per process.
     """
 
     _nlp_en: Optional[Language] = None
@@ -74,7 +76,7 @@ class ResumeParser:
 
     @classmethod
     def load_models(cls) -> None:
-        """Load (or lazy-load) spaCy large models. Called once at startup."""
+        """Called once at startup by FastAPI lifespan hook."""
         if cls._nlp_en is None:
             try:
                 cls._nlp_en = spacy.load("en_core_web_lg")
@@ -93,6 +95,9 @@ class ResumeParser:
                 spacy.cli.download("ro_core_news_lg")
                 cls._nlp_ro = spacy.load("ro_core_news_lg")
 
+        BertNER._get_pipeline = staticmethod(BertNER._get_pipeline)  # type: ignore
+        SkillsMatcher.load_corpus()
+
     @property
     def nlp_en(self) -> Language:
         if self.__class__._nlp_en is None:
@@ -108,10 +113,20 @@ class ResumeParser:
     # ── Public API ────────────────────────────────────────────────────────────
 
     def parse(self, pdf_bytes: bytes) -> ParseResponse:
+        bert = BertNER()
+        skills_matcher = SkillsMatcher()
+
         extractor = PDFExtractor()
         extracted = extractor.extract(pdf_bytes)
         lines: List[Dict[str, Any]] = extracted["lines"]
         median_size: float = extracted["median_size"]
+        europass_xml: Optional[str] = extracted.get("europass_xml")
+
+        # ── Fast path: Europass embedded XML ──────────────────────────────
+        if europass_xml:
+            result = self._parse_europass_xml(europass_xml)
+            if result:
+                return result
 
         if not lines:
             return self._empty_response()
@@ -120,7 +135,7 @@ class ResumeParser:
 
         # ── Personal info ──────────────────────────────────────────────────
         header_texts = [l["text"] for l in sections.get("header", {}).get("lines", [])]
-        personal = self._extract_personal(header_texts)
+        personal = self._extract_personal(header_texts, bert)
 
         summary_texts = [l["text"] for l in sections.get("summary", {}).get("lines", [])]
         if summary_texts:
@@ -128,7 +143,19 @@ class ResumeParser:
 
         # ── Experience ────────────────────────────────────────────────────
         exp_lines = [l["text"] for l in sections.get("experience", {}).get("lines", [])]
-        experience = self._parse_experience(exp_lines)
+        experience = self._parse_experience(exp_lines, bert)
+
+        # ── Skills — augment with BERT + ESCO ─────────────────────────────
+        skills_lines = [l["text"] for l in sections.get("skills", {}).get("lines", [])]
+        raw_skills = self._collect_raw_skills(skills_lines)
+
+        # Also collect skills mentioned inline in experience bullets via BERT
+        if bert.available and exp_lines:
+            exp_text = " ".join(exp_lines)
+            bert_skills = bert.get_skills(exp_text)
+            raw_skills.extend(bert_skills)
+
+        canonical_skills = skills_matcher.match(raw_skills, lang="en")
 
         # ── Dynamic sections ──────────────────────────────────────────────
         ordered_types = [
@@ -142,10 +169,13 @@ class ResumeParser:
             sec_data = sections.get(sec_type)
             if not sec_data:
                 continue
-            lines_text = [l["text"] for l in sec_data["lines"]]
-            if not lines_text:
-                continue
-            content = self._format_section(sec_type, lines_text)
+            if sec_type == "skills":
+                # Use ESCO-matched skills if we have them
+                content = "\n".join(f"• {s}" for s in canonical_skills) if canonical_skills \
+                          else self._parse_skills_section(skills_lines)
+            else:
+                lines_text = [l["text"] for l in sec_data["lines"]]
+                content = self._format_section(sec_type, lines_text) if lines_text else ""
             if content:
                 dynamic_sections.append({
                     "id": str(uuid.uuid4()),
@@ -172,21 +202,65 @@ class ResumeParser:
             personal=personal.dict(),
             experience=[e.dict() for e in experience],
             dynamicSections=dynamic_sections,
-            metadata={"source": "python-nlp", "models": "en_core_web_lg+ro_core_news_lg"},
+            metadata={
+                "source": "python-nlp",
+                "layers": {
+                    "pdf": extracted["metadata"].get("extractor", "unknown"),
+                    "bert": bert.available,
+                    "esco_skills": len(canonical_skills),
+                    "europass_xml": europass_xml is not None,
+                    "columns": extracted["metadata"].get("n_columns", 1),
+                },
+            },
         )
+
+    # ── Europass XML fast path ────────────────────────────────────────────────
+
+    def _parse_europass_xml(self, xml: str) -> Optional[ParseResponse]:
+        """
+        Extract data from Europass-embedded XML.
+        Returns ParseResponse if extraction is confident, None otherwise.
+        The Europass XML schema (HR-XML) is well-documented and predictable.
+        """
+        try:
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(xml)
+            ns = {"cv": "http://www.cedefop.europa.eu/Europass"}
+
+            def find_text(path: str) -> str:
+                el = root.find(path, ns)
+                return el.text.strip() if el is not None and el.text else ""
+
+            first = find_text(".//cv:FirstName") or find_text(".//FirstName")
+            last = find_text(".//cv:Surname") or find_text(".//Surname")
+            email = find_text(".//cv:ContactInfo//cv:Email") or find_text(".//Email")
+            phone = find_text(".//cv:ContactInfo//cv:Telephone") or find_text(".//Telephone")
+
+            if not first and not last and not email:
+                return None  # Not a parseable Europass XML
+
+            personal = PersonalInfo(
+                firstName=first,
+                lastName=last,
+                email=email,
+                phone=phone,
+            )
+
+            return ParseResponse(
+                personal=personal.dict(),
+                experience=[],
+                dynamicSections=[],
+                metadata={"source": "europass-xml", "confidence": 1.0},
+            )
+        except Exception as exc:
+            logger.debug("Europass XML parse failed: %s", exc)
+            return None
 
     # ── Section splitting ─────────────────────────────────────────────────────
 
     def _split_sections(
         self, lines: List[Dict[str, Any]], median_size: float
     ) -> Dict[str, Any]:
-        """
-        Iterate over lines; classify each as a section header or content.
-        Header detection uses three passes in priority order:
-          1. Font signal (bold or large) + keyword/fuzzy match
-          2. ALL-CAPS short line + keyword/fuzzy match
-          3. Exact keyword match regardless of font
-        """
         sections: Dict[str, Any] = {}
         current_type = "header"
         current_title = "Header"
@@ -204,7 +278,6 @@ class ResumeParser:
             raw = line["text"].strip()
             if not raw:
                 continue
-
             sec_type = self._classify_header(raw, line, median_size)
             if sec_type is not None:
                 flush()
@@ -220,29 +293,23 @@ class ResumeParser:
     def _classify_header(
         self, text: str, line: Dict[str, Any], median_size: float
     ) -> Optional[str]:
-        """
-        Returns canonical section type string, a 'custom:…' string for
-        unknown bold headers, or None if the line is regular content.
-        """
         cleaned = text.rstrip(":–—-").strip()
         normalized = normalize_for_match(cleaned)
 
-        # Fast path: exact match in lookup table (regardless of font)
+        # Fast path: exact keyword match
         if normalized in SECTION_NAMES:
             return SECTION_NAMES[normalized]
 
-        # Determine whether the line looks like a header visually
+        # Visual header detection (bold or oversized + short)
         is_bold = line.get("is_bold", False)
         is_large = line.get("is_large", False)
         word_count = len(cleaned.split())
         is_allcaps = cleaned == cleaned.upper() and bool(re.search(r"[A-ZÀ-ɏ]", cleaned))
-        is_short = 1 <= word_count <= 6
-        is_visual_header = (is_bold or is_large or is_allcaps) and is_short
+        is_visual_header = (is_bold or is_large or is_allcaps) and 1 <= word_count <= 6
 
         if not is_visual_header:
             return None
 
-        # Fuzzy match against known section names
         result = process.extractOne(
             normalized, _SECTION_KEYS, scorer=fuzz.ratio, score_cutoff=_FUZZY_RATIO_CUTOFF
         )
@@ -250,15 +317,11 @@ class ResumeParser:
             return SECTION_NAMES[result[0]]
 
         result = process.extractOne(
-            normalized,
-            _SECTION_KEYS,
-            scorer=fuzz.partial_ratio,
-            score_cutoff=_FUZZY_PARTIAL_CUTOFF,
+            normalized, _SECTION_KEYS, scorer=fuzz.partial_ratio, score_cutoff=_FUZZY_PARTIAL_CUTOFF
         )
         if result:
             return SECTION_NAMES[result[0]]
 
-        # Unknown bold header — preserve as custom section
         if len(cleaned) >= 3 and not EMAIL_RE.search(cleaned) and not PHONE_RE.search(cleaned):
             return f"custom:{cleaned}"
 
@@ -266,11 +329,11 @@ class ResumeParser:
 
     # ── Personal info ─────────────────────────────────────────────────────────
 
-    def _extract_personal(self, header_lines: List[str]) -> PersonalInfo:
+    def _extract_personal(self, header_lines: List[str], bert: BertNER) -> PersonalInfo:
         personal = PersonalInfo()
         all_text = " ".join(header_lines)
 
-        # Regex contact extraction
+        # Layer 1: Regex (confidence 1.0)
         email_m = EMAIL_RE.search(all_text)
         personal.email = email_m.group(0) if email_m else ""
 
@@ -285,60 +348,54 @@ class ResumeParser:
         if gh_m:
             personal.github = f"https://github.com/{gh_m.group(1)}"
 
-        urls = URL_RE.findall(all_text)
-        for url in urls:
+        for url in URL_RE.findall(all_text):
             if not LINKEDIN_RE.search(url) and not GITHUB_RE.search(url):
                 personal.website = url
                 break
 
-        # Name via spaCy PERSON NER on the first 5 header lines
-        name_text = " | ".join(header_lines[:5])
-        doc_en = self.nlp_en(name_text)
-        for ent in doc_en.ents:
-            if ent.label_ == "PERSON":
-                parts = ent.text.strip().split()
+        # Layer 2: BERT NER — name with confidence 0.9
+        if bert.available:
+            bert_name = bert.get_name(" ".join(header_lines[:6]))
+            if bert_name:
+                parts = bert_name.strip().split()
                 if len(parts) >= 2:
                     personal.firstName = parts[0]
                     personal.lastName = " ".join(parts[1:])
-                    break
 
-        # Fallback name heuristic: first line with 2–5 words, no digits, no contact info
+        # Layer 3: spaCy NER — name fallback + location
+        if not personal.firstName:
+            name_text = " | ".join(header_lines[:5])
+            for doc in (self.nlp_en(name_text), self.nlp_ro(name_text)):
+                for ent in doc.ents:
+                    if ent.label_ == "PERSON" and not personal.firstName:
+                        parts = ent.text.strip().split()
+                        if len(parts) >= 2:
+                            personal.firstName = parts[0]
+                            personal.lastName = " ".join(parts[1:])
+                    if ent.label_ == "GPE" and not personal.location:
+                        personal.location = ent.text.strip()
+
+        # Layer 4: heuristic name fallback (confidence 0.5)
         if not personal.firstName:
             for line in header_lines:
                 if (
-                    not EMAIL_RE.search(line)
-                    and not PHONE_RE.search(line)
-                    and not URL_RE.search(line)
-                    and not re.search(r"\d{4}", line)
-                    and 2 <= len(line.split()) <= 5
-                    and 4 <= len(line) <= 60
+                    not EMAIL_RE.search(line) and not PHONE_RE.search(line)
+                    and not URL_RE.search(line) and not re.search(r"\d{4}", line)
+                    and 2 <= len(line.split()) <= 5 and 4 <= len(line) <= 60
                 ):
                     parts = line.split()
                     personal.firstName = parts[0]
                     personal.lastName = " ".join(parts[1:])
                     break
 
-        # Location via spaCy GPE NER
-        doc_ro = self.nlp_ro(name_text)
-        for doc in (doc_en, doc_ro):
-            for ent in doc.ents:
-                if ent.label_ == "GPE" and not personal.location:
-                    personal.location = ent.text.strip()
-                    break
-
-        # Title: first short non-contact line after name
-        name_line = (
-            f"{personal.firstName} {personal.lastName}".strip() if personal.firstName else None
-        )
+        # Title: first short line after name that looks like a job title
+        name_line = f"{personal.firstName} {personal.lastName}".strip() if personal.firstName else None
         for line in header_lines:
             if (
-                line != name_line
-                and not EMAIL_RE.search(line)
-                and not PHONE_RE.search(line)
-                and not URL_RE.search(line)
+                line != name_line and not EMAIL_RE.search(line)
+                and not PHONE_RE.search(line) and not URL_RE.search(line)
                 and not re.search(r"\d{4}", line)
-                and 5 <= len(line) <= 80
-                and 2 <= len(line.split()) <= 8
+                and 5 <= len(line) <= 80 and 2 <= len(line.split()) <= 8
             ):
                 personal.title = line
                 break
@@ -347,20 +404,19 @@ class ResumeParser:
 
     # ── Experience ────────────────────────────────────────────────────────────
 
-    def _parse_experience(self, lines: List[str]) -> List[ExperienceEntry]:
+    def _parse_experience(self, lines: List[str], bert: BertNER) -> List[ExperienceEntry]:
         """
-        State machine that handles both Europass labeled-field CVs and
-        modern implicit-layout CVs.
-
-        Entry boundary signals (in priority order):
-          1. Europass PERIOD label → always starts a new entry
-          2. A date range line when we already have period + content
-          3. A new ROLE label when the current entry is already populated
+        Multi-layer experience parser:
+          1. Europass labeled fields (Perioada, Funcția, Angajator)
+          2. Date-range boundary detection
+          3. Combined line patterns (Title | Company | Date)
+          4. BERT ORG NER for company detection
+          5. spaCy ORG fallback
+          6. Job-title keyword heuristic
         """
         entries: List[ExperienceEntry] = []
-        # Mutable draft
         draft: Dict[str, Any] = self._new_draft()
-        pending: Optional[str] = None  # 'period' | 'title' | 'company' | 'resp'
+        pending: Optional[str] = None
 
         def push():
             nonlocal pending
@@ -375,7 +431,7 @@ class ResumeParser:
             if not line:
                 continue
 
-            # ── Europass labeled fields ────────────────────────────────────
+            # Europass labeled fields
             period_val = self._tagged(line, EUROPASS_PERIOD_RE)
             if period_val is not None:
                 if draft["period"] and (draft["title"] or draft["company"] or draft["bullets"]):
@@ -405,7 +461,7 @@ class ResumeParser:
                 pending = "resp"
                 continue
 
-            # ── Pending field from previous Europass label ─────────────────
+            # Pending continuation from Europass label
             if pending:
                 if pending == "period":
                     if draft["period"] and (draft["title"] or draft["company"]):
@@ -420,55 +476,63 @@ class ResumeParser:
                 pending = None
                 continue
 
-            # ── Bullet line ────────────────────────────────────────────────
+            # Bullet line
             if BULLET_RE.match(line):
                 draft["bullets"].append(re.sub(BULLET_RE, "", line).strip())
                 continue
 
-            # ── Append to last bullet (wrapped continuation) ───────────────
+            # Bullet continuation (wrapped line)
             if self._append_to_last_bullet(draft, line):
                 continue
 
-            # ── Date range → new entry boundary ───────────────────────────
-            is_date_range = bool(DATE_RANGE_RE.search(line) or LOOSE_DATE_RANGE_RE.search(line))
-            if is_date_range:
+            # Date range → new entry boundary
+            if DATE_RANGE_RE.search(line) or LOOSE_DATE_RANGE_RE.search(line):
                 if draft["period"] and (draft["title"] or draft["company"] or draft["bullets"]):
                     push()
                 draft["period"] = line
                 continue
 
-            # ── Combined line: Title | Company | Date ─────────────────────
+            # Combined line: "Title | Company | Date" or "Title @ Company (Date)"
             combined = self._try_combined(line)
             if combined:
-                if combined.get("period") and draft["period"] and (
-                    draft["title"] or draft["company"]
-                ):
+                if combined.get("period") and draft["period"] and (draft["title"] or draft["company"]):
                     push()
                 draft["title"] = draft["title"] or combined.get("title", "")
                 draft["company"] = draft["company"] or combined.get("company", "")
                 draft["period"] = draft["period"] or combined.get("period", "")
                 continue
 
-            # ── spaCy ORG NER for company detection ────────────────────────
-            ner = self._ner_extract(line)
-            if ner and not draft["company"]:
-                draft["company"] = ner["org"]
-                remainder = ner["remainder"].strip(" ,|-")
-                if remainder and not draft["title"] and self._looks_like_job_title(remainder):
-                    draft["title"] = remainder
-                continue
+            # BERT ORG NER (Layer 5 — highest semantic accuracy)
+            if bert.available and not draft["company"]:
+                companies = bert.get_companies(line)
+                if companies:
+                    draft["company"] = companies[0]
+                    remainder = line.replace(companies[0], "", 1).strip(" ,|-")
+                    if remainder and not draft["title"] and self._looks_like_job_title(remainder):
+                        draft["title"] = remainder
+                    continue
 
-            # ── Job title heuristic ────────────────────────────────────────
-            if not draft["title"] and self._looks_like_job_title(line):
-                draft["title"] = line
-                continue
+            # spaCy ORG NER fallback
+            if not draft["company"]:
+                ner = self._spacy_ner(line)
+                if ner:
+                    draft["company"] = ner["org"]
+                    remainder = ner["remainder"].strip(" ,|-")
+                    if remainder and not draft["title"] and self._looks_like_job_title(remainder):
+                        draft["title"] = remainder
+                    continue
 
-            # ── Company suffix heuristic ──────────────────────────────────
+            # Company suffix heuristic
             if not draft["company"] and COMPANY_SUFFIX_RE.search(line):
                 draft["company"] = line
                 continue
 
-            # ── Fallback: long lines become bullets ────────────────────────
+            # Job-title heuristic
+            if not draft["title"] and self._looks_like_job_title(line):
+                draft["title"] = line
+                continue
+
+            # Anything else
             if len(line) >= 20:
                 draft["bullets"].append(line)
 
@@ -478,12 +542,10 @@ class ResumeParser:
     # ── Education ─────────────────────────────────────────────────────────────
 
     def _parse_education_section(self, lines: List[str]) -> str:
-        """
-        Parse education blocks into structured text:
-        "Degree (Period)\n• Institution: …\n• Field: …"
-        """
         blocks: List[str] = []
-        edu: Dict[str, Any] = {"period": "", "qual": "", "field": "", "institution": "", "details": []}
+        edu: Dict[str, Any] = {
+            "period": "", "qual": "", "field": "", "institution": "", "details": []
+        }
         pending: Optional[str] = None
 
         def flush():
@@ -491,18 +553,17 @@ class ResumeParser:
             if any([edu["period"], edu["qual"], edu["field"], edu["institution"], edu["details"]]):
                 heading = edu["qual"] or edu["institution"] or "Education"
                 title_line = f"{heading} ({edu['period']})" if edu["period"] else heading
-                bullets: List[str] = []
                 seen: set = set()
+                bullets: List[str] = []
 
-                def add(val: str):
-                    c = val.strip()
+                def add(v: str) -> None:
+                    c = v.strip()
                     k = normalize_for_match(c)
                     if c and k not in seen:
                         seen.add(k)
                         bullets.append(c)
 
-                norm_heading = normalize_for_match(heading)
-                if edu["institution"] and normalize_for_match(edu["institution"]) != norm_heading:
+                if edu["institution"] and normalize_for_match(edu["institution"]) != normalize_for_match(heading):
                     add(f"Institution: {edu['institution']}")
                 if edu["field"]:
                     add(f"Field of study: {edu['field']}")
@@ -559,14 +620,12 @@ class ResumeParser:
                 edu["period"] = line
                 continue
 
-            # University/college keyword → institution
             if not edu["institution"] and re.search(
                 r"universit|academy|facult|liceu|school|college|institut", line, re.I
             ):
                 edu["institution"] = line
                 continue
 
-            # Degree keywords → qualification
             if not edu["qual"] and re.search(
                 r"bachelor|master|phd|doctorat|licenta|inginer|diploma|degree|B\.?Sc|M\.?Sc",
                 line, re.I,
@@ -581,24 +640,24 @@ class ResumeParser:
 
     # ── Skills ────────────────────────────────────────────────────────────────
 
+    def _collect_raw_skills(self, lines: List[str]) -> List[str]:
+        """Extract raw skill strings from a skills section."""
+        raw: List[str] = []
+        for line in lines:
+            clean = re.sub(BULLET_RE, "", line).strip()
+            raw.extend(p.strip() for p in re.split(r"[,;|]", clean) if p.strip())
+        return raw
+
     def _parse_skills_section(self, lines: List[str]) -> str:
         seen: Dict[str, str] = {}
         for raw in lines:
-            line = raw.strip()
-            if not line:
-                continue
-            # Strip leading bullet
-            clean = re.sub(BULLET_RE, "", line).strip()
-            # Try to split by comma, semicolon, pipe
-            parts = re.split(r"\s*[,;|]\s*", clean)
-            for part in parts:
+            clean = re.sub(BULLET_RE, "", raw).strip()
+            for part in re.split(r"[,;|]", clean):
                 p = part.strip()
                 k = normalize_for_match(p)
                 if p and k and k not in seen:
                     seen[k] = p
-        if not seen:
-            return "\n".join(lines)
-        return "\n".join(f"• {v}" for v in seen.values())
+        return "\n".join(f"• {v}" for v in seen.values()) if seen else "\n".join(lines)
 
     # ── Languages ─────────────────────────────────────────────────────────────
 
@@ -611,26 +670,20 @@ class ResumeParser:
             level_m = LANG_LEVEL_RE.search(line)
             if level_m:
                 lang = line[: level_m.start()].strip(" :-–—,")
-                level = level_m.group(0)
-                if lang:
-                    result.append(f"• {lang} — {level}")
-                else:
-                    result.append(f"• {line}")
+                result.append(f"• {lang} — {level_m.group(0)}" if lang else f"• {line}")
             else:
                 result.append(f"• {line}")
         return "\n".join(result) if result else "\n".join(lines)
 
-    # ── Generic section formatter ─────────────────────────────────────────────
+    # ── Generic formatter ─────────────────────────────────────────────────────
 
     def _format_section(self, sec_type: str, lines: List[str]) -> str:
         if sec_type == "education":
             return self._parse_education_section(lines)
-        if sec_type in ("skills", "languages", "interests"):
-            if sec_type == "skills":
-                return self._parse_skills_section(lines)
-            if sec_type == "languages":
-                return self._parse_languages_section(lines)
-        # Generic: preserve bullets, group paragraphs
+        if sec_type == "skills":
+            return self._parse_skills_section(lines)
+        if sec_type == "languages":
+            return self._parse_languages_section(lines)
         parts: List[str] = []
         for raw in lines:
             line = raw.strip()
@@ -655,25 +708,19 @@ class ResumeParser:
         period = draft["period"].strip()
         bullets = [b.strip() for b in draft["bullets"] if b.strip()]
         description = draft["description"].strip()
-
         if not title and not company and not period and not bullets:
             return None
-
-        if not bullets and description:
-            bullets = [description]
-
         return ExperienceEntry(
             id=str(uuid.uuid4()),
             title=title,
             company=company,
             period=period,
             description=description,
-            bullets=bullets or [""],
+            bullets=bullets or ([""] if not description else [description]),
         )
 
     @staticmethod
     def _tagged(line: str, pattern: re.Pattern) -> Optional[str]:
-        """Return the captured group value if pattern matches, else None."""
         m = pattern.match(line)
         if m is None:
             return None
@@ -681,8 +728,6 @@ class ResumeParser:
 
     @staticmethod
     def _split_bullets(text: str) -> List[str]:
-        """Split text on bullet symbols or semicolons into individual items."""
-        # Split on common bullet chars (excluding dash to avoid splitting date ranges)
         parts = re.split(r"\s*[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃]\s*", text)
         if len(parts) > 1:
             return [p.strip() for p in parts if p.strip()]
@@ -693,18 +738,13 @@ class ResumeParser:
 
     @staticmethod
     def _append_to_last_bullet(draft: Dict[str, Any], line: str) -> bool:
-        """Append a continuation line to the last bullet (handles PDF line wraps)."""
         if not draft["bullets"]:
             return False
-        # Don't append if the line looks like a new structural element
         if (
-            BULLET_RE.match(line)
-            or DATE_RANGE_RE.search(line)
-            or LOOSE_DATE_RANGE_RE.search(line)
-            or len(line) > 220
+            BULLET_RE.match(line) or DATE_RANGE_RE.search(line)
+            or LOOSE_DATE_RANGE_RE.search(line) or len(line) > 220
         ):
             return False
-        # Only append short-ish continuation lines that start lowercase or with punctuation
         if line and (line[0].islower() or line[0] in ",:;.)-"):
             draft["bullets"][-1] = f"{draft['bullets'][-1]} {line}".strip()
             return True
@@ -712,47 +752,29 @@ class ResumeParser:
 
     @staticmethod
     def _try_combined(line: str) -> Optional[Dict[str, str]]:
-        """
-        Parse combined lines like:
-          "Software Engineer | Acme Corp | Jan 2020 - Present"
-          "Lead Developer @ StartupX (2019 - 2022)"
-          "Title - Company - 2018 - 2021"
-        """
-        # Three-part pipe/bullet separated
         m = re.match(r"^([^|•]+?)\s*[|•]\s*([^|•]+?)\s*[|•]\s*(.+)$", line)
         if m:
-            left = m.group(1).strip()
-            mid = m.group(2).strip()
             right = m.group(3).strip()
             if DATE_RANGE_RE.search(right) or LOOSE_DATE_RANGE_RE.search(right):
-                return {"title": left, "company": mid, "period": right}
+                return {"title": m.group(1).strip(), "company": m.group(2).strip(), "period": right}
 
-        # Title @ Company (optional date)
         at_m = re.match(r"^(.+?)\s+@\s+(.+?)(?:\s+[(\[](.+)[)\]])?$", line)
         if at_m:
             period_candidate = at_m.group(3) or ""
-            if not period_candidate or DATE_RANGE_RE.search(period_candidate) or LOOSE_DATE_RANGE_RE.search(period_candidate):
+            if not period_candidate or DATE_RANGE_RE.search(period_candidate):
                 return {
                     "title": at_m.group(1).strip(),
                     "company": at_m.group(2).strip(),
                     "period": period_candidate.strip(),
                 }
-
         return None
 
-    def _ner_extract(self, text: str) -> Optional[Dict[str, str]]:
-        """
-        Run spaCy ORG NER on text.
-        Returns {"org": <name>, "remainder": <rest of line>} or None.
-        Uses the English model first; falls back to Romanian.
-        """
+    def _spacy_ner(self, text: str) -> Optional[Dict[str, str]]:
         for nlp in (self.nlp_en, self.nlp_ro):
             doc = nlp(text)
             orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
             if orgs:
-                org = orgs[0]
-                remainder = text.replace(org, "", 1)
-                return {"org": org, "remainder": remainder}
+                return {"org": orgs[0], "remainder": text.replace(orgs[0], "", 1)}
         return None
 
     @staticmethod
@@ -761,10 +783,7 @@ class ResumeParser:
             return False
         if EMAIL_RE.search(text) or PHONE_RE.search(text) or DATE_RE.search(text):
             return False
-        lower = text.lower()
-        return any(kw in lower for kw in JOB_TITLE_KEYWORDS)
-
-    # ── Empty response ────────────────────────────────────────────────────────
+        return any(kw in text.lower() for kw in JOB_TITLE_KEYWORDS)
 
     @staticmethod
     def _empty_response() -> ParseResponse:

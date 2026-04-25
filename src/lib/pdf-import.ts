@@ -7,16 +7,79 @@ type PdfjsTextItem = {
   transform?: number[]
 }
 
+/**
+ * Import a PDF resume.
+ *
+ * Strategy (in order):
+ *   1. POST to /api/parse-resume → Python microservice (PyMuPDF + spaCy + BERT)
+ *      Best accuracy; multi-column, Europass, ESCO skills.
+ *   2. Client-side TypeScript parser (pdfjs-dist + heuristics)
+ *      Always available fallback — no network dependency.
+ */
 export async function importPdfClientSide(file: File): Promise<ResumeTemplateData> {
   if (file.type !== 'application/pdf') throw new Error('File must be a PDF')
   if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be under 10 MB')
 
+  // ── Layer 1: Python microservice ─────────────────────────────────────────
+  try {
+    const result = await _importViaPythonService(file)
+    if (result) return result
+  } catch {
+    // Service unreachable or timed out — fall through to TypeScript parser
+  }
+
+  // ── Layer 2: TypeScript parser (client-side, always available) ───────────
+  return _importWithTsParser(file)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function _importViaPythonService(file: File): Promise<ResumeTemplateData | null> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 18_000)
+
+  let response: Response
+  try {
+    response = await fetch('/api/parse-resume', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timer)
+  }
+
+  if (!response.ok) {
+    console.warn('[pdf-import] Python service returned', response.status, '— falling back to TS parser')
+    return null
+  }
+
+  const data = (await response.json()) as ResumeTemplateData
+
+  // Sanity check: Python service must return at least a name or email
+  const hasMinimalData =
+    data.personal?.firstName ||
+    data.personal?.lastName  ||
+    data.personal?.email     ||
+    (data.experience?.length ?? 0) > 0
+
+  if (!hasMinimalData) {
+    console.warn('[pdf-import] Python service returned empty result — falling back to TS parser')
+    return null
+  }
+
+  return data
+}
+
+async function _importWithTsParser(file: File): Promise<ResumeTemplateData> {
   const pdfjsLib = await import('pdfjs-dist')
 
-  // Use a local bundled worker to avoid CDN/CORS/network failures in browser.
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
+    import.meta.url,
   ).toString()
 
   const arrayBuffer = await file.arrayBuffer()
