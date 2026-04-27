@@ -6,7 +6,7 @@ export const siteConfig = {
 
 export const heroContent = {
   heading: "Your Resume Is Getting Rejected Before a Human Ever Reads It.",
-  subheading: "75% of applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
+  subheading: "Many applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
   cta: "Check My ATS Score. It's Free",
   features: [
     { text: "No credit card required", icon: "CheckCircle2" },
@@ -23,13 +23,13 @@ export const statCards = [
   },
   {
     icon: "ShieldCheck",
-    title: "100% ATS Pass-Through",
-    description: "Templates designed specifically to format perfectly for applicant tracking systems.",
+    title: "ATS-Optimized Format",
+    description: "Templates designed to format cleanly for applicant tracking systems.",
   },
   {
     icon: "FileText",
-    title: "50%+ Interview Boost",
-    description: "Users report significantly higher callback rates with our optimized formats.",
+    title: "Clearer, More Relevant CV",
+    description: "Highlight the experience recruiters want to see most.",
   },
 ];
 
@@ -43,7 +43,7 @@ export const atsPreviewContent = {
   ],
   improvement: {
     before: "Helped team increase sales",
-    after: "Spearheaded initiative driving a 24% increase in sales Q3.",
+    after: "Spearheaded initiative driving a sales increase in Q3.",
   },
 };
 
