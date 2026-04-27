@@ -47,7 +47,7 @@ function emit(level: LogLevel, message: string, context?: LogContext) {
   } else if (level === 'warn') {
     console.warn(line)
   } else {
-    console.log(line)
+    console.info(line)
   }
 
   if (shouldSendAlert(level)) {
@@ -76,8 +76,44 @@ export function withRequestId(response: Response, requestId: string): Response {
   return response
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function normalizeApiPayload(data: unknown, status: number): unknown {
+  if (isRecord(data) && typeof data.success === 'boolean') {
+    if (data.success) {
+      if ('data' in data) {
+        return data
+      }
+
+      const rest = { ...data }
+      delete rest.success
+      return { success: true, data: rest, ...rest }
+    }
+
+    return {
+      success: false,
+      error: typeof data.error === 'string' && data.error.trim().length > 0 ? data.error : 'Request failed',
+    }
+  }
+
+  if (status >= 400) {
+    if (isRecord(data) && typeof data.error === 'string' && data.error.trim().length > 0) {
+      return { success: false, error: data.error }
+    }
+    return { success: false, error: 'Request failed' }
+  }
+
+  if (isRecord(data)) {
+    return { success: true, data, ...data }
+  }
+
+  return { success: true, data }
+}
+
 export function jsonWithRequestId(data: unknown, status: number, requestId: string): NextResponse {
-  const response = NextResponse.json(data, { status })
+  const response = NextResponse.json(normalizeApiPayload(data, status), { status })
   response.headers.set('x-request-id', requestId)
   return response
 }

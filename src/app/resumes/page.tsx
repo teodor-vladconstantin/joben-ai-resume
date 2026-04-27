@@ -12,52 +12,6 @@ type ResumeListItem = {
   updated_at: string
 }
 
-type ResumeDetailPayload = {
-  resume?: {
-    data?: unknown
-  }
-}
-
-function extractResumeText(data: unknown) {
-  if (!data || typeof data !== 'object') return ''
-  const payload = data as {
-    personal?: {
-      firstName?: string
-      lastName?: string
-      title?: string
-      email?: string
-      phone?: string
-      summary?: string
-    }
-    experience?: Array<{
-      title?: string
-      company?: string
-      period?: string
-      description?: string
-      bullets?: string[]
-    }>
-  }
-
-  const personal = payload.personal || {}
-  const base = [
-    `${personal.firstName || ''} ${personal.lastName || ''}`.trim(),
-    personal.title || '',
-    personal.email || '',
-    personal.phone || '',
-    personal.summary || '',
-  ]
-
-  const experience = (payload.experience || []).map((entry) => {
-    const bullets = Array.isArray(entry.bullets)
-      ? entry.bullets.map((bullet) => bullet.trim()).filter(Boolean)
-      : []
-    const bulletText = bullets.length > 0 ? bullets.join(' | ') : (entry.description || '')
-
-    return `${entry.title || ''} at ${entry.company || ''} (${entry.period || ''}) ${bulletText}`
-  })
-
-  return [...base, ...experience].filter(Boolean).join('\n')
-}
 
 function timeAgo(dateValue: string): string {
   const date = new Date(dateValue)
@@ -95,8 +49,8 @@ export default function ResumesPage() {
         return
       }
 
-      const payload = (await response.json()) as { resumes?: ResumeListItem[] }
-      if (!cancelled) setResumes(payload.resumes || [])
+      const payload = (await response.json()) as { resumes?: ResumeListItem[]; data?: { resumes?: ResumeListItem[] } }
+      if (!cancelled) setResumes(payload.data?.resumes || payload.resumes || [])
     }
 
     loadResumes()
@@ -154,12 +108,12 @@ export default function ResumesPage() {
       <Navbar />
       
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-center mb-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Resumes</h1>
             <p className="text-[#FFFFFF]/82">{resumes.length} resumes</p>
           </div>
-          <Link href="/resumes/new" className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+          <Link href="/resumes/new" className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 w-full sm:w-auto">
             <Plus className="w-5 h-5" /> Create Resume
           </Link>
         </div>
@@ -174,7 +128,7 @@ export default function ResumesPage() {
               className="w-full rounded-lg border border-white/10 bg-[#0A0F0D] py-2 pl-10 pr-3 text-sm text-white focus:border-[#16DB65] focus:outline-none"
             />
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Newest</button>
             <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Oldest</button>
             <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>A-Z</button>

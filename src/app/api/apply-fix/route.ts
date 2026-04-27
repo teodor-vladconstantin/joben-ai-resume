@@ -73,26 +73,29 @@ Return ONLY valid JSON, no markdown:
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId, sessionClaims } = await auth()
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const emailHint = getEmailHintFromSessionClaims(sessionClaims)
-
-  const body = (await req.json()) as {
-    resumeId?: string
-    reviewId?: string
-    improvement?: Improvement
-  }
-
-  if (!body.resumeId || !body.improvement) {
-    return jsonWithRequestId({ error: 'resumeId and improvement are required' }, 400, requestId)
-  }
-
-  const plan = await getUserPlan(userId, emailHint)
-
+  let userId: string | null = null
   try {
+    const authResult = await auth()
+    userId = authResult.userId
+    const { sessionClaims } = authResult
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    }
+
+    const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+
+    const body = (await req.json()) as {
+      resumeId?: string
+      reviewId?: string
+      improvement?: Improvement
+    }
+
+    if (!body.resumeId || !body.improvement) {
+      return jsonWithRequestId({ error: 'resumeId and improvement are required' }, 400, requestId)
+    }
+
+    const plan = await getUserPlan(userId, emailHint)
+
     const supabase = createServerClient()
 
     const { data: resume, error: resumeError } = await supabase

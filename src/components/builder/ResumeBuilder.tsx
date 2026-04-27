@@ -1,7 +1,7 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, X } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
@@ -192,13 +192,21 @@ export function ResumeBuilder() {
           id: string
           data?: ResumeData
         }
+        data?: {
+          resume?: {
+            id: string
+            data?: ResumeData
+          }
+        }
       }
 
       if (cancelled) return
 
-      if (payload.resume) {
-        setResumeId(payload.resume.id)
-        const loadedData = payload.resume.data
+      const resumePayload = payload.data?.resume || payload.resume
+
+      if (resumePayload) {
+        setResumeId(resumePayload.id)
+        const loadedData = resumePayload.data
         if (loadedData) {
           setResumeData((prev) => {
             const incomingExperience = Array.isArray(loadedData.experience)
@@ -945,7 +953,7 @@ export function ResumeBuilder() {
               }))
             }
           />
-          <div className="flex gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="flex-1 rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm font-semibold text-[#0A9548] hover:bg-[#0A9548]/20"
@@ -1106,7 +1114,8 @@ export function ResumeBuilder() {
                           <div className="flex items-center justify-end gap-2 pt-1">
                             <button
                               onClick={() => void handleGenerateSummary(summaryGenerationMode)}
-                              className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
+                              disabled={isGeneratingSummary}
+                              className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Regenerate
                             </button>
@@ -1263,10 +1272,11 @@ export function ResumeBuilder() {
                                  </div>
                                  <p className="text-sm text-white/95 leading-relaxed">{draftState?.draft}</p>
                                  <div className="flex items-center justify-end gap-2 pt-1">
-                                   <button
-                                     onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
-                                     className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
-                                   >
+                                  <button
+                                    onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
+                                    disabled={Boolean(draftState?.isLoading)}
+                                    className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
                                      Regenerate
                                    </button>
                                    <button
@@ -1318,7 +1328,11 @@ export function ResumeBuilder() {
         </div>
         
         <div className="shrink-0 p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4" suppressHydrationWarning>
-          <button onClick={() => void persistResume()} className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
+          <button
+            onClick={() => void persistResume()}
+            disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
+            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <Save className="w-4 h-4" /> Save
           </button>
           <button

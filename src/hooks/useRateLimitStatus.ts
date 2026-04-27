@@ -30,8 +30,8 @@ export function useRateLimitStatus(): UseRateLimitStatusResult {
         throw new Error(payload?.error || 'Could not load rate limit status.')
       }
 
-      const payload = (await response.json()) as RateLimitStatus
-      setStatus(payload)
+      const payload = (await response.json()) as RateLimitStatus & { data?: RateLimitStatus }
+      setStatus(payload.data || payload)
     } catch {
       setStatus(null)
     } finally {

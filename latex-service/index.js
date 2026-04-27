@@ -126,5 +126,5 @@ function cleanupFiles(basePath) {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`LaTeX compiler service listening on port ${PORT}`);
+    console.info(`LaTeX compiler service listening on port ${PORT}`);
 });

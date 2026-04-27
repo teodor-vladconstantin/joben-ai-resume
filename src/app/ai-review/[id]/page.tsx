@@ -52,11 +52,16 @@ export default function AIReviewEditorPage() {
       const payload = (await response.json()) as {
         review?: AnalyzerReview
         comparison?: { previousScore: number | null; previousReviewId: string | null; delta: number | null } | null
+        data?: {
+          review?: AnalyzerReview
+          comparison?: { previousScore: number | null; previousReviewId: string | null; delta: number | null } | null
+        }
       }
 
       if (!cancelled) {
-        setReview(payload.review || null)
-        setComparison(payload.comparison || null)
+        const responseData = payload.data || {}
+        setReview(responseData.review || payload.review || null)
+        setComparison(responseData.comparison || payload.comparison || null)
         setIsLoading(false)
       }
     }

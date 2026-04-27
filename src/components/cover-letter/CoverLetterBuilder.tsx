@@ -107,6 +107,7 @@ export function CoverLetterBuilder() {
   const [isBodyModalOpen, setIsBodyModalOpen] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [letterId, setLetterId] = useState<string | null>(null)
   const [modalDraft, setModalDraft] = useState('')
@@ -168,17 +169,26 @@ export function CoverLetterBuilder() {
           title: string
           content: string
         }
+        data?: {
+          letter?: {
+            id: string
+            title: string
+            content: string
+          }
+        }
       }
 
-      if (cancelled || !payload.letter) {
+      const letterPayload = payload.data?.letter || payload.letter
+
+      if (cancelled || !letterPayload) {
         setIsLoading(false)
         return
       }
 
-      setLetterId(payload.letter.id)
-      setSections(parseSections(payload.letter.content || ''))
+      setLetterId(letterPayload.id)
+      setSections(parseSections(letterPayload.content || ''))
 
-      const parts = (payload.letter.title || '').split(' - ')
+      const parts = (letterPayload.title || '').split(' - ')
       if (parts.length >= 2) {
         setSections((prev) => ({
           ...prev,
@@ -396,6 +406,9 @@ export function CoverLetterBuilder() {
   }
 
   async function exportAsPdf() {
+    if (isExportingPdf) return
+    setIsExportingPdf(true)
+
     try {
       const response = await fetch('/api/cover-letter/pdf', {
         method: 'POST',
@@ -423,6 +436,8 @@ export function CoverLetterBuilder() {
       URL.revokeObjectURL(url)
     } catch (error) {
       alert(`Export failed: ${(error as Error).message}`)
+    } finally {
+      setIsExportingPdf(false)
     }
   }
 
@@ -508,10 +523,18 @@ export function CoverLetterBuilder() {
         </div>
 
         <div className="p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4">
-          <button onClick={() => void persistLetter()} className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
+          <button
+            onClick={() => void persistLetter()}
+            disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
+            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <Save className="w-4 h-4" /> Save
           </button>
-          <button onClick={() => void exportAsPdf()} className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
+          <button
+            onClick={() => void exportAsPdf()}
+            disabled={isLoading || isExportingPdf}
+            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <Download className="w-4 h-4" /> Export PDF
           </button>
         </div>

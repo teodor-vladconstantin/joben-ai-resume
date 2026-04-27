@@ -8,6 +8,7 @@ import {
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { AI_LIMITS, estimateTokens } from '@/lib/token-estimator'
+import { getErrorMessage } from '@/lib/api-response'
 
 type SummaryMode = 'resume' | 'scratch'
 
@@ -111,106 +112,110 @@ function buildResumeContext(resumeData: ResumeSummaryInput): string {
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId, sessionClaims } = await auth()
-
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const body = (await req.json()) as GenerateSummaryBody
-  const mode = body.mode
-
-  if (mode !== 'resume' && mode !== 'scratch') {
-    return jsonWithRequestId({ error: 'mode must be either "resume" or "scratch".' }, 400, requestId)
-  }
-
-  let userPrompt = ''
-
-  if (mode === 'resume') {
-    if (!body.resumeData) {
-      return jsonWithRequestId({ error: 'resumeData is required when mode is "resume".' }, 400, requestId)
-    }
-
-    const resumeContext = buildResumeContext(body.resumeData)
-    if (!resumeContext.trim()) {
-      return jsonWithRequestId({ error: 'Resume context is empty. Add experience or sections before generating.' }, 400, requestId)
-    }
-
-    userPrompt = [
-      'Generate a professional summary based on this resume context.',
-      'Keep it specific to the achievements and skills shown below.',
-      '',
-      'Resume context:',
-      resumeContext,
-    ].join('\n')
-  }
-
-  if (mode === 'scratch') {
-    const roleDescription = compactWhitespace(body.roleDescription || '')
-    if (!roleDescription) {
-      return jsonWithRequestId({ error: 'roleDescription is required when mode is "scratch".' }, 400, requestId)
-    }
-
-    userPrompt = [
-      'Generate a professional summary from scratch for this target role.',
-      '',
-      `Target role description: ${roleDescription}`,
-    ].join('\n')
-  }
-
-  const estimatedTokens = estimateTokens(`${SUMMARY_SYSTEM_PROMPT}\n${userPrompt}`)
-  if (estimatedTokens > AI_LIMITS.summary_gen) {
-    return jsonWithRequestId(
-      {
-        error: `Input is too long for summary generation. Keep it under ${AI_LIMITS.summary_gen * 4} characters (~${AI_LIMITS.summary_gen} tokens).`,
-        limitType: 'input_too_long',
-      },
-      429,
-      requestId
-    )
-  }
-
-  const emailHint = getEmailHintFromSessionClaims(sessionClaims)
-  const plan = await getUserPlan(userId, emailHint)
-
   try {
-    const messages: MessageParam[] = [
-      {
-        role: 'user',
-        content: userPrompt,
-      },
-    ]
+    const { userId, sessionClaims } = await auth()
 
-    const aiResponse = await callAnthropicWithLimits({
-      userId,
-      plan,
-      inputText: userPrompt,
-      messages,
-      system: SUMMARY_SYSTEM_PROMPT,
-    })
-
-    const summary = normalizeSummaryOutput(extractTextFromAnthropicMessage(aiResponse))
-    if (!summary) {
-      return jsonWithRequestId({ error: 'Could not generate a summary. Please try again.' }, 500, requestId)
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
-    return jsonWithRequestId({ summary }, 200, requestId)
+    const body = (await req.json()) as GenerateSummaryBody
+    const mode = body.mode
+
+    if (mode !== 'resume' && mode !== 'scratch') {
+      return jsonWithRequestId({ error: 'mode must be either "resume" or "scratch".' }, 400, requestId)
+    }
+
+    let userPrompt = ''
+
+    if (mode === 'resume') {
+      if (!body.resumeData) {
+        return jsonWithRequestId({ error: 'resumeData is required when mode is "resume".' }, 400, requestId)
+      }
+
+      const resumeContext = buildResumeContext(body.resumeData)
+      if (!resumeContext.trim()) {
+        return jsonWithRequestId({ error: 'Resume context is empty. Add experience or sections before generating.' }, 400, requestId)
+      }
+
+      userPrompt = [
+        'Generate a professional summary based on this resume context.',
+        'Keep it specific to the achievements and skills shown below.',
+        '',
+        'Resume context:',
+        resumeContext,
+      ].join('\n')
+    }
+
+    if (mode === 'scratch') {
+      const roleDescription = compactWhitespace(body.roleDescription || '')
+      if (!roleDescription) {
+        return jsonWithRequestId({ error: 'roleDescription is required when mode is "scratch".' }, 400, requestId)
+      }
+
+      userPrompt = [
+        'Generate a professional summary from scratch for this target role.',
+        '',
+        `Target role description: ${roleDescription}`,
+      ].join('\n')
+    }
+
+    const estimatedTokens = estimateTokens(`${SUMMARY_SYSTEM_PROMPT}\n${userPrompt}`)
+    if (estimatedTokens > AI_LIMITS.summary_gen) {
+      return jsonWithRequestId(
+        {
+          error: `Input is too long for summary generation. Keep it under ${AI_LIMITS.summary_gen * 4} characters (~${AI_LIMITS.summary_gen} tokens).`,
+          limitType: 'input_too_long',
+        },
+        429,
+        requestId
+      )
+    }
+
+    const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+    const plan = await getUserPlan(userId, emailHint)
+
+    try {
+      const messages: MessageParam[] = [
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ]
+
+      const aiResponse = await callAnthropicWithLimits({
+        userId,
+        plan,
+        inputText: userPrompt,
+        messages,
+        system: SUMMARY_SYSTEM_PROMPT,
+      })
+
+      const summary = normalizeSummaryOutput(extractTextFromAnthropicMessage(aiResponse))
+      if (!summary) {
+        return jsonWithRequestId({ error: 'Could not generate a summary. Please try again.' }, 500, requestId)
+      }
+
+      return jsonWithRequestId({ summary }, 200, requestId)
+    } catch (error) {
+      if (isRateLimitExceededError(error)) {
+        return jsonWithRequestId(error.payload, error.status, requestId)
+      }
+
+      logger.error('Generate-summary route failed', {
+        requestId,
+        userId,
+        route: '/api/generate-summary',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+
+      return jsonWithRequestId(
+        { error: error instanceof Error ? error.message : 'Could not generate summary.' },
+        500,
+        requestId
+      )
+    }
   } catch (error) {
-    if (isRateLimitExceededError(error)) {
-      return jsonWithRequestId(error.payload, error.status, requestId)
-    }
-
-    logger.error('Generate-summary route failed', {
-      requestId,
-      userId,
-      route: '/api/generate-summary',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    })
-
-    return jsonWithRequestId(
-      { error: error instanceof Error ? error.message : 'Could not generate summary.' },
-      500,
-      requestId
-    )
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
   }
 }

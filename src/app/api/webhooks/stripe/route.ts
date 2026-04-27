@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
-import { getRequestId, logger, withRequestId } from '@/lib/logger'
+import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/api-response'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -30,14 +30,14 @@ export async function POST(req: Request) {
       requestId,
       route: '/api/webhooks/stripe',
     })
-    return withRequestId(new NextResponse('Webhook Error: STRIPE_WEBHOOK_SECRET is not set', { status: 500 }), requestId)
+    return jsonWithRequestId({ error: 'Webhook Error: STRIPE_WEBHOOK_SECRET is not set' }, 500, requestId)
   }
 
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
 
   if (!sig) {
-    return withRequestId(new NextResponse('Webhook Error: Missing stripe-signature header', { status: 400 }), requestId)
+    return jsonWithRequestId({ error: 'Webhook Error: Missing stripe-signature header' }, 400, requestId)
   }
 
   let event: Stripe.Event
@@ -55,14 +55,19 @@ export async function POST(req: Request) {
       route: '/api/webhooks/stripe',
       error: message,
     })
-    return withRequestId(new NextResponse(`Webhook Error: ${message}`, { status: 400 }), requestId)
+    return jsonWithRequestId({ error: `Webhook Error: ${message}` }, 400, requestId)
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   })
 
-  const payload = JSON.parse(body) as Record<string, unknown>
+  let payload: Record<string, unknown>
+  try {
+    payload = JSON.parse(body) as Record<string, unknown>
+  } catch {
+    return jsonWithRequestId({ error: 'Webhook Error: invalid JSON payload' }, 400, requestId)
+  }
   const eventCreated = typeof event.created === 'number' ? event.created : Math.floor(Date.now() / 1000)
 
   const { error: claimError } = await supabase.from('webhook_events').insert({
@@ -80,7 +85,7 @@ export async function POST(req: Request) {
         eventId: event.id,
         eventType: event.type,
       })
-      return withRequestId(new NextResponse('Duplicate webhook ignored', { status: 200 }), requestId)
+      return jsonWithRequestId({ message: 'Duplicate webhook ignored' }, 200, requestId)
     }
 
     logger.error('Failed to claim stripe webhook event', {
@@ -90,7 +95,7 @@ export async function POST(req: Request) {
       eventType: event.type,
       error: claimError.message,
     })
-    return withRequestId(new NextResponse('Webhook Error: failed to claim event', { status: 500 }), requestId)
+    return jsonWithRequestId({ error: 'Webhook Error: failed to claim event' }, 500, requestId)
   }
 
   const syncPlanFromSubscription = async (
@@ -112,7 +117,7 @@ export async function POST(req: Request) {
         eventType: event.type,
         error: userLookupError.message,
       })
-      return withRequestId(new NextResponse('Webhook Error: database lookup failed', { status: 500 }), requestId)
+      return jsonWithRequestId({ error: 'Webhook Error: database lookup failed' }, 500, requestId)
     }
 
     if (!user) {
@@ -161,7 +166,7 @@ export async function POST(req: Request) {
           eventType: event.type,
           error: error.message,
         })
-        return withRequestId(new NextResponse('Webhook Error: database update failed', { status: 500 }), requestId)
+        return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
       }
 
       logger.info('Skipped stripe plan downgrade due to lifetime recruiting override', {
@@ -198,7 +203,7 @@ export async function POST(req: Request) {
         eventType: event.type,
         error: error.message,
       })
-      return withRequestId(new NextResponse('Webhook Error: database update failed', { status: 500 }), requestId)
+      return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
     }
 
     return null
@@ -226,7 +231,7 @@ export async function POST(req: Request) {
             eventType: event.type,
             error: userLookupError.message,
           })
-          return withRequestId(new NextResponse('Webhook Error: database lookup failed', { status: 500 }), requestId)
+          return jsonWithRequestId({ error: 'Webhook Error: database lookup failed' }, 500, requestId)
         }
 
         if (!user) {
@@ -249,7 +254,7 @@ export async function POST(req: Request) {
             lastProcessedAt: user.stripe_last_event_created,
             eventCreated,
           })
-          return withRequestId(new NextResponse('Stale webhook ignored', { status: 200 }), requestId)
+          return jsonWithRequestId({ message: 'Stale webhook ignored' }, 200, requestId)
         }
 
         const updatePayload: {
@@ -290,7 +295,7 @@ export async function POST(req: Request) {
               eventType: event.type,
               error: error.message,
             })
-            return withRequestId(new NextResponse('Webhook Error: database update failed', { status: 500 }), requestId)
+            return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
           }
         }
       }
@@ -393,13 +398,13 @@ export async function POST(req: Request) {
       }
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
+    const message = getErrorMessage(err)
     logger.error('Stripe webhook handling failed', {
       requestId,
       route: '/api/webhooks/stripe',
       error: message,
     })
-    return withRequestId(new NextResponse(`Webhook handling failed: ${message}`, { status: 500 }), requestId)
+    return jsonWithRequestId({ error: `Webhook handling failed: ${message}` }, 500, requestId)
   }
 
   logger.info('Stripe webhook processed', {
@@ -408,5 +413,5 @@ export async function POST(req: Request) {
     eventId: event.id,
     eventType: event.type,
   })
-  return withRequestId(new NextResponse('Webhook received', { status: 200 }), requestId)
+  return jsonWithRequestId({ message: 'Webhook received' }, 200, requestId)
 }

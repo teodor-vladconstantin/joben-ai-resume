@@ -11,6 +11,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { estimateRequestCost } from '@/lib/token-estimator'
+import { getErrorMessage } from '@/lib/api-response'
 
 const ANALYZE_SYSTEM_PROMPT = `You are an elite resume analyst and ATS expert. Analyze the resume and return ONLY valid JSON, no markdown, no preamble.
 
@@ -55,111 +56,115 @@ Return:
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId, sessionClaims } = await auth()
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const emailHint = getEmailHintFromSessionClaims(sessionClaims)
-
-  const body = (await req.json()) as {
-    resumeText?: string
-    jobDescription?: string
-    resumeId?: string
-  }
-
-  if (!body.resumeText || !body.resumeText.trim()) {
-    return jsonWithRequestId({ error: 'resumeText is required' }, 400, requestId)
-  }
-
-  const plan = await getUserPlan(userId, emailHint)
-
-  const costEstimate = estimateRequestCost(body.resumeText, body.jobDescription, 'resume_analysis')
-  if (!costEstimate.withinLimit) {
-    const suggested = costEstimate.suggestedMaxChars ?? 16000
-    const label = costEstimate.limitType === 'jd_too_long'
-      ? `Job description-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
-      : `CV-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
-    return jsonWithRequestId({ error: label, limitType: 'input_too_long' }, 429, requestId)
-  }
-
   try {
-    const prompt = `Resume:\n${body.resumeText}\n\nJob description:\n${body.jobDescription || 'N/A'}`
-    const messages: MessageParam[] = [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ]
+    const { userId, sessionClaims } = await auth()
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    }
 
-    const aiResponse = await callAnthropicWithLimits({
-      userId,
-      plan,
-      inputText: prompt,
-      messages,
-      system: ANALYZE_SYSTEM_PROMPT,
-    })
+    const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
-    const analysisText = extractTextFromAnthropicMessage(aiResponse)
-    const analysis = parseClaudeJsonText(analysisText) as Record<string, unknown> & { overall_score?: number }
+    const body = (await req.json()) as {
+      resumeText?: string
+      jobDescription?: string
+      resumeId?: string
+    }
 
-    const supabase = createServerClient()
-    const { data: createdReview, error: insertError } = await supabase
-      .from('ai_reviews')
-      .insert({
-        user_id: userId,
-        resume_id: body.resumeId || null,
-        score: Number(analysis?.overall_score || 0),
-        feedback: analysis,
+    if (!body.resumeText || !body.resumeText.trim()) {
+      return jsonWithRequestId({ error: 'resumeText is required' }, 400, requestId)
+    }
+
+    const plan = await getUserPlan(userId, emailHint)
+
+    const costEstimate = estimateRequestCost(body.resumeText, body.jobDescription, 'resume_analysis')
+    if (!costEstimate.withinLimit) {
+      const suggested = costEstimate.suggestedMaxChars ?? 16000
+      const label = costEstimate.limitType === 'jd_too_long'
+        ? `Job description-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
+        : `CV-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
+      return jsonWithRequestId({ error: label, limitType: 'input_too_long' }, 429, requestId)
+    }
+
+    try {
+      const prompt = `Resume:\n${body.resumeText}\n\nJob description:\n${body.jobDescription || 'N/A'}`
+      const messages: MessageParam[] = [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ]
+
+      const aiResponse = await callAnthropicWithLimits({
+        userId,
+        plan,
+        inputText: prompt,
+        messages,
+        system: ANALYZE_SYSTEM_PROMPT,
       })
-      .select('id')
-      .single()
 
-    if (insertError) {
-      logger.error('Failed to insert AI review', {
+      const analysisText = extractTextFromAnthropicMessage(aiResponse)
+      const analysis = parseClaudeJsonText(analysisText) as Record<string, unknown> & { overall_score?: number }
+
+      const supabase = createServerClient()
+      const { data: createdReview, error: insertError } = await supabase
+        .from('ai_reviews')
+        .insert({
+          user_id: userId,
+          resume_id: body.resumeId || null,
+          score: Number(analysis?.overall_score || 0),
+          feedback: analysis,
+        })
+        .select('id')
+        .single()
+
+      if (insertError) {
+        logger.error('Failed to insert AI review', {
+          requestId,
+          userId,
+          route: '/api/analyze',
+          error: insertError.message,
+        })
+        return jsonWithRequestId({ error: insertError.message }, 500, requestId)
+      }
+
+      logger.info('AI review created', {
         requestId,
         userId,
         route: '/api/analyze',
-        error: insertError.message,
-      })
-      return jsonWithRequestId({ error: insertError.message }, 500, requestId)
-    }
-
-    logger.info('AI review created', {
-      requestId,
-      userId,
-      route: '/api/analyze',
-      reviewId: createdReview.id,
-    })
-
-    await trackProductEvent({
-      userId,
-      eventName: 'resume_analyzed',
-      requestId,
-      metadata: {
-        resumeId: body.resumeId || null,
         reviewId: createdReview.id,
-        hasJobDescription: Boolean(body.jobDescription?.trim()),
-      },
-    })
+      })
 
-    return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
-  } catch (error) {
-    if (isRateLimitExceededError(error)) {
-      return jsonWithRequestId(error.payload, error.status, requestId)
+      await trackProductEvent({
+        userId,
+        eventName: 'resume_analyzed',
+        requestId,
+        metadata: {
+          resumeId: body.resumeId || null,
+          reviewId: createdReview.id,
+          hasJobDescription: Boolean(body.jobDescription?.trim()),
+        },
+      })
+
+      return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
+    } catch (error) {
+      if (isRateLimitExceededError(error)) {
+        return jsonWithRequestId(error.payload, error.status, requestId)
+      }
+
+      const message = error instanceof ClaudeJsonParseError
+        ? 'AI response format was invalid. Please retry.'
+        : getErrorMessage(error)
+
+      logger.error('Analyze route failed', {
+        requestId,
+        userId,
+        route: '/api/analyze',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+
+      return jsonWithRequestId({ error: message }, 500, requestId)
     }
-
-    const message = error instanceof ClaudeJsonParseError
-      ? 'AI response format was invalid. Please retry.'
-      : (error as Error).message
-
-    logger.error('Analyze route failed', {
-      requestId,
-      userId,
-      route: '/api/analyze',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    })
-
-    return jsonWithRequestId({ error: message }, 500, requestId)
+  } catch (error) {
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
   }
 }

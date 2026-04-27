@@ -93,15 +93,15 @@ export default function AIReviewPage() {
       ])
 
       if (!cancelled && resumesRes.ok) {
-        const r = (await resumesRes.json()) as { resumes?: ResumeItem[] }
-        const list = r.resumes || []
+        const r = (await resumesRes.json()) as { resumes?: ResumeItem[]; data?: { resumes?: ResumeItem[] } }
+        const list = r.data?.resumes || r.resumes || []
         setResumes(list)
         if (list.length > 0) setSelectedResumeId(list[0].id)
       }
 
       if (!cancelled && reviewsRes.ok) {
-        const a = (await reviewsRes.json()) as { reviews?: ReviewItem[] }
-        setReviews(a.reviews || [])
+        const a = (await reviewsRes.json()) as { reviews?: ReviewItem[]; data?: { reviews?: ReviewItem[] } }
+        setReviews(a.data?.reviews || a.reviews || [])
       }
     }
 
@@ -180,8 +180,8 @@ export default function AIReviewPage() {
           return
         }
 
-        const detail = (await detailRes.json()) as { resume?: { data?: unknown } }
-        resumeText = extractResumeText(detail.resume?.data)
+        const detail = (await detailRes.json()) as { resume?: { data?: unknown }; data?: { resume?: { data?: unknown } } }
+        resumeText = extractResumeText(detail.data?.resume?.data ?? detail.resume?.data)
       }
 
       if (!resumeText.trim()) {
@@ -367,7 +367,7 @@ export default function AIReviewPage() {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <h3 className="text-xl font-bold text-white">Review Existing Resume</h3>
             <div className="relative w-full max-w-sm">
               <Search className="w-4 h-4 text-[#FFFFFF]/60 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -379,46 +379,52 @@ export default function AIReviewPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {visibleResumes.map((resume) => {
-              const resumeReviews = reviews
-                .filter((review) => review.resume_id === resume.id)
-                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-              const latestReview = resumeReviews.at(-1)
-              const hasReviews = resumeReviews.length > 0
-              const scoreHistory = resumeReviews.map((r) => Number(r.score || 0)).filter((s) => s > 0)
-              const latestScore = scoreHistory.at(-1) ?? Number(latestReview?.score || 0)
-              return (
-                <div key={resume.id} className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
-                  <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
-                  {hasReviews ? (
-                    <p className="text-xs text-[#FFFFFF]/60 mt-1 flex items-center gap-1 flex-wrap">
-                      {`Score ${latestScore}`}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-[#FFFFFF]/60 mt-1">Not reviewed yet</p>
-                  )}
-                  <div className="mt-3 flex gap-2">
-                    {hasReviews && latestReview && (
-                      <Link
-                        href={`/ai-review/${latestReview.id}`}
-                        className="flex-1 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-2 text-sm text-white font-semibold inline-flex items-center justify-center"
-                      >
-                        View Latest
-                      </Link>
+          {visibleResumes.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/10 bg-[#0A0F0D] p-6 text-center text-sm text-[#FFFFFF]/72">
+              No resumes found.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {visibleResumes.map((resume) => {
+                const resumeReviews = reviews
+                  .filter((review) => review.resume_id === resume.id)
+                  .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                const latestReview = resumeReviews.at(-1)
+                const hasReviews = resumeReviews.length > 0
+                const scoreHistory = resumeReviews.map((r) => Number(r.score || 0)).filter((s) => s > 0)
+                const latestScore = scoreHistory.at(-1) ?? Number(latestReview?.score || 0)
+                return (
+                  <div key={resume.id} className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
+                    <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
+                    {hasReviews ? (
+                      <p className="text-xs text-[#FFFFFF]/60 mt-1 flex items-center gap-1 flex-wrap">
+                        {`Score ${latestScore}`}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-[#FFFFFF]/60 mt-1">Not reviewed yet</p>
                     )}
-                    <button
-                      onClick={() => void handleAnalyze(resume.id)}
-                      disabled={isAnalyzing}
-                      className={`${hasReviews ? 'flex-1' : 'w-full'} rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm text-[#0A9548] font-semibold disabled:opacity-60`}
-                    >
-                      {hasReviews ? 'Re-review' : 'Start Review'}
-                    </button>
+                    <div className="mt-3 flex gap-2">
+                      {hasReviews && latestReview && (
+                        <Link
+                          href={`/ai-review/${latestReview.id}`}
+                          className="flex-1 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-2 text-sm text-white font-semibold inline-flex items-center justify-center"
+                        >
+                          View Latest
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => void handleAnalyze(resume.id)}
+                        disabled={isAnalyzing}
+                        className={`${hasReviews ? 'flex-1' : 'w-full'} rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm text-[#0A9548] font-semibold disabled:opacity-60`}
+                      >
+                        {hasReviews ? 'Re-review' : 'Start Review'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </main>
 

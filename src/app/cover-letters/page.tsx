@@ -43,8 +43,8 @@ export default function CoverLettersPage() {
         return
       }
 
-      const payload = (await response.json()) as { letters?: CoverLetterItem[] }
-      if (!cancelled) setLetters(payload.letters || [])
+      const payload = (await response.json()) as { letters?: CoverLetterItem[]; data?: { letters?: CoverLetterItem[] } }
+      if (!cancelled) setLetters(payload.data?.letters || payload.letters || [])
     }
 
     loadLetters()
@@ -89,12 +89,12 @@ export default function CoverLettersPage() {
       <Navbar />
       
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-center mb-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Cover Letters</h1>
             <p className="text-[#FFFFFF]/82">{letters.length} cover letters</p>
           </div>
-          <Link href="/cover-letters/new" className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+          <Link href="/cover-letters/new" className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 w-full sm:w-auto">
             <Plus className="w-5 h-5" /> Create Cover Letter
           </Link>
         </div>
@@ -109,7 +109,7 @@ export default function CoverLettersPage() {
               className="w-full rounded-lg border border-white/10 bg-[#0A0F0D] py-2 pl-10 pr-3 text-sm text-white focus:border-[#16DB65] focus:outline-none"
             />
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Newest</button>
             <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Oldest</button>
             <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>A-Z</button>

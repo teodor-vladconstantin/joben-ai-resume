@@ -1,14 +1,18 @@
-import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getRateLimitStatus } from '@/lib/ratelimit'
+import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
 
 export async function GET() {
-  const { userId } = await auth()
+  try {
+    const { userId } = await auth()
 
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!userId) {
+      return apiError('Unauthorized', 401)
+    }
+
+    const status = await getRateLimitStatus(userId)
+    return apiSuccess(status, 200)
+  } catch (error) {
+    return apiError(getErrorMessage(error), 500)
   }
-
-  const status = await getRateLimitStatus(userId)
-  return NextResponse.json(status, { status: 200 })
 }
