@@ -8,6 +8,7 @@ import {
   unblockFeature,
 } from '@/lib/ratelimit'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/api-response'
 
 const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'cvs'])
 const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'cvs', 'tokens', 'hard_cap'])
@@ -117,90 +118,98 @@ async function getAlertsForDate(date: string): Promise<Array<{ userId: string; f
 
 export async function GET(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
+  try {
+    const { userId } = await auth()
 
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const admins = parseAdminUserIds()
-  if (!admins.has(userId)) {
-    return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
-  }
-
-  const { searchParams } = new URL(req.url)
-  const action = searchParams.get('action') || 'alerts'
-
-  if (action === 'alerts') {
-    const today = new Date().toISOString().slice(0, 10)
-    const date = searchParams.get('date') || today
-
-    if (!isValidIsoDay(date)) {
-      return jsonWithRequestId({ error: 'date must use YYYY-MM-DD format' }, 400, requestId)
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
-    const alerts = await getAlertsForDate(date)
-    return jsonWithRequestId(alerts, 200, requestId)
-  }
-
-  if (action === 'user') {
-    const targetUserId = searchParams.get('userId')
-    if (!targetUserId) {
-      return jsonWithRequestId({ error: 'userId is required for action=user' }, 400, requestId)
+    const admins = parseAdminUserIds()
+    if (!admins.has(userId)) {
+      return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
     }
 
-    const status = await getRateLimitStatus(targetUserId)
-    return jsonWithRequestId(status, 200, requestId)
-  }
+    const { searchParams } = new URL(req.url)
+    const action = searchParams.get('action') || 'alerts'
 
-  return jsonWithRequestId({ error: 'Unsupported action. Use alerts or user.' }, 400, requestId)
+    if (action === 'alerts') {
+      const today = new Date().toISOString().slice(0, 10)
+      const date = searchParams.get('date') || today
+
+      if (!isValidIsoDay(date)) {
+        return jsonWithRequestId({ error: 'date must use YYYY-MM-DD format' }, 400, requestId)
+      }
+
+      const alerts = await getAlertsForDate(date)
+      return jsonWithRequestId(alerts, 200, requestId)
+    }
+
+    if (action === 'user') {
+      const targetUserId = searchParams.get('userId')
+      if (!targetUserId) {
+        return jsonWithRequestId({ error: 'userId is required for action=user' }, 400, requestId)
+      }
+
+      const status = await getRateLimitStatus(targetUserId)
+      return jsonWithRequestId(status, 200, requestId)
+    }
+
+    return jsonWithRequestId({ error: 'Unsupported action. Use alerts or user.' }, 400, requestId)
+  } catch (error) {
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+  }
 }
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
+  try {
+    const { userId } = await auth()
 
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    }
+
+    const admins = parseAdminUserIds()
+    if (!admins.has(userId)) {
+      return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
+    }
+
+    const body = (await req.json()) as {
+      action?: 'block' | 'unblock'
+      userId?: string
+      feature?: Feature
+    }
+
+    if (!body.action || (body.action !== 'block' && body.action !== 'unblock')) {
+      return jsonWithRequestId({ error: 'action must be block or unblock' }, 400, requestId)
+    }
+
+    if (!body.userId) {
+      return jsonWithRequestId({ error: 'userId is required' }, 400, requestId)
+    }
+
+    if (!body.feature || !FEATURE_SET.has(body.feature)) {
+      return jsonWithRequestId({ error: 'feature must be one of covers, jds, bullets, cvs' }, 400, requestId)
+    }
+
+    if (body.action === 'block') {
+      await blockFeature(body.userId, body.feature)
+    } else {
+      await unblockFeature(body.userId, body.feature)
+    }
+
+    return jsonWithRequestId(
+      {
+        ok: true,
+        action: body.action,
+        userId: body.userId,
+        feature: body.feature,
+      },
+      200,
+      requestId
+    )
+  } catch (error) {
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
   }
-
-  const admins = parseAdminUserIds()
-  if (!admins.has(userId)) {
-    return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
-  }
-
-  const body = (await req.json()) as {
-    action?: 'block' | 'unblock'
-    userId?: string
-    feature?: Feature
-  }
-
-  if (!body.action || (body.action !== 'block' && body.action !== 'unblock')) {
-    return jsonWithRequestId({ error: 'action must be block or unblock' }, 400, requestId)
-  }
-
-  if (!body.userId) {
-    return jsonWithRequestId({ error: 'userId is required' }, 400, requestId)
-  }
-
-  if (!body.feature || !FEATURE_SET.has(body.feature)) {
-    return jsonWithRequestId({ error: 'feature must be one of covers, jds, bullets, cvs' }, 400, requestId)
-  }
-
-  if (body.action === 'block') {
-    await blockFeature(body.userId, body.feature)
-  } else {
-    await unblockFeature(body.userId, body.feature)
-  }
-
-  return jsonWithRequestId(
-    {
-      ok: true,
-      action: body.action,
-      userId: body.userId,
-      feature: body.feature,
-    },
-    200,
-    requestId
-  )
 }

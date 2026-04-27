@@ -5,6 +5,17 @@
 - [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interests/references/associations), 25 tests passing
 - [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
+- [DONE] Final technical polish pass (types, errors, loading, empty states, logs, env, API response shape, mobile, lint)
+- [DONE] [Polish C1] TypeScript: npx tsc --noEmit clean, no any introduced
+- [DONE] [Polish C2] Error handling: API routes and server actions return safe errors
+- [DONE] [Polish C3] Loading states: async action buttons guarded against double-submit
+- [DONE] [Polish C4] Empty states: lists/data views never render blank screen
+- [DONE] [Polish C5] Console logs: remove debug console.log statements
+- [DONE] [Polish C6] Env vars: sync all used vars into .env.prod.example
+- [DONE] [Polish C7] API response consistency: success/data and success/error envelope
+- [DONE] [Polish C8] Mobile responsiveness: 375px overflow/layout fixes
+- [DONE] [Polish C9] Lint: npm run lint clean (warnings/errors)
+- [DONE] [Polish C10] Final verification: npx tsc --noEmit final pass
 - [DONE] Remove broken score history characters from AI review cards
 - [ ] Apply supabase migration: 20260421000000_add_resume_analyses_table.sql (run `npx supabase db push` or apply in Supabase dashboard)
 - [DONE] Live AI Auto-Fix + Apply this fix: /api/apply-fix and /api/auto-fix routes with Claude, per-improvement loading states, builder banner + highlight

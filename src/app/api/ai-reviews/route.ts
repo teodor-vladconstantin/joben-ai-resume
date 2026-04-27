@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
+import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
 
 function isMissingRelation(error: unknown): boolean {
   const err = error as { code?: string; message?: string }
@@ -8,24 +8,28 @@ function isMissingRelation(error: unknown): boolean {
 }
 
 export async function GET() {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const supabase = createServerClient()
-  const { data, error } = await supabase
-    .from('ai_reviews')
-    .select('id, score, created_at, resume_id, feedback, resumes(title)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    if (isMissingRelation(error)) {
-      return NextResponse.json({ reviews: [] }, { status: 200 })
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return apiError('Unauthorized', 401)
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
 
-  return NextResponse.json({ reviews: data || [] }, { status: 200 })
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('ai_reviews')
+      .select('id, score, created_at, resume_id, feedback, resumes(title)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      if (isMissingRelation(error)) {
+        return apiSuccess({ reviews: [] }, 200)
+      }
+      return apiError(error.message, 500)
+    }
+
+    return apiSuccess({ reviews: data || [] }, 200)
+  } catch (error) {
+    return apiError(getErrorMessage(error), 500)
+  }
 }

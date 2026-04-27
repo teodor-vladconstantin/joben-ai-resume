@@ -3,7 +3,8 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
-import { getRequestId, jsonWithRequestId, logger, withRequestId } from '@/lib/logger'
+import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/api-response'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -14,89 +15,86 @@ function isDuplicateEventError(error: { code?: string } | null): boolean {
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
-  if (!WEBHOOK_SECRET) {
-    logger.error('CLERK_WEBHOOK_SECRET missing', {
-      requestId,
-      route: '/api/webhooks/clerk',
-    })
-    return jsonWithRequestId({ error: 'Webhook secret not configured' }, 500, requestId)
-  }
-
-  // Get the headers
-  const headerPayload = await headers()
-  const svixId = headerPayload.get('svix-id')
-  const svixTimestamp = headerPayload.get('svix-timestamp')
-  const svixSignature = headerPayload.get('svix-signature')
-
-  if (!svixId || !svixTimestamp || !svixSignature) {
-    return withRequestId(new Response('Error occured -- no svix headers', {
-      status: 400
-    }), requestId)
-  }
-
-  const payload = await req.json()
-  const body = JSON.stringify(payload)
-
-  const wh = new Webhook(WEBHOOK_SECRET)
-  let evt: WebhookEvent
-
   try {
-    evt = wh.verify(body, {
-      'svix-id': svixId,
-      'svix-timestamp': svixTimestamp,
-      'svix-signature': svixSignature,
-    }) as WebhookEvent
-  } catch (err) {
-    logger.error('Clerk webhook signature verification failed', {
-      requestId,
-      route: '/api/webhooks/clerk',
-      eventId: svixId,
-      error: err instanceof Error ? err.message : 'Unknown error',
+    const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+    if (!WEBHOOK_SECRET) {
+      logger.error('CLERK_WEBHOOK_SECRET missing', {
+        requestId,
+        route: '/api/webhooks/clerk',
+      })
+      return jsonWithRequestId({ error: 'Webhook secret not configured' }, 500, requestId)
+    }
+
+    // Get the headers
+    const headerPayload = await headers()
+    const svixId = headerPayload.get('svix-id')
+    const svixTimestamp = headerPayload.get('svix-timestamp')
+    const svixSignature = headerPayload.get('svix-signature')
+
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      return jsonWithRequestId({ error: 'Missing svix headers' }, 400, requestId)
+    }
+
+    const payload = await req.json()
+    const body = JSON.stringify(payload)
+
+    const wh = new Webhook(WEBHOOK_SECRET)
+    let evt: WebhookEvent
+
+    try {
+      evt = wh.verify(body, {
+        'svix-id': svixId,
+        'svix-timestamp': svixTimestamp,
+        'svix-signature': svixSignature,
+      }) as WebhookEvent
+    } catch (err) {
+      logger.error('Clerk webhook signature verification failed', {
+        requestId,
+        route: '/api/webhooks/clerk',
+        eventId: svixId,
+        error: err instanceof Error ? err.message : 'Unknown error',
+      })
+      return jsonWithRequestId({ error: 'Signature verification failed' }, 400, requestId)
+    }
+
+    const eventType = evt.type
+
+    // Init Supabase Service Role client to bypass RLS for server-side admin tasks
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
     })
-    return withRequestId(new Response('Error occured', {
-      status: 400
-    }), requestId)
-  }
-
-  const eventType = evt.type
-
-  // Init Supabase Service Role client to bypass RLS for server-side admin tasks
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false }
-  })
 
   // Claim event first to make webhook handling idempotent across retries.
-  const { error: claimError } = await supabase.from('webhook_events').insert({
-    provider: 'clerk',
-    event_id: svixId,
-    event_type: eventType,
-    payload,
-  })
+    const { error: claimError } = await supabase.from('webhook_events').insert({
+      provider: 'clerk',
+      event_id: svixId,
+      event_type: eventType,
+      payload,
+    })
 
-  if (claimError) {
-    if (isDuplicateEventError(claimError)) {
-      logger.info('Duplicate Clerk webhook ignored', {
+    if (claimError) {
+      if (isDuplicateEventError(claimError)) {
+        logger.info('Duplicate Clerk webhook ignored', {
+          requestId,
+          route: '/api/webhooks/clerk',
+          eventId: svixId,
+          eventType,
+        })
+        return jsonWithRequestId({ message: 'Duplicate webhook ignored' }, 200, requestId)
+      }
+
+      logger.error('Failed to claim clerk webhook event', {
         requestId,
         route: '/api/webhooks/clerk',
         eventId: svixId,
         eventType,
+        error: claimError.message,
       })
-      return jsonWithRequestId({ message: 'Duplicate webhook ignored' }, 200, requestId)
+      return jsonWithRequestId({ error: 'Could not claim webhook event' }, 500, requestId)
     }
 
-    logger.error('Failed to claim clerk webhook event', {
-      requestId,
-      route: '/api/webhooks/clerk',
-      eventId: svixId,
-      eventType,
-      error: claimError.message,
-    })
-    return jsonWithRequestId({ error: 'Could not claim webhook event' }, 500, requestId)
-  }
-
-  // Handle user creation
-  if (eventType === 'user.created') {
+    // Handle user creation
+    if (eventType === 'user.created') {
     const { id, email_addresses, first_name, last_name, image_url } = evt.data
     const primaryEmail = email_addresses?.[0]?.email_address ?? null
 
@@ -200,8 +198,8 @@ export async function POST(req: Request) {
     }
   }
 
-  // Handle user updates
-  if (eventType === 'user.updated') {
+    // Handle user updates
+    if (eventType === 'user.updated') {
     const { id, email_addresses, first_name, last_name, image_url } = evt.data
     const primaryEmail = email_addresses?.[0]?.email_address ?? null
 
@@ -230,8 +228,8 @@ export async function POST(req: Request) {
     }
   }
 
-  // Handle user deletion
-  if (eventType === 'user.deleted') {
+    // Handle user deletion
+    if (eventType === 'user.deleted') {
     const { id } = evt.data
     if (id) {
       const { error } = await supabase.from('users').delete().eq('clerk_id', id)
@@ -249,11 +247,14 @@ export async function POST(req: Request) {
     }
   }
 
-  logger.info('Clerk webhook processed', {
-    requestId,
-    route: '/api/webhooks/clerk',
-    eventId: svixId,
-    eventType,
-  })
-  return jsonWithRequestId({ message: 'Success' }, 200, requestId)
+    logger.info('Clerk webhook processed', {
+      requestId,
+      route: '/api/webhooks/clerk',
+      eventId: svixId,
+      eventType,
+    })
+    return jsonWithRequestId({ message: 'Success' }, 200, requestId)
+  } catch (error) {
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+  }
 }

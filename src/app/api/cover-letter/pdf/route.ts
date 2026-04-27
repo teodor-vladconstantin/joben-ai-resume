@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
+import { apiError, getErrorMessage } from '@/lib/api-response'
 
 export const runtime = 'nodejs'
 
@@ -50,74 +51,78 @@ function sanitizeFilename(value: string) {
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  let payload: { title?: string; sections?: CoverLetterSections }
   try {
-    payload = (await request.json()) as { title?: string; sections?: CoverLetterSections }
-  } catch {
-    return NextResponse.json({ error: 'Invalid request payload' }, { status: 400 })
-  }
+    const { userId } = await auth()
+    if (!userId) {
+      return apiError('Unauthorized', 401)
+    }
 
-  const title = payload.title || 'Cover Letter'
-  const sections = payload.sections || {}
+    let payload: { title?: string; sections?: CoverLetterSections }
+    try {
+      payload = (await request.json()) as { title?: string; sections?: CoverLetterSections }
+    } catch {
+      return apiError('Invalid request payload', 400)
+    }
 
-  const bodyParagraphs =
-    sections.bodyParagraphs?.map((item) => item.trim()).filter((item) => item.length > 0) || []
+    const title = payload.title || 'Cover Letter'
+    const sections = payload.sections || {}
 
-  const closingLines =
-    sections.closingSignature
-      ?.split('\n')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0) || []
+    const bodyParagraphs =
+      sections.bodyParagraphs?.map((item) => item.trim()).filter((item) => item.length > 0) || []
 
-  const doc = React.createElement(
-    Document,
-    null,
-    React.createElement(
-      Page,
-      { size: 'A4', style: styles.page },
+    const closingLines =
+      sections.closingSignature
+        ?.split('\n')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0) || []
+
+    const doc = React.createElement(
+      Document,
+      null,
       React.createElement(
-        View,
-        { style: styles.headerBlock },
-        React.createElement(Text, { style: styles.bold }, sections.headerName || 'Your Name'),
-        sections.headerEmail ? React.createElement(Text, null, sections.headerEmail) : null,
-        sections.headerPhone ? React.createElement(Text, null, sections.headerPhone) : null,
-        React.createElement(Text, { style: { marginTop: 8 } }, sections.date || new Date().toLocaleDateString())
-      ),
-      React.createElement(
-        View,
-        { style: styles.sectionGap },
-        sections.recipientName ? React.createElement(Text, null, sections.recipientName) : null,
-        sections.recipientTitle ? React.createElement(Text, null, sections.recipientTitle) : null,
-        sections.company ? React.createElement(Text, null, sections.company) : null
-      ),
-      React.createElement(Text, { style: styles.paragraph }, sections.salutation || 'Dear Hiring Manager,'),
-      sections.introduction ? React.createElement(Text, { style: styles.paragraph }, sections.introduction) : null,
-      ...bodyParagraphs.map((paragraph, index) =>
-        React.createElement(Text, { key: `body-${index}`, style: styles.paragraph }, paragraph)
-      ),
-      sections.conclusion ? React.createElement(Text, { style: styles.paragraph }, sections.conclusion) : null,
-      ...closingLines.map((line, index) =>
-        React.createElement(Text, { key: `closing-${index}` }, line)
+        Page,
+        { size: 'A4', style: styles.page },
+        React.createElement(
+          View,
+          { style: styles.headerBlock },
+          React.createElement(Text, { style: styles.bold }, sections.headerName || 'Your Name'),
+          sections.headerEmail ? React.createElement(Text, null, sections.headerEmail) : null,
+          sections.headerPhone ? React.createElement(Text, null, sections.headerPhone) : null,
+          React.createElement(Text, { style: { marginTop: 8 } }, sections.date || new Date().toLocaleDateString())
+        ),
+        React.createElement(
+          View,
+          { style: styles.sectionGap },
+          sections.recipientName ? React.createElement(Text, null, sections.recipientName) : null,
+          sections.recipientTitle ? React.createElement(Text, null, sections.recipientTitle) : null,
+          sections.company ? React.createElement(Text, null, sections.company) : null
+        ),
+        React.createElement(Text, { style: styles.paragraph }, sections.salutation || 'Dear Hiring Manager,'),
+        sections.introduction ? React.createElement(Text, { style: styles.paragraph }, sections.introduction) : null,
+        ...bodyParagraphs.map((paragraph, index) =>
+          React.createElement(Text, { key: `body-${index}`, style: styles.paragraph }, paragraph)
+        ),
+        sections.conclusion ? React.createElement(Text, { style: styles.paragraph }, sections.conclusion) : null,
+        ...closingLines.map((line, index) =>
+          React.createElement(Text, { key: `closing-${index}` }, line)
+        )
       )
     )
-  )
 
-  const blob = await pdf(doc).toBlob()
-  const arrayBuffer = await blob.arrayBuffer()
+    const blob = await pdf(doc).toBlob()
+    const arrayBuffer = await blob.arrayBuffer()
 
-  return new NextResponse(arrayBuffer, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${sanitizeFilename(title)}.pdf"`,
-      'Cache-Control': 'no-store',
-    },
-  })
+    return new NextResponse(arrayBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${sanitizeFilename(title)}.pdf"`,
+        'Cache-Control': 'no-store',
+      },
+    })
+  } catch (error) {
+    return apiError(getErrorMessage(error), 500)
+  }
 }
 
 

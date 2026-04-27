@@ -1,28 +1,29 @@
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/api-response'
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const body = (await req.json()) as {
-    reviewId?: string
-    resumeId?: string
-    analysisJson?: Record<string, unknown>
-    status?: 'pending' | 'applied'
-  }
-
-  if (!body.reviewId) {
-    return jsonWithRequestId({ error: 'reviewId is required' }, 400, requestId)
-  }
-
-  const status = body.status === 'applied' ? 'applied' : 'pending'
-
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    }
+
+    const body = (await req.json()) as {
+      reviewId?: string
+      resumeId?: string
+      analysisJson?: Record<string, unknown>
+      status?: 'pending' | 'applied'
+    }
+
+    if (!body.reviewId) {
+      return jsonWithRequestId({ error: 'reviewId is required' }, 400, requestId)
+    }
+
+    const status = body.status === 'applied' ? 'applied' : 'pending'
+
     const supabase = createServerClient()
 
     const { data, error } = await supabase
@@ -52,32 +53,31 @@ export async function POST(req: Request) {
   } catch (error) {
     logger.error('resume-analyses POST failed', {
       requestId,
-      userId,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: getErrorMessage(error),
     })
-    return jsonWithRequestId({ error: 'Internal server error' }, 500, requestId)
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
   }
 }
 
 export async function PATCH(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
-  if (!userId) {
-    return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
-  }
-
-  const body = (await req.json()) as {
-    reviewId?: string
-    status?: 'pending' | 'applied'
-  }
-
-  if (!body.reviewId) {
-    return jsonWithRequestId({ error: 'reviewId is required' }, 400, requestId)
-  }
-
-  const status = body.status === 'applied' ? 'applied' : 'pending'
-
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+    }
+
+    const body = (await req.json()) as {
+      reviewId?: string
+      status?: 'pending' | 'applied'
+    }
+
+    if (!body.reviewId) {
+      return jsonWithRequestId({ error: 'reviewId is required' }, 400, requestId)
+    }
+
+    const status = body.status === 'applied' ? 'applied' : 'pending'
+
     const supabase = createServerClient()
 
     const { error } = await supabase
@@ -103,9 +103,8 @@ export async function PATCH(req: Request) {
   } catch (error) {
     logger.error('resume-analyses PATCH failed', {
       requestId,
-      userId,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: getErrorMessage(error),
     })
-    return jsonWithRequestId({ error: 'Internal server error' }, 500, requestId)
+    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
   }
 }
