@@ -2,11 +2,8 @@
 
 import { Navbar } from '@/components/ui/Navbar'
 import Link from 'next/link'
-import { Plus, Clock3, Trash2, Edit, Eye, Search, Sparkles } from 'lucide-react'
+import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
-import { startProCheckout } from '@/lib/client-billing'
 
 type ResumeListItem = {
   id: string
@@ -79,15 +76,10 @@ function timeAgo(dateValue: string): string {
 }
 
 export default function ResumesPage() {
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [resumes, setResumes] = useState<ResumeListItem[]>([])
   const [query, setQuery] = useState('')
   const [sortMode, setSortMode] = useState<'newest' | 'oldest' | 'az'>('newest')
-  const [analyzingResumeId, setAnalyzingResumeId] = useState<string | null>(null)
-  const [actionError, setActionError] = useState('')
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro for unlimited AI analysis.')
 
   useEffect(() => {
     let cancelled = false
@@ -136,63 +128,6 @@ export default function ResumesPage() {
     }
   }
 
-  const handleAnalyze = async (resumeId: string) => {
-    setActionError('')
-    setAnalyzingResumeId(resumeId)
-
-    try {
-      const detailResponse = await fetch(`/api/resumes/${resumeId}`, { cache: 'no-store' })
-      const detailPayload = (await detailResponse.json()) as ResumeDetailPayload & { error?: string }
-
-      if (!detailResponse.ok) {
-        setActionError(detailPayload.error || 'Could not load resume details for analysis.')
-        return
-      }
-
-      const resumeText = extractResumeText(detailPayload.resume?.data)
-      if (!resumeText.trim()) {
-        setActionError('Selected resume has no content to analyze.')
-        return
-      }
-
-      const analyzeResponse = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          resumeText,
-          resumeId,
-        }),
-      })
-
-      const analyzePayload = (await analyzeResponse.json()) as {
-        error?: string
-        showUpgrade?: boolean
-        reviewId?: string
-      }
-
-      if (!analyzeResponse.ok) {
-        if (analyzePayload.showUpgrade) {
-          setUpgradeMessage(analyzePayload.error || 'This action requires Pro access.')
-          setShowUpgradeModal(true)
-          return
-        }
-
-        setActionError(analyzePayload.error || 'Failed to analyze resume.')
-        return
-      }
-
-      if (!analyzePayload.reviewId) {
-        setActionError('Analysis succeeded but review id is missing.')
-        return
-      }
-
-      router.push(`/ai-review/${analyzePayload.reviewId}`)
-    } catch (error) {
-      setActionError((error as Error).message)
-    } finally {
-      setAnalyzingResumeId(null)
-    }
-  }
 
   const visibleResumes = useMemo(() => {
     const filtered = resumes.filter((resume) =>
@@ -246,11 +181,6 @@ export default function ResumesPage() {
           </div>
         </div>
 
-        {actionError ? (
-          <div className="mb-4 rounded-lg border border-[#16DB65]/30 bg-[#0A9548]/12 px-3 py-2 text-sm text-[#16DB65]">
-            {actionError}
-          </div>
-        ) : null}
 
         <div className="rounded-2xl border border-white/10 bg-[#0A0F0D] overflow-hidden">
           {visibleResumes.length === 0 ? (
@@ -270,14 +200,6 @@ export default function ResumesPage() {
                       {Number(resume.score || 0)}
                     </span>
                     <span className="text-xs text-[#FFFFFF]/82 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
-                    <button
-                      onClick={() => void handleAnalyze(resume.id)}
-                      disabled={Boolean(analyzingResumeId) || isPending}
-                      className="inline-flex items-center gap-1 rounded-md border border-[#16DB65]/35 bg-[#16DB65]/10 px-2 py-1 text-xs font-semibold text-[#16DB65] hover:bg-[#16DB65]/15 disabled:opacity-55"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      {analyzingResumeId === resume.id ? 'Analyzing...' : 'Analyze'}
-                    </button>
                     <Link href={`/resumes/${resume.id}`} className="text-[#FFFFFF]/82 hover:text-white"><Eye className="w-4 h-4" /></Link>
                     <Link href={`/resumes/${resume.id}`} className="text-[#FFFFFF]/82 hover:text-white"><Edit className="w-4 h-4" /></Link>
                     <button
@@ -295,13 +217,6 @@ export default function ResumesPage() {
         </div>
       </main>
 
-      <UpgradeModal
-        open={showUpgradeModal}
-        title="Upgrade to Pro Analyzer"
-        description={upgradeMessage}
-        onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={startProCheckout}
-      />
     </div>
   )
 }
