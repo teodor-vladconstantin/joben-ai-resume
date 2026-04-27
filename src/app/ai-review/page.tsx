@@ -387,19 +387,13 @@ export default function AIReviewPage() {
               const latestReview = resumeReviews.at(-1)
               const hasReviews = resumeReviews.length > 0
               const scoreHistory = resumeReviews.map((r) => Number(r.score || 0)).filter((s) => s > 0)
+              const latestScore = scoreHistory.at(-1) ?? Number(latestReview?.score || 0)
               return (
                 <div key={resume.id} className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4">
                   <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
                   {hasReviews ? (
                     <p className="text-xs text-[#FFFFFF]/60 mt-1 flex items-center gap-1 flex-wrap">
-                      {scoreHistory.length > 1 ? (
-                        <>
-                          <TrendingUp className="w-3 h-3 text-[#0A9548] shrink-0" />
-                          {scoreHistory.join(' â†’ ')}
-                        </>
-                      ) : (
-                        `Score ${scoreHistory[0] ?? 0}`
-                      )}
+                      {`Score ${latestScore}`}
                     </p>
                   ) : (
                     <p className="text-xs text-[#FFFFFF]/60 mt-1">Not reviewed yet</p>
