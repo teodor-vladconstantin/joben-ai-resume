@@ -164,7 +164,7 @@ export default function Home() {
                             <p className="shrink-0 text-gray-600">2023 - Present</p>
                           </div>
                           <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
-                            <li>Led migration to event-driven services, reducing checkout failures by 32%.</li>
+                            <li>Led migration to event-driven services, reducing checkout failures.</li>
                             <li>Optimized PostgreSQL queries and caching, improving API latency from 410ms to 240ms.</li>
                           </ul>
                         </div>
@@ -176,7 +176,7 @@ export default function Home() {
                           </div>
                           <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
                             <li>Built internal observability tooling adopted by 8 product teams.</li>
-                            <li>Implemented resilience patterns that improved uptime from 99.1% to 99.93%.</li>
+                            <li>Implemented resilience patterns that improved uptime and reliability.</li>
                           </ul>
                         </div>
                       </section>
@@ -232,7 +232,7 @@ export default function Home() {
               `} suppressHydrationWarning>
                 {plan.isBestValue && (
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#0A9548] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide" suppressHydrationWarning>
-                    Best Value (Save 33%)
+                    Best Value (Save with 6-month plan)
                   </div>
                 )}
 
