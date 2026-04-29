@@ -134,8 +134,8 @@ export default function AIReviewPage() {
     setIsProcessingUpload(true)
 
     try {
-      const parsed = await importPdfClientSide(file)
-      const text = extractResumeText(parsed)
+      const result = await importPdfClientSide(file)
+      const text = extractResumeText(result.data)
 
       if (!text.trim()) {
         setError('Could not extract text from this PDF.')
