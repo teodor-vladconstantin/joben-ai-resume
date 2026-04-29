@@ -653,8 +653,11 @@ export function ResumeBuilder() {
     setIsImportingPdf(true)
 
     try {
-      const data = await importPdfClientSide(file)
-      handleOnboardingImport(data)
+      const result = await importPdfClientSide(file, resumeId)
+      handleOnboardingImport(result.data)
+      if (typeof result.pdfImportsRemaining === 'number') {
+        alert(`${result.pdfImportsRemaining} of 3 PDF imports remaining for this resume`)
+      }
       setActiveTab('personal')
     } catch (err) {
       alert(err instanceof Error ? err.message : 'PDF import failed. Please try again.')

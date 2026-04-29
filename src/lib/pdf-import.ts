@@ -1,59 +1,64 @@
-import { reconstructLines, parseResumeTextToData } from "@/lib/resume-parser";
-import type { ResumeTemplateData } from "@/components/templates/types";
+import type { ResumeTemplateData } from '@/components/templates/types'
 
-type PdfjsTextItem = {
-  str: string;
-  transform?: number[];
-};
+type ParseResumeResponse = {
+  success?: boolean
+  error?: string
+  parsed?: ResumeTemplateData
+  pdf_import_count?: number
+  pdf_imports_remaining?: number
+  data?: {
+    parsed?: ResumeTemplateData
+    pdf_import_count?: number
+    pdf_imports_remaining?: number
+  }
+}
 
-/**
- * Import a PDF resume entirely client-side.
- * Uses pdfjs-dist + robust line-reconstruction + strict parser heuristics.
- */
-export async function importPdfClientSide(
-  file: File,
-): Promise<ResumeTemplateData> {
-  if (file.type !== "application/pdf") throw new Error("File must be a PDF");
-  if (file.size > 10 * 1024 * 1024) throw new Error("PDF must be under 10 MB");
+export type PdfImportResult = {
+  data: ResumeTemplateData
+  pdfImportCount: number | null
+  pdfImportsRemaining: number | null
+}
 
-  const pdfjsLib = await import("pdfjs-dist");
+function toNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).toString();
+export async function importPdfClientSide(file: File, resumeId?: string | null): Promise<PdfImportResult> {
+  if (file.type !== 'application/pdf') throw new Error('File must be a PDF')
+  if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be under 10 MB')
 
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) })
-    .promise;
-
-  const allLines: string[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-
-    const items = (content.items as PdfjsTextItem[])
-      .filter((item) => item.str.trim())
-      .map((item) => ({
-        str: item.str,
-        x: item.transform?.[4] ?? 0,
-        y: item.transform?.[5] ?? 0,
-      }));
-
-    allLines.push(...reconstructLines(items), "");
+  const formData = new FormData()
+  formData.append('file', file)
+  if (resumeId) {
+    formData.append('resumeId', resumeId)
   }
 
-  const lines = allLines.filter(
-    (line, i, arr) => line !== "" || arr[i - 1] !== "",
-  );
-  const textContent = lines.filter(Boolean).join(" ");
+  const response = await fetch('/api/parse-resume', {
+    method: 'POST',
+    body: formData,
+  })
 
-  if (textContent.length < 50) {
-    throw new Error(
-      "PDF appears to be a scanned image — text extraction is not possible",
-    );
+  const payload = (await response.json()) as ParseResumeResponse
+  if (!response.ok || payload.success === false) {
+    throw new Error(payload.error || 'PDF import failed. Please try again.')
   }
 
-  return parseResumeTextToData(lines);
+  const parsed = payload.data?.parsed ?? payload.parsed
+  if (!parsed) {
+    throw new Error('PDF import failed. Please try again.')
+  }
+
+  const pdfImportCount = toNumber(payload.data?.pdf_import_count ?? payload.pdf_import_count)
+  const pdfImportsRemaining = toNumber(payload.data?.pdf_imports_remaining ?? payload.pdf_imports_remaining)
+
+  return {
+    data: parsed,
+    pdfImportCount,
+    pdfImportsRemaining,
+  }
 }

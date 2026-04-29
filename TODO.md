@@ -1,5 +1,4 @@
 ## Active
-
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
 - [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
 - [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interests/references/associations), 25 tests passing
@@ -60,6 +59,7 @@
 
 ## Done
 
+- [DONE] Replace Python resume parser with Gemini 2.0 Flash-Lite and add PDF import limits per resume
 - [DONE] Maximized upload resume parser accuracy (two-column reconstruction, combined role/company/date lines, wrapped bullets, numeric date ranges) + added regression tests
 - [DONE] AI Summary generator + independent left panel scroll in resume builder
 - [DONE] PostHog setup alignment (Next.js instrumentation-client + session replay + env cleanup)
