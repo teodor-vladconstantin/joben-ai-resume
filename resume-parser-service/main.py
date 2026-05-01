@@ -8,14 +8,11 @@ from pydantic import BaseModel
 from llama_parse import LlamaParse
 import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
 app = FastAPI(title="Resume Parser", version="1.0.0")
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://joben.eu", "http://localhost:3000"],
@@ -24,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic models for response
 class WorkExperience(BaseModel):
     company: str
     role: str
@@ -55,7 +51,6 @@ class ResumeData(BaseModel):
     languages: list[Language] = []
     certifications: list[str] = []
 
-# Initialize LlamaParse parser
 api_key = os.getenv("LLAMA_CLOUD_API_KEY")
 if not api_key:
     raise ValueError("LLAMA_CLOUD_API_KEY environment variable not set")
@@ -83,95 +78,63 @@ parser = LlamaParse(
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {"status": "ok"}
 
 @app.post("/parse")
 async def parse_resume(file: UploadFile = File(...)):
-    """Parse a resume file (PDF or DOCX)"""
-    
-    # Validate file extension
     allowed_extensions = {".pdf", ".docx"}
     file_extension = os.path.splitext(file.filename or "")[1].lower()
     if file_extension not in allowed_extensions:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid file type. Only PDF and DOCX files are allowed."
-        )
-    
-    # Validate file size (5MB max)
-    max_size = 5 * 1024 * 1024
-    file_size = await file.seek(0, 2)  # Seek to end to get size
-    await file.seek(0)  # Reset to beginning
-    if file_size > max_size:
-        raise HTTPException(
-            status_code=413,
-            detail="File too large. Maximum size is 5MB."
-        )
-    
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PDF and DOCX files are allowed.")
+
+    content = await file.read()
+
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
+
     try:
-        # Read file content
-        content = await file.read()
-        
-        # Parse with LlamaParse
         logger.info(f"Parsing file: {file.filename}")
         parsed_doc = parser.parse_file_bytes(
             file_bytes=content,
             file_name=file.filename,
-            mime_type=file.content_type or "application/pdf"
+            mime_type=file.content_type or "application/pdf",
         )
-        
-        # Extract text content
-        parsed_text = parsed_doc.text if hasattr(parsed_doc, 'text') else str(parsed_doc)
-        
-        # Clean up the response - remove markdown code blocks if present
+
+        parsed_text = parsed_doc.text if hasattr(parsed_doc, "text") else str(parsed_doc)
+
         if "```json" in parsed_text:
-            json_match = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
-            if json_match:
-                parsed_text = json_match.group(1)
+            m = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
+            if m:
+                parsed_text = m.group(1)
         elif "```" in parsed_text:
-            json_match = re.search(r"```\s*(.*?)\s*```", parsed_text, re.DOTALL)
-            if json_match:
-                parsed_text = json_match.group(1)
-        
-        # Parse JSON response
+            m = re.search(r"```\s*(.*?)\s*```", parsed_text, re.DOTALL)
+            if m:
+                parsed_text = m.group(1)
+
         resume_data = json.loads(parsed_text.strip())
-        
-        # Validate and normalize the response
+
         result = ResumeData(
             full_name=resume_data.get("full_name"),
             email=resume_data.get("email"),
             phone=resume_data.get("phone"),
             location=resume_data.get("location"),
             summary=resume_data.get("summary"),
-            work_experience=[
-                WorkExperience(**exp) for exp in resume_data.get("work_experience", [])
-            ],
-            education=[
-                Education(**edu) for edu in resume_data.get("education", [])
-            ],
+            work_experience=[WorkExperience(**exp) for exp in resume_data.get("work_experience", [])],
+            education=[Education(**edu) for edu in resume_data.get("education", [])],
             skills=resume_data.get("skills", []),
-            languages=[
-                Language(**lang) for lang in resume_data.get("languages", [])
-            ],
+            languages=[Language(**lang) for lang in resume_data.get("languages", [])],
             certifications=resume_data.get("certifications", []),
         )
-        
+
         logger.info(f"Successfully parsed resume: {result.full_name}")
         return result.model_dump()
-        
+
     except json.JSONDecodeError as e:
         logger.error(f"Failed to parse JSON response: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to parse resume. Invalid response format."
-        )
+        raise HTTPException(status_code=500, detail="Failed to parse resume. Invalid response format.")
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error parsing resume: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
