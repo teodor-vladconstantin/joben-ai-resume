@@ -24,6 +24,9 @@ Score across 5 categories:
 
 Note: scores are out of 20/40/10/25/5 (total 100).
 Be strict. 85+ should be rare.
+Important rules:
+- Concurrent/overlapping roles are NORMAL and must NOT be flagged as an issue.
+- Missing graduation dates for education entries are minor cosmetic gaps — do NOT list them as priority improvements.
 Keep output compact:
 - strengths: exactly 3 short items
 - improvements: max 3 items
