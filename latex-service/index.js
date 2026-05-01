@@ -81,8 +81,12 @@ app.post('/api/compile', (req, res) => {
 
         // Run pdflatex (interaction=nonstopmode to avoid hanging, output-dir=/tmp)
         const cmd = `pdflatex -interaction=nonstopmode -output-directory=${TMP_DIR} ${texFile}`;
-        
-        exec(cmd, { timeout: 15000 }, (error, stdout, stderr) => {
+
+        // Increase timeout and buffer to support larger compilations.
+        exec(cmd, { timeout: 120000, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+            // Log compiler output for debugging
+            if (stdout) console.info('pdflatex stdout:', stdout.substring(0, 10000));
+            if (stderr) console.error('pdflatex stderr:', stderr.substring(0, 10000));
             // Even with errors, sometimes pdflatex still generates the PDF. Check if it exists.
             if (fs.existsSync(pdfFile)) {
                 res.setHeader('Content-Type', 'application/pdf');
