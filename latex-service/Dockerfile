@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base \
     texlive-fonts-recommended \
     texlive-fonts-extra \
+    fonts-lmodern \
     texlive-latex-extra \
     curl \
     && rm -rf /var/lib/apt/lists/*

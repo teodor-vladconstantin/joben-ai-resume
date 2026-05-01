@@ -49,8 +49,9 @@ function normalizeLatexText(text: string | undefined): string {
 
 function clampLatexText(text: string | undefined, maxChars: number): string {
   const normalized = normalizeLatexText(text)
-  if (normalized.length <= maxChars) return normalized
-  return `${normalized.slice(0, Math.max(maxChars - 3, 0)).trimEnd()}...`
+    // Do not truncate fields at export time — return the normalized text in full.
+    // Downstream limits (payload size) are still enforced by the route.
+    return normalized
 }
 
 function escapeLatex(text: string | undefined): string {
