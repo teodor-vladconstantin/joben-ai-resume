@@ -202,10 +202,11 @@ def extract_resume_data(pdf_bytes: bytes) -> Dict[str, Any]:
     
     if not text.strip():
         return _empty_schema()
-        
-    doc = nlp(text[:5000])
     
-    personal = parse_personal_info(text[:2000], doc)
+    # Do not truncate text — process full resume content (increased limit to 500KB max for memory safety)
+    doc = nlp(text[:500000])
+    
+    personal = parse_personal_info(text[:500000], doc)
     sections = segment_sections(text)
     
     if sections.get("summary"):
