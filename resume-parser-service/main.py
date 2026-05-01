@@ -94,7 +94,7 @@ async def parse_resume(file: UploadFile = File(...)):
 
     try:
         logger.info(f"Parsing file: {file.filename}")
-        documents = parser.load_data(
+        documents = await parser.aload_data(
             io.BytesIO(content),
             extra_info={"file_name": file.filename},
         )
