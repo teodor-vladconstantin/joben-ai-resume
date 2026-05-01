@@ -115,8 +115,7 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
       const formData = new FormData()
       formData.append('file', pendingFile)
 
-      const microserviceUrl = process.env.NEXT_PUBLIC_RESUME_PARSER_URL || 'http://localhost:8001'
-      const response = await fetch(`${microserviceUrl}/parse`, {
+      const response = await fetch('/api/parse', {
         method: 'POST',
         body: formData,
       })
@@ -225,7 +224,7 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
       {/* Error Message */}
       {error && (
         <div className="mt-4 p-4 rounded-lg bg-red-900/20 border border-red-800 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <p className="text-red-400 text-sm">{error}</p>
         </div>
       )}
@@ -237,7 +236,7 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
           {uploadedFiles.map((file, index) => (
             <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-800">
               <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                <FileText className="w-4 h-4 text-blue-500 shrink-0" />
                 <span className="text-sm text-gray-300 truncate">{file.name}</span>
               </div>
               <button
@@ -265,7 +264,7 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
         <div className="mt-8 space-y-6">
           {/* Header */}
           <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
+            <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0 mt-1" />
             <div>
               <h3 className="text-xl font-semibold text-white">{parsedData.full_name || 'Resume'}</h3>
               <p className="text-gray-400 text-sm">Successfully parsed</p>

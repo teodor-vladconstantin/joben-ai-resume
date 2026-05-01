@@ -11,8 +11,28 @@
 networks:
   latex-net:
     driver: bridge
+  parser-net:
+    driver: bridge
 
 services:
+  resume-parser:
+    build:
+      context: ./resume-parser-service
+    container_name: joben-resume-parser
+    restart: unless-stopped
+    networks: [parser-net]
+    environment:
+      LLAMA_CLOUD_API_KEY: ${LLAMA_CLOUD_API_KEY}
+    ports:
+      - "8000:8000"
+    mem_limit: 512m
+    cpus: "0.5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   latex-service:
     build:
       context: ./latex-service
