@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const maxDuration = 60
+
 const PARSER_URL = process.env.RESUME_PARSER_URL || 'http://resume-parser:8001'
 
 export async function POST(req: NextRequest) {
