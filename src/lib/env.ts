@@ -4,12 +4,10 @@ const REQUIRED = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
   'SUPABASE_SERVICE_ROLE_KEY',
-  'GEMINI_API_KEY',
 ] as const
 
 const PLACEHOLDER_VALUES = [
   'your_anthropic_api_key_here',
-  'your_gemini_api_key',
   'your_stripe_secret_key_here',
   'your_stripe_webhook_secret_here',
   'CHANGE_ME',
@@ -90,10 +88,6 @@ export const env = {
   anthropic: {
     apiKey: process.env.ANTHROPIC_API_KEY,
     isConfigured: isEnvSet('ANTHROPIC_API_KEY'),
-  },
-  gemini: {
-    apiKey: process.env.GEMINI_API_KEY,
-    isConfigured: isEnvSet('GEMINI_API_KEY'),
   },
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,

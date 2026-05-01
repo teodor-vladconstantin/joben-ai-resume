@@ -1,27 +1,6 @@
-fastapi[standard]==0.115.0
+fastapi==0.115.0
 uvicorn[standard]==0.30.0
 pydantic==2.8.2
-pydantic-settings==2.3.4
 python-multipart==0.0.9
-
-# PDF extraction — PyMuPDF (primary) + pdfplumber (fallback)
-pymupdf==1.24.9
-pdfplumber==0.11.4
-
-# NLP — spaCy large models
-spacy==3.7.4
-en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.0/en_core_web_lg-3.7.0-py3-none-any.whl
-ro-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/ro_core_news_lg-3.7.0/ro_core_news_lg-3.7.0-py3-none-any.whl
-
-# BERT NER — yashpwr/resume-ner-bert-v2 (F1=90.87%, Apache 2.0)
-# torch CPU-only to minimize image size (~750 MB vs 2 GB GPU)
-torch==2.3.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
-transformers==4.41.2
-huggingface-hub==0.23.4
-
-# Matching + dates
-rapidfuzz==3.9.0
-dateparser==1.1.8
-
-# Utilities
-numpy==1.26.4
+llama-parse==0.5.3
+python-dotenv==1.0.0
