@@ -41,6 +41,10 @@ function extractResumeText(data: unknown) {
       description?: string
       bullets?: string[]
     }>
+    dynamicSections?: Array<{
+      title?: string
+      content?: string
+    }>
   }
 
   const personal = payload.personal || {}
@@ -52,18 +56,19 @@ function extractResumeText(data: unknown) {
     personal.summary || '',
   ]
 
-  const experience = (payload.experience || []).map(
-    (e) => {
-      const bullets = Array.isArray(e.bullets)
-        ? e.bullets.map((bullet) => bullet.trim()).filter(Boolean)
-        : []
-      const bulletText = bullets.length > 0 ? bullets.join(' | ') : (e.description || '')
+  const experience = (payload.experience || []).map((e) => {
+    const bullets = Array.isArray(e.bullets)
+      ? e.bullets.map((b) => b.trim()).filter(Boolean)
+      : []
+    const bulletText = bullets.length > 0 ? bullets.join(' | ') : (e.description || '')
+    return `${e.title || ''} at ${e.company || ''} (${e.period || ''}) ${bulletText}`
+  })
 
-      return `${e.title || ''} at ${e.company || ''} (${e.period || ''}) ${bulletText}`
-    }
+  const dynamic = (payload.dynamicSections || []).map(
+    (s) => `${s.title || ''}:\n${s.content || ''}`
   )
 
-  return [...base, ...experience].filter(Boolean).join('\n')
+  return [...base, ...experience, ...dynamic].filter(Boolean).join('\n')
 }
 
 export default function AIReviewPage() {
