@@ -72,7 +72,8 @@ parser = LlamaParse(
         "- languages (array of: language, level)\n"
         "- certifications (array of strings)\n"
         "If a field is not found, return null for strings and empty array for arrays.\n"
-        "Return only valid JSON, no markdown, no extra text."
+        "Return only valid JSON, no markdown, no extra text.\n"
+        "CRITICAL: Do NOT summarize, truncate, or abbreviate any text. Extract the FULL EXACT TEXT for descriptions, summaries, and roles."
     ),
     cost_optimizer="true",
 )
