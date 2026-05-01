@@ -24,9 +24,6 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
     try {
       const result = await importPdfClientSide(file)
       onImported(result.data)
-      if (typeof result.pdfImportsRemaining === 'number') {
-        alert(`${result.pdfImportsRemaining} of 3 PDF imports remaining for this resume`)
-      }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Import failed. Please try again.')
       setStep('error')
