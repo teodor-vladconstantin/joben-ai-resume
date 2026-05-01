@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import re
 from typing import Optional
@@ -82,9 +83,8 @@ async def health_check():
 
 @app.post("/parse")
 async def parse_resume(file: UploadFile = File(...)):
-    allowed_extensions = {".pdf", ".docx"}
     file_extension = os.path.splitext(file.filename or "")[1].lower()
-    if file_extension not in allowed_extensions:
+    if file_extension not in {".pdf", ".docx"}:
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF and DOCX files are allowed.")
 
     content = await file.read()
@@ -94,19 +94,17 @@ async def parse_resume(file: UploadFile = File(...)):
 
     try:
         logger.info(f"Parsing file: {file.filename}")
-        parsed_doc = parser.parse_file_bytes(
-            file_bytes=content,
-            file_name=file.filename,
-            mime_type=file.content_type or "application/pdf",
+        documents = parser.load_data(
+            io.BytesIO(content),
+            extra_info={"file_name": file.filename},
         )
 
-        parsed_text = parsed_doc.text if hasattr(parsed_doc, "text") else str(parsed_doc)
+        parsed_text = documents[0].text if documents else ""
 
-        if "```json" in parsed_text:
-            m = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
-            if m:
-                parsed_text = m.group(1)
-        elif "```" in parsed_text:
+        m = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
+        if m:
+            parsed_text = m.group(1)
+        else:
             m = re.search(r"```\s*(.*?)\s*```", parsed_text, re.DOTALL)
             if m:
                 parsed_text = m.group(1)
@@ -130,7 +128,7 @@ async def parse_resume(file: UploadFile = File(...)):
         return result.model_dump()
 
     except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse JSON response: {e}")
+        logger.error(f"Failed to parse JSON response: {e}\nRaw text: {parsed_text[:500]}")
         raise HTTPException(status_code=500, detail="Failed to parse resume. Invalid response format.")
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
