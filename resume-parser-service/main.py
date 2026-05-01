@@ -23,16 +23,16 @@ app.add_middleware(
 )
 
 class WorkExperience(BaseModel):
-    company: str
-    role: str
+    company: Optional[str] = None
+    role: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     description: Optional[str] = None
 
 class Education(BaseModel):
-    institution: str
-    degree: str
-    field: str
+    institution: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 
