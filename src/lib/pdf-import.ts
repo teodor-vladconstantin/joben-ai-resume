@@ -91,7 +91,7 @@ export async function importPdfClientSide(file: File): Promise<PdfImportResult> 
   const formData = new FormData()
   formData.append('file', file)
 
-  const microserviceUrl = process.env.NEXT_PUBLIC_RESUME_PARSER_URL || 'http://localhost:8001'
+  const microserviceUrl = process.env.RESUME_PARSER_URL || 'http://localhost:8001'
   const response = await fetch(`${microserviceUrl}/parse`, {
     method: 'POST',
     body: formData,
