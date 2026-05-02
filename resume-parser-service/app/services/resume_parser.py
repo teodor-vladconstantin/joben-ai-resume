@@ -677,6 +677,55 @@ class ResumeParser:
 
     # ── Generic formatter ─────────────────────────────────────────────────────
 
+    def _parse_projects_section(self, lines: List[str]) -> str:
+        """
+        Parse project entries with proper project detection and formatting.
+        Handles various project formats including:
+        - Project titles with descriptions
+        - Projects with technologies used
+        - Project date ranges
+        - Bullet-point formatted projects
+        """
+        if not lines:
+            return ""
+
+        # Enhanced project parsing logic
+        parts: List[str] = []
+        current_project: List[str] = []
+        projects: List[str] = []
+
+        for line in lines:
+            cleaned = line.strip()
+            if not cleaned:
+                continue
+
+            # If we find a project header pattern (all caps, likely a project title)
+            if (cleaned == cleaned.upper() and
+                3 <= len(cleaned) <= 100 and
+                not re.search(r'\d{4}', cleaned) and  # Not a year
+                not cleaned.startswith(('-', '•', '*', '·'))):  # Not a bullet
+                # Save previous project if we have one
+                if current_project:
+                    projects.append("\n".join(current_project))
+                    current_project = []
+                # Start new project with this as title
+                current_project.append(f"## {cleaned}")
+            else:
+                # Add to current project
+                current_project.append(cleaned)
+
+        # Don't forget the last project
+        if current_project:
+            projects.append("\n".join(current_project))
+
+        # Format projects with proper spacing
+        formatted_projects = []
+        for project in projects:
+            if project.strip():
+                formatted_projects.append(project)
+
+        return "\n\n".join(formatted_projects) if formatted_projects else "\n".join(lines)
+
     def _format_section(self, sec_type: str, lines: List[str]) -> str:
         if sec_type == "education":
             return self._parse_education_section(lines)
@@ -684,6 +733,8 @@ class ResumeParser:
             return self._parse_skills_section(lines)
         if sec_type == "languages":
             return self._parse_languages_section(lines)
+        if sec_type == "projects":
+            return self._parse_projects_section(lines)
         parts: List[str] = []
         for raw in lines:
             line = raw.strip()
