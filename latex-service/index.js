@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 
 const TMP_DIR = process.env.TMP_DIR || '/tmp';
 const LATEX_SERVICE_SECRET = process.env.LATEX_SERVICE_SECRET || '';
-const REQUIRE_SERVICE_AUTH = process.env.NODE_ENV === 'production' || Boolean(LATEX_SERVICE_SECRET);
+const REQUIRE_SERVICE_AUTH = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true';
 
 function resolveSuppliedSecret(req) {
     const authHeader = req.header('authorization') || '';
