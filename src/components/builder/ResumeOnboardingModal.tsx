@@ -1,15 +1,16 @@
 "use client"
 import { useRef, useState } from 'react'
-import { Upload, FileText, Loader2 } from 'lucide-react'
+import { Upload, FileText, Loader2, AlertTriangle } from 'lucide-react'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
+import { AlertModal } from '@/components/ui/AlertModal'
 
 type Props = {
   onStartBlank: (firstName: string, lastName: string, title: string) => void
   onImported: (data: ResumeTemplateData) => void
 }
 
-type Step = 'choose' | 'blank-form' | 'importing' | 'error'
+type Step = 'choose' | 'blank-form' | 'importing' | 'error' | 'show-alert'
 
 export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   const [step, setStep] = useState<Step>('choose')
@@ -18,6 +19,8 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   const [jobTitle, setJobTitle] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const [showAlert, setShowAlert] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const handlePdfSelect = async (file: File) => {
     setStep('importing')
@@ -32,13 +35,31 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) void handlePdfSelect(file)
+    if (file) {
+      setSelectedFile(file)
+      setShowAlert(true)
+    }
   }
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
-    if (file?.type === 'application/pdf') void handlePdfSelect(file)
+    if (file) {
+      setSelectedFile(file)
+      setShowAlert(true)
+    }
+  }
+
+  const handleAlertConfirm = () => {
+    setShowAlert(false)
+    if (selectedFile) {
+      void handlePdfSelect(selectedFile)
+    }
+  }
+
+  const handleAlertCancel = () => {
+    setShowAlert(false)
+    setStep('choose')
   }
 
   const handleBlankSubmit = (e: React.FormEvent) => {
@@ -49,6 +70,23 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg mx-4 p-8 shadow-2xl">
+
+        {showAlert && (
+          <AlertModal
+            isOpen={showAlert}
+            onOpenChange={setShowAlert}
+            onConfirm={handleAlertConfirm}
+            onCancel={handleAlertCancel}
+          />
+        )}
+        {showAlert && (
+          <AlertModal
+            isOpen={showAlert}
+            onOpenChange={setShowAlert}
+            onConfirm={handleAlertConfirm}
+            onCancel={handleAlertCancel}
+          />
+        )}
 
         {step === 'choose' && (
           <>
