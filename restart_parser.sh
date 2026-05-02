@@ -1,8 +1,8 @@
 #!/bin/sh
-docker ps --filter "status=running" --format "{{.Names}}" | while read name; do
-  if echo "$name" | grep -qi parser; then
-    docker stop "$name" || true
-  fi
-done
-docker rm -f joben-parser || true
-docker run -d --restart unless-stopped --name joben-parser -p 8000:8000 joben-parser:prod
+set -eu
+
+docker rm -f joben-parser >/dev/null 2>&1 || true
+
+docker compose -f docker-compose.prod.yml up -d --build resume-parser
+
+docker ps --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -i "resume-parser" || true

@@ -1,7 +1,7 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
@@ -122,6 +122,26 @@ const tabSectionMap: Record<string, AddableSection['type'][]> = {
   sections: ['professional_summary', 'career_objective', 'leadership', 'research', 'awards', 'publications'],
 }
 
+const MAX_FILES_PER_SLOT = 3
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_FILES_ERROR_MESSAGE = 'You can upload a maximum of 3 CVs per slot.'
+const INVALID_FILE_ERROR_MESSAGE = 'Only .pdf and .docx files are allowed.'
+const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
+
+function getFileExtension(fileName: string): string {
+  const index = fileName.lastIndexOf('.')
+  if (index < 0) return ''
+  return fileName.slice(index).toLowerCase()
+}
+
+function isValidResumeFile(file: File): boolean {
+  const extension = getFileExtension(file.name)
+  if (!ALLOWED_EXTENSIONS.includes(extension)) return false
+  if (!file.type) return true
+  return ALLOWED_TYPES.includes(file.type)
+}
+
 
 export function ResumeBuilder() {
   const importInputRef = useRef<HTMLInputElement | null>(null)
@@ -138,6 +158,10 @@ export function ResumeBuilder() {
   const [isTailoring, setIsTailoring] = useState(false)
   const [bulletDraftStates, setBulletDraftStates] = useState<Record<string, BulletDraftState>>({})
   const [isImportingPdf, setIsImportingPdf] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadedImportFiles, setUploadedImportFiles] = useState<File[]>([])
+  const [showUploadWarning, setShowUploadWarning] = useState(false)
+  const [pendingUploadFile, setPendingUploadFile] = useState<File | null>(null)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
@@ -647,20 +671,56 @@ export function ResumeBuilder() {
     }))
   }
 
-  const handleImportPdf = async (file: File) => {
-    if (isImportingPdf) return
+  const validateUploadFile = (file: File) => {
+    if (!isValidResumeFile(file)) {
+      setUploadError(INVALID_FILE_ERROR_MESSAGE)
+      return false
+    }
 
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setUploadError('File must be under 5 MB.')
+      return false
+    }
+
+    if (uploadedImportFiles.length >= MAX_FILES_PER_SLOT) {
+      setUploadError(MAX_FILES_ERROR_MESSAGE)
+      return false
+    }
+
+    return true
+  }
+
+  const startUploadFlow = (file: File) => {
+    setUploadError(null)
+    if (!validateUploadFile(file)) return
+    setPendingUploadFile(file)
+    setShowUploadWarning(true)
+  }
+
+  const finalizeUpload = async () => {
+    if (!pendingUploadFile || isImportingPdf) return
+
+    setShowUploadWarning(false)
     setIsImportingPdf(true)
+    setUploadError(null)
 
     try {
-      const result = await importPdfClientSide(file)
+      const result = await importPdfClientSide(pendingUploadFile)
       handleOnboardingImport(result.data)
+      setUploadedImportFiles((prev) => [...prev, pendingUploadFile])
       setActiveTab('personal')
+      setPendingUploadFile(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'PDF import failed. Please try again.')
+      setUploadError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
+      setPendingUploadFile(null)
     } finally {
       setIsImportingPdf(false)
     }
+  }
+
+  const cancelUpload = () => {
+    setShowUploadWarning(false)
+    setPendingUploadFile(null)
   }
 
   const handleTailorResume = async () => {
@@ -913,12 +973,12 @@ export function ResumeBuilder() {
           ref={importInputRef}
           id="pdf-import-input"
           type="file"
-          accept="application/pdf"
+          accept=".pdf,.docx"
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0]
             if (file) {
-              void handleImportPdf(file)
+              startUploadFlow(file)
               e.currentTarget.value = ''
             }
           }}
@@ -965,7 +1025,7 @@ export function ResumeBuilder() {
               disabled={isImportingPdf}
               className="flex-1 rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-white/88 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isImportingPdf ? 'Importing PDF...' : 'Import from PDF'}
+              {isImportingPdf ? 'Importing...' : 'Import PDF/DOCX'}
             </button>
             <FeatureButton
               feature="jds"
@@ -986,6 +1046,13 @@ export function ResumeBuilder() {
             >
               âœ•
             </button>
+          </div>
+        ) : null}
+
+        {uploadError ? (
+          <div className="shrink-0 mx-4 mt-3 flex gap-3 rounded-xl border border-red-800/60 bg-red-900/20 px-4 py-2.5">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+            <p className="text-sm text-red-300">{uploadError}</p>
           </div>
         ) : null}
 
@@ -1401,6 +1468,39 @@ export function ResumeBuilder() {
         <BeforeAfterModal patches={fixPatches} onClose={() => setShowBeforeAfterModal(false)} />
       )}
 
+      {showUploadWarning ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={cancelUpload} />
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white">Before you upload</h3>
+            <p className="mt-2 text-sm text-[#FFFFFF]/82">
+              For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={cancelUpload}
+                className="rounded-lg border border-white/10 bg-[#0A0F0D] px-4 py-2 text-sm text-[#FFFFFF]/72"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={finalizeUpload}
+                disabled={isImportingPdf}
+                className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isImportingPdf ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                  </>
+                ) : (
+                  'Got it, continue'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <UpgradeModal
         open={showUpgradeModal}
         title="Pro Feature"
@@ -1411,5 +1511,6 @@ export function ResumeBuilder() {
     </div>
   )
 }
+
 
 

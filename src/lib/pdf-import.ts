@@ -133,7 +133,11 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
 
 export async function importPdfClientSide(file: File): Promise<PdfImportResult> {
   const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-  if (!allowedTypes.includes(file.type)) {
+  const allowedExtensions = ['.pdf', '.docx']
+  const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+  const hasAllowedExtension = allowedExtensions.includes(extension)
+  const hasAllowedType = file.type ? allowedTypes.includes(file.type) : false
+  if (!hasAllowedExtension && !hasAllowedType) {
     throw new Error('File must be a PDF or DOCX')
   }
   if (file.size > 5 * 1024 * 1024) {
@@ -143,14 +147,18 @@ export async function importPdfClientSide(file: File): Promise<PdfImportResult> 
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch('/api/parse', {
+  const response = await fetch('/parse', {
     method: 'POST',
     body: formData,
   })
 
-  const payload = (await response.json()) as ParseResumeResponse | { error: string }
+  const payload = (await response.json()) as ParseResumeResponse | { error?: string; detail?: string }
   if (!response.ok) {
-    throw new Error((payload as { error: string }).error || 'Resume parsing failed. Please try again.')
+    const message =
+      (payload as { error?: string; detail?: string }).error ||
+      (payload as { error?: string; detail?: string }).detail ||
+      'Resume parsing failed. Please try again.'
+    throw new Error(message)
   }
 
   return { data: mapLlamaParseToTemplate(payload as ParseResumeResponse) }
