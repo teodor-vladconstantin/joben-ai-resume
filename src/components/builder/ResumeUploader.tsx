@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
-import { Upload, FileText, X, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { AlertCircle, CheckCircle2, FileText, Loader2, Upload, X } from 'lucide-react'
 
 interface ParsedResume {
   full_name: string | null
@@ -36,7 +36,30 @@ interface ResumeUploaderProps {
   maxFiles?: number
 }
 
-export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) {
+const MAX_FILES_PER_SLOT = 3
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_FILES_ERROR_MESSAGE = 'You can upload a maximum of 3 CVs per slot.'
+const INVALID_FILE_ERROR_MESSAGE = 'Only .pdf and .docx files are allowed.'
+
+const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
+
+function getExtension(fileName: string): string {
+  const index = fileName.lastIndexOf('.')
+  if (index < 0) return ''
+  return fileName.slice(index).toLowerCase()
+}
+
+function isValidFile(file: File): boolean {
+  const extension = getExtension(file.name)
+  if (!ALLOWED_EXTENSIONS.includes(extension)) return false
+  if (file.type === '') return true
+  return ALLOWED_TYPES.includes(file.type)
+}
+
+export function ResumeUploader({ onParsed, maxFiles = MAX_FILES_PER_SLOT }: ResumeUploaderProps) {
+  const effectiveMaxFiles = Math.min(maxFiles, MAX_FILES_PER_SLOT)
+
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -46,30 +69,28 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-  const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
-
-  const isValidFile = (file: File): boolean => {
-    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
-    return ALLOWED_EXTENSIONS.includes(extension) && ALLOWED_TYPES.includes(file.type)
-  }
-
   const handleFileSelect = (file: File) => {
     setError(null)
 
-    // Check if file type is valid
     if (!isValidFile(file)) {
-      setError('Invalid file type. Please upload a PDF or DOCX file.')
+      setError(INVALID_FILE_ERROR_MESSAGE)
       return
     }
 
-    // Check if we already have max files
-    if (uploadedFiles.length >= maxFiles) {
-      setError(`You can upload a maximum of ${maxFiles} CVs per slot.`)
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setError('File must be under 5 MB.')
       return
     }
 
-    // Show modal before uploading
+    if (uploadedFiles.length >= effectiveMaxFiles) {
+      if (effectiveMaxFiles === MAX_FILES_PER_SLOT) {
+        setError(MAX_FILES_ERROR_MESSAGE)
+      } else {
+        setError(`You can upload a maximum of ${effectiveMaxFiles} CVs per slot.`)
+      }
+      return
+    }
+
     setPendingFile(file)
     setShowModal(true)
   }
@@ -105,7 +126,7 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
   }
 
   const handleContinueUpload = async () => {
-    if (!pendingFile) return
+    if (!pendingFile || isLoading) return
 
     setShowModal(false)
     setIsLoading(true)
@@ -115,18 +136,18 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
       const formData = new FormData()
       formData.append('file', pendingFile)
 
-      const response = await fetch('/api/parse', {
+      const response = await fetch('/parse', {
         method: 'POST',
         body: formData,
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to parse resume')
+        const errorData = (await response.json()) as { detail?: string; error?: string }
+        throw new Error(errorData.detail || errorData.error || 'Failed to parse resume')
       }
 
-      const data: ParsedResume = await response.json()
-      setUploadedFiles([...uploadedFiles, pendingFile])
+      const data = (await response.json()) as ParsedResume
+      setUploadedFiles((prev) => [...prev, pendingFile])
       setParsedData(data)
       setPendingFile(null)
 
@@ -147,32 +168,35 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
   }
 
   const handleRemoveFile = (index: number) => {
-    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
-    if (uploadedFiles.length - 1 === 0) {
-      setParsedData(null)
-    }
+    setUploadedFiles((prev) => {
+      const next = prev.filter((_, i) => i !== index)
+      if (next.length === 0) {
+        setParsedData(null)
+      }
+      return next
+    })
   }
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-8 max-w-md mx-4 border border-gray-800">
-            <h3 className="text-lg font-semibold text-white mb-3">Before you upload</h3>
-            <p className="text-gray-400 mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 max-w-md rounded-lg border border-gray-800 bg-gray-900 p-8">
+            <h3 className="mb-3 text-lg font-semibold text-white">Before you upload</h3>
+            <p className="mb-6 text-gray-400">
               For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={handleCancel}
-                className="flex-1 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium transition"
+                className="flex-1 rounded-lg bg-gray-800 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleContinueUpload}
-                className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
+                disabled={isLoading}
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Got it, continue
               </button>
@@ -181,17 +205,16 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
         </div>
       )}
 
-      {/* Upload Area */}
       {!parsedData && (
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition ${
+          className={`relative cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition ${
             isDragging
               ? 'border-blue-500 bg-blue-500/10'
-              : 'border-gray-700 hover:border-gray-600 bg-gray-900/50 hover:bg-gray-900'
+              : 'border-gray-700 bg-gray-900/50 hover:border-gray-600 hover:bg-gray-900'
           }`}
         >
           <input
@@ -205,53 +228,59 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
 
           {isLoading ? (
             <>
-              <Loader2 className="w-12 h-12 text-blue-500 mx-auto mb-3 animate-spin" />
-              <p className="text-gray-400">Parsing your resume...</p>
+              <Loader2 className="mx-auto mb-3 h-12 w-12 animate-spin text-blue-500" />
+              <p className="text-gray-400">Uploading and parsing your file...</p>
             </>
           ) : (
             <>
-              <Upload className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-              <p className="text-white font-medium mb-1">Drag and drop your CV here</p>
-              <p className="text-gray-400 text-sm mb-3">or click to browse</p>
-              <p className="text-gray-500 text-xs">
-                PDF or DOCX • Max 5MB • {uploadedFiles.length}/{maxFiles} files uploaded
+              <Upload className="mx-auto mb-3 h-12 w-12 text-gray-500" />
+              <p className="mb-1 font-medium text-white">Drag and drop your CV here</p>
+              <p className="mb-3 text-sm text-gray-400">or click to browse</p>
+              <p className="text-xs text-gray-500">
+                PDF or DOCX - Max 5MB - {uploadedFiles.length}/{effectiveMaxFiles} files uploaded
               </p>
             </>
           )}
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
-        <div className="mt-4 p-4 rounded-lg bg-red-900/20 border border-red-800 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="mt-4 flex gap-3 rounded-lg border border-red-800 bg-red-900/20 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
-      {/* Uploaded Files List */}
       {uploadedFiles.length > 0 && (
         <div className="mt-6 space-y-2">
-          <p className="text-sm font-medium text-gray-400 mb-3">Uploaded files ({uploadedFiles.length}/{maxFiles})</p>
+          <p className="mb-3 text-sm font-medium text-gray-400">Uploaded files ({uploadedFiles.length}/{effectiveMaxFiles})</p>
           {uploadedFiles.map((file, index) => (
-            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-800">
-              <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-4 h-4 text-blue-500 shrink-0" />
-                <span className="text-sm text-gray-300 truncate">{file.name}</span>
+            <div key={index} className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <FileText className="h-4 w-4 shrink-0 text-blue-500" />
+                <span className="truncate text-sm text-gray-300">{file.name}</span>
               </div>
               <button
                 onClick={() => handleRemoveFile(index)}
-                className="text-gray-500 hover:text-red-500 transition"
+                className="text-gray-500 transition hover:text-red-500"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           ))}
-          {uploadedFiles.length < maxFiles && (
+
+          {isLoading ? (
+            <p className="inline-flex items-center gap-2 text-sm text-blue-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Uploading and parsing your file...
+            </p>
+          ) : null}
+
+          {uploadedFiles.length < effectiveMaxFiles && (
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="w-full mt-4 px-4 py-2 rounded-lg border border-dashed border-gray-700 hover:border-gray-600 text-gray-400 hover:text-gray-300 transition disabled:opacity-50"
+              className="mt-4 w-full rounded-lg border border-dashed border-gray-700 px-4 py-2 text-gray-400 transition hover:border-gray-600 hover:text-gray-300 disabled:opacity-50"
             >
               + Add another file
             </button>
@@ -259,57 +288,52 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
         </div>
       )}
 
-      {/* Parsed Data Display */}
       {parsedData && (
         <div className="mt-8 space-y-6">
-          {/* Header */}
           <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0 mt-1" />
+            <CheckCircle2 className="mt-1 h-6 w-6 shrink-0 text-green-500" />
             <div>
               <h3 className="text-xl font-semibold text-white">{parsedData.full_name || 'Resume'}</h3>
-              <p className="text-gray-400 text-sm">Successfully parsed</p>
+              <p className="text-sm text-gray-400">Successfully parsed</p>
             </div>
           </div>
 
-          {/* Personal Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {parsedData.email && (
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">Email</p>
                 <p className="text-white">{parsedData.email}</p>
               </div>
             )}
             {parsedData.phone && (
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</p>
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">Phone</p>
                 <p className="text-white">{parsedData.phone}</p>
               </div>
             )}
             {parsedData.location && (
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Location</p>
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">Location</p>
                 <p className="text-white">{parsedData.location}</p>
               </div>
             )}
           </div>
 
-          {/* Summary */}
           {parsedData.summary && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Professional Summary</p>
-              <p className="text-gray-300 text-sm leading-relaxed">{parsedData.summary}</p>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Professional Summary</p>
+              <p className="text-sm leading-relaxed text-gray-300">{parsedData.summary}</p>
             </div>
           )}
 
-          {/* Skills */}
           {parsedData.skills.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Skills</p>
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500">Skills</p>
               <div className="flex flex-wrap gap-2">
                 {parsedData.skills.map((skill, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 rounded-full bg-blue-900/30 border border-blue-800 text-blue-300 text-sm"
+                    className="rounded-full border border-blue-800 bg-blue-900/30 px-3 py-1 text-sm text-blue-300"
                   >
                     {skill}
                   </span>
@@ -318,38 +342,36 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
             </div>
           )}
 
-          {/* Work Experience */}
           {parsedData.work_experience.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Work Experience</p>
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500">Work Experience</p>
               <div className="space-y-4">
                 {parsedData.work_experience.map((exp, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-gray-900/50 border border-gray-800">
-                    <div className="flex items-start justify-between mb-2">
+                  <div key={index} className="rounded-lg border border-gray-800 bg-gray-900/50 p-4">
+                    <div className="mb-2 flex items-start justify-between">
                       <div>
                         <p className="font-medium text-white">{exp.role}</p>
                         <p className="text-sm text-gray-400">{exp.company}</p>
                       </div>
                       {(exp.start_date || exp.end_date) && (
                         <p className="text-xs text-gray-500">
-                          {exp.start_date && exp.start_date} {exp.end_date && `— ${exp.end_date}`}
+                          {exp.start_date && exp.start_date} {exp.end_date && `- ${exp.end_date}`}
                         </p>
                       )}
                     </div>
-                    {exp.description && <p className="text-sm text-gray-300 mt-2">{exp.description}</p>}
+                    {exp.description && <p className="mt-2 text-sm text-gray-300">{exp.description}</p>}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Education */}
           {parsedData.education.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Education</p>
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500">Education</p>
               <div className="space-y-3">
                 {parsedData.education.map((edu, index) => (
-                  <div key={index} className="p-3 rounded-lg bg-gray-900/50 border border-gray-800">
+                  <div key={index} className="rounded-lg border border-gray-800 bg-gray-900/50 p-3">
                     <p className="font-medium text-white">{edu.degree}</p>
                     <p className="text-sm text-gray-400">{edu.institution}</p>
                     {edu.field && <p className="text-sm text-gray-500">{edu.field}</p>}
@@ -359,10 +381,9 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
             </div>
           )}
 
-          {/* Languages */}
           {parsedData.languages.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Languages</p>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Languages</p>
               <div className="flex flex-wrap gap-2">
                 {parsedData.languages.map((lang, index) => (
                   <span key={index} className="text-sm text-gray-300">
@@ -373,28 +394,26 @@ export function ResumeUploader({ onParsed, maxFiles = 3 }: ResumeUploaderProps) 
             </div>
           )}
 
-          {/* Certifications */}
           {parsedData.certifications.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Certifications</p>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Certifications</p>
               <ul className="space-y-1">
                 {parsedData.certifications.map((cert, index) => (
                   <li key={index} className="text-sm text-gray-300">
-                    • {cert}
+                    - {cert}
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {/* Upload Another Button */}
           <button
             onClick={() => {
               setUploadedFiles([])
               setParsedData(null)
               setError(null)
             }}
-            className="w-full mt-6 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-medium transition"
+            className="mt-6 w-full rounded-lg bg-gray-800 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
           >
             Upload Another CV
           </button>
