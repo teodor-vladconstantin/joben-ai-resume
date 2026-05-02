@@ -3,12 +3,12 @@ import { AlertTriangle } from 'lucide-react'
 
 interface AlertModalProps {
   isOpen: boolean
-  onOpenChange: (open: boolean) => void
   onConfirm: () => void
   onCancel: () => void
+  title?: string
 }
 
-export function AlertModal({ isOpen, onOpenChange, onConfirm, onCancel }: AlertModalProps) {
+export function AlertModal({ isOpen, onConfirm, onCancel, title }: AlertModalProps) {
   const ref = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
@@ -36,8 +36,7 @@ export function AlertModal({ isOpen, onOpenChange, onConfirm, onCancel }: AlertM
           <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
           <h3 className="text-lg font-medium text-white mt-4">Important Notice</h3>
           <p className="text-white/80 mt-2 mb-4 text-sm">
-            Please note that only PDF and DOCX files are supported for import.
-            Scanned documents or images in PDF format will not be imported correctly.
+            {title || "Please note that only PDF and DOCX files are supported for import. Scanned documents or images in PDF format will not be imported correctly."}
           </p>
           <div className="flex justify-center gap-3">
             <button
