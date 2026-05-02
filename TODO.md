@@ -1,10 +1,11 @@
 ## Active
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
 - [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
+- [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interestories, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
 - [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interests/references/associations), 25 tests passing
 - [DONE] Remove unsubstantiated marketing claims from UI copy
 - [DONE] Parser cleanup: imports, types, formatting, verification
-- [IN PROGRESS] Final launch execution gates (Vercel deploy + service keys)
+- [DONE] Final launch execution gates (Vercel deploy + service keys)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [DONE] Final technical polish pass (types, errors, loading, empty states, logs, env, API response shape, mobile, lint)
 - [DONE] [Polish C1] TypeScript: npx tsc --noEmit clean, no any introduced
@@ -59,6 +60,7 @@
 
 ## Done
 
+- [DONE] Implement PDF upload limits and warning modals for ResumeOnboardingModal
 - [DONE] Replace Python resume parser with Gemini 2.0 Flash-Lite and add PDF import limits per resume
 - [DONE] Maximized upload resume parser accuracy (two-column reconstruction, combined role/company/date lines, wrapped bullets, numeric date ranges) + added regression tests
 - [DONE] AI Summary generator + independent left panel scroll in resume builder

@@ -1,9 +1,14 @@
 "use client"
 import { useRef, useState } from 'react'
-import { Upload, FileText, Loader2, AlertTriangle } from 'lucide-react'
+import { Upload, FileText, Loader2 } from 'lucide-react'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { AlertModal } from '@/components/ui/AlertModal'
+
+const MAX_FILES_PER_SLOT = 3
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
 
 type Props = {
   onStartBlank: (firstName: string, lastName: string, title: string) => void
@@ -11,6 +16,20 @@ type Props = {
 }
 
 type Step = 'choose' | 'blank-form' | 'importing' | 'error' | 'show-alert'
+
+
+function getFileExtension(fileName: string): string {
+  const index = fileName.lastIndexOf('.')
+  if (index < 0) return ''
+  return fileName.slice(index).toLowerCase()
+}
+
+function isValidResumeFile(file: File): boolean {
+  const extension = getFileExtension(file.name)
+  if (!ALLOWED_EXTENSIONS.includes(extension)) return false
+  if (!file.type) return true
+  return ALLOWED_TYPES.includes(file.type)
+}
 
 export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   const [step, setStep] = useState<Step>('choose')
@@ -20,12 +39,34 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   const [errorMsg, setErrorMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
   const [showAlert, setShowAlert] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [alertMessage, setAlertMessage] = useState('')
+  const [uploadedImportFiles, setUploadedImportFiles] = useState<File[]>([])
+  const [pendingUploadFile, setPendingUploadFile] = useState<File | null>(null)
+
+  const validateUploadFile = (file: File) => {
+    if (!isValidResumeFile(file)) {
+      setAlertMessage('Only PDF and DOCX files are allowed.')
+      return false
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setAlertMessage('File must be under 5 MB.')
+      return false
+    }
+
+    if (uploadedImportFiles.length >= MAX_FILES_PER_SLOT) {
+      setAlertMessage(`You can upload a maximum of ${MAX_FILES_PER_SLOT} CVs per slot.`)
+      return false
+    }
+
+    return true
+  }
 
   const handlePdfSelect = async (file: File) => {
     setStep('importing')
     try {
       const result = await importPdfClientSide(file)
+      setUploadedImportFiles(prev => [...prev, file])
       onImported(result.data)
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Import failed. Please try again.')
@@ -36,8 +77,13 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setSelectedFile(file)
-      setShowAlert(true)
+      if (validateUploadFile(file)) {
+        setPendingUploadFile(file)
+        setAlertMessage('For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.')
+        setShowAlert(true)
+      }
+      // Reset input to allow selecting the same file again
+      e.currentTarget.value = ''
     }
   }
 
@@ -45,20 +91,24 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file) {
-      setSelectedFile(file)
-      setShowAlert(true)
+      if (validateUploadFile(file)) {
+        setPendingUploadFile(file)
+        setAlertMessage('For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.')
+        setShowAlert(true)
+      }
     }
   }
 
   const handleAlertConfirm = () => {
     setShowAlert(false)
-    if (selectedFile) {
-      void handlePdfSelect(selectedFile)
+    if (pendingUploadFile) {
+      void handlePdfSelect(pendingUploadFile)
     }
   }
 
   const handleAlertCancel = () => {
     setShowAlert(false)
+    setPendingUploadFile(null)
     setStep('choose')
   }
 
@@ -74,17 +124,9 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
         {showAlert && (
           <AlertModal
             isOpen={showAlert}
-            onOpenChange={setShowAlert}
             onConfirm={handleAlertConfirm}
             onCancel={handleAlertCancel}
-          />
-        )}
-        {showAlert && (
-          <AlertModal
-            isOpen={showAlert}
-            onOpenChange={setShowAlert}
-            onConfirm={handleAlertConfirm}
-            onCancel={handleAlertCancel}
+            title={alertMessage}
           />
         )}
 
