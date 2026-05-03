@@ -59,6 +59,8 @@ class ResumeData(BaseModel):
     phone: Optional[str] = None
     location: Optional[str] = None
     summary: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
     work_experience: list[WorkExperience] = []
     education: list[Education] = []
     skills: list[str] = []
@@ -111,6 +113,9 @@ TECHNOLOGY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 
 URL_PATTERN = re.compile(r"https?://[^\s)\]}>,]+", re.IGNORECASE)
 
+LINKEDIN_PATTERN = re.compile(r"https?://(?:www\.)?linkedin\.com/[\w\-/]+", re.IGNORECASE)
+GITHUB_PATTERN = re.compile(r"https?://(?:www\.)?github\.com/[\w\-/]+", re.IGNORECASE)
+
 
 def looks_like_project_entry(entry: dict) -> bool:
     header_text = " ".join(
@@ -125,14 +130,42 @@ def looks_like_project_entry(entry: dict) -> bool:
     )
     description_text = entry.get("description") if isinstance(entry.get("description"), str) else ""
 
+    # If header explicitly mentions projects, it's a project
     if header_text and PROJECT_SECTION_PATTERN.search(header_text):
         return True
 
-    if description_text and PROJECT_SECTION_PATTERN.search(description_text):
-        candidate_text = " ".join(filter(None, [header_text, description_text]))
-        return bool(extract_url(candidate_text) or extract_technologies(candidate_text))
+    # If this entry looks like a full work experience (company + role) and has dates,
+    # prefer keeping it as work_experience to avoid false positives.
+    has_company = bool(entry.get("company") and isinstance(entry.get("company"), str) and entry.get("company").strip())
+    has_role = bool(entry.get("role") and isinstance(entry.get("role"), str) and entry.get("role").strip())
+    has_dates = bool(entry.get("start_date") or entry.get("end_date"))
+    if has_company and has_role and has_dates:
+        return False
+
+    # Candidate text for signals
+    candidate_text = " ".join(filter(None, [header_text, description_text]))
+    if not candidate_text.strip():
+        return False
+
+    # If description explicitly mentions projects keywords and we also detect technologies or a URL,
+    # treat as a project entry.
+    if PROJECT_SECTION_PATTERN.search(description_text):
+        return bool(extract_url(candidate_text) or extract_technologies(candidate_text) or has_project_verbs(candidate_text))
+
+    # If description contains strong project verbs (built, developed, prototype) and we detect
+    # technologies or a URL, consider it a project.
+    if has_project_verbs(candidate_text) and (extract_url(candidate_text) or extract_technologies(candidate_text)):
+        return True
 
     return False
+
+
+def has_project_verbs(text: Optional[str]) -> bool:
+    if not isinstance(text, str) or not text.strip():
+        return False
+    verbs = [r"\\bbuilt\\b", r"\\bdeveloped\\b", r"\\bimplemented\\b", r"\\bprototype\\b", r"\\bbuilt a\\b", r"\\bcreated\\b", r"\\bdesigned\\b", r"\\bdeployed\\b", r"\\bsubmitted\\b", r"\\bportfolio\\b"]
+    combined = re.compile("|".join(verbs), re.IGNORECASE)
+    return bool(combined.search(text))
 
 
 def extract_technologies(text: Optional[str]) -> list[str]:
@@ -195,6 +228,20 @@ def normalize_project_entry(entry: dict) -> Project:
         technologies=extract_technologies(project_text),
         url=url,
     )
+
+
+def extract_linkedin(text: Optional[str]) -> Optional[str]:
+    if not isinstance(text, str) or not text.strip():
+        return None
+    m = LINKEDIN_PATTERN.search(text)
+    return m.group(0).rstrip('.,;:') if m else None
+
+
+def extract_github(text: Optional[str]) -> Optional[str]:
+    if not isinstance(text, str) or not text.strip():
+        return None
+    m = GITHUB_PATTERN.search(text)
+    return m.group(0).rstrip('.,;:') if m else None
 
 
 api_key = os.getenv("LLAMA_CLOUD_API_KEY")
@@ -262,12 +309,22 @@ async def parse_resume(file: UploadFile = File(...)):
 
         resume_data = json.loads(parsed_text.strip())
 
+        # try to extract LinkedIn/GitHub from explicit fields or from the parsed output text
+        linkedin_val = resume_data.get("linkedin") if isinstance(resume_data.get("linkedin"), str) else None
+        github_val = resume_data.get("github") if isinstance(resume_data.get("github"), str) else None
+        if not linkedin_val:
+            linkedin_val = extract_linkedin(parsed_text)
+        if not github_val:
+            github_val = extract_github(parsed_text)
+
         result = ResumeData(
             full_name=resume_data.get("full_name"),
             email=resume_data.get("email"),
             phone=resume_data.get("phone"),
             location=resume_data.get("location"),
             summary=resume_data.get("summary"),
+            linkedin=linkedin_val,
+            github=github_val,
             projects=[
                 normalize_project_entry(project)
                 for project in (resume_data.get("projects") or [])
