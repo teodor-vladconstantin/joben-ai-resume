@@ -136,7 +136,7 @@ LINKEDIN_PATTERN = re.compile(r"https?://(?:www\.)?linkedin\.com/[\w\-/]+", re.I
 GITHUB_PATTERN = re.compile(r"https?://(?:www\.)?github\.com/[\w\-/]+", re.IGNORECASE)
 
 
-def looks_like_project_entry(entry: dict) -> bool:
+def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     header_text = " ".join(
         str(value)
         for value in (
@@ -148,9 +148,13 @@ def looks_like_project_entry(entry: dict) -> bool:
         if isinstance(value, str) and value.strip()
     )
     description_text = entry.get("description") if isinstance(entry.get("description"), str) else ""
+    
+    entry_name = entry.get("name") or entry.get("title") or entry.get("company") or "unknown"
 
     # If header explicitly mentions projects, it's a project
     if header_text and PROJECT_SECTION_PATTERN.search(header_text):
+        if verbose:
+            logger.info(f"    -> YES (header mentions project): '{entry_name}'")
         return True
 
     # If this entry looks like a full work experience (company + role) and has dates,
@@ -159,30 +163,67 @@ def looks_like_project_entry(entry: dict) -> bool:
     has_role = bool(entry.get("role") and isinstance(entry.get("role"), str) and entry.get("role").strip())
     has_dates = bool(entry.get("start_date") or entry.get("end_date"))
     if has_company and has_role and has_dates:
+        if verbose:
+            logger.info(f"    -> NO (full work exp): '{entry_name}' (company={has_company}, role={has_role}, dates={has_dates})")
         return False
 
     # Candidate text for signals
     candidate_text = " ".join(filter(None, [header_text, description_text]))
     if not candidate_text.strip():
+        if verbose:
+            logger.info(f"    -> NO (no text): '{entry_name}'")
         return False
 
     # If description explicitly mentions projects keywords and we also detect technologies or a URL,
     # treat as a project entry.
     if PROJECT_SECTION_PATTERN.search(description_text):
-        return bool(extract_url(candidate_text) or extract_technologies(candidate_text) or has_project_verbs(candidate_text))
+        has_url = bool(extract_url(candidate_text))
+        has_tech = bool(extract_technologies(candidate_text))
+        has_verbs = has_project_verbs(candidate_text)
+        result = has_url or has_tech or has_verbs
+        if verbose:
+            logger.info(f"    -> {'YES' if result else 'NO'} (desc mentions projects, url={has_url}, tech={has_tech}, verbs={has_verbs}): '{entry_name}'")
+        return result
 
     # If description contains strong project verbs (built, developed, prototype) and we detect
     # technologies or a URL, consider it a project.
-    if has_project_verbs(candidate_text) and (extract_url(candidate_text) or extract_technologies(candidate_text)):
+    has_verbs = has_project_verbs(candidate_text)
+    has_url = bool(extract_url(candidate_text))
+    has_tech = bool(extract_technologies(candidate_text))
+    if has_verbs and (has_url or has_tech):
+        if verbose:
+            logger.info(f"    -> YES (verbs + tech/url): '{entry_name}' (verbs={has_verbs}, url={has_url}, tech={has_tech})")
         return True
 
+    if verbose:
+        logger.info(f"    -> NO (no signals): '{entry_name}'")
     return False
 
 
 def has_project_verbs(text: Optional[str]) -> bool:
     if not isinstance(text, str) or not text.strip():
         return False
-    verbs = [r"\\bbuilt\\b", r"\\bdeveloped\\b", r"\\bimplemented\\b", r"\\bprototype\\b", r"\\bbuilt a\\b", r"\\bcreated\\b", r"\\bdesigned\\b", r"\\bdeployed\\b", r"\\bsubmitted\\b", r"\\bportfolio\\b"]
+    verbs = [
+        r"\bbuilt\b",
+        r"\bdeveloped\b", 
+        r"\bimplemented\b",
+        r"\bprototyped\b",
+        r"\bprototype\b",
+        r"\bcreated\b",
+        r"\bdesigned\b",
+        r"\bdeployed\b",
+        r"\bsubmitted\b",
+        r"\bportfolio\b",
+        r"\bconstructed\b",
+        r"\bengineered\b",
+        r"\barchitected\b",
+        r"\bfabricated\b",
+        r"\bforged\b",
+        r"\blaunch\b",
+        r"\blaunched\b",
+        r"\breleased\b",
+        r"\bbuild\b",
+    ]
     combined = re.compile("|".join(verbs), re.IGNORECASE)
     return bool(combined.search(text))
 
@@ -308,6 +349,8 @@ parser = LlamaParse(
         "- email (string)\n"
         "- phone (string)\n"
         "- location (string)\n"
+        "- linkedin (string, URL if present)\n"
+        "- github (string, URL if present)\n"
         "- summary (string)\n"
         "- projects (array of: name, description, technologies, url)\n"
         "- work_experience (array of: company, role, start_date, end_date, description)\n"
@@ -315,11 +358,18 @@ parser = LlamaParse(
         "- skills (array of strings)\n"
         "- languages (array of: language, level)\n"
         "- certifications (array of strings)\n"
-        "CRITICAL: Any project sections such as Projects, Personal Projects, Side Projects, Academic Projects, or similar variations must be placed in the projects array, not work_experience.\n"
-        "For each project, extract a concise name, the full description, a technologies array based on the description, and any URL present in the project text.\n"
-        "If a field is not found, return null for strings and empty array for arrays.\n"
-        "Return only valid JSON, no markdown, no extra text.\n"
-        "CRITICAL: Do NOT summarize, truncate, or abbreviate any text. Extract the FULL EXACT TEXT for descriptions, summaries, and roles."
+        "\n"
+        "DISTINCTION:\n"
+        "- PROJECTS: Stand-alone work items (personal, academic, side projects). Usually have: name/title, description, technologies list, optional URL/GitHub link. NO company name.\n"
+        "- WORK_EXPERIENCE: Employment at a company. Must have: company name, job title/role, dates, description of responsibilities/achievements.\n"
+        "\n"
+        "CRITICAL EXTRACTION RULES:\n"
+        "1. Look for 'Projects', 'Personal Projects', 'Side Projects', 'Academic Projects', 'Featured Projects', 'Project Work', 'Portfolio' sections - place these in projects array.\n"
+        "2. Each project MUST have: name (the project title), description (full details of what was built/created), technologies (list of tech stack used), url (if present, e.g., GitHub link).\n"
+        "3. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
+        "4. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
+        "5. Extract linkedin and github URLs if found anywhere in the resume.\n"
+        "6. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
     cost_optimizer="true",
 )
@@ -375,12 +425,18 @@ async def parse_resume(file: UploadFile = File(...)):
 
         # DEBUG: Log project classification
         explicit_projects = [p for p in (resume_data.get("projects") or []) if isinstance(p, dict)]
-        classified_as_projects = [e for e in (resume_data.get("work_experience") or []) if isinstance(e, dict) and looks_like_project_entry(e)]
-        logger.info(f"Explicit projects: {len(explicit_projects)}, Classified as projects: {len(classified_as_projects)}")
-        for exp in (resume_data.get("work_experience") or []):
+        
+        # Pre-classify work_experience entries with verbose logging
+        work_exp_entries = resume_data.get("work_experience") or []
+        work_exp_classifications = {}
+        for i, exp in enumerate(work_exp_entries):
             if isinstance(exp, dict):
-                is_project = looks_like_project_entry(exp)
-                logger.info(f"  Entry '{exp.get('name', exp.get('title', 'unknown'))}' -> is_project={is_project}")
+                is_proj = looks_like_project_entry(exp, verbose=True)
+                work_exp_classifications[i] = is_proj
+        
+        classified_as_projects = sum(1 for is_proj in work_exp_classifications.values() if is_proj)
+        logger.info(f"Explicit projects from LlamaParse: {len(explicit_projects)}")
+        logger.info(f"Work exp entries classified as projects: {classified_as_projects}")
 
         result = ResumeData(
             full_name=resume_data.get("full_name"),
@@ -397,8 +453,8 @@ async def parse_resume(file: UploadFile = File(...)):
             ]
             + [
                 normalize_project_entry(exp)
-                for exp in (resume_data.get("work_experience") or [])
-                if isinstance(exp, dict) and looks_like_project_entry(exp)
+                for i, exp in enumerate(work_exp_entries)
+                if isinstance(exp, dict) and work_exp_classifications.get(i, False)
             ],
             work_experience=[
                 WorkExperience(
@@ -408,8 +464,8 @@ async def parse_resume(file: UploadFile = File(...)):
                     end_date=normalize_date(exp.get("end_date")),
                     description=exp.get("description"),
                 )
-                for exp in (resume_data.get("work_experience") or [])
-                if isinstance(exp, dict) and not looks_like_project_entry(exp)
+                for i, exp in enumerate(work_exp_entries)
+                if isinstance(exp, dict) and not work_exp_classifications.get(i, False)
             ],
             education=[
                 Education(
