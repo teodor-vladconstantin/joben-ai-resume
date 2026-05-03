@@ -73,6 +73,11 @@ PROJECT_SECTION_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+SECTION_HEADING_PATTERN = re.compile(
+    r"^(?:#{1,6}\s*)?(?:summary|professional summary|profile|experience|work experience|employment|education|skills|projects?|personal projects?|side projects?|academic projects?|featured projects?|project work|project experience|certifications?|languages?|awards?|volunteer|interests?|publications?|references?|sections?)[:\s-]*$",
+    re.IGNORECASE,
+)
+
 TECHNOLOGY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("React", re.compile(r"\bReact(?:\.js)?\b", re.IGNORECASE)),
     ("Next.js", re.compile(r"\bNext(?:\.js)?\b", re.IGNORECASE)),
@@ -290,6 +295,134 @@ def normalize_project_entry(entry: dict) -> Project:
     )
 
 
+def strip_markdown_formatting(text: str) -> str:
+    cleaned = text.strip()
+    cleaned = re.sub(r"^#{1,6}\s*", "", cleaned)
+    cleaned = re.sub(r"^[-*•]\s*", "", cleaned)
+    cleaned = re.sub(r"^\*\*(.+?)\*\*$", r"\1", cleaned)
+    cleaned = re.sub(r"^__(.+?)__$", r"\1", cleaned)
+    return cleaned.strip().rstrip(":")
+
+
+def is_section_heading(line: str) -> bool:
+    cleaned = strip_markdown_formatting(line)
+    if not cleaned:
+        return False
+    if len(cleaned) > 80:
+        return False
+    if SECTION_HEADING_PATTERN.match(line.strip()):
+        return True
+    if cleaned.isupper() and len(cleaned.split()) <= 4:
+        return True
+    return False
+
+
+def is_project_title_line(line: str) -> bool:
+    cleaned = strip_markdown_formatting(line)
+    if not cleaned:
+        return False
+    if extract_url(cleaned) or re.search(r"\d{4}", cleaned):
+        return False
+    if cleaned.endswith(":") or cleaned.endswith("."):
+        return False
+    if len(cleaned) > 120:
+        return False
+    words = cleaned.split()
+    return 1 <= len(words) <= 10 and bool(re.match(r"^[A-Z0-9].*", cleaned))
+
+
+def split_project_blocks(section_text: str) -> list[str]:
+    blocks = [block.strip() for block in re.split(r"\n\s*\n", section_text) if block.strip()]
+    if blocks:
+        return blocks
+
+    return [section_text.strip()] if section_text.strip() else []
+
+
+def parse_project_block(block: str) -> Optional[dict]:
+    lines = [line.strip() for line in block.splitlines() if line.strip()]
+    if not lines:
+        return None
+
+    title_index = 0
+    for index, line in enumerate(lines):
+        if is_project_title_line(line):
+            title_index = index
+            break
+
+    title = strip_markdown_formatting(lines[title_index])
+    description_lines = [strip_markdown_formatting(line) for i, line in enumerate(lines) if i != title_index]
+    description = " ".join(line for line in description_lines if line and not is_section_heading(line)).strip()
+
+    if not title:
+        title = "Project"
+
+    project_text = f"{title} {description} {block}"
+    technologies = extract_technologies(project_text)
+    url = extract_url(project_text)
+
+    return {
+        "name": title,
+        "description": description or None,
+        "technologies": technologies,
+        "url": url,
+    }
+
+
+def extract_projects_from_text(text: str) -> list[dict]:
+    if not isinstance(text, str) or not text.strip():
+        return []
+
+    lines = text.splitlines()
+    projects: list[dict] = []
+    current_section_lines: list[str] = []
+    in_project_section = False
+
+    for raw_line in lines:
+        line = raw_line.rstrip()
+        if is_section_heading(line):
+            heading = strip_markdown_formatting(line)
+            if PROJECT_SECTION_PATTERN.search(heading):
+                in_project_section = True
+                current_section_lines = []
+                continue
+
+            if in_project_section:
+                break
+
+        if in_project_section:
+            current_section_lines.append(line)
+
+    section_text = "\n".join(current_section_lines).strip()
+    if not section_text:
+        return []
+
+    for block in split_project_blocks(section_text):
+        project = parse_project_block(block)
+        if project:
+            projects.append(project)
+
+    return projects
+
+
+def dedupe_project_entries(project_entries: list[dict]) -> list[dict]:
+    unique_projects: list[dict] = []
+    seen_signatures: set[tuple[str, str, str]] = set()
+
+    for entry in project_entries:
+        name = str(entry.get("name") or "").strip().lower()
+        description = str(entry.get("description") or "").strip().lower()
+        url = str(entry.get("url") or "").strip().lower()
+        signature = (name, description, url)
+        if signature in seen_signatures:
+            continue
+
+        seen_signatures.add(signature)
+        unique_projects.append(entry)
+
+    return unique_projects
+
+
 def extract_linkedin(text: Optional[str]) -> Optional[str]:
     if not isinstance(text, str) or not text.strip():
         return None
@@ -374,6 +507,16 @@ parser = LlamaParse(
     cost_optimizer="true",
 )
 
+text_parser = LlamaParse(
+    api_key=api_key,
+    result_type="text",
+    parsing_instruction=(
+        "Extract the resume text as faithfully as possible. Preserve headings, bullet lists, URLs, project names, and section boundaries. "
+        "Do not summarize or rewrite the content."
+    ),
+    cost_optimizer="true",
+)
+
 
 @app.get("/health")
 async def health_check():
@@ -398,7 +541,8 @@ async def parse_resume(file: UploadFile = File(...)):
             extra_info={"file_name": file.filename},
         )
 
-        parsed_text = documents[0].text if documents else ""
+        raw_text = documents[0].text if documents else ""
+        parsed_text = raw_text
 
         m = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
         if m:
@@ -425,6 +569,18 @@ async def parse_resume(file: UploadFile = File(...)):
 
         # DEBUG: Log project classification
         explicit_projects = [p for p in (resume_data.get("projects") or []) if isinstance(p, dict)]
+
+        fallback_project_entries = extract_projects_from_text(raw_text)
+        if not fallback_project_entries:
+            try:
+                fallback_documents = await text_parser.aload_data(
+                    io.BytesIO(content),
+                    extra_info={"file_name": file.filename, "mode": "text_fallback"},
+                )
+                fallback_text = fallback_documents[0].text if fallback_documents else ""
+                fallback_project_entries = extract_projects_from_text(fallback_text)
+            except Exception as fallback_error:
+                logger.warning(f"Text fallback parser failed: {fallback_error}")
         
         # Pre-classify work_experience entries with verbose logging
         work_exp_entries = resume_data.get("work_experience") or []
@@ -437,6 +593,13 @@ async def parse_resume(file: UploadFile = File(...)):
         classified_as_projects = sum(1 for is_proj in work_exp_classifications.values() if is_proj)
         logger.info(f"Explicit projects from LlamaParse: {len(explicit_projects)}")
         logger.info(f"Work exp entries classified as projects: {classified_as_projects}")
+        logger.info(f"Fallback projects extracted from raw text: {len(fallback_project_entries)}")
+
+        project_entries = dedupe_project_entries(
+            explicit_projects
+            + [normalize_project_entry(exp).model_dump() for i, exp in enumerate(work_exp_entries) if isinstance(exp, dict) and work_exp_classifications.get(i, False)]
+            + fallback_project_entries
+        )
 
         result = ResumeData(
             full_name=resume_data.get("full_name"),
@@ -446,16 +609,7 @@ async def parse_resume(file: UploadFile = File(...)):
             summary=resume_data.get("summary"),
             linkedin=linkedin_val,
             github=github_val,
-            projects=[
-                normalize_project_entry(project)
-                for project in (resume_data.get("projects") or [])
-                if isinstance(project, dict)
-            ]
-            + [
-                normalize_project_entry(exp)
-                for i, exp in enumerate(work_exp_entries)
-                if isinstance(exp, dict) and work_exp_classifications.get(i, False)
-            ],
+            projects=[normalize_project_entry(project) for project in project_entries],
             work_experience=[
                 WorkExperience(
                     company=normalize_company_name(exp.get("company")),
