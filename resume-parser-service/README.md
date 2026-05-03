@@ -10,6 +10,47 @@ A lightweight FastAPI microservice for parsing resumes and CVs using LlamaParse.
 - **Validation** for file type and size
 - **JSON Schema** output for structured resume data
 - **Docker** support for easy deployment
+- **Projects Detection** — Automatically separates personal/side projects from work experience
+- **LinkedIn/GitHub Extraction** — Extracts social profile URLs from resume text
+- **Date Normalization** — Standardizes date formats (YYYY-MM)
+- **Company Name Cleanup** — Removes common suffixes (Inc., LLC, Corp., etc.)
+- **Technology Detection** — Identifies 40+ tech stack items (React, Node.js, PostgreSQL, Docker, etc.)
+- **Smart Heuristics** — Distinguishes projects from work experience using verb detection and tech signals
+
+## Extracted Fields
+
+```json
+{
+  "full_name": "John Developer",
+  "email": "john@example.com",
+  "phone": "+1-555-1234",
+  "location": "San Francisco, CA",
+  "summary": "5+ years building scalable web applications",
+  "linkedin": "https://linkedin.com/in/johndeveloper",
+  "github": "https://github.com/johndeveloper",
+  "work_experience": [
+    {
+      "company": "TechCorp",
+      "role": "Senior Engineer",
+      "start_date": "2021-01",
+      "end_date": "Present",
+      "description": "Led backend API development..."
+    }
+  ],
+  "projects": [
+    {
+      "name": "E-Commerce Platform",
+      "description": "Built a full-stack e-commerce solution...",
+      "technologies": ["React", "Node.js", "PostgreSQL"],
+      "url": "https://github.com/johndeveloper/ecommerce"
+    }
+  ],
+  "education": [...],
+  "skills": [...],
+  "languages": [...],
+  "certifications": [...]
+}
+```
 
 ## Setup
 
@@ -31,7 +72,13 @@ A lightweight FastAPI microservice for parsing resumes and CVs using LlamaParse.
    ```bash
    python main.py
    ```
-   Server runs on `http://localhost:8001`
+   Server runs on `http://localhost:8000`
+
+4. **Run tests:**
+   ```bash
+   cd ../tests
+   python3 test_integration.py
+   ```
 
 ### Docker Deployment
 
@@ -42,7 +89,7 @@ A lightweight FastAPI microservice for parsing resumes and CVs using LlamaParse.
 
 2. **Run with Docker:**
    ```bash
-   docker run -e LLAMA_CLOUD_API_KEY=your_key_here -p 8001:8001 resume-parser:latest
+   docker run -e LLAMA_CLOUD_API_KEY=your_key_here -p 8000:8000 resume-parser:latest
    ```
 
 3. **Run with Docker Compose:**
