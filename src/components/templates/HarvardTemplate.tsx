@@ -4,6 +4,10 @@ type HarvardTemplateProps = {
   data: ResumeTemplateData
 }
 
+function normalizeContactText(url: string): string {
+  return url.replace(/^https?:\/\/(www\.)?/i, '')
+}
+
 function resolveBullets(exp: { bullets?: string[]; description: string }) {
   const bullets = (exp.bullets || []).map((bullet) => bullet.trim()).filter(Boolean)
   if (bullets.length > 0) return bullets
@@ -11,12 +15,28 @@ function resolveBullets(exp: { bullets?: string[]; description: string }) {
 }
 
 export function HarvardTemplate({ data }: HarvardTemplateProps) {
+  const contactItems = [
+    data.personal.email ? { label: 'Email', value: data.personal.email, href: `mailto:${data.personal.email}` } : null,
+    data.personal.phone ? { label: 'Phone', value: data.personal.phone, href: `tel:${data.personal.phone.replace(/[^+\d]/g, '')}` } : null,
+    data.personal.linkedin ? { label: 'LinkedIn', value: normalizeContactText(data.personal.linkedin), href: data.personal.linkedin } : null,
+    data.personal.github ? { label: 'GitHub', value: normalizeContactText(data.personal.github), href: data.personal.github } : null,
+  ].filter(Boolean) as Array<{ label: string; value: string; href: string }>
+
   return (
     <div className="p-12 text-black font-serif h-full">
       <div className="border-b-2 border-gray-300 pb-6 mb-6 text-center">
         <h1 className="text-4xl font-bold uppercase tracking-[0.2em] mb-2">{data.personal.firstName} {data.personal.lastName}</h1>
         <h2 className="text-xl text-gray-700 mb-4 uppercase tracking-wide">{data.personal.title}</h2>
-        <p className="text-sm text-gray-600">{data.personal.email} • {data.personal.phone}</p>
+        <p className="text-sm text-gray-600">
+          {contactItems.map((item, index) => (
+            <span key={item.label}>
+              {index > 0 ? ' • ' : ''}
+              <a className="hover:underline" href={item.href} target="_blank" rel="noreferrer">
+                {item.value}
+              </a>
+            </span>
+          ))}
+        </p>
       </div>
 
       <section className="mb-6">

@@ -60,6 +60,9 @@
 
 ## Done
 
+- [DONE] Fix resume parser projects section routing on Hetzner parser service
+- [DONE] Add LinkedIn and GitHub support in resume builder profile/header
+
 - [DONE] Implement PDF upload limits and warning modals for ResumeOnboardingModal
 - [DONE] Replace Python resume parser with Gemini 2.0 Flash-Lite and add PDF import limits per resume
 - [DONE] Maximized upload resume parser accuracy (two-column reconstruction, combined role/company/date lines, wrapped bullets, numeric date ranges) + added regression tests

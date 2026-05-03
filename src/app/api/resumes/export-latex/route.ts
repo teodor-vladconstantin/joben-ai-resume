@@ -13,6 +13,8 @@ type LatexPersonal = {
   email?: string
   title?: string
   summary?: string
+  linkedin?: string
+  github?: string
 }
 
 type LatexExperienceEntry = {
@@ -48,7 +50,15 @@ function normalizeLatexText(text: string | undefined): string {
 }
 
 function clampLatexText(text: string | undefined, maxChars: number): string {
-  return normalizeLatexText(text)
+  return normalizeLatexText(text).slice(0, maxChars)
+}
+
+function normalizeContactText(url: string): string {
+  return normalizeLatexText(url).replace(/^https?:\/\/(www\.)?/i, '')
+}
+
+function makeLatexLink(url: string, label: string): string {
+  return String.raw`\href{${normalizeLatexText(url)}}{${escapeLatex(label)}}`
 }
 
 function escapeLatex(text: string | undefined): string {
@@ -99,11 +109,13 @@ function generateLatex(data: LatexResumeData): string {
 
   const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
   const contactParts = [
-    clampLatexText(personal?.phone, 40),
-    clampLatexText(personal?.email, 120),
-    clampLatexText(personal?.title, 90),
+    personal?.phone ? escapeLatex(`Phone: ${clampLatexText(personal.phone, 40)}`) : '',
+    personal?.email ? escapeLatex(`Email: ${clampLatexText(personal.email, 120)}`) : '',
+    escapeLatex(clampLatexText(personal?.title, 90)),
+    personal?.linkedin ? `LinkedIn: ${makeLatexLink(personal.linkedin, normalizeContactText(personal.linkedin))}` : '',
+    personal?.github ? `GitHub: ${makeLatexLink(personal.github, normalizeContactText(personal.github))}` : '',
   ].filter(Boolean)
-  const contactLine = contactParts.map((value) => escapeLatex(value)).join(' $|$ ')
+  const contactLine = contactParts.join(' $|$ ')
   const contactBlock = contactLine
     ? String.raw`    \small ${contactLine}
 `
