@@ -116,18 +116,15 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
   }
 
   const projects = parsed.projects || []
-  if (Array.isArray(projects) && projects.length > 0) {
-    for (let i = 0; i < projects.length; i++) {
-      const p = projects[i] as { name?: string | null; description?: string | null; technologies?: string[] | null; url?: string | null }
-      const title = p.name ? decodeHtml(p.name) : `Project ${i + 1}`
-      const parts: string[] = []
-      if (p.description) parts.push(decodeHtml(p.description))
-      if (Array.isArray(p.technologies) && p.technologies.length > 0) parts.push(`Technologies: ${p.technologies.map((t) => decodeHtml(t)).join(', ')}`)
-      if (p.url) parts.push(`URL: ${decodeHtml(p.url)}`)
-      const content = parts.join('\n\n')
-      dynamicSections.push({ id: `proj_${Date.now()}_${i}`, type: 'projects', title, content })
-    }
-  }
+  const projectsArray = Array.isArray(projects) && projects.length > 0
+    ? projects.map((p, i) => ({
+        id: `proj_${Date.now()}_${i}`,
+        name: p.name ? decodeHtml(p.name) : `Project ${i + 1}`,
+        description: p.description ? decodeHtml(p.description) : '',
+        technologies: Array.isArray(p.technologies) ? p.technologies.map((t) => decodeHtml(t)) : [],
+        url: p.url ? decodeHtml(p.url) : undefined,
+      }))
+    : []
 
   return {
     personal: {
@@ -147,6 +144,7 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       description: decodeHtml(exp.description),
       bullets: exp.description ? [decodeHtml(exp.description)] : [],
     })),
+    projects: projectsArray,
     dynamicSections,
   }
 }

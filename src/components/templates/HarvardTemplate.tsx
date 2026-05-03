@@ -62,6 +62,34 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
         ))}
       </section>
 
+      {(data.projects && data.projects.length > 0) && (
+        <section className="mb-6">
+          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Projects</h3>
+          {data.projects.map((project) => (
+            <div key={project.id} className="mb-4">
+              <div className="flex justify-between items-baseline mb-1">
+                <h4 className="font-bold text-gray-900">{project.name}</h4>
+              </div>
+              {project.description && (
+                <p className="text-gray-800 mb-2">{project.description}</p>
+              )}
+              {project.technologies && project.technologies.length > 0 && (
+                <p className="text-sm text-gray-600 mb-2">
+                  <strong>Technologies:</strong> {project.technologies.join(', ')}
+                </p>
+              )}
+              {project.url && (
+                <p className="text-sm text-gray-600">
+                  <a href={project.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                    {project.url}
+                  </a>
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
       {(data.dynamicSections || []).map((section) => (
         <section key={section.id} className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">{section.title}</h3>
