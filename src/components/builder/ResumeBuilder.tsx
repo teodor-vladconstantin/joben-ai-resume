@@ -38,6 +38,14 @@ type ExperienceEntry = {
   bullets?: string[]
 }
 
+type ProjectEntry = {
+  id: string
+  name: string
+  description: string
+  technologies: string[]
+  url?: string
+}
+
 type ResumeData = {
   template: ResumeTemplate
   personal: {
@@ -51,6 +59,7 @@ type ResumeData = {
     github?: string
   }
   experience: ExperienceEntry[]
+  projects: ProjectEntry[]
   dynamicSections: DynamicSection[]
 }
 
@@ -113,6 +122,7 @@ const initialResumeData: ResumeData = {
   template: 'harvard',
   personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '', linkedin: '', github: '' },
   experience: [],
+  projects: [],
   dynamicSections: [],
 }
 
@@ -238,11 +248,15 @@ export function ResumeBuilder() {
             const incomingExperience = Array.isArray(loadedData.experience)
               ? loadedData.experience.map((exp) => normalizeExperienceEntry(exp as Partial<ExperienceEntry>))
               : prev.experience
+            const incomingProjects = Array.isArray(loadedData.projects)
+              ? loadedData.projects
+              : prev.projects
 
             return {
               template: normalizeTemplate() || prev.template,
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
+              projects: incomingProjects,
               dynamicSections: loadedData.dynamicSections || prev.dynamicSections,
             }
           })

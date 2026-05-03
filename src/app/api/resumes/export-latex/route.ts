@@ -25,6 +25,13 @@ type LatexExperienceEntry = {
   bullets?: unknown
 }
 
+type LatexProjectEntry = {
+  name?: string
+  description?: string
+  technologies?: string[]
+  url?: string
+}
+
 type LatexDynamicSection = {
   type: string
   title?: string
@@ -34,6 +41,7 @@ type LatexDynamicSection = {
 type LatexResumeData = {
   personal?: LatexPersonal
   experience?: LatexExperienceEntry[]
+  projects?: LatexProjectEntry[]
   dynamicSections?: LatexDynamicSection[]
 }
 
@@ -216,7 +224,40 @@ ${bulletItems}
 `
   }
 
-  const groupedSections = dynamicSections.reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
+  // Render projects section if present
+  if (data.projects && data.projects.length > 0) {
+    tex += String.raw`\section{Projects}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+`
+    for (const proj of data.projects) {
+      const projTitle = escapeLatex(clampLatexText(proj.name || 'Project', 120))
+      const projDesc = proj.description ? escapeLatex(clampLatexText(proj.description, 280)) : ''
+      const techs = proj.technologies && proj.technologies.length > 0
+        ? escapeLatex(proj.technologies.slice(0, 5).join(', '))
+        : ''
+      
+      let projContent = projDesc
+      if (techs) {
+        projContent += (projContent ? ' • ' : '') + `Technologies: ${techs}`
+      }
+      if (proj.url) {
+        const link = makeLatexLink(proj.url, normalizeContactText(proj.url))
+        projContent += (projContent ? ' • ' : '') + link
+      }
+
+      tex += String.raw`
+    \resumeSubheading
+      {${projTitle}}{ }
+      {${projContent}}{ }
+`
+    }
+    tex += String.raw`  \end{itemize}
+`
+  }
+
+  const groupedSections = dynamicSections
+    .filter((section) => section.type !== 'projects') // projects are now rendered separately
+    .reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
     if (!acc[current.type]) acc[current.type] = []
     acc[current.type].push(current)
     return acc
@@ -228,7 +269,7 @@ ${bulletItems}
     tex += String.raw`\section{${escapeLatex(sectionTitle)}}
 `
 
-    if (type === 'education' || type === 'projects' || type === 'certifications') {
+    if (type === 'education' || type === 'certifications') {
       tex += String.raw`  \begin{itemize}[leftmargin=0.15in, label={}]
 `
       for (const section of sections) {

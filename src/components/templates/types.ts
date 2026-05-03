@@ -20,6 +20,14 @@ export type ResumeExperience = {
   bullets?: string[]
 }
 
+export type ResumeProject = {
+  id: string
+  name: string
+  description: string
+  technologies: string[]
+  url?: string
+}
+
 export type ResumeDynamicSection = {
   id: string
   type: string
@@ -30,5 +38,6 @@ export type ResumeDynamicSection = {
 export type ResumeTemplateData = {
   personal: ResumePersonal
   experience: ResumeExperience[]
+  projects?: ResumeProject[]
   dynamicSections?: ResumeDynamicSection[]
 }
