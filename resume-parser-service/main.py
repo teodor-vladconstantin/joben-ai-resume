@@ -360,6 +360,11 @@ async def parse_resume(file: UploadFile = File(...)):
 
         resume_data = json.loads(parsed_text.strip())
 
+        # DEBUG: Log what keys we got from LlamaParse
+        logger.info(f"LlamaParse returned keys: {list(resume_data.keys())}")
+        logger.info(f"Projects from LlamaParse: {resume_data.get('projects', [])}")
+        logger.info(f"Work experience count: {len(resume_data.get('work_experience', []))}")
+
         # try to extract LinkedIn/GitHub from explicit fields or from the parsed output text
         linkedin_val = resume_data.get("linkedin") if isinstance(resume_data.get("linkedin"), str) else None
         github_val = resume_data.get("github") if isinstance(resume_data.get("github"), str) else None
@@ -367,6 +372,15 @@ async def parse_resume(file: UploadFile = File(...)):
             linkedin_val = extract_linkedin(parsed_text)
         if not github_val:
             github_val = extract_github(parsed_text)
+
+        # DEBUG: Log project classification
+        explicit_projects = [p for p in (resume_data.get("projects") or []) if isinstance(p, dict)]
+        classified_as_projects = [e for e in (resume_data.get("work_experience") or []) if isinstance(e, dict) and looks_like_project_entry(e)]
+        logger.info(f"Explicit projects: {len(explicit_projects)}, Classified as projects: {len(classified_as_projects)}")
+        for exp in (resume_data.get("work_experience") or []):
+            if isinstance(exp, dict):
+                is_project = looks_like_project_entry(exp)
+                logger.info(f"  Entry '{exp.get('name', exp.get('title', 'unknown'))}' -> is_project={is_project}")
 
         result = ResumeData(
             full_name=resume_data.get("full_name"),
