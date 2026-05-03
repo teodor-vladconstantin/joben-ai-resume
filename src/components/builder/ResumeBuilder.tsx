@@ -118,6 +118,22 @@ function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
   return `${experienceId}:${bulletIndex}`
 }
 
+function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
+  return {
+    id: entry.id || `proj_${Date.now()}`,
+    name: entry.name || '',
+    description: entry.description || '',
+    technologies: Array.isArray(entry.technologies) ? entry.technologies.filter((tech) => typeof tech === 'string') : [],
+    url: entry.url || '',
+  }
+}
+
+function getProjectTechnologies(project: ProjectEntry): string[] {
+  return Array.isArray(project.technologies)
+    ? project.technologies.map((tech) => tech.trim()).filter(Boolean)
+    : []
+}
+
 const initialResumeData: ResumeData = {
   template: 'harvard',
   personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '', linkedin: '', github: '' },
@@ -249,7 +265,7 @@ export function ResumeBuilder() {
               ? loadedData.experience.map((exp) => normalizeExperienceEntry(exp as Partial<ExperienceEntry>))
               : prev.experience
             const incomingProjects = Array.isArray(loadedData.projects)
-              ? loadedData.projects
+              ? loadedData.projects.map((project) => normalizeProjectEntry(project as Partial<ProjectEntry>))
               : prev.projects
 
             return {
@@ -677,6 +693,47 @@ export function ResumeBuilder() {
       dynamicSections: prev.dynamicSections.map((section) =>
         section.id === id ? { ...section, ...patch } : section
       ),
+    }))
+  }
+
+  const handleAddProject = () => {
+    setResumeData((prev) => ({
+      ...prev,
+      projects: [
+        ...prev.projects,
+        normalizeProjectEntry({
+          id: `proj_${Date.now()}`,
+          name: '',
+          description: '',
+          technologies: [],
+          url: '',
+        }),
+      ],
+    }))
+  }
+
+  const updateProjectField = (projectId: string, patch: Partial<ProjectEntry>) => {
+    setResumeData((prev) => ({
+      ...prev,
+      projects: prev.projects.map((project) =>
+        project.id === projectId ? normalizeProjectEntry({ ...project, ...patch }) : project
+      ),
+    }))
+  }
+
+  const updateProjectTechnologies = (projectId: string, technologiesText: string) => {
+    const technologies = technologiesText
+      .split(',')
+      .map((tech) => tech.trim())
+      .filter(Boolean)
+
+    updateProjectField(projectId, { technologies })
+  }
+
+  const deleteProject = (projectId: string) => {
+    setResumeData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((project) => project.id !== projectId),
     }))
   }
 
@@ -1392,7 +1449,71 @@ export function ResumeBuilder() {
             </div>
           )}
 
-          {['education', 'skills', 'projects', 'certifications', 'sections'].includes(activeTab) ? (
+          {activeTab === 'projects' && (
+            <div className="space-y-4" suppressHydrationWarning>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Projects</h2>
+                  <p className="mt-1 text-sm text-[#FFFFFF]/72">Manage your imported and manual projects here. These are rendered separately from custom sections.</p>
+                </div>
+                <button onClick={handleAddProject} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Project</button>
+              </div>
+
+              {resumeData.projects.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-[#FFFFFF]/82">
+                  No projects yet. Add one to keep it separate from custom sections.
+                </div>
+              ) : (
+                resumeData.projects.map((project, index) => (
+                  <div key={project.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
+                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
+                      <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/82">Project {index + 1}</p>
+                      <div className="flex gap-2" suppressHydrationWarning>
+                        <button
+                          onClick={() => deleteProject(project.id)}
+                          className="text-[#16DB65] hover:text-[#2AEA7A] p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        value={project.name}
+                        onChange={(e) => updateProjectField(project.id, { name: e.target.value })}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Project name"
+                      />
+
+                      <textarea
+                        value={project.description}
+                        onChange={(e) => updateProjectField(project.id, { description: e.target.value })}
+                        className="h-28 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Describe what you built, shipped, or learned"
+                      />
+
+                      <input
+                        value={getProjectTechnologies(project).join(', ')}
+                        onChange={(e) => updateProjectTechnologies(project.id, e.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Technologies separated by commas (React, Node.js, AWS)"
+                      />
+
+                      <input
+                        value={project.url || ''}
+                        onChange={(e) => updateProjectField(project.id, { url: e.target.value })}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Project URL or GitHub link"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {['education', 'skills', 'certifications', 'sections'].includes(activeTab) ? (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-bold text-white">{tabs.find((t) => t.id === activeTab)?.label}</h2>

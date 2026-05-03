@@ -60,6 +60,8 @@
 
 ## Done
 
+- [DONE] Resume builder Projects tab now has a dedicated project editor with add/delete and field editing, separate from custom sections
+- [DONE] Resume parser projects: first-class projects array, improved LlamaParse prompt, project detection heuristics, comprehensive tests, and documentation
 - [DONE] Fix resume parser projects section routing on Hetzner parser service
 - [DONE] Add LinkedIn and GitHub support in resume builder profile/header
 
