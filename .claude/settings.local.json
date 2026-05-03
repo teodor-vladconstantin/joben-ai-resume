@@ -8,7 +8,11 @@
       "Bash(git checkout *)",
       "Bash(git restore *)",
       "Bash(git add *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(ping *)",
+      "Bash(ssh *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(npx supabase *)"
     ]
   }
 }

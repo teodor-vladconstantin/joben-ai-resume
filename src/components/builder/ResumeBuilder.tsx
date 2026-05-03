@@ -47,6 +47,8 @@ type ResumeData = {
     email: string
     phone: string
     summary: string
+    linkedin?: string
+    github?: string
   }
   experience: ExperienceEntry[]
   dynamicSections: DynamicSection[]
@@ -109,7 +111,7 @@ function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
 
 const initialResumeData: ResumeData = {
   template: 'harvard',
-  personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '' },
+  personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '', linkedin: '', github: '' },
   experience: [],
   dynamicSections: [],
 }
@@ -1107,6 +1109,15 @@ export function ResumeBuilder() {
                   className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors h-28 resize-none"
                   placeholder="Professional summary"
                 />
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#FFFFFF]/82">LinkedIn URL</label>
+                  <input type="text" value={resumeData.personal.linkedin} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://linkedin.com/in/yourname" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#FFFFFF]/82">GitHub URL</label>
+                  <input type="text" value={resumeData.personal.github} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://github.com/yourusername" />
+                </div>
 
                 {isSummaryGeneratorOpen ? (
                   <div className="rounded-xl border border-white/10 bg-[#020202] p-3 space-y-3">
