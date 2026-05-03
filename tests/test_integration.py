@@ -84,7 +84,27 @@ def extract_github(text: Optional[str]) -> Optional[str]:
 def has_project_verbs(text: Optional[str]) -> bool:
     if not isinstance(text, str) or not text.strip():
         return False
-    verbs = [r"\bbuilt\b", r"\bdeveloped\b", r"\bimplemented\b", r"\bprototype\b", r"\bcreated\b"]
+    verbs = [
+        r"\bbuilt\b",
+        r"\bdeveloped\b", 
+        r"\bimplemented\b",
+        r"\bprototyped\b",
+        r"\bprototype\b",
+        r"\bcreated\b",
+        r"\bdesigned\b",
+        r"\bdeployed\b",
+        r"\bsubmitted\b",
+        r"\bportfolio\b",
+        r"\bconstructed\b",
+        r"\bengineered\b",
+        r"\barchitected\b",
+        r"\bfabricated\b",
+        r"\bforged\b",
+        r"\blaunch\b",
+        r"\blaunched\b",
+        r"\breleased\b",
+        r"\bbuild\b",
+    ]
     combined = re.compile("|".join(verbs), re.IGNORECASE)
     return bool(combined.search(text))
 
@@ -145,6 +165,10 @@ def test_project_verbs():
     assert has_project_verbs("I built a React app")
     assert has_project_verbs("Developed a Python tool")
     assert has_project_verbs("Created a portfolio project")
+    assert has_project_verbs("Engineered a new platform")
+    assert has_project_verbs("Architected a scalable solution")
+    assert has_project_verbs("Launched a new feature")
+    assert has_project_verbs("Released v2.0 of the app")
     assert not has_project_verbs("Managed a team at Acme Corp")
     print("✓ Project verb detection tests passed")
 
