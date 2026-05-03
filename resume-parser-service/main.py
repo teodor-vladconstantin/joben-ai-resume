@@ -109,6 +109,25 @@ TECHNOLOGY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("AWS", re.compile(r"\bAWS\b|\bAmazon Web Services\b", re.IGNORECASE)),
     ("GCP", re.compile(r"\bGCP\b|\bGoogle Cloud\b", re.IGNORECASE)),
     ("Azure", re.compile(r"\bAzure\b", re.IGNORECASE)),
+    ("Svelte", re.compile(r"\bSvelte\b", re.IGNORECASE)),
+    ("Remix", re.compile(r"\bRemix\b", re.IGNORECASE)),
+    ("Astro", re.compile(r"\bAstro\b", re.IGNORECASE)),
+    ("Nuxt", re.compile(r"\bNuxt\b", re.IGNORECASE)),
+    ("Gatsby", re.compile(r"\bGatsby\b", re.IGNORECASE)),
+    ("WebAssembly", re.compile(r"\bWebAssembly\b|\bWasm\b", re.IGNORECASE)),
+    ("Kotlin", re.compile(r"\bKotlin\b", re.IGNORECASE)),
+    ("Swift", re.compile(r"\bSwift\b", re.IGNORECASE)),
+    ("MySQL", re.compile(r"\bMySQL\b", re.IGNORECASE)),
+    ("Firebase", re.compile(r"\bFirebase\b", re.IGNORECASE)),
+    ("SQLite", re.compile(r"\bSQLite\b", re.IGNORECASE)),
+    ("Cassandra", re.compile(r"\bCassandra\b", re.IGNORECASE)),
+    ("Elasticsearch", re.compile(r"\bElasticsearch\b", re.IGNORECASE)),
+    ("Kafka", re.compile(r"\bKafka\b", re.IGNORECASE)),
+    ("RabbitMQ", re.compile(r"\bRabbitMQ\b", re.IGNORECASE)),
+    ("CI/CD", re.compile(r"\bCI/CD\b", re.IGNORECASE)),
+    ("Git", re.compile(r"\bGit\b", re.IGNORECASE)),
+    ("GitHub", re.compile(r"\bGitHub\b", re.IGNORECASE)),
+    ("GitLab", re.compile(r"\bGitLab\b", re.IGNORECASE)),
 ]
 
 URL_PATTERN = re.compile(r"https?://[^\s)\]}>,]+", re.IGNORECASE)
@@ -244,6 +263,38 @@ def extract_github(text: Optional[str]) -> Optional[str]:
     return m.group(0).rstrip('.,;:') if m else None
 
 
+def normalize_date(date_str: Optional[str]) -> Optional[str]:
+    """Normalize date strings to YYYY-MM format when possible."""
+    if not isinstance(date_str, str) or not date_str.strip():
+        return None
+    date_str = date_str.strip()
+    # Already in good format
+    if re.match(r'^\d{4}-\d{2}$', date_str):
+        return date_str
+    # Try to extract year-month
+    m = re.search(r'(\d{4})[/-](\d{1,2})', date_str)
+    if m:
+        year, month = m.groups()
+        return f"{year}-{month.zfill(2)}"
+    # Try to extract just year
+    m = re.search(r'(\d{4})', date_str)
+    if m:
+        return m.group(1)
+    return date_str
+
+
+def normalize_company_name(company: Optional[str]) -> Optional[str]:
+    """Clean up company name by removing common suffixes and extra whitespace."""
+    if not isinstance(company, str) or not company.strip():
+        return None
+    company = company.strip()
+    # Remove common suffixes
+    company = re.sub(r'\s+(Inc\.|LLC|Ltd\.|Corp\.|Co\.|Ltd|Inc|Corporation|Company|Inc\.|GMBH|GmbH)\s*$', '', company, flags=re.IGNORECASE)
+    # Remove extra whitespace
+    company = re.sub(r'\s+', ' ', company).strip()
+    return company if company else None
+
+
 api_key = os.getenv("LLAMA_CLOUD_API_KEY")
 if not api_key:
     raise ValueError("LLAMA_CLOUD_API_KEY environment variable not set")
@@ -336,11 +387,26 @@ async def parse_resume(file: UploadFile = File(...)):
                 if isinstance(exp, dict) and looks_like_project_entry(exp)
             ],
             work_experience=[
-                WorkExperience(**exp)
+                WorkExperience(
+                    company=normalize_company_name(exp.get("company")),
+                    role=exp.get("role"),
+                    start_date=normalize_date(exp.get("start_date")),
+                    end_date=normalize_date(exp.get("end_date")),
+                    description=exp.get("description"),
+                )
                 for exp in (resume_data.get("work_experience") or [])
                 if isinstance(exp, dict) and not looks_like_project_entry(exp)
             ],
-            education=[Education(**edu) for edu in (resume_data.get("education") or [])],
+            education=[
+                Education(
+                    institution=exp.get("institution"),
+                    degree=exp.get("degree"),
+                    field=exp.get("field"),
+                    start_date=normalize_date(exp.get("start_date")),
+                    end_date=normalize_date(exp.get("end_date")),
+                )
+                for exp in (resume_data.get("education") or [])
+            ],
             skills=resume_data.get("skills") or [],
             languages=[Language(**lang) for lang in (resume_data.get("languages") or [])],
             certifications=resume_data.get("certifications") or [],
