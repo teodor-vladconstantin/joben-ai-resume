@@ -30,6 +30,7 @@ class WorkExperience(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     description: Optional[str] = None
+    bullets: list[str] = []
 
 
 class Education(BaseModel):
@@ -50,6 +51,8 @@ class Project(BaseModel):
     description: Optional[str] = None
     technologies: list[str] = []
     url: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class ResumeData(BaseModel):
@@ -142,8 +145,8 @@ TECHNOLOGY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 
 URL_PATTERN = re.compile(r"https?://[^\s)\]}>,]+", re.IGNORECASE)
 
-LINKEDIN_PATTERN = re.compile(r"https?://(?:www\.)?linkedin\.com/[\w\-/]+", re.IGNORECASE)
-GITHUB_PATTERN = re.compile(r"https?://(?:www\.)?github\.com/[\w\-/]+", re.IGNORECASE)
+LINKEDIN_PATTERN = re.compile(r"(?:https?://)?(?:www\.)?linkedin\.com/[\w\-/]+", re.IGNORECASE)
+GITHUB_PATTERN = re.compile(r"(?:https?://)?(?:www\.)?github\.com/[\w\-/]+", re.IGNORECASE)
 
 MONTH_NAME_TO_NUMBER = {
     "jan": "01", "january": "01",
@@ -338,11 +341,35 @@ def normalize_project_entry(entry: dict) -> Project:
     if not url:
         url = extract_url(project_text)
 
+    def to_mmm_yyyy(value: Optional[str]) -> Optional[str]:
+        normalized = normalize_date(value)
+        if not normalized:
+            return None
+        if normalized == "Present":
+            return "Present"
+        m = re.match(r"^(\d{4})-(\d{2})$", normalized)
+        if not m:
+            return None
+        year, month = m.groups()
+        month_idx = int(month) - 1
+        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        if month_idx < 0 or month_idx >= len(month_names):
+            return None
+        return f"{month_names[month_idx]} {year}"
+
+    explicit_start = entry.get("start_date") if isinstance(entry.get("start_date"), str) else None
+    explicit_end = entry.get("end_date") if isinstance(entry.get("end_date"), str) else None
+    inferred_start, inferred_end = extract_date_range(project_text)
+    project_start_date = to_mmm_yyyy(explicit_start or inferred_start)
+    project_end_date = to_mmm_yyyy(explicit_end or inferred_end)
+
     return Project(
         name=name or "Project",
         description=description,
         technologies=extract_technologies(project_text),
         url=url,
+        start_date=project_start_date,
+        end_date=project_end_date,
     )
 
 
@@ -571,14 +598,24 @@ def extract_linkedin(text: Optional[str]) -> Optional[str]:
     if not isinstance(text, str) or not text.strip():
         return None
     m = LINKEDIN_PATTERN.search(text)
-    return m.group(0).rstrip('.,;:') if m else None
+    if not m:
+        return None
+    value = m.group(0).rstrip('.,;:')
+    if not value.lower().startswith("http"):
+        value = f"https://{value}"
+    return value
 
 
 def extract_github(text: Optional[str]) -> Optional[str]:
     if not isinstance(text, str) or not text.strip():
         return None
     m = GITHUB_PATTERN.search(text)
-    return m.group(0).rstrip('.,;:') if m else None
+    if not m:
+        return None
+    value = m.group(0).rstrip('.,;:')
+    if not value.lower().startswith("http"):
+        value = f"https://{value}"
+    return value
 
 
 def normalize_date(date_str: Optional[str]) -> Optional[str]:
@@ -719,6 +756,29 @@ def normalize_company_name(company: Optional[str]) -> Optional[str]:
     return company if company else None
 
 
+def normalize_bullets(bullets: Optional[list[str]], description: Optional[str]) -> list[str]:
+    normalized: list[str] = []
+    if isinstance(bullets, list):
+        for item in bullets:
+            if isinstance(item, str):
+                cleaned = re.sub(r"\s+", " ", item).strip()
+                cleaned = re.sub(r"^[•\-\*\u2022]\s*", "", cleaned)
+                if cleaned:
+                    normalized.append(cleaned)
+
+    if normalized:
+        return normalized
+
+    if isinstance(description, str) and description.strip():
+        parts = [segment.strip() for segment in re.split(r"(?:\n|•|\u2022|\s-\s)", description) if segment.strip()]
+        cleaned_parts = [re.sub(r"\s+", " ", part).strip() for part in parts if part.strip()]
+        if len(cleaned_parts) > 1:
+            return cleaned_parts
+        return [re.sub(r"\s+", " ", description).strip()]
+
+    return []
+
+
 api_key = os.getenv("LLAMA_CLOUD_API_KEY")
 if not api_key:
     raise ValueError("LLAMA_CLOUD_API_KEY environment variable not set")
@@ -735,8 +795,8 @@ parser = LlamaParse(
         "- linkedin (string, URL if present)\n"
         "- github (string, URL if present)\n"
         "- summary (string)\n"
-        "- projects (array of: name, description, technologies, url)\n"
-        "- work_experience (array of: company, role, start_date, end_date, description)\n"
+        "- projects (array of: name, description, technologies, url, start_date, end_date)\n"
+        "- work_experience (array of: company, role, start_date, end_date, description, bullets)\n"
         "- education (array of: institution, degree, field, start_date, end_date)\n"
         "- skills (array of strings)\n"
         "- languages (array of: language, level)\n"
@@ -756,7 +816,8 @@ parser = LlamaParse(
         "7. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
         "8. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
         "9. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
-        "10. Return only valid JSON, no markdown code blocks, no extra text.\n"
+        "10. For work_experience, output bullets as an array of separate achievement points. Do not merge all points into a single sentence.\n"
+        "11. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
     cost_optimizer="true",
 )
@@ -813,13 +874,26 @@ async def parse_resume(file: UploadFile = File(...)):
         logger.info(f"Projects from LlamaParse: {resume_data.get('projects', [])}")
         logger.info(f"Work experience count: {len(resume_data.get('work_experience', []))}")
 
-        # try to extract LinkedIn/GitHub from explicit fields or from the parsed output text
+        # try to extract LinkedIn/GitHub from explicit fields or from parser text outputs
         linkedin_val = resume_data.get("linkedin") if isinstance(resume_data.get("linkedin"), str) else None
         github_val = resume_data.get("github") if isinstance(resume_data.get("github"), str) else None
-        if not linkedin_val:
-            linkedin_val = extract_linkedin(parsed_text)
-        if not github_val:
-            github_val = extract_github(parsed_text)
+
+        normalized_linkedin = extract_linkedin(linkedin_val)
+        normalized_github = extract_github(github_val)
+
+        if normalized_linkedin:
+            linkedin_val = normalized_linkedin
+        else:
+            discovered_linkedin = extract_linkedin(parsed_text) or extract_linkedin(raw_text)
+            if discovered_linkedin:
+                linkedin_val = discovered_linkedin
+
+        if normalized_github:
+            github_val = normalized_github
+        else:
+            discovered_github = extract_github(parsed_text) or extract_github(raw_text)
+            if discovered_github:
+                github_val = discovered_github
 
         # DEBUG: Log project classification
         explicit_projects = [p for p in (resume_data.get("projects") or []) if isinstance(p, dict)]
@@ -883,6 +957,7 @@ async def parse_resume(file: UploadFile = File(...)):
                     start_date=normalize_date(exp.get("start_date")),
                     end_date=normalize_date(exp.get("end_date")),
                     description=exp.get("description"),
+                    bullets=normalize_bullets(exp.get("bullets"), exp.get("description")),
                 )
                 for i, exp in enumerate(work_exp_entries)
                 if isinstance(exp, dict) and not work_exp_classifications.get(i, False)
