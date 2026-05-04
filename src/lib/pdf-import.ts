@@ -59,9 +59,31 @@ function parseName(fullName: string | null | undefined): { firstName: string; la
   return { firstName: parts.join(' '), lastName }
 }
 
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function formatSingleDate(value: string | null | undefined): string {
+  if (!value) return ''
+  const cleaned = decodeHtml(value).trim()
+  if (!cleaned) return ''
+  if (/^(present|current|ongoing|now)$/i.test(cleaned)) return 'Present'
+
+  const yearMonthMatch = cleaned.match(/^(\d{4})-(\d{2})$/)
+  if (yearMonthMatch) {
+    const monthIdx = Number(yearMonthMatch[2]) - 1
+    if (monthIdx >= 0 && monthIdx < MONTH_LABELS.length) {
+      return `${MONTH_LABELS[monthIdx]} ${yearMonthMatch[1]}`
+    }
+  }
+
+  return cleaned
+}
+
 function formatDateRange(start: string | null, end: string | null): string {
-  if (start && end) return `${start} - ${end}`
-  if (start) return `${start} - Present`
+  const startLabel = formatSingleDate(start)
+  const endLabel = formatSingleDate(end)
+
+  if (startLabel && endLabel) return `${startLabel} - ${endLabel}`
+  if (startLabel) return `${startLabel} - Present`
   return ''
 }
 

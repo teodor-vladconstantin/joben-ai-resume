@@ -168,7 +168,9 @@ export async function callAnthropicWithLimits(params: {
     })
   }
 
-  const rateLimitStatus = await getRateLimitStatus(params.userId)
+  // Reuse the already resolved plan from the route to avoid plan drift
+  // between DB cache and runtime overrides (e.g. GOD MODE / recruiting).
+  const rateLimitStatus = await getRateLimitStatus(params.userId, params.plan)
   const tokenRemaining = rateLimitStatus.tokens.remaining
 
   if (tokenRemaining !== null && tokenRemaining <= 0) {

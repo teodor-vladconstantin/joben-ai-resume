@@ -60,6 +60,10 @@
 
 ## Done
 
+- [DONE] World-class parser hardening: strict LlamaParse prompt, intelligent date-range recovery from raw text, and production deploy validation on Hetzner
+- [DONE] Fixed false 429 rate-limit path by preventing plan drift in Anthropic limiter status checks
+- [DONE] Fixed Hetzner parser deployment drift, improved projects extraction fallback, and mapped month-aware experience dates in Resume Builder import
+- [DONE] Fixed onboarding CV import to persist parsed projects into Resume Builder Projects tab state
 - [DONE] Resume parser now has a raw-text fallback extractor for projects when LlamaParse JSON misses them
 - [DONE] Resume builder Projects tab now has a dedicated project editor with add/delete and field editing, separate from custom sections
 - [DONE] Resume parser projects: first-class projects array, improved LlamaParse prompt, project detection heuristics, comprehensive tests, and documentation

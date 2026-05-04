@@ -466,6 +466,7 @@ export function ResumeBuilder() {
           ? exp.bullets
           : exp.description ? [exp.description] : [''],
       })),
+      projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
       dynamicSections: (data.dynamicSections ?? []).map((s, i) => ({
         id: s.id || `section_${i}`,
         type: s.type as DynamicSection['type'],
