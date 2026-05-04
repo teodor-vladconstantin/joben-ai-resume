@@ -12,7 +12,11 @@
       "Bash(ping *)",
       "Bash(ssh *)",
       "Bash(Get-ChildItem *)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "Bash(docker *)",
+      "Bash(curl *)",
+      "Bash(scp *)",
+      "Bash(tar *)"
     ]
   }
 }

@@ -73,6 +73,11 @@ PROJECT_SECTION_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+EXPERIENCE_SECTION_PATTERN = re.compile(
+    r"\b(?:experience|work experience|employment|professional experience|experien[țt]a|experienta|istoric profesional)\b",
+    re.IGNORECASE,
+)
+
 SECTION_HEADING_PATTERN = re.compile(
     r"^(?:#{1,6}\s*)?(?:summary|professional summary|profile|experience|work experience|employment|education|skills|projects?|personal projects?|side projects?|academic projects?|featured projects?|project work|project experience|certifications?|languages?|awards?|volunteer|interests?|publications?|references?|sections?)[:\s-]*$",
     re.IGNORECASE,
@@ -139,6 +144,52 @@ URL_PATTERN = re.compile(r"https?://[^\s)\]}>,]+", re.IGNORECASE)
 
 LINKEDIN_PATTERN = re.compile(r"https?://(?:www\.)?linkedin\.com/[\w\-/]+", re.IGNORECASE)
 GITHUB_PATTERN = re.compile(r"https?://(?:www\.)?github\.com/[\w\-/]+", re.IGNORECASE)
+
+MONTH_NAME_TO_NUMBER = {
+    "jan": "01", "january": "01",
+    "feb": "02", "february": "02",
+    "mar": "03", "march": "03",
+    "apr": "04", "april": "04",
+    "may": "05",
+    "jun": "06", "june": "06",
+    "jul": "07", "july": "07",
+    "aug": "08", "august": "08",
+    "sep": "09", "sept": "09", "september": "09",
+    "oct": "10", "october": "10",
+    "nov": "11", "november": "11",
+    "dec": "12", "december": "12",
+    "ian": "01", "ianuarie": "01",
+    "februarie": "02",
+    "martie": "03",
+    "aprilie": "04",
+    "mai": "05",
+    "iun": "06", "iunie": "06",
+    "iul": "07", "iulie": "07",
+    "august": "08",
+    "septembrie": "09",
+    "octombrie": "10",
+    "noiembrie": "11",
+    "decembrie": "12",
+}
+
+MONTH_TOKEN_PATTERN = (
+    r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|"
+    r"sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|"
+    r"ian(?:uarie)?|februarie|martie|aprilie|mai|iun(?:ie)?|iul(?:ie)?|"
+    r"august|septembrie|octombrie|noiembrie|decembrie)"
+)
+
+DATE_POINT_PATTERN = re.compile(
+    rf"(?:(?:{MONTH_TOKEN_PATTERN})\s+)?\b\d{{4}}\b|\b(?:0?[1-9]|1[0-2])[/-]\d{{4}}\b|\b\d{{4}}[/-](?:0?[1-9]|1[0-2])\b",
+    re.IGNORECASE,
+)
+
+DATE_RANGE_PATTERN = re.compile(
+    rf"((?:(?:{MONTH_TOKEN_PATTERN})\s+)?\b\d{{4}}\b|\b(?:0?[1-9]|1[0-2])[/-]\d{{4}}\b|\b\d{{4}}[/-](?:0?[1-9]|1[0-2])\b)"
+    r"\s*(?:-|–|—|to|until|till)\s*"
+    rf"((?:(?:{MONTH_TOKEN_PATTERN})\s+)?\b\d{{4}}\b|\b(?:0?[1-9]|1[0-2])[/-]\d{{4}}\b|\b\d{{4}}[/-](?:0?[1-9]|1[0-2])\b|present|current|ongoing|now|prezent|acum)",
+    re.IGNORECASE,
+)
 
 
 def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
@@ -408,19 +459,112 @@ def extract_projects_from_text(text: str) -> list[dict]:
 def dedupe_project_entries(project_entries: list[dict]) -> list[dict]:
     unique_projects: list[dict] = []
     seen_signatures: set[tuple[str, str, str]] = set()
+    seen_name_description_pairs: set[tuple[str, str]] = set()
 
     for entry in project_entries:
-        name = str(entry.get("name") or "").strip().lower()
-        description = str(entry.get("description") or "").strip().lower()
+        raw_name = str(entry.get("name") or "").strip()
+        # Fallback text parsing can add right-aligned location/mode fragments after long spaces.
+        cleaned_name = re.sub(r"\s{2,}.*$", "", raw_name).strip()
+        name = re.sub(r"\s+", " ", cleaned_name).strip().lower()
+
+        raw_description = str(entry.get("description") or "").strip().lower()
+        description = re.sub(r"\s+", " ", raw_description).strip()
+        description_key = description[:200]
+
         url = str(entry.get("url") or "").strip().lower()
-        signature = (name, description, url)
-        if signature in seen_signatures:
+        signature = (name, description_key, url)
+        name_description_signature = (name, description_key)
+
+        if signature in seen_signatures or name_description_signature in seen_name_description_pairs:
+            continue
+
+        # Fallback + explicit extraction can produce duplicate projects with the same name.
+        # Merge these when URL does not clearly differentiate them, preferring longer description.
+        merged_existing = False
+        if name:
+            for existing in unique_projects:
+                existing_name_raw = str(existing.get("name") or "").strip()
+                existing_name = re.sub(r"\s{2,}.*$", "", existing_name_raw).strip().lower()
+                if existing_name != name:
+                    continue
+
+                existing_url = str(existing.get("url") or "").strip().lower()
+                if existing_url and url and existing_url != url:
+                    continue
+
+                existing_description = re.sub(
+                    r"\s+",
+                    " ",
+                    str(existing.get("description") or "").strip()
+                ).strip()
+                candidate_description = re.sub(
+                    r"\s+",
+                    " ",
+                    str(entry.get("description") or "").strip()
+                ).strip()
+
+                if len(candidate_description) > len(existing_description):
+                    existing["description"] = entry.get("description")
+                if not existing.get("url") and entry.get("url"):
+                    existing["url"] = entry.get("url")
+
+                existing_tech = existing.get("technologies") if isinstance(existing.get("technologies"), list) else []
+                candidate_tech = entry.get("technologies") if isinstance(entry.get("technologies"), list) else []
+                existing["technologies"] = sorted(
+                    {
+                        str(t).strip()
+                        for t in [*existing_tech, *candidate_tech]
+                        if isinstance(t, str) and str(t).strip()
+                    }
+                )
+                merged_existing = True
+                break
+
+        if merged_existing:
             continue
 
         seen_signatures.add(signature)
+        seen_name_description_pairs.add(name_description_signature)
+        if cleaned_name:
+            entry["name"] = cleaned_name
         unique_projects.append(entry)
 
     return unique_projects
+
+
+def normalize_signature_value(value: Optional[str]) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = strip_markdown_formatting(value)
+    normalized = re.sub(r"\s+", " ", normalized).strip().lower()
+    return normalized
+
+
+def should_promote_work_entry_to_project(entry: dict, fallback_project_names: set[str]) -> bool:
+    if not isinstance(entry, dict) or not fallback_project_names:
+        return False
+
+    company_name = normalize_signature_value(entry.get("company"))
+    if not company_name or company_name not in fallback_project_names:
+        return False
+
+    candidate_text = " ".join(
+        str(value).strip()
+        for value in (
+            entry.get("company"),
+            entry.get("role"),
+            entry.get("description"),
+        )
+        if isinstance(value, str) and value.strip()
+    )
+    if not candidate_text:
+        return False
+
+    return (
+        has_project_verbs(candidate_text)
+        or bool(extract_technologies(candidate_text))
+        or bool(extract_url(candidate_text))
+    )
 
 
 def extract_linkedin(text: Optional[str]) -> Optional[str]:
@@ -442,19 +586,125 @@ def normalize_date(date_str: Optional[str]) -> Optional[str]:
     if not isinstance(date_str, str) or not date_str.strip():
         return None
     date_str = date_str.strip()
+    normalized_input = re.sub(r"\s+", " ", date_str.replace("–", "-").replace("—", "-")).strip()
+
+    # Keep "present/current" semantics in a consistent label for UI mapping.
+    if re.search(r"\b(present|current|ongoing|now|acum|prezent)\b", normalized_input, re.IGNORECASE):
+        return "Present"
+
     # Already in good format
-    if re.match(r'^\d{4}-\d{2}$', date_str):
-        return date_str
+    if re.match(r'^\d{4}-\d{2}$', normalized_input):
+        return normalized_input
+
+    # Handle compact MM/YYYY or M/YYYY
+    m = re.search(r"\b(\d{1,2})[/-](\d{4})\b", normalized_input)
+    if m:
+        month, year = m.groups()
+        return f"{year}-{month.zfill(2)}"
+
     # Try to extract year-month
-    m = re.search(r'(\d{4})[/-](\d{1,2})', date_str)
+    m = re.search(r'(\d{4})[/-](\d{1,2})', normalized_input)
     if m:
         year, month = m.groups()
         return f"{year}-{month.zfill(2)}"
+
+    # Handle textual month formats: "Jan 2024", "Ianuarie 2024"
+    m = re.search(r"\b([A-Za-zăâîșț\.]+)\s+(\d{4})\b", normalized_input, re.IGNORECASE)
+    if m:
+        month_token = m.group(1).lower().rstrip(".")
+        year = m.group(2)
+        month = MONTH_NAME_TO_NUMBER.get(month_token)
+        if month:
+            return f"{year}-{month}"
+
+    # Handle reversed textual format: "2024 Jan"
+    m = re.search(r"\b(\d{4})\s+([A-Za-zăâîșț\.]+)\b", normalized_input, re.IGNORECASE)
+    if m:
+        year = m.group(1)
+        month_token = m.group(2).lower().rstrip(".")
+        month = MONTH_NAME_TO_NUMBER.get(month_token)
+        if month:
+            return f"{year}-{month}"
+
     # Try to extract just year
-    m = re.search(r'(\d{4})', date_str)
+    m = re.search(r'(\d{4})', normalized_input)
     if m:
         return m.group(1)
-    return date_str
+    return normalized_input
+
+
+def extract_date_range(text: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+    if not isinstance(text, str) or not text.strip():
+        return None, None
+
+    candidate = re.sub(r"\s+", " ", text.replace("—", "-").replace("–", "-")).strip()
+    m = DATE_RANGE_PATTERN.search(candidate)
+    if m:
+        return normalize_date(m.group(1)), normalize_date(m.group(2))
+
+    date_points = [normalize_date(item) for item in DATE_POINT_PATTERN.findall(candidate)]
+    date_points = [item for item in date_points if item]
+    if len(date_points) >= 2:
+        return date_points[0], date_points[1]
+    if len(date_points) == 1:
+        return date_points[0], "Present" if re.search(r"\b(present|current|ongoing|now|prezent|acum)\b", candidate, re.IGNORECASE) else None
+
+    return None, None
+
+
+def enrich_work_experience_dates(work_exp_entries: list[dict], raw_text: str) -> list[dict]:
+    if not isinstance(raw_text, str):
+        raw_text = ""
+
+    raw_lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
+    enriched: list[dict] = []
+
+    for entry in work_exp_entries:
+        if not isinstance(entry, dict):
+            continue
+
+        current = dict(entry)
+        start = normalize_date(current.get("start_date"))
+        end = normalize_date(current.get("end_date"))
+
+        if start and end:
+            current["start_date"] = start
+            current["end_date"] = end
+            enriched.append(current)
+            continue
+
+        # First-pass: infer from entry-local text
+        local_text = " ".join(
+            str(value).strip()
+            for value in (
+                current.get("role"),
+                current.get("company"),
+                current.get("description"),
+            )
+            if isinstance(value, str) and value.strip()
+        )
+        inferred_start, inferred_end = extract_date_range(local_text)
+
+        # Second-pass: if still missing, scan matching lines from raw parse text
+        if not (inferred_start or inferred_end):
+            anchors = [
+                str(current.get("company") or "").strip().lower(),
+                str(current.get("role") or "").strip().lower(),
+            ]
+            anchors = [item for item in anchors if item]
+            if anchors:
+                for line in raw_lines:
+                    lower_line = line.lower()
+                    if any(anchor and anchor in lower_line for anchor in anchors):
+                        inferred_start, inferred_end = extract_date_range(line)
+                        if inferred_start or inferred_end:
+                            break
+
+        current["start_date"] = start or inferred_start
+        current["end_date"] = end or inferred_end
+        enriched.append(current)
+
+    return enriched
 
 
 def normalize_company_name(company: Optional[str]) -> Optional[str]:
@@ -502,7 +752,11 @@ parser = LlamaParse(
         "3. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
         "4. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
         "5. Extract linkedin and github URLs if found anywhere in the resume.\n"
-        "6. Return only valid JSON, no markdown code blocks, no extra text.\n"
+        "6. For work_experience and education dates, preserve month+year whenever present (do NOT reduce to year-only). Accept forms like 'Jan 2024', 'January 2024', '01/2024', '2024-01', Romanian month names, and 'Present/Current'.\n"
+        "7. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
+        "8. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
+        "9. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
+        "10. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
     cost_optimizer="true",
 )
@@ -582,12 +836,24 @@ async def parse_resume(file: UploadFile = File(...)):
             except Exception as fallback_error:
                 logger.warning(f"Text fallback parser failed: {fallback_error}")
         
+        fallback_project_names = {
+            normalize_signature_value(project.get("name"))
+            for project in fallback_project_entries
+            if isinstance(project, dict) and normalize_signature_value(project.get("name"))
+        }
+
         # Pre-classify work_experience entries with verbose logging
-        work_exp_entries = resume_data.get("work_experience") or []
+        work_exp_entries = enrich_work_experience_dates(resume_data.get("work_experience") or [], raw_text)
         work_exp_classifications = {}
         for i, exp in enumerate(work_exp_entries):
             if isinstance(exp, dict):
                 is_proj = looks_like_project_entry(exp, verbose=True)
+                if not is_proj and should_promote_work_entry_to_project(exp, fallback_project_names):
+                    logger.info(
+                        "    -> YES (fallback project section match): '%s'",
+                        exp.get("company") or exp.get("role") or "unknown",
+                    )
+                    is_proj = True
                 work_exp_classifications[i] = is_proj
         
         classified_as_projects = sum(1 for is_proj in work_exp_classifications.values() if is_proj)

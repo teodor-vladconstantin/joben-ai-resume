@@ -509,8 +509,8 @@ export async function unblockFeature(userId: string, feature: Feature): Promise<
   }
 }
 
-export async function getRateLimitStatus(userId: string): Promise<RateLimitStatus> {
-  const plan = await getUserPlan(userId)
+export async function getRateLimitStatus(userId: string, planOverride?: Plan): Promise<RateLimitStatus> {
+  const plan = planOverride ?? await getUserPlan(userId)
   const limits = getPlanLimits(plan)
   const fallback = buildFallbackStatus(plan, limits)
 
