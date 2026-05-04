@@ -60,6 +60,8 @@
 
 ## Done
 
+- [DONE] Added client-side bullet migration split for legacy single-bullet experience entries so existing resumes display multiple bullets immediately
+- [DONE] Resume parser now returns structured work_experience bullets and import mapping preserves multiple bullets per role
 - [DONE] World-class parser hardening: strict LlamaParse prompt, intelligent date-range recovery from raw text, and production deploy validation on Hetzner
 - [DONE] Fixed false 429 rate-limit path by preventing plan drift in Anthropic limiter status checks
 - [DONE] Fixed Hetzner parser deployment drift, improved projects extraction fallback, and mapped month-aware experience dates in Resume Builder import

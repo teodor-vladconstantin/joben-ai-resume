@@ -76,19 +76,32 @@ function normalizeExperienceBullets(
   fallbackDescription?: string,
   options?: { keepEmpty?: boolean }
 ): string[] {
+  const splitCombinedBullet = (value: string): string[] => {
+    const cleaned = value.trim()
+    if (!cleaned) return []
+    const sentenceSplit = cleaned
+      .split(/(?<=[.!?])\s+(?=[A-Z])/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+    return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
+  }
+
   if (Array.isArray(input) && input.length > 0) {
     const rawBullets = input.map((item) => (typeof item === 'string' ? item : ''))
 
     if (options?.keepEmpty) {
+      const nonEmpty = rawBullets.map((item) => item.trim()).filter(Boolean)
+      if (nonEmpty.length === 1) return splitCombinedBullet(nonEmpty[0])
       return rawBullets
     }
 
     const normalizedBullets = rawBullets.map((item) => item.trim()).filter(Boolean)
+    if (normalizedBullets.length === 1) return splitCombinedBullet(normalizedBullets[0])
     if (normalizedBullets.length > 0) return normalizedBullets
   }
 
   if (typeof fallbackDescription === 'string' && fallbackDescription.trim()) {
-    return [fallbackDescription.trim()]
+    return splitCombinedBullet(fallbackDescription)
   }
 
   return ['']

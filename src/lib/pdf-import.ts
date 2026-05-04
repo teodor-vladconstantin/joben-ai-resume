@@ -14,6 +14,7 @@ type ParseResumeResponse = {
     start_date: string | null
     end_date: string | null
     description: string | null
+    bullets?: string[] | null
   }>
   education?: Array<{
     institution: string | null
@@ -85,6 +86,33 @@ function formatDateRange(start: string | null, end: string | null): string {
   if (startLabel && endLabel) return `${startLabel} - ${endLabel}`
   if (startLabel) return `${startLabel} - Present`
   return ''
+}
+
+function normalizeExperienceBullets(input: string[] | null | undefined, description: string): string[] {
+  const splitCombinedBullet = (value: string): string[] => {
+    const cleaned = value.trim()
+    if (!cleaned) return []
+    const sentenceSplit = cleaned
+      .split(/(?<=[.!?])\s+(?=[A-Z])/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+    return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
+  }
+
+  if (Array.isArray(input)) {
+    const cleaned = input.map((item) => decodeHtml(item).trim()).filter(Boolean)
+    if (cleaned.length === 1) return splitCombinedBullet(cleaned[0])
+    if (cleaned.length > 0) return cleaned
+  }
+
+  const fallback = decodeHtml(description || '')
+  if (!fallback) return []
+  const split = fallback
+    .split(/\n|•|●|▪|◦/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+  if (split.length > 1) return split
+  return splitCombinedBullet(fallback)
 }
 
 function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateData {
@@ -164,7 +192,7 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       company: decodeHtml(exp.company),
       period: formatDateRange(exp.start_date, exp.end_date),
       description: decodeHtml(exp.description),
-      bullets: exp.description ? [decodeHtml(exp.description)] : [],
+      bullets: normalizeExperienceBullets(exp.bullets, exp.description || ''),
     })),
     projects: projectsArray,
     dynamicSections,
