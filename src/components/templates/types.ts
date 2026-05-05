@@ -28,6 +28,13 @@ export type ResumeExperience = {
 export type ResumeProject = {
   id: string
   name: string
+  role?: string
+  period?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
   description: string
   technologies: string[]
   url?: string

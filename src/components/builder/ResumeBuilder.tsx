@@ -1,7 +1,7 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
@@ -46,6 +46,13 @@ type ExperienceEntry = {
 type ProjectEntry = {
   id: string
   name: string
+  role?: string
+  period?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
   description: string
   technologies: string[]
   url?: string
@@ -119,7 +126,9 @@ function parsePeriodString(period: string): Partial<Pick<ExperienceEntry, 'start
   }
 }
 
-function computePeriod(entry: Pick<ExperienceEntry, 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent'>): string {
+type DateFields = { startMonth?: number; startYear?: number; endMonth?: number; endYear?: number; isCurrent?: boolean }
+
+function computePeriod(entry: DateFields): string {
   const startLabel = entry.startYear
     ? (entry.startMonth ? `${MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}` : `${entry.startYear}`)
     : ''
@@ -213,6 +222,13 @@ function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
   return {
     id: entry.id || `proj_${Date.now()}`,
     name: entry.name || '',
+    role: entry.role || '',
+    period: entry.period || '',
+    startMonth: entry.startMonth,
+    startYear: entry.startYear,
+    endMonth: entry.endMonth,
+    endYear: entry.endYear,
+    isCurrent: entry.isCurrent ?? false,
     description: entry.description || '',
     technologies: Array.isArray(entry.technologies) ? entry.technologies.filter((tech) => typeof tech === 'string') : [],
     url: entry.url || '',
@@ -651,6 +667,21 @@ export function ResumeBuilder() {
       experience: prev.experience.map((exp) => {
         if (exp.id !== experienceId) return exp
         const updated = { ...exp, [field]: value }
+        return { ...updated, period: computePeriod(updated) }
+      }),
+    }))
+  }
+
+  const updateProjectDateField = (
+    projectId: string,
+    field: 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent',
+    value: number | boolean | undefined
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      projects: prev.projects.map((proj) => {
+        if (proj.id !== projectId) return proj
+        const updated = { ...proj, [field]: value }
         return { ...updated, period: computePeriod(updated) }
       }),
     }))
@@ -1453,14 +1484,17 @@ export function ResumeBuilder() {
                      <div className="space-y-1">
                        <p className="text-xs text-white/40 uppercase tracking-wide">Period</p>
                        <div className="flex items-center gap-1 flex-wrap">
-                         <select
-                           value={exp.startMonth ?? ''}
-                           onChange={(e) => updateExperienceDateField(exp.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
-                           className="rounded border border-white/10 bg-[#020202] px-1.5 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                         >
-                           <option value="">Month</option>
-                           {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                         </select>
+                         <div className="relative">
+                           <select
+                             value={exp.startMonth ?? ''}
+                             onChange={(e) => updateExperienceDateField(exp.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
+                             className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
+                           >
+                             <option value="">Month</option>
+                             {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                           </select>
+                           <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
+                         </div>
                          <input
                            type="number"
                            value={exp.startYear ?? ''}
@@ -1475,14 +1509,17 @@ export function ResumeBuilder() {
                            <span className="text-xs font-medium text-[#16DB65]">Present</span>
                          ) : (
                            <>
-                             <select
-                               value={exp.endMonth ?? ''}
-                               onChange={(e) => updateExperienceDateField(exp.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
-                               className="rounded border border-white/10 bg-[#020202] px-1.5 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                             >
-                               <option value="">Month</option>
-                               {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                             </select>
+                             <div className="relative">
+                               <select
+                                 value={exp.endMonth ?? ''}
+                                 onChange={(e) => updateExperienceDateField(exp.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
+                                 className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
+                               >
+                                 <option value="">Month</option>
+                                 {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                               </select>
+                               <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
+                             </div>
                              <input
                                type="number"
                                value={exp.endYear ?? ''}
@@ -1657,6 +1694,75 @@ export function ResumeBuilder() {
                         className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
                         placeholder="Project name"
                       />
+
+                      <input
+                        value={project.role || ''}
+                        onChange={(e) => updateProjectField(project.id, { role: e.target.value })}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Role / Title (e.g. Solo Founder, Lead Developer)"
+                      />
+
+                      <div className="space-y-1">
+                        <p className="text-xs text-white/40 uppercase tracking-wide">Period</p>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <div className="relative">
+                            <select
+                              value={project.startMonth ?? ''}
+                              onChange={(e) => updateProjectDateField(project.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
+                              className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
+                            >
+                              <option value="">Month</option>
+                              {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
+                          </div>
+                          <input
+                            type="number"
+                            value={project.startYear ?? ''}
+                            onChange={(e) => updateProjectDateField(project.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
+                            className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                            placeholder="Year"
+                            min={1950}
+                            max={2099}
+                          />
+                          <span className="text-white/30 text-xs">–</span>
+                          {project.isCurrent ? (
+                            <span className="text-xs font-medium text-[#16DB65]">Present</span>
+                          ) : (
+                            <>
+                              <div className="relative">
+                                <select
+                                  value={project.endMonth ?? ''}
+                                  onChange={(e) => updateProjectDateField(project.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
+                                  className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
+                                >
+                                  <option value="">Month</option>
+                                  {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                                </select>
+                                <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
+                              </div>
+                              <input
+                                type="number"
+                                value={project.endYear ?? ''}
+                                onChange={(e) => updateProjectDateField(project.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
+                                className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                                placeholder="Year"
+                                min={1950}
+                                max={2099}
+                              />
+                            </>
+                          )}
+                          <label className="flex items-center gap-1 ml-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={project.isCurrent ?? false}
+                              onChange={(e) => updateProjectDateField(project.id, 'isCurrent', e.target.checked)}
+                              className="accent-[#16DB65] w-3 h-3"
+                            />
+                            <span className="text-xs text-white/50">Present</span>
+                          </label>
+                        </div>
+                      </div>
 
                       <textarea
                         value={project.description}

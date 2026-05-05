@@ -69,9 +69,15 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
             <div key={project.id} className="mb-4">
               <div className="flex justify-between items-baseline mb-1">
                 <h4 className="font-bold text-gray-900">{project.name}</h4>
+                {project.period && <span className="text-sm text-gray-600">{project.period}</span>}
               </div>
+              {project.role && <p className="text-gray-700 italic mb-2">{project.role}</p>}
               {project.description && (
-                <p className="text-gray-800 mb-2">{project.description}</p>
+                <ul className="list-disc pl-5 text-gray-800 mb-2">
+                  {project.description.split('\n').filter(Boolean).map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ul>
               )}
               {project.technologies && project.technologies.length > 0 && (
                 <p className="text-sm text-gray-600 mb-2">
