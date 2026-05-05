@@ -61,6 +61,7 @@
 
 ## Done
 
+- [DONE] Fix Education behavior: hide editable education section titles in builder and render a single Education heading in Harvard preview
 - [DONE] Fix Vercel build type error in ResumeBuilder (removed unsupported sectionType prop)
 
 - [DONE] Auto-fix token precheck + warning modal

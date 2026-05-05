@@ -1808,6 +1808,7 @@ export function ResumeBuilder() {
                     key={section.id}
                     title={section.title}
                     content={section.content}
+                    showTitleField={activeTab !== 'education'}
                     onTitleChange={(value) => updateDynamicSection(section.id, { title: value })}
                     onContentChange={(value) => updateDynamicSection(section.id, { content: value })}
                     onDelete={() => deleteDynamicSection(section.id)}
