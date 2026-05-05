@@ -61,6 +61,8 @@
 
 ## Done
 
+- [DONE] Fix Vercel build type error in ResumeBuilder (removed unsupported sectionType prop)
+
 - [DONE] Auto-fix token precheck + warning modal
 - [DONE] Align AI feature limits + per-CV PDF import cap
 - [DONE] Final check: smoke checklist + free plan cost estimate
