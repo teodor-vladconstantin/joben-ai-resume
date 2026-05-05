@@ -34,6 +34,11 @@ type ExperienceEntry = {
   title: string
   company: string
   period: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
   description: string
   bullets?: string[]
 }
@@ -44,6 +49,10 @@ type ProjectEntry = {
   description: string
   technologies: string[]
   url?: string
+}
+
+type ImportMeta = {
+  pdfImportsCount: number
 }
 
 type ResumeData = {
@@ -61,6 +70,7 @@ type ResumeData = {
   experience: ExperienceEntry[]
   projects: ProjectEntry[]
   dynamicSections: DynamicSection[]
+  importMeta?: ImportMeta
 }
 
 type SummaryGenerationMode = 'resume' | 'scratch'
@@ -71,20 +81,79 @@ type BulletDraftState = {
   error: string | null
 }
 
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const MONTH_NAME_MAP: Record<string, number> = {
+  jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4,
+  may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11,
+  dec: 12, december: 12,
+}
+
+function parsePeriodString(period: string): Partial<Pick<ExperienceEntry, 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent'>> {
+  if (!period || period === 'Start - End') return {}
+  const parts = period.split(/\s*[-–—]\s*/)
+  if (parts.length < 2) return {}
+
+  const parseDate = (str: string): { month?: number; year?: number } => {
+    const s = str.trim()
+    const m1 = s.match(/([a-zA-Z]+)\s+(\d{4})/)
+    if (m1) return { month: MONTH_NAME_MAP[m1[1].toLowerCase()], year: parseInt(m1[2]) }
+    const m2 = s.match(/(\d{1,2})[/.](\d{4})/)
+    if (m2) return { month: parseInt(m2[1]), year: parseInt(m2[2]) }
+    const m3 = s.match(/(\d{4})/)
+    if (m3) return { year: parseInt(m3[1]) }
+    return {}
+  }
+
+  const start = parseDate(parts[0])
+  const isCurrent = /present|current|ongoing|now/i.test(parts[1])
+  const end = isCurrent ? {} : parseDate(parts[1])
+
+  return {
+    startMonth: start.month,
+    startYear: start.year,
+    endMonth: end.month,
+    endYear: end.year,
+    isCurrent,
+  }
+}
+
+function computePeriod(entry: Pick<ExperienceEntry, 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent'>): string {
+  const startLabel = entry.startYear
+    ? (entry.startMonth ? `${MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}` : `${entry.startYear}`)
+    : ''
+  const endLabel = entry.isCurrent
+    ? 'Present'
+    : entry.endYear
+      ? (entry.endMonth ? `${MONTH_LABELS[entry.endMonth - 1]} ${entry.endYear}` : `${entry.endYear}`)
+      : ''
+  if (startLabel && endLabel) return `${startLabel} - ${endLabel}`
+  return startLabel || endLabel || ''
+}
+
+function splitCombinedBullet(value: string): string[] {
+  const cleaned = value.trim()
+  if (!cleaned) return []
+
+  const bulletSplit = cleaned.split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
+  if (bulletSplit.length > 1) return bulletSplit.map((s) => s.trim()).filter(Boolean)
+
+  const numberedSplit = cleaned.split(/(?<!\d)\d{1,2}[.)]\s+/)
+  if (numberedSplit.length > 1) {
+    const parts = numberedSplit.map((s) => s.trim()).filter(Boolean)
+    if (parts.length > 1) return parts
+  }
+
+  const sentenceSplit = cleaned.split(/(?<=[.!?])\s+(?=[A-Z])/).map((s) => s.trim()).filter(Boolean)
+  return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
+}
+
 function normalizeExperienceBullets(
   input: unknown,
   fallbackDescription?: string,
   options?: { keepEmpty?: boolean }
 ): string[] {
-  const splitCombinedBullet = (value: string): string[] => {
-    const cleaned = value.trim()
-    if (!cleaned) return []
-    const sentenceSplit = cleaned
-      .split(/(?<=[.!?])\s+(?=[A-Z])/)
-      .map((item) => item.trim())
-      .filter(Boolean)
-    return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
-  }
 
   if (Array.isArray(input) && input.length > 0) {
     const rawBullets = input.map((item) => (typeof item === 'string' ? item : ''))
@@ -113,11 +182,20 @@ function normalizeExperienceEntry(entry: Partial<ExperienceEntry>): ExperienceEn
     bullets.find((bullet) => bullet.trim().length > 0) ||
     (typeof entry.description === 'string' ? entry.description.trim() : '')
 
+  // If structured date fields are missing, derive them from the period string
+  const hasStructured = entry.startYear !== undefined || entry.endYear !== undefined
+  const derived = hasStructured ? {} : parsePeriodString(entry.period || '')
+
   return {
     id: entry.id || `exp_${Date.now()}`,
     title: entry.title || '',
     company: entry.company || '',
     period: entry.period || '',
+    startMonth: entry.startMonth ?? derived.startMonth,
+    startYear: entry.startYear ?? derived.startYear,
+    endMonth: entry.endMonth ?? derived.endMonth,
+    endYear: entry.endYear ?? derived.endYear,
+    isCurrent: entry.isCurrent ?? derived.isCurrent,
     description,
     bullets,
   }
@@ -153,6 +231,7 @@ const initialResumeData: ResumeData = {
   experience: [],
   projects: [],
   dynamicSections: [],
+  importMeta: { pdfImportsCount: 0 },
 }
 
 const tabSectionMap: Record<string, AddableSection['type'][]> = {
@@ -163,9 +242,9 @@ const tabSectionMap: Record<string, AddableSection['type'][]> = {
   sections: ['professional_summary', 'career_objective', 'leadership', 'research', 'awards', 'publications'],
 }
 
-const MAX_FILES_PER_SLOT = 3
+const MAX_PDF_IMPORTS_PER_RESUME = 3
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
-const MAX_FILES_ERROR_MESSAGE = 'You can upload a maximum of 3 CVs per slot.'
+const MAX_FILES_ERROR_MESSAGE = 'You can upload a maximum of 3 PDF/DOCX imports per CV slot.'
 const INVALID_FILE_ERROR_MESSAGE = 'Only .pdf and .docx files are allowed.'
 const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
@@ -181,6 +260,11 @@ function isValidResumeFile(file: File): boolean {
   if (!ALLOWED_EXTENSIONS.includes(extension)) return false
   if (!file.type) return true
   return ALLOWED_TYPES.includes(file.type)
+}
+
+function getPdfImportCount(data: ResumeData): number {
+  const count = data.importMeta?.pdfImportsCount ?? 0
+  return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0
 }
 
 
@@ -200,8 +284,8 @@ export function ResumeBuilder() {
   const [bulletDraftStates, setBulletDraftStates] = useState<Record<string, BulletDraftState>>({})
   const [isImportingPdf, setIsImportingPdf] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [uploadedImportFiles, setUploadedImportFiles] = useState<File[]>([])
   const [showUploadWarning, setShowUploadWarning] = useState(false)
+  const [showImportLimitModal, setShowImportLimitModal] = useState(false)
   const [pendingUploadFile, setPendingUploadFile] = useState<File | null>(null)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -287,6 +371,7 @@ export function ResumeBuilder() {
               experience: incomingExperience,
               projects: incomingProjects,
               dynamicSections: loadedData.dynamicSections || prev.dynamicSections,
+              importMeta: loadedData.importMeta || prev.importMeta,
             }
           })
         }
@@ -486,6 +571,9 @@ export function ResumeBuilder() {
         title: s.title || '',
         content: s.content || '',
       })),
+      importMeta: {
+        pdfImportsCount: Math.min(getPdfImportCount(prev) + 1, MAX_PDF_IMPORTS_PER_RESUME),
+      },
     }))
   }
 
@@ -542,19 +630,29 @@ export function ResumeBuilder() {
 
   const updateExperienceMetaField = (
     experienceId: string,
-    field: 'title' | 'company' | 'period',
+    field: 'title' | 'company',
     value: string
   ) => {
     setResumeData((prev) => ({
       ...prev,
       experience: prev.experience.map((exp) =>
-        exp.id === experienceId
-          ? {
-              ...exp,
-              [field]: value,
-            }
-          : exp
+        exp.id === experienceId ? { ...exp, [field]: value } : exp
       ),
+    }))
+  }
+
+  const updateExperienceDateField = (
+    experienceId: string,
+    field: 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent',
+    value: number | boolean | undefined
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      experience: prev.experience.map((exp) => {
+        if (exp.id !== experienceId) return exp
+        const updated = { ...exp, [field]: value }
+        return { ...updated, period: computePeriod(updated) }
+      }),
     }))
   }
 
@@ -769,8 +867,9 @@ export function ResumeBuilder() {
       return false
     }
 
-    if (uploadedImportFiles.length >= MAX_FILES_PER_SLOT) {
-      setUploadError(MAX_FILES_ERROR_MESSAGE)
+    if (getPdfImportCount(resumeData) >= MAX_PDF_IMPORTS_PER_RESUME) {
+      setUploadError(null)
+      setShowImportLimitModal(true)
       return false
     }
 
@@ -779,6 +878,7 @@ export function ResumeBuilder() {
 
   const startUploadFlow = (file: File) => {
     setUploadError(null)
+    setShowImportLimitModal(false)
     if (!validateUploadFile(file)) return
     setPendingUploadFile(file)
     setShowUploadWarning(true)
@@ -794,7 +894,6 @@ export function ResumeBuilder() {
     try {
       const result = await importPdfClientSide(pendingUploadFile)
       handleOnboardingImport(result.data)
-      setUploadedImportFiles((prev) => [...prev, pendingUploadFile])
       setActiveTab('personal')
       setPendingUploadFile(null)
     } catch (err) {
@@ -808,6 +907,10 @@ export function ResumeBuilder() {
   const cancelUpload = () => {
     setShowUploadWarning(false)
     setPendingUploadFile(null)
+  }
+
+  const closeImportLimitModal = () => {
+    setShowImportLimitModal(false)
   }
 
   const handleTailorResume = async () => {
@@ -1333,19 +1436,66 @@ export function ResumeBuilder() {
                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
                        placeholder="Role title"
                      />
-                     <div className="grid grid-cols-2 gap-2">
-                       <input
-                         value={exp.company}
-                         onChange={(e) => updateExperienceMetaField(exp.id, 'company', e.target.value)}
-                         className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
-                         placeholder="Company"
-                       />
-                       <input
-                         value={exp.period}
-                         onChange={(e) => updateExperienceMetaField(exp.id, 'period', e.target.value)}
-                         className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
-                         placeholder="Period"
-                       />
+                     <input
+                       value={exp.company}
+                       onChange={(e) => updateExperienceMetaField(exp.id, 'company', e.target.value)}
+                       className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                       placeholder="Company"
+                     />
+                     <div className="space-y-1">
+                       <p className="text-xs text-white/40 uppercase tracking-wide">Period</p>
+                       <div className="flex items-center gap-1 flex-wrap">
+                         <select
+                           value={exp.startMonth ?? ''}
+                           onChange={(e) => updateExperienceDateField(exp.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
+                           className="rounded border border-white/10 bg-[#020202] px-1.5 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                         >
+                           <option value="">Month</option>
+                           {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                         </select>
+                         <input
+                           type="number"
+                           value={exp.startYear ?? ''}
+                           onChange={(e) => updateExperienceDateField(exp.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
+                           className="w-[68px] rounded border border-white/10 bg-[#020202] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                           placeholder="Year"
+                           min={1950}
+                           max={2099}
+                         />
+                         <span className="text-white/30 text-xs">–</span>
+                         {exp.isCurrent ? (
+                           <span className="text-xs font-medium text-[#16DB65]">Present</span>
+                         ) : (
+                           <>
+                             <select
+                               value={exp.endMonth ?? ''}
+                               onChange={(e) => updateExperienceDateField(exp.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
+                               className="rounded border border-white/10 bg-[#020202] px-1.5 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                             >
+                               <option value="">Month</option>
+                               {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                             </select>
+                             <input
+                               type="number"
+                               value={exp.endYear ?? ''}
+                               onChange={(e) => updateExperienceDateField(exp.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
+                               className="w-[68px] rounded border border-white/10 bg-[#020202] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
+                               placeholder="Year"
+                               min={1950}
+                               max={2099}
+                             />
+                           </>
+                         )}
+                         <label className="flex items-center gap-1 ml-1 cursor-pointer">
+                           <input
+                             type="checkbox"
+                             checked={exp.isCurrent ?? false}
+                             onChange={(e) => updateExperienceDateField(exp.id, 'isCurrent', e.target.checked)}
+                             className="accent-[#16DB65] w-3 h-3"
+                           />
+                           <span className="text-xs text-white/50">Present</span>
+                         </label>
+                       </div>
                      </div>
 
                      <div className="space-y-2">
@@ -1656,6 +1806,41 @@ export function ResumeBuilder() {
                   'Got it, continue'
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showImportLimitModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={closeImportLimitModal} />
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white">Import limit reached</h3>
+            <p className="mt-2 text-sm text-[#FFFFFF]/82">
+              {MAX_FILES_ERROR_MESSAGE}
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={closeImportLimitModal}
+                className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isImportingPdf ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-[#16DB65]" />
+              <div>
+                <p className="text-sm font-semibold text-white">Importing PDF/DOCX</p>
+                <p className="text-xs text-[#FFFFFF]/72">Parsing your resume. This can take a moment.</p>
+              </div>
             </div>
           </div>
         </div>

@@ -5,6 +5,15 @@ import {
   isRateLimitExceededError,
   MessageParam,
 } from '@/lib/anthropic-with-limits'
+import {
+  checkFeatureLimit,
+  checkAndReserveTokens,
+  getPlanLimits,
+  getRateLimitStatus,
+  getMonthlyResetAtIso,
+  incrementFeatureCounterBy,
+  recordLimitHit,
+} from '@/lib/ratelimit'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
@@ -88,6 +97,9 @@ export async function POST(req: Request) {
   const requestId = getRequestId(req)
   let userId: string | null = null
   try {
+    const url = new URL(req.url)
+    const dryRun = url.searchParams.get('dryRun') === 'true'
+
     const authResult = await auth()
     userId = authResult.userId
     const { sessionClaims } = authResult
@@ -108,6 +120,43 @@ export async function POST(req: Request) {
     }
 
     const plan = await getUserPlan(userId, emailHint)
+    const featureCheck = await checkFeatureLimit(userId, 'bullets', plan)
+
+    if (!featureCheck.allowed) {
+      if (!dryRun) {
+        await recordLimitHit(userId, 'bullets')
+      }
+
+      if (featureCheck.blocked) {
+        return jsonWithRequestId(
+          {
+            error: 'Access to this feature has been temporarily suspended. Please contact support.',
+            limitType: 'blocked',
+            feature: 'bullets',
+            resetAt: getMonthlyResetAtIso(),
+          },
+          429,
+          requestId
+        )
+      }
+
+      return jsonWithRequestId(
+        {
+          error: `You have used all ${featureCheck.limit || 0} bullet rewrites available this month.`,
+          limitType: 'feature',
+          feature: 'bullets',
+          used: featureCheck.used,
+          limit: featureCheck.limit ?? undefined,
+          resetAt: getMonthlyResetAtIso(),
+        },
+        429,
+        requestId
+      )
+    }
+
+    const remainingBulletCredits = featureCheck.limit === null
+      ? null
+      : Math.max((featureCheck.limit || 0) - featureCheck.used, 0)
 
     const supabase = createServerClient()
 
@@ -152,6 +201,94 @@ ${JSON.stringify(experienceForPrompt, null, 2)}
 
 Improvements to apply:
 ${improvementsText}`
+
+    const limits = getPlanLimits(plan)
+    const inputLength = prompt.length
+    const estimatedInputTokens = Math.ceil(inputLength / 4)
+
+    if (inputLength > limits.maxRawChars || estimatedInputTokens > limits.maxInputTokensPerCall) {
+      return jsonWithRequestId(
+        {
+          allowed: false,
+          error: 'The document is too long. Maximum 32,000 characters (~8 A4 pages).',
+          limitType: 'input_too_long',
+          estimatedInputTokens,
+          resetAt: getMonthlyResetAtIso(),
+        },
+        429,
+        requestId
+      )
+    }
+
+    const tokenReserve = await checkAndReserveTokens(userId, plan, estimatedInputTokens)
+    if (!tokenReserve.allowed) {
+      const limitType = tokenReserve.limitType || 'tokens'
+
+      if (!dryRun) {
+        await recordLimitHit(userId, limitType)
+      }
+
+      if (limitType === 'hard_cap') {
+        return jsonWithRequestId(
+          {
+            allowed: false,
+            error: 'The absolute monthly limit has been reached. Please contact support.',
+            limitType,
+            estimatedInputTokens,
+            resetAt: getMonthlyResetAtIso(),
+          },
+          429,
+          requestId
+        )
+      }
+
+      const resetAt = getMonthlyResetAtIso()
+      const monthLabel = new Date(resetAt).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
+      return jsonWithRequestId(
+        {
+          allowed: false,
+          error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
+          limitType,
+          estimatedInputTokens,
+          resetAt,
+        },
+        429,
+        requestId
+      )
+    }
+
+    const rateLimitStatus = await getRateLimitStatus(userId, plan)
+    const tokenRemaining = rateLimitStatus.tokens.remaining
+
+    if (tokenRemaining !== null && tokenRemaining <= 0) {
+      const resetAt = getMonthlyResetAtIso()
+      const monthLabel = new Date(resetAt).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
+      return jsonWithRequestId(
+        {
+          allowed: false,
+          error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
+          limitType: 'tokens',
+          estimatedInputTokens,
+          remainingTokens: tokenRemaining,
+          resetAt,
+        },
+        429,
+        requestId
+      )
+    }
+
+    if (dryRun) {
+      return jsonWithRequestId(
+        {
+          allowed: true,
+          estimatedInputTokens,
+          remainingTokens: tokenRemaining,
+          resetAt: getMonthlyResetAtIso(),
+        },
+        200,
+        requestId
+      )
+    }
 
     const messages: MessageParam[] = [{ role: 'user', content: prompt }]
 
@@ -221,19 +358,22 @@ ${improvementsText}`
       patchMap.get(raw.experienceId)!.set(safeIdx, updatedText)
     }
 
-    // Build enriched patches (with original + context) and apply to resume
-    const enrichedPatches: FixPatchWithContext[] = []
+    // Build enriched patches (with original + context) and apply to resume.
+    const candidatePatches: FixPatchWithContext[] = []
 
-    const updatedExperience = experience.map((exp) => {
+    for (const exp of experience) {
       const bulletPatches = patchMap.get(exp.id)
-      if (!bulletPatches) return exp
+      if (!bulletPatches) continue
 
       const bullets = Array.isArray(exp.bullets) && exp.bullets.length > 0
-        ? [...exp.bullets]
+        ? exp.bullets
         : [exp.description || '']
 
-      for (const [idx, text] of bulletPatches) {
-        enrichedPatches.push({
+      const sortedIndexes = Array.from(bulletPatches.keys()).sort((a, b) => a - b)
+      for (const idx of sortedIndexes) {
+        const text = bulletPatches.get(idx)
+        if (!text) continue
+        candidatePatches.push({
           experienceId: exp.id,
           bulletIndex: idx,
           originalBullet: bullets[idx] || '',
@@ -241,6 +381,31 @@ ${improvementsText}`
           experienceTitle: exp.title || '',
           company: exp.company || '',
         })
+      }
+    }
+
+    const maxAllowed = remainingBulletCredits === null
+      ? candidatePatches.length
+      : Math.min(candidatePatches.length, remainingBulletCredits)
+    const enrichedPatches = candidatePatches.slice(0, maxAllowed)
+
+    const allowedPatchMap = new Map<string, Map<number, string>>()
+    for (const patch of enrichedPatches) {
+      if (!allowedPatchMap.has(patch.experienceId)) {
+        allowedPatchMap.set(patch.experienceId, new Map())
+      }
+      allowedPatchMap.get(patch.experienceId)!.set(patch.bulletIndex, patch.updatedBullet)
+    }
+
+    const updatedExperience = experience.map((exp) => {
+      const bulletPatches = allowedPatchMap.get(exp.id)
+      if (!bulletPatches) return exp
+
+      const bullets = Array.isArray(exp.bullets) && exp.bullets.length > 0
+        ? [...exp.bullets]
+        : [exp.description || '']
+
+      for (const [idx, text] of bulletPatches) {
         bullets[idx] = text
       }
 
@@ -275,6 +440,8 @@ ${improvementsText}`
         analysis_json: { fixesApplied: appliedCount },
       })
     }
+
+    await incrementFeatureCounterBy(userId, 'bullets', appliedCount)
 
     logger.info('auto-fix: improvements applied', {
       requestId, userId, resumeId: body.resumeId, appliedCount,

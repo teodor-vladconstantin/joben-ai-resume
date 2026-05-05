@@ -21,7 +21,9 @@ const FEATURE_LABEL: Record<Feature, string> = {
   covers: 'cover letters',
   jds: 'job tailoring uses',
   bullets: 'bullet rewrites',
-  cvs: 'resume analyses',
+  reviews: 'resume analyses',
+  summaries: 'summary generations',
+  cvs: 'resume creations',
 }
 
 export type MessageParam = Anthropic.MessageParam
