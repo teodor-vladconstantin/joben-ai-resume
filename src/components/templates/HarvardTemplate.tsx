@@ -53,6 +53,9 @@ function EducationSection({ section }: { section: ResumeDynamicSection }) {
 }
 
 export function HarvardTemplate({ data }: HarvardTemplateProps) {
+  const educationSections = (data.dynamicSections || []).filter((section) => section.type === 'education')
+  const nonEducationSections = (data.dynamicSections || []).filter((section) => section.type !== 'education')
+
   const contactItems = [
     data.personal.email ? { label: 'Email', value: data.personal.email, href: `mailto:${data.personal.email}` } : null,
     data.personal.phone ? { label: 'Phone', value: data.personal.phone, href: `tel:${data.personal.phone.replace(/[^+\d]/g, '')}` } : null,
@@ -141,14 +144,19 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
         </section>
       )}
 
-      {(data.dynamicSections || []).map((section) => (
+      {educationSections.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Education</h3>
+          {educationSections.map((section) => (
+            <EducationSection key={section.id} section={section} />
+          ))}
+        </section>
+      )}
+
+      {nonEducationSections.map((section) => (
         <section key={section.id} className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">{section.title}</h3>
-          {section.type === 'education' ? (
-            <EducationSection section={section} />
-          ) : (
-            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
-          )}
+          <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
         </section>
       ))}
     </div>
