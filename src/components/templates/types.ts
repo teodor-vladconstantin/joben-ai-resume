@@ -16,6 +16,11 @@ export type ResumeExperience = {
   title: string
   company: string
   period: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
   description: string
   bullets?: string[]
 }

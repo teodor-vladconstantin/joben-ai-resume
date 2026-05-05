@@ -186,6 +186,7 @@ export async function POST(req: Request) {
       const aiResponse = await callAnthropicWithLimits({
         userId,
         plan,
+        feature: 'summaries',
         inputText: userPrompt,
         messages,
         system: SUMMARY_SYSTEM_PROMPT,

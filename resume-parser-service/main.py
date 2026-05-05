@@ -29,6 +29,11 @@ class WorkExperience(BaseModel):
     role: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    start_month: Optional[int] = None
+    start_year: Optional[int] = None
+    end_month: Optional[int] = None
+    end_year: Optional[int] = None
+    is_current: bool = False
     description: Optional[str] = None
     bullets: list[str] = []
 
@@ -39,6 +44,10 @@ class Education(BaseModel):
     field: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    start_month: Optional[int] = None
+    start_year: Optional[int] = None
+    end_month: Optional[int] = None
+    end_year: Optional[int] = None
 
 
 class Language(BaseModel):
@@ -53,6 +62,10 @@ class Project(BaseModel):
     url: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    start_month: Optional[int] = None
+    start_year: Optional[int] = None
+    end_month: Optional[int] = None
+    end_year: Optional[int] = None
 
 
 class ResumeData(BaseModel):
@@ -360,8 +373,12 @@ def normalize_project_entry(entry: dict) -> Project:
     explicit_start = entry.get("start_date") if isinstance(entry.get("start_date"), str) else None
     explicit_end = entry.get("end_date") if isinstance(entry.get("end_date"), str) else None
     inferred_start, inferred_end = extract_date_range(project_text)
+    raw_start = normalize_date(explicit_start or inferred_start)
+    raw_end = normalize_date(explicit_end or inferred_end)
     project_start_date = to_mmm_yyyy(explicit_start or inferred_start)
     project_end_date = to_mmm_yyyy(explicit_end or inferred_end)
+    s_year, s_month = date_to_parts(raw_start)
+    e_year, e_month = date_to_parts(raw_end)
 
     return Project(
         name=name or "Project",
@@ -370,6 +387,10 @@ def normalize_project_entry(entry: dict) -> Project:
         url=url,
         start_date=project_start_date,
         end_date=project_end_date,
+        start_year=s_year,
+        start_month=s_month,
+        end_year=e_year,
+        end_month=e_month,
     )
 
 
@@ -670,6 +691,52 @@ def normalize_date(date_str: Optional[str]) -> Optional[str]:
     return normalized_input
 
 
+def date_to_parts(normalized: Optional[str]) -> tuple[Optional[int], Optional[int]]:
+    """Convert normalized date string to (year, month) integers.
+
+    Returns (year, month) for 'YYYY-MM', (year, None) for year-only, (None, None) for None/Present.
+    """
+    if not normalized or normalized == "Present":
+        return None, None
+    m = re.match(r'^(\d{4})-(\d{2})$', normalized)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    m = re.match(r'^(\d{4})$', normalized)
+    if m:
+        return int(m.group(1)), None
+    return None, None
+
+
+_INLINE_BULLET_RE = re.compile(
+    r'\s*[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃]\s+'
+)
+_NUMBERED_ITEM_RE = re.compile(r'(?<!\d)\d{1,2}[.)]\s+')
+
+
+def split_merged_bullets(text: str) -> list[str]:
+    """Split a potentially merged bullet string into individual bullet points."""
+    if not text.strip():
+        return []
+
+    # Split on inline bullet characters (e.g. "• Built X • Improved Y")
+    parts = _INLINE_BULLET_RE.split(text)
+    if len(parts) > 1:
+        return [p.strip() for p in parts if p.strip()]
+
+    # Split on newlines (LlamaParse sometimes uses \n between bullets in one string)
+    parts = [p.strip() for p in text.split('\n') if p.strip()]
+    if len(parts) > 1:
+        # Strip leading bullet chars from each line
+        return [re.sub(r'^[•·▸▶\-\*]\s*', '', p).strip() for p in parts if p.strip()]
+
+    # Split on numbered list embedded in string (e.g. "1. Built X 2. Improved Y")
+    parts = _NUMBERED_ITEM_RE.split(text)
+    if len(parts) > 1:
+        return [p.strip() for p in parts if p.strip()]
+
+    return [text.strip()]
+
+
 def extract_date_range(text: Optional[str]) -> tuple[Optional[str], Optional[str]]:
     if not isinstance(text, str) or not text.strip():
         return None, None
@@ -762,9 +829,9 @@ def normalize_bullets(bullets: Optional[list[str]], description: Optional[str]) 
         for item in bullets:
             if isinstance(item, str):
                 cleaned = re.sub(r"\s+", " ", item).strip()
-                cleaned = re.sub(r"^[•\-\*\u2022]\s*", "", cleaned)
+                cleaned = re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", cleaned)
                 if cleaned:
-                    normalized.append(cleaned)
+                    normalized.extend(split_merged_bullets(cleaned))
 
     if normalized:
         return normalized
@@ -941,6 +1008,50 @@ async def parse_resume(file: UploadFile = File(...)):
             + fallback_project_entries
         )
 
+        def _build_work_experience() -> list[WorkExperience]:
+            entries = []
+            for i, exp in enumerate(work_exp_entries):
+                if not isinstance(exp, dict) or work_exp_classifications.get(i, False):
+                    continue
+                nd_start = normalize_date(exp.get("start_date"))
+                nd_end = normalize_date(exp.get("end_date"))
+                s_year, s_month = date_to_parts(nd_start)
+                e_year, e_month = date_to_parts(nd_end)
+                entries.append(WorkExperience(
+                    company=normalize_company_name(exp.get("company")),
+                    role=exp.get("role"),
+                    start_date=nd_start,
+                    end_date=nd_end,
+                    start_year=s_year,
+                    start_month=s_month,
+                    end_year=e_year,
+                    end_month=e_month,
+                    is_current=nd_end == "Present",
+                    description=exp.get("description"),
+                    bullets=normalize_bullets(exp.get("bullets"), exp.get("description")),
+                ))
+            return entries
+
+        def _build_education() -> list[Education]:
+            entries = []
+            for exp in (resume_data.get("education") or []):
+                nd_start = normalize_date(exp.get("start_date"))
+                nd_end = normalize_date(exp.get("end_date"))
+                s_year, s_month = date_to_parts(nd_start)
+                e_year, e_month = date_to_parts(nd_end)
+                entries.append(Education(
+                    institution=exp.get("institution"),
+                    degree=exp.get("degree"),
+                    field=exp.get("field"),
+                    start_date=nd_start,
+                    end_date=nd_end,
+                    start_year=s_year,
+                    start_month=s_month,
+                    end_year=e_year,
+                    end_month=e_month,
+                ))
+            return entries
+
         result = ResumeData(
             full_name=resume_data.get("full_name"),
             email=resume_data.get("email"),
@@ -950,28 +1061,8 @@ async def parse_resume(file: UploadFile = File(...)):
             linkedin=linkedin_val,
             github=github_val,
             projects=[normalize_project_entry(project) for project in project_entries],
-            work_experience=[
-                WorkExperience(
-                    company=normalize_company_name(exp.get("company")),
-                    role=exp.get("role"),
-                    start_date=normalize_date(exp.get("start_date")),
-                    end_date=normalize_date(exp.get("end_date")),
-                    description=exp.get("description"),
-                    bullets=normalize_bullets(exp.get("bullets"), exp.get("description")),
-                )
-                for i, exp in enumerate(work_exp_entries)
-                if isinstance(exp, dict) and not work_exp_classifications.get(i, False)
-            ],
-            education=[
-                Education(
-                    institution=exp.get("institution"),
-                    degree=exp.get("degree"),
-                    field=exp.get("field"),
-                    start_date=normalize_date(exp.get("start_date")),
-                    end_date=normalize_date(exp.get("end_date")),
-                )
-                for exp in (resume_data.get("education") or [])
-            ],
+            work_experience=_build_work_experience(),
+            education=_build_education(),
             skills=resume_data.get("skills") or [],
             languages=[Language(**lang) for lang in (resume_data.get("languages") or [])],
             certifications=resume_data.get("certifications") or [],

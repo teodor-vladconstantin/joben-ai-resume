@@ -7,6 +7,7 @@
 - [DONE] Parser cleanup: imports, types, formatting, verification
 - [DONE] Final launch execution gates (Vercel deploy + service keys)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
+- [IN PROGRESS] Parser + builder: projects bullets/dates, LinkedIn/GitHub parsing
 - [DONE] Final technical polish pass (types, errors, loading, empty states, logs, env, API response shape, mobile, lint)
 - [DONE] [Polish C1] TypeScript: npx tsc --noEmit clean, no any introduced
 - [DONE] [Polish C2] Error handling: API routes and server actions return safe errors
@@ -59,6 +60,11 @@
 
 
 ## Done
+
+- [DONE] Auto-fix token precheck + warning modal
+- [DONE] Align AI feature limits + per-CV PDF import cap
+- [DONE] Final check: smoke checklist + free plan cost estimate
+- [DONE] Final check summary (business logic, rate limits, free usage cost)
 
 - [DONE] Added client-side bullet migration split for legacy single-bullet experience entries so existing resumes display multiple bullets immediately
 - [DONE] Resume parser now returns structured work_experience bullets and import mapping preserves multiple bullets per role

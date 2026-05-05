@@ -34,6 +34,13 @@ export default function AIReviewEditorPage() {
 
   const [isSavingAutoFix, setIsSavingAutoFix] = useState(false)
   const [autoFixError, setAutoFixError] = useState('')
+  const [showAutoFixTokenWarning, setShowAutoFixTokenWarning] = useState(false)
+  const [autoFixTokenWarning, setAutoFixTokenWarning] = useState('')
+  const [autoFixTokenDetails, setAutoFixTokenDetails] = useState<{
+    estimatedInputTokens?: number
+    remainingTokens?: number | null
+    resetAt?: string
+  } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -140,8 +147,38 @@ export default function AIReviewEditorPage() {
 
     setIsSavingAutoFix(true)
     setAutoFixError('')
+    setShowAutoFixTokenWarning(false)
+    setAutoFixTokenWarning('')
+    setAutoFixTokenDetails(null)
 
     try {
+      const precheckRes = await fetch('/api/auto-fix?dryRun=true', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeId, reviewId, improvements }),
+      })
+
+      const precheckPayload = (await precheckRes.json()) as {
+        allowed?: boolean
+        error?: string
+        limitType?: string
+        estimatedInputTokens?: number
+        remainingTokens?: number | null
+        resetAt?: string
+      }
+
+      if (!precheckRes.ok || precheckPayload.allowed === false) {
+        setAutoFixTokenWarning(precheckPayload.error || 'Auto-fix cannot run due to token limits.')
+        setAutoFixTokenDetails({
+          estimatedInputTokens: precheckPayload.estimatedInputTokens,
+          remainingTokens: precheckPayload.remainingTokens,
+          resetAt: precheckPayload.resetAt,
+        })
+        setShowAutoFixTokenWarning(true)
+        setIsSavingAutoFix(false)
+        return
+      }
+
       const res = await fetch('/api/auto-fix', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -189,6 +226,39 @@ export default function AIReviewEditorPage() {
           onApplyFix={handleApplyFix}
         />
       </main>
+
+      {showAutoFixTokenWarning ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setShowAutoFixTokenWarning(false)} />
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white">Auto-fix unavailable</h3>
+            <p className="mt-2 text-sm text-[#FFFFFF]/82">
+              {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}
+            </p>
+            {autoFixTokenDetails ? (
+              <div className="mt-4 rounded-xl border border-white/10 bg-[#020202] px-4 py-3 text-xs text-[#FFFFFF]/72 space-y-1">
+                {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
+                  <p>Estimated input tokens: {autoFixTokenDetails.estimatedInputTokens}</p>
+                ) : null}
+                {typeof autoFixTokenDetails.remainingTokens === 'number' ? (
+                  <p>Remaining monthly tokens: {autoFixTokenDetails.remainingTokens}</p>
+                ) : null}
+                {autoFixTokenDetails.resetAt ? (
+                  <p>Resets at: {new Date(autoFixTokenDetails.resetAt).toLocaleString()}</p>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowAutoFixTokenWarning(false)}
+                className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

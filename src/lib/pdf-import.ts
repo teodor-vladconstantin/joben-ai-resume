@@ -13,6 +13,11 @@ type ParseResumeResponse = {
     role: string | null
     start_date: string | null
     end_date: string | null
+    start_month?: number | null
+    start_year?: number | null
+    end_month?: number | null
+    end_year?: number | null
+    is_current?: boolean
     description: string | null
     bullets?: string[] | null
   }>
@@ -22,6 +27,10 @@ type ParseResumeResponse = {
     field: string | null
     start_date: string | null
     end_date: string | null
+    start_month?: number | null
+    start_year?: number | null
+    end_month?: number | null
+    end_year?: number | null
   }>
   skills?: string[]
   languages?: Array<{
@@ -88,16 +97,30 @@ function formatDateRange(start: string | null, end: string | null): string {
   return ''
 }
 
-function normalizeExperienceBullets(input: string[] | null | undefined, description: string): string[] {
-  const splitCombinedBullet = (value: string): string[] => {
-    const cleaned = value.trim()
-    if (!cleaned) return []
-    const sentenceSplit = cleaned
-      .split(/(?<=[.!?])\s+(?=[A-Z])/)
-      .map((item) => item.trim())
-      .filter(Boolean)
-    return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
+function splitCombinedBullet(value: string): string[] {
+  const cleaned = value.trim()
+  if (!cleaned) return []
+
+  // Split on inline bullet characters embedded in the string
+  const bulletSplit = cleaned.split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
+  if (bulletSplit.length > 1) return bulletSplit.map((s) => s.trim()).filter(Boolean)
+
+  // Split on numbered list items embedded in a single string (e.g. "1. Built X 2. Improved Y")
+  const numberedSplit = cleaned.split(/(?<!\d)\d{1,2}[.)]\s+/)
+  if (numberedSplit.length > 1) {
+    const parts = numberedSplit.map((s) => s.trim()).filter(Boolean)
+    if (parts.length > 1) return parts
   }
+
+  // Split on sentence boundaries (capital letter after punctuation)
+  const sentenceSplit = cleaned
+    .split(/(?<=[.!?])\s+(?=[A-Z])/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+  return sentenceSplit.length > 1 ? sentenceSplit : [cleaned]
+}
+
+function normalizeExperienceBullets(input: string[] | null | undefined, description: string): string[] {
 
   if (Array.isArray(input)) {
     const cleaned = input.map((item) => decodeHtml(item).trim()).filter(Boolean)
@@ -191,6 +214,11 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       title: decodeHtml(exp.role),
       company: decodeHtml(exp.company),
       period: formatDateRange(exp.start_date, exp.end_date),
+      startMonth: exp.start_month ?? undefined,
+      startYear: exp.start_year ?? undefined,
+      endMonth: exp.end_month ?? undefined,
+      endYear: exp.end_year ?? undefined,
+      isCurrent: exp.is_current ?? false,
       description: decodeHtml(exp.description),
       bullets: normalizeExperienceBullets(exp.bullets, exp.description || ''),
     })),

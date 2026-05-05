@@ -10,8 +10,8 @@ import {
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/api-response'
 
-const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'cvs'])
-const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'cvs', 'tokens', 'hard_cap'])
+const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs'])
+const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap'])
 
 function parseAdminUserIds(): Set<string> {
   const raw = process.env.ADMIN_USER_IDS || ''
@@ -190,7 +190,7 @@ export async function POST(req: Request) {
     }
 
     if (!body.feature || !FEATURE_SET.has(body.feature)) {
-      return jsonWithRequestId({ error: 'feature must be one of covers, jds, bullets, cvs' }, 400, requestId)
+      return jsonWithRequestId({ error: 'feature must be one of covers, jds, bullets, reviews, summaries, cvs' }, 400, requestId)
     }
 
     if (body.action === 'block') {

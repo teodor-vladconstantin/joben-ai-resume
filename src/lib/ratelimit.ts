@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 
 export type Plan = 'free' | 'pro' | 'recruiting'
-export type Feature = 'covers' | 'jds' | 'bullets' | 'cvs'
+export type Feature = 'covers' | 'jds' | 'bullets' | 'reviews' | 'summaries' | 'cvs'
 export type FlagType = Feature | 'tokens' | 'hard_cap'
 
 export interface PlanLimits {
@@ -15,6 +15,8 @@ export interface PlanLimits {
   covers: number | null
   jds: number | null
   bullets: number | null
+  reviews: number | null
+  summaries: number | null
   cvs: number | null
 }
 
@@ -48,8 +50,8 @@ const MONTHLY_TTL_SECONDS = 35 * 24 * 60 * 60
 const ADMIN_ALERT_TTL_SECONDS = 90 * 24 * 60 * 60
 const PLAN_CACHE_TTL_SECONDS = 60 * 60
 
-const FEATURE_ORDER: Feature[] = ['covers', 'jds', 'bullets', 'cvs']
-const FLAG_ORDER: FlagType[] = ['covers', 'jds', 'bullets', 'cvs', 'tokens', 'hard_cap']
+const FEATURE_ORDER: Feature[] = ['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs']
+const FLAG_ORDER: FlagType[] = ['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap']
 
 const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   free: {
@@ -61,6 +63,8 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     covers: 3,
     jds: 3,
     bullets: 15,
+    reviews: 10,
+    summaries: 10,
     cvs: 1,
   },
   pro: {
@@ -72,6 +76,8 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     covers: 60,
     jds: 60,
     bullets: 200,
+    reviews: 100,
+    summaries: 100,
     cvs: 3,
   },
   recruiting: {
@@ -83,6 +89,8 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     covers: 300,
     jds: 300,
     bullets: 1_000,
+    reviews: 1_000,
+    summaries: 1_000,
     cvs: 15,
   },
 }
@@ -164,6 +172,8 @@ function createDefaultFeatureStatuses(limits: PlanLimits): Record<Feature, Featu
     covers: { used: 0, limit: limits.covers, remaining: limits.covers, blocked: false },
     jds: { used: 0, limit: limits.jds, remaining: limits.jds, blocked: false },
     bullets: { used: 0, limit: limits.bullets, remaining: limits.bullets, blocked: false },
+    reviews: { used: 0, limit: limits.reviews, remaining: limits.reviews, blocked: false },
+    summaries: { used: 0, limit: limits.summaries, remaining: limits.summaries, blocked: false },
     cvs: { used: 0, limit: limits.cvs, remaining: limits.cvs, blocked: false },
   }
 }
@@ -173,6 +183,8 @@ function createDefaultFlagStatuses(): Record<FlagType, FlagStatus> {
     covers: { hits: 0, flagged: false },
     jds: { hits: 0, flagged: false },
     bullets: { hits: 0, flagged: false },
+    reviews: { hits: 0, flagged: false },
+    summaries: { hits: 0, flagged: false },
     cvs: { hits: 0, flagged: false },
     tokens: { hits: 0, flagged: false },
     hard_cap: { hits: 0, flagged: false },
@@ -410,19 +422,26 @@ export async function checkFeatureLimit(
 }
 
 export async function incrementFeatureCounter(userId: string, feature: Feature): Promise<void> {
+  await incrementFeatureCounterBy(userId, feature, 1)
+}
+
+export async function incrementFeatureCounterBy(userId: string, feature: Feature, amount: number): Promise<void> {
   if (!redis) return
+
+  const incrementBy = Math.max(0, Math.floor(amount))
+  if (incrementBy <= 0) return
 
   const month = currentMonthUtc()
   const key = featureKey(userId, feature, month)
 
   try {
     if (feature === 'cvs') {
-      await redis.incr(key)
+      await redis.incrby(key, incrementBy)
       return
     }
 
     const pipeline = redis.pipeline()
-    pipeline.incr(key)
+    pipeline.incrby(key, incrementBy)
     pipeline.expire(key, MONTHLY_TTL_SECONDS)
     await pipeline.exec()
   } catch (error) {
@@ -540,6 +559,8 @@ export async function getRateLimitStatus(userId: string, planOverride?: Plan): P
       covers: 0,
       jds: 0,
       bullets: 0,
+      reviews: 0,
+      summaries: 0,
       cvs: 0,
     }
 
@@ -551,6 +572,8 @@ export async function getRateLimitStatus(userId: string, planOverride?: Plan): P
       covers: 0,
       jds: 0,
       bullets: 0,
+      reviews: 0,
+      summaries: 0,
       cvs: 0,
       tokens: 0,
       hard_cap: 0,
@@ -564,6 +587,8 @@ export async function getRateLimitStatus(userId: string, planOverride?: Plan): P
       covers: false,
       jds: false,
       bullets: false,
+      reviews: false,
+      summaries: false,
       cvs: false,
     }
 
