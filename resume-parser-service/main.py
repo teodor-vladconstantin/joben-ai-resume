@@ -208,6 +208,27 @@ DATE_RANGE_PATTERN = re.compile(
 )
 
 
+_MONTH_TOKEN_CLEAN = (
+    r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?"
+    r"|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?"
+    r"|Ian(?:uarie)?|Februarie|Martie|Aprilie|Iun(?:ie)?|Iul(?:ie)?"
+    r"|August|Septembrie|Octombrie|Noiembrie|Decembrie)"
+)
+_DATE_RANGE_LEAD_RE = re.compile(
+    rf"^\s*(?:(?:{_MONTH_TOKEN_CLEAN})\s+)?\d{{4}}\s*[-–—]\s*"
+    rf"(?:(?:(?:{_MONTH_TOKEN_CLEAN})\s+)?\d{{4}}|Present|Current|Ongoing|Now|Prezent|Acum)\s*",
+    re.IGNORECASE,
+)
+
+
+def strip_leading_date_range(text: Optional[str]) -> Optional[str]:
+    """Remove a date range that LlamaParse sometimes prepends to description text."""
+    if not isinstance(text, str) or not text.strip():
+        return text
+    cleaned = _DATE_RANGE_LEAD_RE.sub("", text).strip()
+    return cleaned if cleaned else text
+
+
 def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     header_text = " ".join(
         str(value)
@@ -323,7 +344,7 @@ def extract_url(text: Optional[str]) -> Optional[str]:
 
 
 def normalize_project_entry(entry: dict) -> Project:
-    description = next(
+    raw_description = next(
         (
             str(value).strip()
             for value in (entry.get("description"), entry.get("summary"))
@@ -331,6 +352,7 @@ def normalize_project_entry(entry: dict) -> Project:
         ),
         None,
     )
+    description = strip_leading_date_range(raw_description)
     name = next(
         (
             str(value).strip()
@@ -712,7 +734,6 @@ _INLINE_BULLET_RE = re.compile(
 )
 _NUMBERED_ITEM_RE = re.compile(r'(?<!\d)\d{1,2}[.)]\s+')
 
-
 def split_merged_bullets(text: str) -> list[str]:
     """Split a potentially merged bullet string into individual bullet points."""
     if not text.strip():
@@ -1017,6 +1038,7 @@ async def parse_resume(file: UploadFile = File(...)):
                 nd_end = normalize_date(exp.get("end_date"))
                 s_year, s_month = date_to_parts(nd_start)
                 e_year, e_month = date_to_parts(nd_end)
+                raw_desc = strip_leading_date_range(exp.get("description"))
                 entries.append(WorkExperience(
                     company=normalize_company_name(exp.get("company")),
                     role=exp.get("role"),
@@ -1027,8 +1049,8 @@ async def parse_resume(file: UploadFile = File(...)):
                     end_year=e_year,
                     end_month=e_month,
                     is_current=nd_end == "Present",
-                    description=exp.get("description"),
-                    bullets=normalize_bullets(exp.get("bullets"), exp.get("description")),
+                    description=raw_desc,
+                    bullets=normalize_bullets(exp.get("bullets"), raw_desc),
                 ))
             return entries
 
