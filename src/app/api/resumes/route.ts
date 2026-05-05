@@ -2,8 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
-import { getEmailHintFromSessionClaims, getUserPlan, isGodModeEmailAddress } from '@/lib/plans'
-import { checkFeatureLimit, getMonthlyResetAtIso, incrementFeatureCounter, recordLimitHit } from '@/lib/ratelimit'
+import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
 
 function isMissingRelation(error: unknown): boolean {
@@ -47,35 +46,17 @@ export async function POST(req: Request) {
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
-    const isGodMode = isGodModeEmailAddress(emailHint)
     const plan = await getUserPlan(userId, emailHint)
-    const featureCheck = isGodMode ? { allowed: true, used: 0, limit: null, blocked: false } : await checkFeatureLimit(userId, 'cvs', plan)
-    if (!featureCheck.allowed) {
-      await recordLimitHit(userId, 'cvs')
-
-      if (featureCheck.blocked) {
-        return jsonWithRequestId(
-          {
-            error: 'Accesul la acest feature a fost suspendat temporar. Contacteaza suportul.',
-            limitType: 'blocked',
-            feature: 'cvs',
-            resetAt: getMonthlyResetAtIso(),
-          },
-          429,
-          requestId
-        )
-      }
-
+    const quotaCheck = await checkResumeCreationQuota(userId, plan)
+    if (!quotaCheck.allowed) {
       return jsonWithRequestId(
         {
-          error: `Ai utilizat toate cele ${featureCheck.limit || 0} CV-uri disponibile pe acest plan.`,
-          limitType: 'feature',
-          feature: 'cvs',
-          used: featureCheck.used,
-          limit: featureCheck.limit,
-          resetAt: getMonthlyResetAtIso(),
+          error: quotaCheck.error || 'Resume limit reached for your plan.',
+          showUpgrade: quotaCheck.showUpgrade ?? false,
+          limit: quotaCheck.limit,
+          used: quotaCheck.used,
         },
-        429,
+        quotaCheck.status as 403 | 429 | 500,
         requestId
       )
     }
@@ -107,8 +88,6 @@ export async function POST(req: Request) {
     if (!data?.id) {
       return jsonWithRequestId({ error: 'Failed to create resume.' }, 500, requestId)
     }
-
-    await incrementFeatureCounter(userId, 'cvs')
 
     await trackProductEvent({
       userId,
