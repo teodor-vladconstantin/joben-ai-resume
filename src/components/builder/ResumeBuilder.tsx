@@ -1808,7 +1808,6 @@ export function ResumeBuilder() {
                     key={section.id}
                     title={section.title}
                     content={section.content}
-                    sectionType={section.type}
                     onTitleChange={(value) => updateDynamicSection(section.id, { title: value })}
                     onContentChange={(value) => updateDynamicSection(section.id, { content: value })}
                     onDelete={() => deleteDynamicSection(section.id)}
