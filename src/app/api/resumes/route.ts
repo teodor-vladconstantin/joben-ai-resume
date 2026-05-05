@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
-import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
 import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
 
 function isMissingRelation(error: unknown): boolean {
@@ -46,19 +46,24 @@ export async function POST(req: Request) {
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
-    const plan = await getUserPlan(userId, emailHint)
-    const quotaCheck = await checkResumeCreationQuota(userId, plan)
-    if (!quotaCheck.allowed) {
-      return jsonWithRequestId(
-        {
-          error: quotaCheck.error || 'Resume limit reached for your plan.',
-          showUpgrade: quotaCheck.showUpgrade ?? false,
-          limit: quotaCheck.limit,
-          used: quotaCheck.used,
-        },
-        quotaCheck.status as 403 | 429 | 500,
-        requestId
-      )
+    const [plan, godMode] = await Promise.all([
+      getUserPlan(userId, emailHint),
+      isGodModeUser(userId),
+    ])
+    if (!godMode) {
+      const quotaCheck = await checkResumeCreationQuota(userId, plan)
+      if (!quotaCheck.allowed) {
+        return jsonWithRequestId(
+          {
+            error: quotaCheck.error || 'Resume limit reached for your plan.',
+            showUpgrade: quotaCheck.showUpgrade ?? false,
+            limit: quotaCheck.limit,
+            used: quotaCheck.used,
+          },
+          quotaCheck.status as 403 | 429 | 500,
+          requestId
+        )
+      }
     }
 
     const body = (await req.json()) as {
