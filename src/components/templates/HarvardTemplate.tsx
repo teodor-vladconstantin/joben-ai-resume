@@ -1,6 +1,4 @@
 import type { ResumeTemplateData, ResumeDynamicSection } from './types'
-import { formatDateRange } from '@/lib/pdf-import'
-import { formatDateRange } from '@/lib/pdf-import'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
