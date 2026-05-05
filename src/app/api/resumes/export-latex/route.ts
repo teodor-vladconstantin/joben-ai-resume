@@ -27,6 +27,7 @@ type LatexExperienceEntry = {
 
 type LatexProjectEntry = {
   name?: string
+  period?: string
   description?: string
   technologies?: string[]
   url?: string
@@ -53,12 +54,22 @@ function normalizeLatexText(text: string | undefined): string {
   return text
     .replace(/\r\n?/g, '\n')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/\t+/g, ' ')
+    .replace(/[ ]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
 function clampLatexText(text: string | undefined, maxChars: number): string {
-  return normalizeLatexText(text).slice(0, maxChars)
+  const normalized = normalizeLatexText(text)
+  if (normalized.length <= maxChars) return normalized
+
+  const boundary = normalized.lastIndexOf(' ', maxChars)
+  if (boundary > Math.floor(maxChars * 0.6)) {
+    return `${normalized.slice(0, boundary).trimEnd()}...`
+  }
+
+  return `${normalized.slice(0, maxChars).trimEnd()}...`
 }
 
 function normalizeContactText(url: string): string {
@@ -73,7 +84,7 @@ function escapeLatex(text: string | undefined): string {
   const normalized = normalizeLatexText(text)
   if (!normalized) return ''
 
-  return normalized
+  const escaped = normalized
     .replace(/\\/g, '\\textbackslash ')
     .replace(/&/g, '\\&')
     .replace(/%/g, '\\%')
@@ -84,6 +95,9 @@ function escapeLatex(text: string | undefined): string {
     .replace(/\}/g, '\\}')
     .replace(/~/g, '\\~')
     .replace(/\^/g, '\\textasciicircum ')
+
+  // Prevent overfull lines for very long unbroken strings (ids, hashes, accidental keyboard mash).
+  return escaped.replace(/([A-Za-z0-9]{24})(?=[A-Za-z0-9])/g, '$1\\allowbreak{}')
 }
 
 function normalizeBulletCandidate(text: string): string {
@@ -94,6 +108,60 @@ function normalizeBulletCandidate(text: string): string {
       .replace(/^['"`]+|['"`]+$/g, ''),
     260
   )
+}
+
+function splitProjectDescription(description: string | undefined): string[] {
+  const normalized = normalizeLatexText(description)
+  if (!normalized) return []
+
+  const lines = normalized
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  if (lines.length > 1) return lines.slice(0, 6)
+
+  const bulletSplit = normalized
+    .split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  if (bulletSplit.length > 1) return bulletSplit.slice(0, 6)
+
+  const sentenceSplit = normalized
+    .split(/(?<=[.!?])\s+(?=[A-Z])/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  return (sentenceSplit.length > 1 ? sentenceSplit : [normalized]).slice(0, 4)
+}
+
+type ParsedEducationEntry = {
+  institution: string
+  details: string[]
+}
+
+function parseEducationContent(content: string | undefined): ParsedEducationEntry[] {
+  const normalized = normalizeLatexText(content)
+  if (!normalized) return []
+
+  const blocks = normalized
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+
+  return blocks
+    .map((block) => {
+      const lines = block
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+      if (lines.length === 0) return null
+
+      return {
+        institution: lines[0],
+        details: lines.slice(1),
+      }
+    })
+    .filter((entry): entry is ParsedEducationEntry => Boolean(entry))
 }
 
 function extractSafeBullets(exp: LatexExperienceEntry): string[] {
@@ -142,6 +210,7 @@ function generateLatex(data: LatexResumeData): string {
 \usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
+\usepackage{xurl}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -157,6 +226,7 @@ function generateLatex(data: LatexResumeData): string {
 \addtolength{\textheight}{1.0in}
 
 \urlstyle{same}
+\Urlmuskip=0mu plus 1mu
 
 \raggedbottom
 \raggedright
@@ -230,26 +300,38 @@ ${bulletItems}
   \begin{itemize}[leftmargin=0.15in, label={}]
 `
     for (const proj of data.projects) {
-      const projTitle = escapeLatex(clampLatexText(proj.name || 'Project', 120))
-      const projDesc = proj.description ? escapeLatex(clampLatexText(proj.description, 280)) : ''
+      const projTitle = escapeLatex(clampLatexText(proj.name || 'Project', 220))
+      const projPeriod = escapeLatex(clampLatexText(proj.period || '', 50))
+      const projBullets = splitProjectDescription(proj.description)
       const techs = proj.technologies && proj.technologies.length > 0
-        ? escapeLatex(proj.technologies.slice(0, 5).join(', '))
+        ? escapeLatex(clampLatexText(proj.technologies.slice(0, 8).join(', '), 220))
         : ''
-      
-      let projContent = projDesc
-      if (techs) {
-        projContent += (projContent ? ' • ' : '') + `Technologies: ${techs}`
+
+      const itemLines: string[] = []
+      if (techs) itemLines.push(`Technologies: ${techs}`)
+      for (const bullet of projBullets) {
+        itemLines.push(escapeLatex(clampLatexText(bullet, 900)))
       }
       if (proj.url) {
-        const link = makeLatexLink(proj.url, normalizeContactText(proj.url))
-        projContent += (projContent ? ' • ' : '') + link
+        itemLines.push(makeLatexLink(proj.url, normalizeContactText(proj.url)))
       }
+
+      const projectItems = itemLines
+        .map((line) => String.raw`        \resumeItem{${line}}`)
+        .join('\n')
 
       tex += String.raw`
     \resumeSubheading
-      {${projTitle}}{ }
-      {${projContent}}{ }
+      {${projTitle}}{${projPeriod}}
+      {${techs ? `Technologies: ${techs}` : ' '}}{ }
 `
+
+      if (projectItems) {
+        tex += String.raw`      \begin{itemize}[leftmargin=0.15in, label={-}]
+${projectItems}
+      \end{itemize}
+`
+      }
     }
     tex += String.raw`  \end{itemize}
 `
@@ -273,17 +355,32 @@ ${bulletItems}
       tex += String.raw`  \begin{itemize}[leftmargin=0.15in, label={}]
 `
       for (const section of sections) {
+        if (type === 'education') {
+          const entries = parseEducationContent(section.content)
+          if (entries.length > 0) {
+            for (const entry of entries) {
+              const details = entry.details.map((line) => escapeLatex(clampLatexText(line, 420))).join(' \\ ')
+              tex += String.raw`
+    \resumeSubheading
+      {${escapeLatex(clampLatexText(entry.institution, 120))}}{ }
+      {${details || ' '}}{ }
+`
+            }
+            continue
+          }
+        }
+
         tex += String.raw`
     \resumeSubheading
       {${escapeLatex(clampLatexText(section.title, 120))}}{ }
-      {${escapeLatex(clampLatexText(section.content, 260))}}{ }
+      {${escapeLatex(clampLatexText(section.content, 900))}}{ }
 `
       }
       tex += String.raw`  \end{itemize}
 `
     } else {
       for (const section of sections) {
-        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatex(clampLatexText(section.content, 520))} \\ \vspace{2pt}
+        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatex(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
 `
       }
     }
