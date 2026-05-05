@@ -8,6 +8,8 @@ type ParseResumeResponse = {
   phone?: string
   location?: string
   summary?: string
+  linkedin?: string | null
+  github?: string | null
   work_experience?: Array<{
     company: string | null
     role: string | null
@@ -43,6 +45,12 @@ type ParseResumeResponse = {
     description?: string | null
     technologies?: string[] | null
     url?: string | null
+    start_date?: string | null
+    end_date?: string | null
+    start_month?: number | null
+    start_year?: number | null
+    end_month?: number | null
+    end_year?: number | null
   }>
 }
 
@@ -196,6 +204,12 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
         description: p.description ? decodeHtml(p.description) : '',
         technologies: Array.isArray(p.technologies) ? p.technologies.map((t) => decodeHtml(t)) : [],
         url: p.url ? decodeHtml(p.url) : undefined,
+        period: formatDateRange(p.start_date ?? null, p.end_date ?? null),
+        startMonth: p.start_month ?? undefined,
+        startYear: p.start_year ?? undefined,
+        endMonth: p.end_month ?? undefined,
+        endYear: p.end_year ?? undefined,
+        isCurrent: (p.end_date ?? '').toLowerCase() === 'present',
       }))
     : []
 
@@ -208,6 +222,8 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       phone: decodeHtml(parsed.phone),
       summary: decodeHtml(parsed.summary),
       location: decodeHtml(parsed.location) || undefined,
+      linkedin: decodeHtml(parsed.linkedin) || undefined,
+      github: decodeHtml(parsed.github) || undefined,
     },
     experience: (parsed.work_experience || []).map((exp, i) => ({
       id: `exp_${Date.now()}_${i}`,

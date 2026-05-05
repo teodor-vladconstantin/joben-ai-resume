@@ -1,4 +1,4 @@
-import type { ResumeTemplateData } from './types'
+import type { ResumeTemplateData, ResumeDynamicSection } from './types'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
@@ -14,13 +14,67 @@ function resolveBullets(exp: { bullets?: string[]; description: string }) {
   return exp.description?.trim() ? [exp.description.trim()] : []
 }
 
+type EduEntry = {
+  institution: string
+  degreeLines: string[]
+  dateLine: string | null
+}
+
+function parseEducationEntries(content: string): EduEntry[] {
+  const blocks = content.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
+  return blocks.map((block) => {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
+    if (lines.length === 0) return { institution: '', degreeLines: [], dateLine: null }
+
+    const institution = lines[0]
+    let dateLine: string | null = null
+    let dateIdx = -1
+
+    for (let i = lines.length - 1; i >= 1; i--) {
+      if (/\d{4}/.test(lines[i]) && lines[i].length < 42) {
+        dateLine = lines[i]
+        dateIdx = i
+        break
+      }
+    }
+
+    const degreeLines = dateIdx >= 1 ? lines.slice(1, dateIdx) : lines.slice(1)
+    return { institution, degreeLines, dateLine }
+  })
+}
+
+function EducationSection({ section }: { section: ResumeDynamicSection }) {
+  const entries = parseEducationEntries(section.content)
+  if (entries.length === 0) {
+    return <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
+  }
+  return (
+    <>
+      {entries.map((entry, i) => (
+        <div key={i} className={i > 0 ? 'mt-4' : ''}>
+          <div className="flex justify-between items-baseline">
+            <p className="font-bold text-gray-900">{entry.institution}</p>
+            {entry.dateLine && (
+              <span className="text-sm text-gray-600 shrink-0 ml-4">{entry.dateLine}</span>
+            )}
+          </div>
+          {entry.degreeLines.map((line, j) => (
+            <p key={j} className="text-gray-700 italic">{line}</p>
+          ))}
+        </div>
+      ))}
+    </>
+  )
+}
+
 export function HarvardTemplate({ data }: HarvardTemplateProps) {
   const contactItems = [
     data.personal.email ? { label: 'Email', value: data.personal.email, href: `mailto:${data.personal.email}` } : null,
     data.personal.phone ? { label: 'Phone', value: data.personal.phone, href: `tel:${data.personal.phone.replace(/[^+\d]/g, '')}` } : null,
+    data.personal.location ? { label: 'Location', value: data.personal.location, href: null } : null,
     data.personal.linkedin ? { label: 'LinkedIn', value: normalizeContactText(data.personal.linkedin), href: data.personal.linkedin } : null,
     data.personal.github ? { label: 'GitHub', value: normalizeContactText(data.personal.github), href: data.personal.github } : null,
-  ].filter(Boolean) as Array<{ label: string; value: string; href: string }>
+  ].filter(Boolean) as Array<{ label: string; value: string; href: string | null }>
 
   return (
     <div className="p-12 text-black font-serif h-full">
@@ -31,18 +85,24 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
           {contactItems.map((item, index) => (
             <span key={item.label}>
               {index > 0 ? ' • ' : ''}
-              <a className="hover:underline" href={item.href} target="_blank" rel="noreferrer">
-                {item.value}
-              </a>
+              {item.href ? (
+                <a className="hover:underline" href={item.href} target="_blank" rel="noreferrer">
+                  {item.value}
+                </a>
+              ) : (
+                <span>{item.value}</span>
+              )}
             </span>
           ))}
         </p>
       </div>
 
-      <section className="mb-6">
-        <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Summary</h3>
-        <p className="text-gray-800 leading-relaxed">{data.personal.summary}</p>
-      </section>
+      {data.personal.summary && (
+        <section className="mb-6">
+          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Summary</h3>
+          <p className="text-gray-800 leading-relaxed">{data.personal.summary}</p>
+        </section>
+      )}
 
       <section className="mb-6">
         <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Experience</h3>
@@ -87,7 +147,7 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
               {project.url && (
                 <p className="text-sm text-gray-600">
                   <a href={project.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                    {project.url}
+                    {normalizeContactText(project.url)}
                   </a>
                 </p>
               )}
@@ -99,7 +159,11 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
       {(data.dynamicSections || []).map((section) => (
         <section key={section.id} className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">{section.title}</h3>
-          <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
+          {section.type === 'education' ? (
+            <EducationSection section={section} />
+          ) : (
+            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
+          )}
         </section>
       ))}
     </div>
