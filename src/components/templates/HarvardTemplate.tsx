@@ -1,4 +1,6 @@
 import type { ResumeTemplateData, ResumeDynamicSection } from './types'
+import { formatDateRange } from '@/lib/pdf-import'
+import { formatDateRange } from '@/lib/pdf-import'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
@@ -17,29 +19,17 @@ function resolveBullets(exp: { bullets?: string[]; description: string }) {
 type EduEntry = {
   institution: string
   degreeLines: string[]
-  dateLine: string | null
 }
 
 function parseEducationEntries(content: string): EduEntry[] {
   const blocks = content.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
   return blocks.map((block) => {
     const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
-    if (lines.length === 0) return { institution: '', degreeLines: [], dateLine: null }
+    if (lines.length === 0) return { institution: '', degreeLines: [] }
 
     const institution = lines[0]
-    let dateLine: string | null = null
-    let dateIdx = -1
-
-    for (let i = lines.length - 1; i >= 1; i--) {
-      if (/\d{4}/.test(lines[i]) && lines[i].length < 42) {
-        dateLine = lines[i]
-        dateIdx = i
-        break
-      }
-    }
-
-    const degreeLines = dateIdx >= 1 ? lines.slice(1, dateIdx) : lines.slice(1)
-    return { institution, degreeLines, dateLine }
+    const degreeLines = lines.slice(1)
+    return { institution, degreeLines }
   })
 }
 
@@ -54,9 +44,6 @@ function EducationSection({ section }: { section: ResumeDynamicSection }) {
         <div key={i} className={i > 0 ? 'mt-4' : ''}>
           <div className="flex justify-between items-baseline">
             <p className="font-bold text-gray-900">{entry.institution}</p>
-            {entry.dateLine && (
-              <span className="text-sm text-gray-600 shrink-0 ml-4">{entry.dateLine}</span>
-            )}
           </div>
           {entry.degreeLines.map((line, j) => (
             <p key={j} className="text-gray-700 italic">{line}</p>
