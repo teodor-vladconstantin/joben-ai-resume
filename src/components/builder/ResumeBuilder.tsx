@@ -1211,11 +1211,19 @@ export function ResumeBuilder() {
               + Add Section
             </button>
             <button
-              onClick={() => importInputRef.current?.click()}
+              onClick={() => {
+                if (getPdfImportCount(resumeData) >= MAX_PDF_IMPORTS_PER_RESUME) {
+                  setShowImportLimitModal(true)
+                  return
+                }
+                importInputRef.current?.click()
+              }}
               disabled={isImportingPdf}
               className="flex-1 rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-white/88 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isImportingPdf ? 'Importing...' : 'Import PDF/DOCX'}
+              {isImportingPdf
+                ? 'Importing...'
+                : `Import PDF/DOCX (${getPdfImportCount(resumeData)}/${MAX_PDF_IMPORTS_PER_RESUME})`}
             </button>
             <FeatureButton
               feature="jds"
