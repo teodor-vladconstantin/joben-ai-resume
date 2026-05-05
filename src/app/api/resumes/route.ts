@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
-import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan, isGodModeEmailAddress } from '@/lib/plans'
 import { checkFeatureLimit, getMonthlyResetAtIso, incrementFeatureCounter, recordLimitHit } from '@/lib/ratelimit'
 import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
 
@@ -47,8 +47,9 @@ export async function POST(req: Request) {
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+    const isGodMode = isGodModeEmailAddress(emailHint)
     const plan = await getUserPlan(userId, emailHint)
-    const featureCheck = await checkFeatureLimit(userId, 'cvs', plan)
+    const featureCheck = isGodMode ? { allowed: true, used: 0, limit: null, blocked: false } : await checkFeatureLimit(userId, 'cvs', plan)
     if (!featureCheck.allowed) {
       await recordLimitHit(userId, 'cvs')
 
