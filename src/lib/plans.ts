@@ -127,6 +127,16 @@ export async function getUserPlan(userId: string, userEmailHint?: string | null)
   return normalizePlan((data?.plan as string | undefined) || 'free')
 }
 
+export async function isGodModeUser(userId: string): Promise<boolean> {
+  const supabase = createServerClient()
+  const { data } = await supabase
+    .from('users')
+    .select('email')
+    .eq('clerk_id', userId)
+    .maybeSingle()
+  return isGodModeEmailAddress(data?.email as string | undefined)
+}
+
 export function hasAiContentGenerationAccess(plan: UserPlan): boolean {
   return PLAN_DEFINITIONS[plan].aiContentGeneration
 }
