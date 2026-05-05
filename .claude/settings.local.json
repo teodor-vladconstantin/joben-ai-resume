@@ -16,7 +16,8 @@
       "Bash(docker *)",
       "Bash(curl *)",
       "Bash(scp *)",
-      "Bash(tar *)"
+      "Bash(tar *)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@89.167.48.64 \"echo connected && ls /root\")"
     ]
   }
 }
