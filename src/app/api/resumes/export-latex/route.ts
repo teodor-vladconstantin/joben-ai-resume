@@ -27,8 +27,10 @@ type LatexExperienceEntry = {
 
 type LatexProjectEntry = {
   name?: string
+  role?: string
   period?: string
   description?: string
+  bullets?: unknown
   technologies?: string[]
   url?: string
 }
@@ -132,6 +134,19 @@ function splitProjectDescription(description: string | undefined): string[] {
     .filter(Boolean)
 
   return (sentenceSplit.length > 1 ? sentenceSplit : [normalized]).slice(0, 4)
+}
+
+function resolveProjectBullets(project: LatexProjectEntry): string[] {
+  const fromBullets = Array.isArray(project.bullets)
+    ? project.bullets
+        .flatMap((bullet: unknown) => (typeof bullet === 'string' ? bullet.split(/\r?\n+/) : []))
+        .map((bullet: string) => normalizeBulletCandidate(bullet))
+        .filter((bullet: string) => Boolean(bullet) && /[\p{L}\p{N}]/u.test(bullet))
+    : []
+
+  if (fromBullets.length > 0) return fromBullets.slice(0, 8)
+
+  return splitProjectDescription(project.description)
 }
 
 type ParsedEducationEntry = {
@@ -301,17 +316,18 @@ ${bulletItems}
 `
     for (const proj of data.projects) {
       const projTitle = escapeLatex(clampLatexText(proj.name || 'Project', 220))
+      const projRole = escapeLatex(clampLatexText(proj.role || '', 140))
       const projPeriod = escapeLatex(clampLatexText(proj.period || '', 50))
-      const projBullets = splitProjectDescription(proj.description)
+      const projBullets = resolveProjectBullets(proj)
       const techs = proj.technologies && proj.technologies.length > 0
         ? escapeLatex(clampLatexText(proj.technologies.slice(0, 8).join(', '), 220))
         : ''
 
       const itemLines: string[] = []
-      if (techs) itemLines.push(`Technologies: ${techs}`)
       for (const bullet of projBullets) {
         itemLines.push(escapeLatex(clampLatexText(bullet, 900)))
       }
+      if (techs) itemLines.push(String.raw`\textit{Technologies:} ${techs}`)
       if (proj.url) {
         itemLines.push(makeLatexLink(proj.url, normalizeContactText(proj.url)))
       }
@@ -320,10 +336,13 @@ ${bulletItems}
         .map((line) => String.raw`        \resumeItem{${line}}`)
         .join('\n')
 
+      // Subheading layout mirrors the Experience block so spacing stays consistent:
+      //   Project name ............................. Period
+      //   Role (italic) .............................(blank)
       tex += String.raw`
     \resumeSubheading
-      {${projTitle}}{${projPeriod}}
-      {${techs ? `Technologies: ${techs}` : ' '}}{ }
+      {${projTitle}}{${projPeriod || ' '}}
+      {${projRole || ' '}}{ }
 `
 
       if (projectItems) {
@@ -368,6 +387,17 @@ ${projectItems}
             }
             continue
           }
+          // No structured entries — render the raw content directly without
+          // leaking the (potentially-corrupt) section.title into the heading.
+          const fallback = escapeLatex(clampLatexText(section.content, 900))
+          if (fallback) {
+            tex += String.raw`
+    \resumeSubheading
+      {${fallback}}{ }
+      { }{ }
+`
+          }
+          continue
         }
 
         tex += String.raw`

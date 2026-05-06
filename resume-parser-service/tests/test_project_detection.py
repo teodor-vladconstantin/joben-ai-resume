@@ -150,17 +150,17 @@ def test_company_name_cleanup():
 
 
 def test_date_normalization():
-    """Test date string normalization."""
+    """Test date string normalization preserves month+year fidelity."""
     cases = [
         ("2020-01", "2020-01"),
         ("2020/01", "2020-01"),
-        ("Jan 2020", "2020"),
-        ("January 2020", "2020"),
+        ("Jan 2020", "2020-01"),
+        ("January 2020", "2020-01"),
         ("2020", "2020"),
         (None, None),
         ("", None),
     ]
-    
+
     for input_date, expected in cases:
         result = parser_main.normalize_date(input_date)
         assert result == expected, f"Failed for {input_date}: got {result}, expected {expected}"
@@ -212,3 +212,120 @@ def test_url_extraction():
     for text, expected_url in test_cases:
         url = parser_main.extract_url(text)
         assert url == expected_url, f"Failed for '{text}': got {url}, expected {expected_url}"
+
+
+# ── Role + period extraction from a project description prefix ─────────────────
+
+
+def test_extract_role_and_period_solo_founder_present():
+    desc = "Solo Founder Jan 2024 - Present Designed and developed an AI Resume Builder."
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(desc)
+    assert role == "Solo Founder"
+    assert start_raw and "Jan" in start_raw and "2024" in start_raw
+    assert end_raw and end_raw.lower() == "present"
+    assert cleaned.startswith("Designed and developed")
+    assert "Jan 2024" not in cleaned and "Solo Founder" not in cleaned
+
+
+def test_extract_role_and_period_with_pipe_separators():
+    desc = "Lead Developer | 2022 - 2024 | Built a real-time collaboration tool."
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(desc)
+    assert role == "Lead Developer"
+    assert start_raw == "2022"
+    assert end_raw == "2024"
+    assert cleaned.startswith("Built a real-time collaboration tool")
+
+
+def test_extract_role_and_period_with_compound_role():
+    desc = "Coordinator & Co-Founder Aug 2025 - Present Founded and coordinated a team of 7."
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(desc)
+    assert role and "Coordinator" in role and "Co-Founder" in role
+    assert start_raw and "Aug" in start_raw and "2025" in start_raw
+    assert end_raw and end_raw.lower() == "present"
+    assert cleaned.startswith("Founded and coordinated")
+
+
+def test_extract_role_and_period_when_description_starts_with_verb():
+    """Sentences that start with a verb (no role prefix) should keep the description intact."""
+    desc = "Built and deployed an open-source CLI in Rust between Jan 2023 and Mar 2024."
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(desc)
+    assert role is None
+    assert cleaned.startswith("Built and deployed")
+
+
+def test_extract_role_and_period_handles_no_dates():
+    desc = "Lead Engineer Designed a payments platform for high-throughput merchants."
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(desc)
+    # Without a date anchor, role detection cannot be confident — keep description intact.
+    assert role is None
+    assert cleaned == desc
+
+
+def test_extract_role_and_period_handles_empty_input():
+    role, start_raw, end_raw, cleaned = parser_main.extract_role_and_period_from_description(None)
+    assert role is None and start_raw is None and end_raw is None
+    assert cleaned == ""
+
+
+def test_normalize_project_entry_extracts_role_period_from_desc():
+    """Regression: parser must split inline role + period from the description prefix."""
+    entry = {
+        "name": "Joben",
+        "description": "Solo Founder Jan 2024 - Present Designed and developed an AI Resume Builder using prompt engineering.",
+    }
+    project = parser_main.normalize_project_entry(entry)
+    assert project.name == "Joben"
+    assert project.role == "Solo Founder"
+    assert project.start_date == "Jan 2024"
+    assert project.end_date == "Present"
+    assert project.start_year == 2024 and project.start_month == 1
+    assert project.description and project.description.startswith("Designed and developed")
+    assert project.bullets and any("Designed" in b for b in project.bullets)
+
+
+def test_normalize_project_entry_keeps_explicit_dates():
+    """If LlamaParse already supplied start/end dates, do not overwrite them with inline ones."""
+    entry = {
+        "name": "Joben",
+        "role": "Solo Founder",
+        "description": "Designed and developed an AI Resume Builder.",
+        "start_date": "Feb 2024",
+        "end_date": "Present",
+    }
+    project = parser_main.normalize_project_entry(entry)
+    assert project.role == "Solo Founder"
+    assert project.start_date == "Feb 2024"
+    assert project.end_date == "Present"
+    assert project.start_year == 2024 and project.start_month == 2
+
+
+def test_normalize_project_entry_never_invents_year_when_dates_missing():
+    """When no date appears anywhere, year fields must stay null (not default to 1950)."""
+    entry = {
+        "name": "Joben",
+        "description": "An AI-powered resume builder built with Next.js and TypeScript.",
+    }
+    project = parser_main.normalize_project_entry(entry)
+    assert project.start_year is None
+    assert project.end_year is None
+    assert project.start_date is None
+    assert project.end_date is None
+
+
+def test_normalize_project_entry_overrides_hallucinated_year_with_inline_dates():
+    """Regression: when LlamaParse hallucinates a year (e.g. 1950) but the description text
+    clearly states 'Jan 2024 - Present', the inline dates from the literal source must win.
+    """
+    entry = {
+        "name": "Joben",
+        "description": "Solo Founder Jan 2024 - Present Designed and developed an AI Resume Builder using prompt engineering.",
+        "start_date": "1950",
+        "end_date": "Oct 2025",
+    }
+    project = parser_main.normalize_project_entry(entry)
+    assert project.role == "Solo Founder"
+    assert project.start_date == "Jan 2024"
+    assert project.end_date == "Present"
+    assert project.start_year == 2024 and project.start_month == 1
+    assert project.end_year is None  # 'Present' has no parts
+    assert project.description and project.description.startswith("Designed and developed")

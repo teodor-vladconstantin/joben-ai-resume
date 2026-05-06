@@ -36,6 +36,7 @@ export type ResumeProject = {
   endYear?: number
   isCurrent?: boolean
   description: string
+  bullets?: string[]
   technologies: string[]
   url?: string
 }

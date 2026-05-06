@@ -42,7 +42,9 @@ type ParseResumeResponse = {
   certifications?: string[]
   projects?: Array<{
     name?: string | null
+    role?: string | null
     description?: string | null
+    bullets?: string[] | null
     technologies?: string[] | null
     url?: string | null
     start_date?: string | null
@@ -108,6 +110,10 @@ function formatDateRange(start: string | null, end: string | null): string {
 function splitCombinedBullet(value: string): string[] {
   const cleaned = value.trim()
   if (!cleaned) return []
+
+  // Newlines are the strongest signal: each becomes its own bullet.
+  const newlineSplit = cleaned.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean)
+  if (newlineSplit.length > 1) return newlineSplit
 
   // Split on inline bullet characters embedded in the string
   const bulletSplit = cleaned.split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
@@ -198,19 +204,40 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
 
   const projects = parsed.projects || []
   const projectsArray = Array.isArray(projects) && projects.length > 0
-    ? projects.map((p, i) => ({
-        id: `proj_${Date.now()}_${i}`,
-        name: p.name ? decodeHtml(p.name) : `Project ${i + 1}`,
-        description: p.description ? decodeHtml(p.description) : '',
-        technologies: Array.isArray(p.technologies) ? p.technologies.map((t) => decodeHtml(t)) : [],
-        url: p.url ? decodeHtml(p.url) : undefined,
-        period: formatDateRange(p.start_date ?? null, p.end_date ?? null),
-        startMonth: p.start_month ?? undefined,
-        startYear: p.start_year ?? undefined,
-        endMonth: p.end_month ?? undefined,
-        endYear: p.end_year ?? undefined,
-        isCurrent: (p.end_date ?? '').toLowerCase() === 'present',
-      }))
+    ? projects.map((p, i) => {
+        const rawDescription = p.description ? decodeHtml(p.description) : ''
+        const incomingBullets = Array.isArray(p.bullets) && p.bullets.length > 0
+          ? p.bullets.map((bullet) => decodeHtml(bullet).trim()).filter(Boolean)
+          : []
+        // Fall back to splitting the description into bullets so the builder + LaTeX export
+        // render clean line items instead of a single wall of text.
+        const resolvedBullets = incomingBullets.length > 0
+          ? incomingBullets
+          : rawDescription ? splitCombinedBullet(rawDescription) : []
+        // Store description as one bullet per line so the builder textarea reflects the
+        // structured bullets and the user can freely edit them.
+        const descriptionForBuilder = resolvedBullets.length > 0
+          ? resolvedBullets.join('\n')
+          : rawDescription
+
+        return {
+          id: `proj_${Date.now()}_${i}`,
+          name: p.name ? decodeHtml(p.name) : `Project ${i + 1}`,
+          role: p.role ? decodeHtml(p.role) : '',
+          description: descriptionForBuilder,
+          bullets: resolvedBullets,
+          technologies: Array.isArray(p.technologies) ? p.technologies.map((t) => decodeHtml(t)) : [],
+          url: p.url ? decodeHtml(p.url) : undefined,
+          period: formatDateRange(p.start_date ?? null, p.end_date ?? null),
+          startMonth: p.start_month ?? undefined,
+          startYear: p.start_year ?? undefined,
+          endMonth: p.end_month ?? undefined,
+          endYear: p.end_year ?? undefined,
+          isCurrent: typeof p.end_date === 'string'
+            ? /^(present|current|ongoing|now)$/i.test(p.end_date.trim())
+            : false,
+        }
+      })
     : []
 
   return {
