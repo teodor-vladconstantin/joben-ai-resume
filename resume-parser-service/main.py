@@ -57,7 +57,9 @@ class Language(BaseModel):
 
 class Project(BaseModel):
     name: Optional[str] = None
+    role: Optional[str] = None
     description: Optional[str] = None
+    bullets: list[str] = []
     technologies: list[str] = []
     url: Optional[str] = None
     start_date: Optional[str] = None
@@ -229,6 +231,103 @@ def strip_leading_date_range(text: Optional[str]) -> Optional[str]:
     return cleaned if cleaned else text
 
 
+# Common role/title prefixes that LlamaParse sometimes leaves at the start of a project description.
+# Examples: "Solo Founder Jan 2024 - Present Built ..." or "Lead Developer | 2022 - 2024 | Designed ..."
+# Both `{1,80}?` and `{1,40}?` are LAZY so the lookahead anchors on the date prefix instead of
+# greedily consuming month tokens like "Aug" into the role text.
+_ROLE_PREFIX_RE = re.compile(
+    r"^\s*([A-Z][\w &/+\-]{1,80}?(?:\s+(?:&|and)\s+[A-Z][\w &/+\-]{1,40}?)?)\s*"
+    r"(?:[|\-\u2013\u2014:•·]\s*)?"
+    r"(?=(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?"
+    r"|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?"
+    r"|Ian(?:uarie)?|Februarie|Martie|Aprilie|Iun(?:ie)?|Iul(?:ie)?|August|Septembrie|Octombrie|Noiembrie|Decembrie)"
+    r"\s+\d{4}|\b\d{4}\b|\b\d{1,2}[/-]\d{4}\b))",
+    re.IGNORECASE,
+)
+
+_LEADING_DATE_ANY_RE = re.compile(
+    r"^\s*"
+    r"(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?"
+    r"|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?"
+    r"|Ian(?:uarie)?|Februarie|Martie|Aprilie|Iun(?:ie)?|Iul(?:ie)?|August|Septembrie|Octombrie|Noiembrie|Decembrie)"
+    r"\s+\d{4}|\b\d{4}\b|\b\d{1,2}[/-]\d{4}\b)"
+    r"(?:\s*[\-\u2013\u2014]\s*"
+    r"(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?"
+    r"|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?"
+    r"|Ian(?:uarie)?|Februarie|Martie|Aprilie|Iun(?:ie)?|Iul(?:ie)?|August|Septembrie|Octombrie|Noiembrie|Decembrie)"
+    r"\s+\d{4}|\b\d{4}\b|\b\d{1,2}[/-]\d{4}\b|Present|Current|Ongoing|Now|Prezent|Acum))?",
+    re.IGNORECASE,
+)
+
+# Words/tokens that strongly suggest the leading prefix is NOT a role title (e.g. it's
+# the start of a regular sentence describing the project).
+_NON_ROLE_LEADING_WORDS = {
+    "the", "a", "an", "this", "we", "i", "developed", "built", "created", "designed",
+    "engineered", "implemented", "launched", "deployed", "prototyped", "managed", "led",
+    "coordinated", "founded", "co-founded", "shipped", "delivered", "responsible",
+}
+
+
+def extract_role_and_period_from_description(
+    description: Optional[str],
+) -> tuple[Optional[str], Optional[str], Optional[str], str]:
+    """Pull a role/title and date range from the start of a project description.
+
+    Returns (role, start_date_raw, end_date_raw, cleaned_description).
+
+    LlamaParse occasionally produces descriptions like:
+        "Solo Founder Jan 2024 - Present Designed and developed..."
+        "Lead Developer | 2022 - 2024 | Built ..."
+        "Coordinator & Co-Founder Aug 2025 - Present Founded ..."
+    We isolate the role and dates so they can populate dedicated fields and the
+    description renders cleanly.
+    """
+    if not isinstance(description, str) or not description.strip():
+        return None, None, None, description or ""
+
+    text = re.sub(r"\s+", " ", description.replace("\u2013", "-").replace("\u2014", "-")).strip()
+
+    # Try to find a role + date range at the start of the description.
+    role: Optional[str] = None
+    remainder = text
+
+    role_match = _ROLE_PREFIX_RE.match(text)
+    if role_match:
+        candidate = role_match.group(1).strip(" |-:")
+        # Reject candidates that obviously start a sentence or are too short/long
+        first_word = candidate.split()[0].lower() if candidate else ""
+        if (
+            candidate
+            and 2 <= len(candidate) <= 80
+            and first_word not in _NON_ROLE_LEADING_WORDS
+            # Avoid grabbing a leading date as "role"
+            and not re.match(r"^\d{4}", candidate)
+        ):
+            role = candidate
+            remainder = text[role_match.end():].lstrip(" |-:\u2013\u2014")
+
+    # Now look for a leading date range in whatever comes next.
+    start_raw: Optional[str] = None
+    end_raw: Optional[str] = None
+    range_match = DATE_RANGE_PATTERN.match(remainder)
+    point_match = None if range_match else _LEADING_DATE_ANY_RE.match(remainder)
+
+    if range_match:
+        start_raw = range_match.group(1)
+        end_raw = range_match.group(2)
+        remainder = remainder[range_match.end():]
+    elif point_match and point_match.group(0).strip():
+        # A single leading date with no range partner (e.g. "Jan 2024 Built ...").
+        start_raw = point_match.group(0).strip()
+        remainder = remainder[point_match.end():]
+
+    cleaned = remainder.lstrip(" |-:\u2013\u2014.,;").strip()
+    if not cleaned:
+        cleaned = text  # fall back to original if stripping consumed everything
+
+    return role, start_raw, end_raw, cleaned
+
+
 def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     header_text = " ".join(
         str(value)
@@ -361,13 +460,28 @@ def normalize_project_entry(entry: dict) -> Project:
         ),
         None,
     )
+
+    explicit_role = entry.get("role") if isinstance(entry.get("role"), str) else None
+    if explicit_role and explicit_role.strip().lower() == (name or "").strip().lower():
+        # If LlamaParse stuffed the project name into role too, drop the role.
+        explicit_role = None
+
+    # Pull a role/title and a date range out of the leading section of the description.
+    inline_role, inline_start_raw, inline_end_raw, cleaned_description = (
+        extract_role_and_period_from_description(description)
+    )
+
+    # Prefer the inline role only when no explicit role is set or it duplicates the name.
+    role = (explicit_role or "").strip() or (inline_role or None)
+    description = cleaned_description or description
+
     project_text = " ".join(
         value
         for value in [
             name or "",
             description or "",
             str(entry.get("company")).strip() if isinstance(entry.get("company"), str) else "",
-            str(entry.get("role")).strip() if isinstance(entry.get("role"), str) else "",
+            role or "",
         ]
         if value
     )
@@ -395,16 +509,26 @@ def normalize_project_entry(entry: dict) -> Project:
     explicit_start = entry.get("start_date") if isinstance(entry.get("start_date"), str) else None
     explicit_end = entry.get("end_date") if isinstance(entry.get("end_date"), str) else None
     inferred_start, inferred_end = extract_date_range(project_text)
-    raw_start = normalize_date(explicit_start or inferred_start)
-    raw_end = normalize_date(explicit_end or inferred_end)
-    project_start_date = to_mmm_yyyy(explicit_start or inferred_start)
-    project_end_date = to_mmm_yyyy(explicit_end or inferred_end)
+
+    # Date precedence: inline dates extracted from the description prefix (literal source text)
+    # take priority over LlamaParse's explicit fields, which are sometimes hallucinated (e.g. a
+    # bogus year like 1950). Fall back to explicit, then to a wider full-text inference.
+    chosen_start = inline_start_raw or explicit_start or inferred_start
+    chosen_end = inline_end_raw or explicit_end or inferred_end
+    raw_start = normalize_date(chosen_start)
+    raw_end = normalize_date(chosen_end)
+    project_start_date = to_mmm_yyyy(chosen_start)
+    project_end_date = to_mmm_yyyy(chosen_end)
     s_year, s_month = date_to_parts(raw_start)
     e_year, e_month = date_to_parts(raw_end)
 
+    bullets = normalize_bullets(entry.get("bullets") if isinstance(entry.get("bullets"), list) else None, description)
+
     return Project(
         name=name or "Project",
+        role=role or None,
         description=description,
+        bullets=bullets,
         technologies=extract_technologies(project_text),
         url=url,
         start_date=project_start_date,
@@ -478,15 +602,22 @@ def parse_project_block(block: str) -> Optional[dict]:
     if not title:
         title = "Project"
 
+    role, start_raw, end_raw, cleaned_description = extract_role_and_period_from_description(description)
+    if cleaned_description:
+        description = cleaned_description
+
     project_text = f"{title} {description} {block}"
     technologies = extract_technologies(project_text)
     url = extract_url(project_text)
 
     return {
         "name": title,
+        "role": role,
         "description": description or None,
         "technologies": technologies,
         "url": url,
+        "start_date": start_raw,
+        "end_date": end_raw,
     }
 
 
@@ -883,7 +1014,7 @@ parser = LlamaParse(
         "- linkedin (string, URL if present)\n"
         "- github (string, URL if present)\n"
         "- summary (string)\n"
-        "- projects (array of: name, description, technologies, url, start_date, end_date)\n"
+        "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date)\n"
         "- work_experience (array of: company, role, start_date, end_date, description, bullets)\n"
         "- education (array of: institution, degree, field, start_date, end_date)\n"
         "- skills (array of strings)\n"
@@ -896,16 +1027,17 @@ parser = LlamaParse(
         "\n"
         "CRITICAL EXTRACTION RULES:\n"
         "1. Look for 'Projects', 'Personal Projects', 'Side Projects', 'Academic Projects', 'Featured Projects', 'Project Work', 'Portfolio' sections - place these in projects array.\n"
-        "2. Each project MUST have: name (the project title), description (full details of what was built/created), technologies (list of tech stack used), url (if present, e.g., GitHub link).\n"
-        "3. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
-        "4. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
-        "5. Extract linkedin and github URLs if found anywhere in the resume.\n"
-        "6. For work_experience and education dates, preserve month+year whenever present (do NOT reduce to year-only). Accept forms like 'Jan 2024', 'January 2024', '01/2024', '2024-01', Romanian month names, and 'Present/Current'.\n"
-        "7. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
-        "8. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
-        "9. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
-        "10. For work_experience, output bullets as an array of separate achievement points. Do not merge all points into a single sentence.\n"
-        "11. Return only valid JSON, no markdown code blocks, no extra text.\n"
+        "2. Each project MUST have: name (the project title only, e.g. 'Joben'), role (your role/title on the project, e.g. 'Solo Founder', 'Lead Developer' - distinct from name), description (full prose describing what was built/created), bullets (array of separate achievement points), technologies (list of tech stack used), url (if present, e.g., GitHub link), start_date and end_date.\n"
+        "3. NEVER concatenate role, dates, and description into a single 'description' string. Always populate role, start_date, end_date as their own fields and keep description focused on the work itself.\n"
+        "4. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
+        "5. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
+        "6. Extract linkedin and github URLs if found anywhere in the resume.\n"
+        "7. For work_experience, education AND projects dates, preserve month+year whenever present (do NOT reduce to year-only). Accept forms like 'Jan 2024', 'January 2024', '01/2024', '2024-01', Romanian month names, and 'Present/Current'. NEVER invent or default to 1950 or any other placeholder year - leave dates null when unknown.\n"
+        "8. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
+        "9. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
+        "10. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
+        "11. For work_experience and projects, output bullets as an array of separate achievement points. Do not merge all points into a single sentence.\n"
+        "12. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
     cost_optimizer="true",
 )

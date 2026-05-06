@@ -54,6 +54,7 @@ type ProjectEntry = {
   endYear?: number
   isCurrent?: boolean
   description: string
+  bullets?: string[]
   technologies: string[]
   url?: string
 }
@@ -145,6 +146,10 @@ function splitCombinedBullet(value: string): string[] {
   const cleaned = value.trim()
   if (!cleaned) return []
 
+  // Newlines are the strongest separator: they map directly to one-bullet-per-line.
+  const newlineSplit = cleaned.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean)
+  if (newlineSplit.length > 1) return newlineSplit
+
   const bulletSplit = cleaned.split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
   if (bulletSplit.length > 1) return bulletSplit.map((s) => s.trim()).filter(Boolean)
 
@@ -219,6 +224,16 @@ function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
 }
 
 function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
+  const description = entry.description || ''
+  // Bullets are a derived view of the description — re-deriving every time keeps the
+  // builder textarea, the live preview, and the exported PDF in lockstep when the user
+  // edits the description (one bullet per non-empty line).
+  const derivedBullets = description ? splitCombinedBullet(description) : []
+  const incomingBullets = Array.isArray(entry.bullets)
+    ? entry.bullets.map((bullet) => (typeof bullet === 'string' ? bullet.trim() : '')).filter(Boolean)
+    : []
+  const bullets = derivedBullets.length > 0 ? derivedBullets : incomingBullets
+
   return {
     id: entry.id || `proj_${Date.now()}`,
     name: entry.name || '',
@@ -229,7 +244,8 @@ function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
     endMonth: entry.endMonth,
     endYear: entry.endYear,
     isCurrent: entry.isCurrent ?? false,
-    description: entry.description || '',
+    description,
+    bullets,
     technologies: Array.isArray(entry.technologies) ? entry.technologies.filter((tech) => typeof tech === 'string') : [],
     url: entry.url || '',
   }
@@ -1767,8 +1783,8 @@ export function ResumeBuilder() {
                       <textarea
                         value={project.description}
                         onChange={(e) => updateProjectField(project.id, { description: e.target.value })}
-                        className="h-28 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
-                        placeholder="Describe what you built, shipped, or learned"
+                        className="h-32 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder={`Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%`}
                       />
 
                       <input
@@ -1806,7 +1822,10 @@ export function ResumeBuilder() {
                 visibleDynamicSections.map((section) => (
                   <SectionPanel
                     key={section.id}
-                    title={section.title}
+                    // Education sections share a single rendered heading, so we ignore
+                    // any legacy garbage stored in `section.title` and always show
+                    // the canonical label in the builder.
+                    title={activeTab === 'education' ? 'Education' : section.title}
                     content={section.content}
                     showTitleField={activeTab !== 'education'}
                     onTitleChange={(value) => updateDynamicSection(section.id, { title: value })}

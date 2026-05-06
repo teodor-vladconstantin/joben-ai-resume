@@ -14,6 +14,21 @@ function resolveBullets(exp: { bullets?: string[]; description: string }) {
   return exp.description?.trim() ? [exp.description.trim()] : []
 }
 
+function resolveProjectBullets(project: { bullets?: string[]; description?: string }): string[] {
+  // Prefer structured bullets, then fall back to splitting the description on newlines so
+  // imported descriptions render as discrete line items instead of one wall of text.
+  const bullets = (project.bullets || []).map((bullet) => bullet.trim()).filter(Boolean)
+  if (bullets.length > 0) return bullets
+
+  const description = (project.description || '').trim()
+  if (!description) return []
+
+  const byLine = description.split(/\r?\n+/).map((line) => line.trim()).filter(Boolean)
+  if (byLine.length > 0) return byLine
+
+  return [description]
+}
+
 type EduEntry = {
   institution: string
   degreeLines: string[]
@@ -113,34 +128,37 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
       {(data.projects && data.projects.length > 0) && (
         <section className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Projects</h3>
-          {data.projects.map((project) => (
-            <div key={project.id} className="mb-4">
-              <div className="flex justify-between items-baseline mb-1">
-                <h4 className="font-bold text-gray-900">{project.name}</h4>
-                {project.period && <span className="text-sm text-gray-600">{project.period}</span>}
+          {data.projects.map((project) => {
+            const bullets = resolveProjectBullets(project)
+            return (
+              <div key={project.id} className="mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold text-gray-900">{project.name}</h4>
+                  {project.period ? <span className="text-sm text-gray-600">{project.period}</span> : null}
+                </div>
+                {project.role ? <p className="text-gray-700 italic mb-2">{project.role}</p> : null}
+                {bullets.length > 0 && (
+                  <ul className="list-disc pl-5 text-gray-800 mb-2">
+                    {bullets.map((line, i) => (
+                      <li key={`${project.id}-bullet-${i}`}>{line}</li>
+                    ))}
+                  </ul>
+                )}
+                {project.technologies && project.technologies.length > 0 && (
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>Technologies:</strong> {project.technologies.join(', ')}
+                  </p>
+                )}
+                {project.url ? (
+                  <p className="text-sm text-gray-600">
+                    <a href={project.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                      {normalizeContactText(project.url)}
+                    </a>
+                  </p>
+                ) : null}
               </div>
-              {project.role && <p className="text-gray-700 italic mb-2">{project.role}</p>}
-              {project.description && (
-                <ul className="list-disc pl-5 text-gray-800 mb-2">
-                  {project.description.split('\n').filter(Boolean).map((line, i) => (
-                    <li key={i}>{line}</li>
-                  ))}
-                </ul>
-              )}
-              {project.technologies && project.technologies.length > 0 && (
-                <p className="text-sm text-gray-600 mb-2">
-                  <strong>Technologies:</strong> {project.technologies.join(', ')}
-                </p>
-              )}
-              {project.url && (
-                <p className="text-sm text-gray-600">
-                  <a href={project.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                    {normalizeContactText(project.url)}
-                  </a>
-                </p>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </section>
       )}
 
