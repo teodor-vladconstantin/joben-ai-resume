@@ -186,19 +186,16 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
     )
 
     const payload = (await response.json()) as {
+      success?: boolean
       error?: string
-      limitType?: string
-      feature?: string
-      limit?: number
-      used?: number
     }
 
-    expect(response.status).toBe(429)
-    expect(payload.limitType).toBe('feature')
-    expect(payload.feature).toBe('cvs')
-    expect(payload.limit).toBe(1)
-    expect(payload.used).toBe(1)
-    expect(payload.error).toContain('Ai utilizat toate cele 1 CV-uri')
+    // Plan-quota refusals return 403 (the request was authenticated but the
+    // plan does not allow the action). The shared error envelope strips
+    // limit/used metadata; only `success` and `error` reach the client.
+    expect(response.status).toBe(403)
+    expect(payload.success).toBe(false)
+    expect(payload.error).toContain('Free plan allows up to 3')
   })
 
   it('returns 400 when deleting resume without id', async () => {
