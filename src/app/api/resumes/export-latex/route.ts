@@ -15,6 +15,8 @@ type LatexPersonal = {
   summary?: string
   linkedin?: string
   github?: string
+  website?: string
+  location?: string
 }
 
 type LatexExperienceEntry = {
@@ -80,6 +82,27 @@ function normalizeContactText(url: string): string {
 
 function makeLatexLink(url: string, label: string): string {
   return String.raw`\href{${normalizeLatexText(url)}}{${escapeLatex(label)}}`
+}
+
+// Mirror `HarvardTemplate` validation: LinkedIn/GitHub/website inputs often
+// contain placeholder copy like "LinkedIn Link" or
+// "https://github.com/yourusername". Render those as nothing instead of
+// emitting a broken `\href`.
+const PLACEHOLDER_URL_TOKENS = /yourusername|placeholder|example\.com/i
+
+function looksLikeUrl(value: string | undefined | null): boolean {
+  if (!value) return false
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  if (PLACEHOLDER_URL_TOKENS.test(trimmed)) return false
+  if (/^https?:\/\//i.test(trimmed)) return true
+  return /^([\w-]+\.)+[a-z]{2,}(\/|$)/i.test(trimmed)
+}
+
+function normalizeHref(value: string): string {
+  const trimmed = value.trim()
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
 }
 
 function escapeLatex(text: string | undefined): string {
@@ -199,12 +222,23 @@ function generateLatex(data: LatexResumeData): string {
   const { personal, experience, dynamicSections = [] } = data
 
   const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
+  const linkedinUrl = looksLikeUrl(personal?.linkedin) ? normalizeHref(personal!.linkedin!) : null
+  const githubUrl = looksLikeUrl(personal?.github) ? normalizeHref(personal!.github!) : null
+  const websiteUrl = looksLikeUrl(personal?.website) ? normalizeHref(personal!.website!) : null
+  const titleText = clampLatexText(personal?.title, 90)
+  // Render the professional title on its own line (matches the Harvard web
+  // preview which stacks name, uppercase title, and contact line).
+  const titleBlock = titleText
+    ? String.raw`    {\scshape\large ${escapeLatex(titleText)}} \\ \vspace{2pt}
+`
+    : ''
   const contactParts = [
     personal?.phone ? escapeLatex(`Phone: ${clampLatexText(personal.phone, 40)}`) : '',
     personal?.email ? escapeLatex(`Email: ${clampLatexText(personal.email, 120)}`) : '',
-    escapeLatex(clampLatexText(personal?.title, 90)),
-    personal?.linkedin ? `LinkedIn: ${makeLatexLink(personal.linkedin, normalizeContactText(personal.linkedin))}` : '',
-    personal?.github ? `GitHub: ${makeLatexLink(personal.github, normalizeContactText(personal.github))}` : '',
+    personal?.location ? escapeLatex(clampLatexText(personal.location, 80)) : '',
+    linkedinUrl ? `LinkedIn: ${makeLatexLink(linkedinUrl, normalizeContactText(linkedinUrl))}` : '',
+    githubUrl ? `GitHub: ${makeLatexLink(githubUrl, normalizeContactText(githubUrl))}` : '',
+    websiteUrl ? makeLatexLink(websiteUrl, normalizeContactText(websiteUrl)) : '',
   ].filter(Boolean)
   const contactLine = contactParts.join(' $|$ ')
   const contactBlock = contactLine
@@ -271,8 +305,8 @@ function generateLatex(data: LatexResumeData): string {
 
 %----------HEADING-----------------
 \begin{center}
-    \textbf{\Huge \scshape ${escapeLatex(fullName)}} \\ \vspace{1pt}
-${contactBlock}\end{center}
+    \textbf{\Huge \scshape ${escapeLatex(fullName)}} \\ \vspace{4pt}
+${titleBlock}${contactBlock}\end{center}
 
 `
 

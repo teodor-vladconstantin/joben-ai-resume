@@ -80,6 +80,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+// Metadata fields that the client UI relies on for nice error UX (quota
+// modals, rate-limit banners, etc.). Preserve them through the error envelope
+// instead of stripping everything except `error`.
+const PRESERVED_ERROR_FIELDS = [
+  'showUpgrade',
+  'limit',
+  'used',
+  'remaining',
+  'currentPlan',
+  'limitType',
+  'feature',
+  'retryAfter',
+] as const
+
+function pickPreservedErrorFields(data: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const key of PRESERVED_ERROR_FIELDS) {
+    if (data[key] !== undefined) out[key] = data[key]
+  }
+  return out
+}
+
 function normalizeApiPayload(data: unknown, status: number): unknown {
   if (isRecord(data) && typeof data.success === 'boolean') {
     if (data.success) {
@@ -95,12 +117,13 @@ function normalizeApiPayload(data: unknown, status: number): unknown {
     return {
       success: false,
       error: typeof data.error === 'string' && data.error.trim().length > 0 ? data.error : 'Request failed',
+      ...pickPreservedErrorFields(data),
     }
   }
 
   if (status >= 400) {
     if (isRecord(data) && typeof data.error === 'string' && data.error.trim().length > 0) {
-      return { success: false, error: data.error }
+      return { success: false, error: data.error, ...pickPreservedErrorFields(data) }
     }
     return { success: false, error: 'Request failed' }
   }

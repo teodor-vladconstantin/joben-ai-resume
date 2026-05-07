@@ -8,6 +8,28 @@ function normalizeContactText(url: string): string {
   return url.replace(/^https?:\/\/(www\.)?/i, '')
 }
 
+// LinkedIn / GitHub / website fields are free-text inputs in the builder, so
+// users frequently leave the placeholder copy in place ("LinkedIn Link",
+// "https://github.com/yourusername"). Render these as plain text — never as
+// hyperlinks — so the exported PDF never points at a broken URL.
+const PLACEHOLDER_TOKENS = /yourusername|placeholder|example\.com/i
+
+function looksLikeUrl(value: string | undefined | null): boolean {
+  if (!value) return false
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  if (PLACEHOLDER_TOKENS.test(trimmed)) return false
+  // Accept both fully-qualified URLs and bare domains like "linkedin.com/in/foo".
+  if (/^https?:\/\//i.test(trimmed)) return true
+  return /^([\w-]+\.)+[a-z]{2,}(\/|$)/i.test(trimmed)
+}
+
+function normalizeHref(value: string): string {
+  const trimmed = value.trim()
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
 function resolveBullets(exp: { bullets?: string[]; description: string }) {
   const bullets = (exp.bullets || []).map((bullet) => bullet.trim()).filter(Boolean)
   if (bullets.length > 0) return bullets
@@ -71,12 +93,17 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
   const educationSections = (data.dynamicSections || []).filter((section) => section.type === 'education')
   const nonEducationSections = (data.dynamicSections || []).filter((section) => section.type !== 'education')
 
+  const linkedinHref = looksLikeUrl(data.personal.linkedin) ? normalizeHref(data.personal.linkedin!) : null
+  const githubHref = looksLikeUrl(data.personal.github) ? normalizeHref(data.personal.github!) : null
+  const websiteHref = looksLikeUrl(data.personal.website) ? normalizeHref(data.personal.website!) : null
+
   const contactItems = [
     data.personal.email ? { label: 'Email', value: data.personal.email, href: `mailto:${data.personal.email}` } : null,
     data.personal.phone ? { label: 'Phone', value: data.personal.phone, href: `tel:${data.personal.phone.replace(/[^+\d]/g, '')}` } : null,
     data.personal.location ? { label: 'Location', value: data.personal.location, href: null } : null,
-    data.personal.linkedin ? { label: 'LinkedIn', value: normalizeContactText(data.personal.linkedin), href: data.personal.linkedin } : null,
-    data.personal.github ? { label: 'GitHub', value: normalizeContactText(data.personal.github), href: data.personal.github } : null,
+    linkedinHref ? { label: 'LinkedIn', value: normalizeContactText(linkedinHref), href: linkedinHref } : null,
+    githubHref ? { label: 'GitHub', value: normalizeContactText(githubHref), href: githubHref } : null,
+    websiteHref ? { label: 'Website', value: normalizeContactText(websiteHref), href: websiteHref } : null,
   ].filter(Boolean) as Array<{ label: string; value: string; href: string | null }>
 
   return (
