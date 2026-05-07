@@ -188,14 +188,20 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
     const payload = (await response.json()) as {
       success?: boolean
       error?: string
+      showUpgrade?: boolean
+      limit?: number
+      used?: number
     }
 
     // Plan-quota refusals return 403 (the request was authenticated but the
-    // plan does not allow the action). The shared error envelope strips
-    // limit/used metadata; only `success` and `error` reach the client.
+    // plan does not allow the action). The shared error envelope keeps
+    // upgrade-related metadata so the client can render the upgrade modal.
     expect(response.status).toBe(403)
     expect(payload.success).toBe(false)
     expect(payload.error).toContain('Free plan allows up to 3')
+    expect(payload.showUpgrade).toBe(true)
+    expect(payload.limit).toBe(3)
+    expect(payload.used).toBe(3)
   })
 
   it('returns 400 when deleting resume without id', async () => {

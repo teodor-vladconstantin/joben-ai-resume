@@ -72,8 +72,10 @@ type ResumeData = {
     email: string
     phone: string
     summary: string
+    location?: string
     linkedin?: string
     github?: string
+    website?: string
   }
   experience: ExperienceEntry[]
   projects: ProjectEntry[]
@@ -1335,6 +1337,10 @@ export function ResumeBuilder() {
                 </div>
               </div>
               <div className="space-y-2">
+                <label className="text-sm font-medium text-[#FFFFFF]/82">Location</label>
+                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="Cluj-Napoca, Romania" />
+              </div>
+              <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-sm font-medium text-[#FFFFFF]/82">Professional Summary</label>
                   <button
@@ -1355,11 +1361,15 @@ export function ResumeBuilder() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[#FFFFFF]/82">LinkedIn URL</label>
-                  <input type="text" value={resumeData.personal.linkedin} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://linkedin.com/in/yourname" />
+                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://linkedin.com/in/yourname" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[#FFFFFF]/82">GitHub URL</label>
-                  <input type="text" value={resumeData.personal.github} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://github.com/yourusername" />
+                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://github.com/yourusername" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#FFFFFF]/82">Website / Portfolio</label>
+                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://yourdomain.com" />
                 </div>
 
                 {isSummaryGeneratorOpen ? (
