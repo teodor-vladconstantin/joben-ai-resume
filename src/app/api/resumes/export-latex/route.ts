@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeExportQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { renderInlineLatex } from '@/lib/inline-format'
 
 export const runtime = 'nodejs'
 
@@ -141,13 +142,21 @@ function escapeLatex(text: string | undefined): string {
 }
 
 function normalizeBulletCandidate(text: string): string {
+  // Keep inline-format markers (**bold**, *italic*, __underline__) so the
+  // LaTeX renderer can translate them — strip only stray leading bullet
+  // glyphs and outer quotes the user did not intend to keep.
   return clampLatexText(
     text
-      .replace(/\*\*/g, '')
-      .replace(/^[-*•]\s*/, '')
+      // Require whitespace after the glyph so we do not eat the leading
+      // asterisk of an *italic* marker.
+      .replace(/^[-*•]\s+/, '')
       .replace(/^['"`]+|['"`]+$/g, ''),
     260
   )
+}
+
+function escapeLatexFormatted(text: string | undefined): string {
+  return renderInlineLatex(text, (segment) => escapeLatex(segment))
 }
 
 function splitProjectDescription(description: string | undefined): string[] {
@@ -354,7 +363,7 @@ ${titleBlock}${contactBlock}\end{center}
   if (personal?.summary) {
     tex += String.raw`
 \section{Summary}
-\small{${escapeLatex(clampLatexText(personal.summary, 900))}}
+\small{${escapeLatexFormatted(clampLatexText(personal.summary, 900))}}
 `
   }
 
@@ -367,7 +376,7 @@ ${titleBlock}${contactBlock}\end{center}
     for (const exp of experience) {
       const safeBullets = extractSafeBullets(exp)
       const bulletItems = safeBullets
-        .map((bullet: string) => String.raw`        \resumeItem{${escapeLatex(bullet)}}`)
+        .map((bullet: string) => String.raw`        \resumeItem{${escapeLatexFormatted(bullet)}}`)
         .join('\n')
 
       tex += String.raw`
@@ -400,7 +409,7 @@ ${bulletItems}
 
       const itemLines: string[] = []
       for (const bullet of projBullets) {
-        itemLines.push(escapeLatex(clampLatexText(bullet, 900)))
+        itemLines.push(escapeLatexFormatted(clampLatexText(bullet, 900)))
       }
       if (techs) itemLines.push(String.raw`\textit{Technologies:} ${techs}`)
       if (proj.url) {
@@ -444,7 +453,7 @@ ${projectItems}
       const period = escapeLatex(formatLatexEducationPeriod(entry))
       const degreeLine = escapeLatex(clampLatexText(buildLatexEducationDegreeLine(entry), 220))
       const location = escapeLatex(clampLatexText(entry.location || '', 120))
-      const description = escapeLatex(clampLatexText(entry.description || '', 600))
+      const description = escapeLatexFormatted(clampLatexText(entry.description || '', 600))
 
       tex += String.raw`
     \resumeSubheading
@@ -496,7 +505,7 @@ ${projectItems}
           }
           // No structured entries — render the raw content directly without
           // leaking the (potentially-corrupt) section.title into the heading.
-          const fallback = escapeLatex(clampLatexText(section.content, 900))
+          const fallback = escapeLatexFormatted(clampLatexText(section.content, 900))
           if (fallback) {
             tex += String.raw`
     \resumeSubheading
@@ -510,14 +519,14 @@ ${projectItems}
         tex += String.raw`
     \resumeSubheading
       {${escapeLatex(clampLatexText(section.title, 120))}}{ }
-      {${escapeLatex(clampLatexText(section.content, 900))}}{ }
+      {${escapeLatexFormatted(clampLatexText(section.content, 900))}}{ }
 `
       }
       tex += String.raw`  \end{itemize}
 `
     } else {
       for (const section of sections) {
-        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatex(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
+        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatexFormatted(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
 `
       }
     }
