@@ -1035,6 +1035,65 @@ def normalize_company_name(company: Optional[str]) -> Optional[str]:
     return company if company else None
 
 
+_BULLET_PREFIX_RE = re.compile(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*")
+_TRAILING_PUNCT = " .,;:"
+
+
+def _strip_trailing_punct(value: str) -> str:
+    return value.rstrip(_TRAILING_PUNCT).strip()
+
+
+def _recover_missing_first_bullet(description: str, bullets: list[str]) -> list[str]:
+    """LlamaParse + LLM extraction occasionally drops the first source bullet
+    into the role's ``description`` field while keeping the rest in
+    ``bullets``. We recover that achievement so the builder/PDF render every
+    bullet from the source CV.
+
+    Two recovery paths:
+
+    1. Description CONTAINS ``bullets[0]`` as a substring (the LLM concatenated
+       every bullet into description). The prefix that comes before the first
+       known bullet is the missing achievement.
+    2. Description is a short, single-line statement disjoint from every
+       existing bullet. The description itself is the missing first bullet.
+
+    A multi-line or long-prose description is treated as a real summary and
+    left untouched.
+    """
+
+    if not description or not bullets:
+        return bullets
+
+    desc = description.strip()
+    if not desc:
+        return bullets
+
+    first = _strip_trailing_punct(bullets[0])
+    if not first:
+        return bullets
+
+    existing_norms = {_strip_trailing_punct(b) for b in bullets}
+
+    # Path 1: bullets[0] appears inside the description.
+    idx = desc.find(first)
+    if idx > 0:
+        prefix = _strip_trailing_punct(desc[:idx])
+        if prefix and prefix not in existing_norms:
+            return [prefix] + list(bullets)
+
+    # Path 2: description is a single-line standalone bullet.
+    if "\n" not in desc and len(desc) <= 600:
+        desc_norm = _strip_trailing_punct(desc)
+        if desc_norm and desc_norm not in existing_norms:
+            already_inside = any(
+                desc_norm in b or _strip_trailing_punct(b) in desc_norm for b in bullets
+            )
+            if not already_inside:
+                return [desc_norm] + list(bullets)
+
+    return bullets
+
+
 def normalize_bullets(bullets: Optional[list[str]], description: Optional[str]) -> list[str]:
     normalized: list[str] = []
     if isinstance(bullets, list):
@@ -1045,17 +1104,20 @@ def normalize_bullets(bullets: Optional[list[str]], description: Optional[str]) 
                     continue
                 split_items = split_merged_bullets(cleaned)
                 for split_item in split_items:
-                    bullet = re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", split_item.strip())
+                    bullet = _BULLET_PREFIX_RE.sub("", split_item.strip())
                     if bullet:
                         normalized.append(bullet)
 
     if normalized:
+        # Recover a missing first bullet that the LLM mis-routed into description.
+        if isinstance(description, str) and description.strip():
+            normalized = _recover_missing_first_bullet(description.strip(), normalized)
         return normalized
 
     if isinstance(description, str) and description.strip():
         split_items = split_merged_bullets(description.strip())
         cleaned_parts = [
-            re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", part.strip())
+            _BULLET_PREFIX_RE.sub("", part.strip())
             for part in split_items
             if part.strip()
         ]
@@ -1104,7 +1166,8 @@ parser = LlamaParse(
         "8. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
         "9. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
         "10. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
-        "11. For work_experience and projects, output bullets as an array of separate achievement points. Preserve every source bullet verbatim and in original order (do NOT summarize, merge, rewrite, or drop bullets).\n"
+        "11. For work_experience and projects, output bullets as an array of separate achievement points. Preserve every source bullet verbatim and in original order (do NOT summarize, merge, rewrite, or drop bullets). EVERY achievement bullet from the source MUST appear in the bullets array, including the first one.\n"
+        "11a. The 'description' field is for a separate prose summary that introduces the role and is distinct from the bullet achievements. If the source only has achievement bullets and no separate prose intro, set description to null. NEVER copy a bullet (or any prefix of the bullet list) into description while leaving it out of the bullets array.\n"
         "12. Always populate start_month/start_year/end_month/end_year for work_experience, projects, and education when inferable from source text. Use integers; use null when unknown.\n"
         "13. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
