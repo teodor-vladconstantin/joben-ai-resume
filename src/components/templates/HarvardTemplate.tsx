@@ -1,7 +1,26 @@
+import { Fragment } from 'react'
 import type { ResumeTemplateData, ResumeDynamicSection, ResumeEducation } from './types'
+import { tokenizeInline } from '@/lib/inline-format'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
+}
+
+function FormattedText({ value, idPrefix }: { value: string | null | undefined; idPrefix: string }) {
+  if (!value) return null
+  const tokens = tokenizeInline(value)
+  if (tokens.length === 0) return <>{value}</>
+  return (
+    <>
+      {tokens.map((token, index) => {
+        const key = `${idPrefix}-${index}`
+        if (token.kind === 'text') return <Fragment key={key}>{token.value}</Fragment>
+        if (token.format === 'bold') return <strong key={key}>{token.value}</strong>
+        if (token.format === 'italic') return <em key={key}>{token.value}</em>
+        return <u key={key}>{token.value}</u>
+      })}
+    </>
+  )
 }
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -131,7 +150,9 @@ function StructuredEducationSection({ entries }: { entries: ResumeEducation[] })
             {degreeLine ? <p className="text-gray-700 italic">{degreeLine}</p> : null}
             {entry.location ? <p className="text-sm text-gray-600">{entry.location}</p> : null}
             {description ? (
-              <p className="text-gray-800 leading-relaxed mt-1 whitespace-pre-wrap">{description}</p>
+              <p className="text-gray-800 leading-relaxed mt-1 whitespace-pre-wrap">
+                <FormattedText value={description} idPrefix={`edu-${entry.id}`} />
+              </p>
             ) : null}
           </div>
         )
@@ -186,7 +207,9 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
       {data.personal.summary && (
         <section className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Summary</h3>
-          <p className="text-gray-800 leading-relaxed">{data.personal.summary}</p>
+          <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+            <FormattedText value={data.personal.summary} idPrefix="summary" />
+          </p>
         </section>
       )}
 
@@ -201,7 +224,9 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
             <p className="text-gray-700 italic mb-2">{exp.company}</p>
             <ul className="list-disc pl-5 text-gray-800">
               {resolveBullets(exp).map((bullet, index) => (
-                <li key={`${exp.id}-bullet-${index}`}>{bullet}</li>
+                <li key={`${exp.id}-bullet-${index}`}>
+                  <FormattedText value={bullet} idPrefix={`exp-${exp.id}-${index}`} />
+                </li>
               ))}
             </ul>
           </div>
@@ -223,7 +248,9 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
                 {bullets.length > 0 && (
                   <ul className="list-disc pl-5 text-gray-800 mb-2">
                     {bullets.map((line, i) => (
-                      <li key={`${project.id}-bullet-${i}`}>{line}</li>
+                      <li key={`${project.id}-bullet-${i}`}>
+                        <FormattedText value={line} idPrefix={`proj-${project.id}-${i}`} />
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -261,7 +288,9 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
       {nonEducationSections.map((section) => (
         <section key={section.id} className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">{section.title}</h3>
-          <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{section.content}</p>
+          <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+            <FormattedText value={section.content} idPrefix={`section-${section.id}`} />
+          </p>
         </section>
       ))}
     </div>

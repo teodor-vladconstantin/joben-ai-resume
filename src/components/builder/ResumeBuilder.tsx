@@ -9,6 +9,7 @@ import { AddContentModal, type AddableSection } from '@/components/builder/AddCo
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
 import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
+import { RichTextarea } from '@/components/ui/RichTextarea'
 import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
@@ -1529,11 +1530,12 @@ export function ResumeBuilder() {
                   </button>
                 </div>
 
-                <textarea
+                <RichTextarea
                   value={resumeData.personal.summary}
-                  onChange={(e) => updatePersonalField('summary', e.target.value)}
+                  onValueChange={(value) => updatePersonalField('summary', value)}
                   className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors h-28 resize-none"
                   placeholder="Professional summary"
+                  toolbarLabel="Summary formatting"
                 />
 
                 <div className="space-y-2">
@@ -1723,22 +1725,23 @@ export function ResumeBuilder() {
                              transition={{ duration: 0.2, ease: 'easeOut' }}
                              className="flex items-start gap-2"
                            >
-                             <span className="pt-2 text-[#0A9548]">•</span>
-                             <textarea
+                             <span className="pt-9 text-[#0A9548]">•</span>
+                             <RichTextarea
                                ref={(node) => {
                                  bulletFieldRefs.current[draftKey] = node
                                }}
                                data-bullet-global-index={globalIdx}
                                value={bullet}
-                               onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
+                               onValueChange={(value) => updateExperienceBulletField(exp.id, bulletIndex, value)}
                                className={`h-20 w-full resize-none rounded-lg border bg-[#020202] px-3 py-2 text-sm text-white focus:outline-none transition-colors ${
                                  isHighlighted
                                    ? 'border-[#16DB65] ring-2 ring-[#16DB65]/40 focus:border-[#16DB65]'
                                    : 'border-white/10 focus:border-[#16DB65]'
                                }`}
                                placeholder="Describe measurable impact"
+                               toolbarLabel="Bullet formatting"
                              />
-                             <div className="flex flex-col gap-1">
+                             <div className="flex flex-col gap-1 pt-7">
                                <button
                                  onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
                                  disabled={Boolean(draftState?.isLoading)}
@@ -1871,11 +1874,12 @@ export function ResumeBuilder() {
                         onIsCurrentChange={(value) => updateProjectDateField(project.id, 'isCurrent', value)}
                       />
 
-                      <textarea
+                      <RichTextarea
                         value={project.description}
-                        onChange={(e) => updateProjectField(project.id, { description: e.target.value })}
+                        onValueChange={(value) => updateProjectField(project.id, { description: value })}
                         className="h-32 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
                         placeholder={`Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%`}
+                        toolbarLabel="Project description formatting"
                       />
 
                       <input
@@ -1972,11 +1976,12 @@ export function ResumeBuilder() {
                         onIsCurrentChange={(value) => updateEducationDateField(entry.id, 'isCurrent', value)}
                       />
 
-                      <textarea
+                      <RichTextarea
                         value={entry.description || ''}
-                        onChange={(e) => updateEducationField(entry.id, 'description', e.target.value)}
+                        onValueChange={(value) => updateEducationField(entry.id, 'description', value)}
                         className="h-24 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
                         placeholder="Optional details (GPA, honors, relevant coursework, thesis, ...)"
+                        toolbarLabel="Education description formatting"
                       />
                     </div>
                   </div>
