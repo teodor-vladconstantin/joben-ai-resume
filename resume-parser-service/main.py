@@ -507,7 +507,15 @@ def normalize_project_entry(entry: dict) -> Project:
         return f"{month_names[month_idx]} {year}"
 
     explicit_start = entry.get("start_date") if isinstance(entry.get("start_date"), str) else None
+    if not explicit_start:
+        explicit_start = date_from_month_year_fields(entry.get("start_month"), entry.get("start_year"))
+
     explicit_end = entry.get("end_date") if isinstance(entry.get("end_date"), str) else None
+    if not explicit_end:
+        if normalize_truthy_flag(entry.get("is_current")):
+            explicit_end = "Present"
+        else:
+            explicit_end = date_from_month_year_fields(entry.get("end_month"), entry.get("end_year"))
     inferred_start, inferred_end = extract_date_range(project_text)
 
     # Date precedence: inline dates extracted from the description prefix (literal source text)
@@ -597,7 +605,7 @@ def parse_project_block(block: str) -> Optional[dict]:
 
     title = strip_markdown_formatting(lines[title_index])
     description_lines = [strip_markdown_formatting(line) for i, line in enumerate(lines) if i != title_index]
-    description = " ".join(line for line in description_lines if line and not is_section_heading(line)).strip()
+    description = "\n".join(line for line in description_lines if line and not is_section_heading(line)).strip()
 
     if not title:
         title = "Project"
@@ -860,6 +868,50 @@ def date_to_parts(normalized: Optional[str]) -> tuple[Optional[int], Optional[in
     return None, None
 
 
+def normalize_truthy_flag(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    if isinstance(value, (int, float)):
+        return value == 1
+    return False
+
+
+def coerce_int(value: object) -> Optional[int]:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if cleaned.isdigit():
+            return int(cleaned)
+    return None
+
+
+def normalize_month_year_fields(month_value: object, year_value: object) -> tuple[Optional[int], Optional[int]]:
+    year = coerce_int(year_value)
+    month = coerce_int(month_value)
+
+    if year is None:
+        return None, None
+    if month is not None and 1 <= month <= 12:
+        return year, month
+    return year, None
+
+
+def date_from_month_year_fields(month_value: object, year_value: object) -> Optional[str]:
+    year, month = normalize_month_year_fields(month_value, year_value)
+    if year is None:
+        return None
+    if month is None:
+        return str(year)
+    return f"{year}-{str(month).zfill(2)}"
+
+
 _INLINE_BULLET_RE = re.compile(
     r'\s*[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃]\s+'
 )
@@ -921,7 +973,15 @@ def enrich_work_experience_dates(work_exp_entries: list[dict], raw_text: str) ->
 
         current = dict(entry)
         start = normalize_date(current.get("start_date"))
+        if not start:
+            start = date_from_month_year_fields(current.get("start_month"), current.get("start_year"))
+
         end = normalize_date(current.get("end_date"))
+        if not end:
+            if normalize_truthy_flag(current.get("is_current")):
+                end = "Present"
+            else:
+                end = date_from_month_year_fields(current.get("end_month"), current.get("end_year"))
 
         if start and end:
             current["start_date"] = start
@@ -980,20 +1040,28 @@ def normalize_bullets(bullets: Optional[list[str]], description: Optional[str]) 
     if isinstance(bullets, list):
         for item in bullets:
             if isinstance(item, str):
-                cleaned = re.sub(r"\s+", " ", item).strip()
-                cleaned = re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", cleaned)
-                if cleaned:
-                    normalized.extend(split_merged_bullets(cleaned))
+                cleaned = item.strip()
+                if not cleaned:
+                    continue
+                split_items = split_merged_bullets(cleaned)
+                for split_item in split_items:
+                    bullet = re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", split_item.strip())
+                    if bullet:
+                        normalized.append(bullet)
 
     if normalized:
         return normalized
 
     if isinstance(description, str) and description.strip():
-        parts = [segment.strip() for segment in re.split(r"(?:\n|•|\u2022|\s-\s)", description) if segment.strip()]
-        cleaned_parts = [re.sub(r"\s+", " ", part).strip() for part in parts if part.strip()]
-        if len(cleaned_parts) > 1:
+        split_items = split_merged_bullets(description.strip())
+        cleaned_parts = [
+            re.sub(r"^[•·▸▶▪◦▷◆◇■□●○➤➢→✓✔★❖⁃\-\*]\s*", "", part.strip())
+            for part in split_items
+            if part.strip()
+        ]
+        cleaned_parts = [part for part in cleaned_parts if part]
+        if cleaned_parts:
             return cleaned_parts
-        return [re.sub(r"\s+", " ", description).strip()]
 
     return []
 
@@ -1014,9 +1082,9 @@ parser = LlamaParse(
         "- linkedin (string, URL if present)\n"
         "- github (string, URL if present)\n"
         "- summary (string)\n"
-        "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date)\n"
-        "- work_experience (array of: company, role, start_date, end_date, description, bullets)\n"
-        "- education (array of: institution, degree, field, start_date, end_date)\n"
+        "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date, start_month, start_year, end_month, end_year)\n"
+        "- work_experience (array of: company, role, start_date, end_date, start_month, start_year, end_month, end_year, is_current, description, bullets)\n"
+        "- education (array of: institution, degree, field, start_date, end_date, start_month, start_year, end_month, end_year)\n"
         "- skills (array of strings)\n"
         "- languages (array of: language, level)\n"
         "- certifications (array of strings)\n"
@@ -1036,8 +1104,9 @@ parser = LlamaParse(
         "8. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
         "9. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
         "10. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
-        "11. For work_experience and projects, output bullets as an array of separate achievement points. Do not merge all points into a single sentence.\n"
-        "12. Return only valid JSON, no markdown code blocks, no extra text.\n"
+        "11. For work_experience and projects, output bullets as an array of separate achievement points. Preserve every source bullet verbatim and in original order (do NOT summarize, merge, rewrite, or drop bullets).\n"
+        "12. Always populate start_month/start_year/end_month/end_year for work_experience, projects, and education when inferable from source text. Use integers; use null when unknown.\n"
+        "13. Return only valid JSON, no markdown code blocks, no extra text.\n"
     ),
     cost_optimizer="true",
 )
@@ -1167,9 +1236,22 @@ async def parse_resume(file: UploadFile = File(...)):
                 if not isinstance(exp, dict) or work_exp_classifications.get(i, False):
                     continue
                 nd_start = normalize_date(exp.get("start_date"))
+                if not nd_start:
+                    nd_start = date_from_month_year_fields(exp.get("start_month"), exp.get("start_year"))
+
                 nd_end = normalize_date(exp.get("end_date"))
-                s_year, s_month = date_to_parts(nd_start)
-                e_year, e_month = date_to_parts(nd_end)
+                if not nd_end:
+                    if normalize_truthy_flag(exp.get("is_current")):
+                        nd_end = "Present"
+                    else:
+                        nd_end = date_from_month_year_fields(exp.get("end_month"), exp.get("end_year"))
+
+                s_year, s_month = normalize_month_year_fields(exp.get("start_month"), exp.get("start_year"))
+                e_year, e_month = normalize_month_year_fields(exp.get("end_month"), exp.get("end_year"))
+                if s_year is None and nd_start:
+                    s_year, s_month = date_to_parts(nd_start)
+                if e_year is None and nd_end:
+                    e_year, e_month = date_to_parts(nd_end)
                 raw_desc = strip_leading_date_range(exp.get("description"))
                 entries.append(WorkExperience(
                     company=normalize_company_name(exp.get("company")),
@@ -1189,10 +1271,23 @@ async def parse_resume(file: UploadFile = File(...)):
         def _build_education() -> list[Education]:
             entries = []
             for exp in (resume_data.get("education") or []):
+                if not isinstance(exp, dict):
+                    continue
+
                 nd_start = normalize_date(exp.get("start_date"))
+                if not nd_start:
+                    nd_start = date_from_month_year_fields(exp.get("start_month"), exp.get("start_year"))
+
                 nd_end = normalize_date(exp.get("end_date"))
-                s_year, s_month = date_to_parts(nd_start)
-                e_year, e_month = date_to_parts(nd_end)
+                if not nd_end:
+                    nd_end = date_from_month_year_fields(exp.get("end_month"), exp.get("end_year"))
+
+                s_year, s_month = normalize_month_year_fields(exp.get("start_month"), exp.get("start_year"))
+                e_year, e_month = normalize_month_year_fields(exp.get("end_month"), exp.get("end_year"))
+                if s_year is None and nd_start:
+                    s_year, s_month = date_to_parts(nd_start)
+                if e_year is None and nd_end:
+                    e_year, e_month = date_to_parts(nd_end)
                 entries.append(Education(
                     institution=exp.get("institution"),
                     degree=exp.get("degree"),

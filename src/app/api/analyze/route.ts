@@ -12,6 +12,7 @@ import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { estimateRequestCost } from '@/lib/token-estimator'
 import { getErrorMessage } from '@/lib/api-response'
+import { stripProviderMentions } from '@/lib/ai-errors'
 
 const ANALYZE_SYSTEM_PROMPT = `You are an elite resume analyst and ATS expert. Analyze the resume and return ONLY valid JSON, no markdown, no preamble.
 
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
 
       const message = error instanceof ClaudeJsonParseError
         ? 'AI response format was invalid. Please retry.'
-        : getErrorMessage(error)
+        : stripProviderMentions(getErrorMessage(error))
 
       logger.error('Analyze route failed', {
         requestId,
@@ -169,6 +170,6 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: message }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
   }
 }

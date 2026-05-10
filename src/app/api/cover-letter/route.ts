@@ -9,6 +9,7 @@ import { parseClaudeJsonText } from '@/lib/claude-json'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { getErrorMessage } from '@/lib/api-response'
+import { stripProviderMentions } from '@/lib/ai-errors'
 
 const COVER_LETTER_SYSTEM_PROMPT = `Generate a cover letter JSON with this exact shape:
 {
@@ -71,9 +72,9 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
-      return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+      return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
   }
 }

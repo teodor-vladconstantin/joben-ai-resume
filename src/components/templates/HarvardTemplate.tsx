@@ -1,7 +1,33 @@
-import type { ResumeTemplateData, ResumeDynamicSection } from './types'
+import type { ResumeTemplateData, ResumeDynamicSection, ResumeEducation } from './types'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
+}
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function formatEducationPeriod(entry: ResumeEducation): string {
+  const startLabel = entry.startYear
+    ? entry.startMonth
+      ? `${MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}`
+      : `${entry.startYear}`
+    : ''
+  const endLabel = entry.isCurrent
+    ? 'Present'
+    : entry.endYear
+      ? entry.endMonth
+        ? `${MONTH_LABELS[entry.endMonth - 1]} ${entry.endYear}`
+        : `${entry.endYear}`
+      : ''
+
+  if (startLabel && endLabel) return `${startLabel} – ${endLabel}`
+  if (startLabel) return startLabel
+  if (endLabel) return endLabel
+  return ''
+}
+
+function buildEducationDegreeLine(entry: ResumeEducation): string {
+  return [entry.degree, entry.field].map((part) => (part || '').trim()).filter(Boolean).join(', ')
 }
 
 function normalizeContactText(url: string): string {
@@ -89,8 +115,38 @@ function EducationSection({ section }: { section: ResumeDynamicSection }) {
   )
 }
 
+function StructuredEducationSection({ entries }: { entries: ResumeEducation[] }) {
+  return (
+    <>
+      {entries.map((entry, i) => {
+        const period = formatEducationPeriod(entry)
+        const degreeLine = buildEducationDegreeLine(entry)
+        const description = (entry.description || '').trim()
+        return (
+          <div key={entry.id} className={i > 0 ? 'mt-4' : ''}>
+            <div className="flex justify-between items-baseline mb-1">
+              <p className="font-bold text-gray-900">{entry.institution}</p>
+              {period ? <span className="text-sm text-gray-600">{period}</span> : null}
+            </div>
+            {degreeLine ? <p className="text-gray-700 italic">{degreeLine}</p> : null}
+            {entry.location ? <p className="text-sm text-gray-600">{entry.location}</p> : null}
+            {description ? (
+              <p className="text-gray-800 leading-relaxed mt-1 whitespace-pre-wrap">{description}</p>
+            ) : null}
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
 export function HarvardTemplate({ data }: HarvardTemplateProps) {
-  const educationSections = (data.dynamicSections || []).filter((section) => section.type === 'education')
+  const structuredEducation = (data.education || []).filter((entry) => (entry.institution || '').trim())
+  // Render legacy text-based education sections only when there is no structured data,
+  // so re-imported CVs do not display Education twice.
+  const educationSections = structuredEducation.length === 0
+    ? (data.dynamicSections || []).filter((section) => section.type === 'education')
+    : []
   const nonEducationSections = (data.dynamicSections || []).filter((section) => section.type !== 'education')
 
   const linkedinHref = looksLikeUrl(data.personal.linkedin) ? normalizeHref(data.personal.linkedin!) : null
@@ -189,12 +245,16 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
         </section>
       )}
 
-      {educationSections.length > 0 && (
+      {(structuredEducation.length > 0 || educationSections.length > 0) && (
         <section className="mb-6">
           <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Education</h3>
-          {educationSections.map((section) => (
-            <EducationSection key={section.id} section={section} />
-          ))}
+          {structuredEducation.length > 0 ? (
+            <StructuredEducationSection entries={structuredEducation} />
+          ) : (
+            educationSections.map((section) => (
+              <EducationSection key={section.id} section={section} />
+            ))
+          )}
         </section>
       )}
 
