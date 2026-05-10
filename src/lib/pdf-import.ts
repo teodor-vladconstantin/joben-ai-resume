@@ -157,20 +157,28 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
   const dynamicSections = []
 
   const education = parsed.education || []
-  if (education.length > 0) {
-    const content = education
-      .map((edu) => {
-        const parts = [decodeHtml(edu.institution)]
-        if (edu.degree || edu.field) {
-          parts.push([decodeHtml(edu.degree), decodeHtml(edu.field)].filter(Boolean).join(', '))
-        }
-        const period = formatDateRange(edu.start_date, edu.end_date)
-        if (period) parts.push(period)
-        return parts.join('\n')
-      })
-      .join('\n\n')
-    dynamicSections.push({ id: `edu_${Date.now()}`, type: 'education', title: 'Education', content })
-  }
+  const educationArray = education
+    .map((edu, i) => {
+      const institution = decodeHtml(edu.institution).trim()
+      // Skip entries with no institution — they cannot be edited meaningfully
+      // and would render as an empty card.
+      if (!institution) return null
+      const isCurrent = typeof edu.end_date === 'string'
+        ? /^(present|current|ongoing|now)$/i.test(edu.end_date.trim())
+        : false
+      return {
+        id: `edu_${Date.now()}_${i}`,
+        institution,
+        degree: decodeHtml(edu.degree).trim() || undefined,
+        field: decodeHtml(edu.field).trim() || undefined,
+        startMonth: edu.start_month ?? undefined,
+        startYear: edu.start_year ?? undefined,
+        endMonth: edu.end_month ?? undefined,
+        endYear: edu.end_year ?? undefined,
+        isCurrent,
+      }
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
 
   const skills = parsed.skills || []
   if (skills.length > 0) {
@@ -266,6 +274,7 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       bullets: normalizeExperienceBullets(exp.bullets, exp.description || ''),
     })),
     projects: projectsArray,
+    education: educationArray,
     dynamicSections,
   }
 }

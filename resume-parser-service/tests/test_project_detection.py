@@ -329,3 +329,51 @@ def test_normalize_project_entry_overrides_hallucinated_year_with_inline_dates()
     assert project.start_year == 2024 and project.start_month == 1
     assert project.end_year is None  # 'Present' has no parts
     assert project.description and project.description.startswith("Designed and developed")
+
+
+def test_normalize_bullets_preserves_order_and_separate_items():
+    bullets = [
+        "• Built onboarding flow",
+        "Improved conversion by 18%",
+        "Automated reporting\nReduced manual work by 6h/week",
+    ]
+    normalized = parser_main.normalize_bullets(bullets, None)
+    assert normalized == [
+        "Built onboarding flow",
+        "Improved conversion by 18%",
+        "Automated reporting",
+        "Reduced manual work by 6h/week",
+    ]
+
+
+def test_normalize_project_entry_uses_month_year_fields_when_date_strings_missing():
+    entry = {
+        "name": "Parser Upgrade",
+        "description": "Improved extraction accuracy and stability.",
+        "start_month": 2,
+        "start_year": 2023,
+        "end_month": 11,
+        "end_year": 2024,
+    }
+    project = parser_main.normalize_project_entry(entry)
+    assert project.start_date == "Feb 2023"
+    assert project.end_date == "Nov 2024"
+    assert project.start_year == 2023 and project.start_month == 2
+    assert project.end_year == 2024 and project.end_month == 11
+
+
+def test_enrich_work_experience_dates_uses_month_year_and_current_flag():
+    entries = [
+        {
+            "company": "Acme",
+            "role": "Engineer",
+            "start_month": 5,
+            "start_year": 2021,
+            "is_current": True,
+            "description": "Owned backend services",
+        }
+    ]
+    enriched = parser_main.enrich_work_experience_dates(entries, "")
+    assert len(enriched) == 1
+    assert enriched[0]["start_date"] == "2021-05"
+    assert enriched[0]["end_date"] == "Present"

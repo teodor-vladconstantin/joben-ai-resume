@@ -41,6 +41,21 @@ export type ResumeProject = {
   url?: string
 }
 
+export type ResumeEducation = {
+  id: string
+  institution: string
+  degree?: string
+  field?: string
+  location?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
+  /** Free-form additional details (GPA, honors, coursework, etc.) */
+  description?: string
+}
+
 export type ResumeDynamicSection = {
   id: string
   type: string
@@ -52,5 +67,6 @@ export type ResumeTemplateData = {
   personal: ResumePersonal
   experience: ResumeExperience[]
   projects?: ResumeProject[]
+  education?: ResumeEducation[]
   dynamicSections?: ResumeDynamicSection[]
 }

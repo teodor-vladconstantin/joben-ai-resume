@@ -9,6 +9,7 @@ import { parseClaudeJsonText } from '@/lib/claude-json'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { getErrorMessage } from '@/lib/api-response'
+import { stripProviderMentions } from '@/lib/ai-errors'
 
 const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
 {
@@ -69,16 +70,16 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
-      const message = getErrorMessage(error)
+      const rawMessage = getErrorMessage(error)
       logger.error('Tailor route failed', {
         requestId,
         userId,
         route: '/api/tailor',
-        error: message,
+        error: rawMessage,
       })
-      return jsonWithRequestId({ error: message }, 500, requestId)
+      return jsonWithRequestId({ error: stripProviderMentions(rawMessage) }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
   }
 }

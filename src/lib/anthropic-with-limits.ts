@@ -11,6 +11,7 @@ import {
   recordTokenUsage,
   Feature,
 } from '@/lib/ratelimit'
+import { sanitizeAiError } from '@/lib/ai-errors'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const primaryClaudeModel = 'claude-haiku-4-5-20251001'
@@ -31,21 +32,27 @@ export type Message = Anthropic.Message
 
 export interface RateLimitError {
   error: string
-  limitType: 'tokens' | 'hard_cap' | 'feature' | 'blocked' | 'input_too_long'
+  limitType: 'tokens' | 'hard_cap' | 'feature' | 'blocked' | 'input_too_long' | 'provider_unavailable'
   feature?: Feature
   used?: number
   limit?: number
   resetAt: string
+  /**
+   * When true, the UI renders the upgrade modal. We set it on quota-style
+   * failures and provider billing failures so the user is nudged to upgrade
+   * (or retry) rather than seeing a raw error toast.
+   */
+  showUpgrade?: boolean
 }
 
 export class RateLimitExceededError extends Error {
   status: number
   payload: RateLimitError
 
-  constructor(payload: RateLimitError) {
+  constructor(payload: RateLimitError, status: number = 429) {
     super(payload.error)
     this.name = 'RateLimitExceededError'
-    this.status = 429
+    this.status = status
     this.payload = payload
   }
 }
@@ -145,6 +152,7 @@ export async function callAnthropicWithLimits(params: {
         used: featureCheck.used,
         limit: featureCheck.limit ?? undefined,
         resetAt,
+        showUpgrade: true,
       })
     }
   }
@@ -167,6 +175,7 @@ export async function callAnthropicWithLimits(params: {
       error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
       limitType,
       resetAt,
+      showUpgrade: true,
     })
   }
 
@@ -182,6 +191,7 @@ export async function callAnthropicWithLimits(params: {
       error: `You have reached your monthly AI limit. Upgrade your plan or wait for the reset on ${monthLabel} 1st.`,
       limitType: 'tokens',
       resetAt,
+      showUpgrade: true,
     })
   }
 
@@ -192,24 +202,45 @@ export async function callAnthropicWithLimits(params: {
   let response: Message
 
   try {
-    response = await createMessage(defaultClaudeModel, {
-      system: params.system,
-      messages: params.messages,
-      maxTokens,
-    })
-  } catch (error) {
-    const shouldRetryWithFallback =
-      defaultClaudeModel !== fallbackClaudeModel && isModelNotFoundError(error)
+    try {
+      response = await createMessage(defaultClaudeModel, {
+        system: params.system,
+        messages: params.messages,
+        maxTokens,
+      })
+    } catch (error) {
+      const shouldRetryWithFallback =
+        defaultClaudeModel !== fallbackClaudeModel && isModelNotFoundError(error)
 
-    if (!shouldRetryWithFallback) {
-      throw error
+      if (!shouldRetryWithFallback) {
+        throw error
+      }
+
+      response = await createMessage(fallbackClaudeModel, {
+        system: params.system,
+        messages: params.messages,
+        maxTokens,
+      })
     }
-
-    response = await createMessage(fallbackClaudeModel, {
-      system: params.system,
-      messages: params.messages,
-      maxTokens,
+  } catch (error) {
+    // Never let a raw provider error reach the route handler (and therefore
+    // the client). Convert to a RateLimitExceededError with a sanitized
+    // message; the real error stays available for server-side logging.
+    const sanitized = sanitizeAiError(error)
+    console.error('[ai] provider call failed', {
+      category: sanitized.category,
+      raw: sanitized.raw,
     })
+    const status = sanitized.category === 'rate_limit' ? 429 : 503
+    throw new RateLimitExceededError(
+      {
+        error: sanitized.userMessage,
+        limitType: 'provider_unavailable',
+        resetAt,
+        showUpgrade: sanitized.showUpgrade,
+      },
+      status,
+    )
   }
 
   const usedInputTokens = response.usage?.input_tokens ?? estimatedInputTokens

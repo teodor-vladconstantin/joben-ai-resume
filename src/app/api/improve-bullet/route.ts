@@ -9,6 +9,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { getErrorMessage } from '@/lib/api-response'
+import { stripProviderMentions } from '@/lib/ai-errors'
 
 const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
 If numeric evidence is present and the source supports it, prefer this structure: [Action verb] X by Y using Z.
@@ -75,16 +76,16 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
-      const message = getErrorMessage(error)
+      const rawMessage = getErrorMessage(error)
       logger.error('Improve-bullet route failed', {
         requestId,
         userId,
         route: '/api/improve-bullet',
-        error: message,
+        error: rawMessage,
       })
-      return jsonWithRequestId({ error: message }, 500, requestId)
+      return jsonWithRequestId({ error: stripProviderMentions(rawMessage) }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
   }
 }

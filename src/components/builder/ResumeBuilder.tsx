@@ -1,13 +1,14 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
 import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
@@ -59,6 +60,20 @@ type ProjectEntry = {
   url?: string
 }
 
+type EducationEntry = {
+  id: string
+  institution: string
+  degree?: string
+  field?: string
+  location?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
+  description?: string
+}
+
 type ImportMeta = {
   pdfImportsCount: number
 }
@@ -79,6 +94,7 @@ type ResumeData = {
   }
   experience: ExperienceEntry[]
   projects: ProjectEntry[]
+  education: EducationEntry[]
   dynamicSections: DynamicSection[]
   importMeta?: ImportMeta
 }
@@ -259,11 +275,72 @@ function getProjectTechnologies(project: ProjectEntry): string[] {
     : []
 }
 
+function normalizeEducationEntry(entry: Partial<EducationEntry>): EducationEntry {
+  const description = typeof entry.description === 'string' ? entry.description.trim() : ''
+  return {
+    id: entry.id || `edu_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    institution: typeof entry.institution === 'string' ? entry.institution.trim() : '',
+    degree: typeof entry.degree === 'string' ? entry.degree.trim() : '',
+    field: typeof entry.field === 'string' ? entry.field.trim() : '',
+    location: typeof entry.location === 'string' ? entry.location.trim() : '',
+    startMonth: typeof entry.startMonth === 'number' ? entry.startMonth : undefined,
+    startYear: typeof entry.startYear === 'number' ? entry.startYear : undefined,
+    endMonth: typeof entry.endMonth === 'number' ? entry.endMonth : undefined,
+    endYear: typeof entry.endYear === 'number' ? entry.endYear : undefined,
+    isCurrent: entry.isCurrent ?? false,
+    description,
+  }
+}
+
+/**
+ * Migrate legacy `dynamicSections[type=education]` text blobs into structured
+ * `EducationEntry` cards. Each blank-line-separated block becomes one card; the
+ * first line is treated as the institution and the remaining lines are folded
+ * into `degree` (line 2) and `description` (everything else, including periods
+ * we cannot reliably parse without a structured source).
+ */
+function migrateLegacyEducationSections(
+  dynamicSections: DynamicSection[]
+): { education: EducationEntry[]; remaining: DynamicSection[] } {
+  const education: EducationEntry[] = []
+  const remaining: DynamicSection[] = []
+
+  for (const section of dynamicSections) {
+    if (section.type !== 'education') {
+      remaining.push(section)
+      continue
+    }
+
+    const blocks = (section.content || '')
+      .split(/\n\s*\n/)
+      .map((block) => block.trim())
+      .filter(Boolean)
+
+    if (blocks.length === 0) continue
+
+    for (const block of blocks) {
+      const lines = block.split(/\n+/).map((line) => line.trim()).filter(Boolean)
+      if (lines.length === 0) continue
+      const [institution, degreeLine, ...rest] = lines
+      education.push(
+        normalizeEducationEntry({
+          institution,
+          degree: degreeLine || '',
+          description: rest.join('\n'),
+        })
+      )
+    }
+  }
+
+  return { education, remaining }
+}
+
 const initialResumeData: ResumeData = {
   template: 'harvard',
   personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '', linkedin: '', github: '' },
   experience: [],
   projects: [],
+  education: [],
   dynamicSections: [],
   importMeta: { pdfImportsCount: 0 },
 }
@@ -398,13 +475,38 @@ export function ResumeBuilder() {
             const incomingProjects = Array.isArray(loadedData.projects)
               ? loadedData.projects.map((project) => normalizeProjectEntry(project as Partial<ProjectEntry>))
               : prev.projects
+            const rawDynamic = Array.isArray(loadedData.dynamicSections)
+              ? (loadedData.dynamicSections as DynamicSection[])
+              : prev.dynamicSections
+            const hasStructuredEducation =
+              Array.isArray((loadedData as { education?: unknown }).education) &&
+              ((loadedData as { education?: unknown[] }).education?.length || 0) > 0
+
+            // Two paths:
+            //  • New CVs persist `education[]` directly; reuse it verbatim.
+            //  • Legacy CVs only ship education as a `dynamicSections[type=education]`
+            //    text blob; fold those into structured cards on load and strip the
+            //    legacy entries so we never render the same data twice.
+            let nextEducation: EducationEntry[]
+            let nextDynamic: DynamicSection[]
+            if (hasStructuredEducation) {
+              nextEducation = (
+                (loadedData as { education: Partial<EducationEntry>[] }).education
+              ).map((entry) => normalizeEducationEntry(entry))
+              nextDynamic = rawDynamic.filter((section) => section.type !== 'education')
+            } else {
+              const migrated = migrateLegacyEducationSections(rawDynamic)
+              nextEducation = migrated.education
+              nextDynamic = migrated.remaining
+            }
 
             return {
               template: normalizeTemplate() || prev.template,
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
               projects: incomingProjects,
-              dynamicSections: loadedData.dynamicSections || prev.dynamicSections,
+              education: nextEducation,
+              dynamicSections: nextDynamic,
               importMeta: loadedData.importMeta || prev.importMeta,
             }
           })
@@ -585,30 +687,49 @@ export function ResumeBuilder() {
   }
 
   const handleOnboardingImport = (data: ResumeTemplateData) => {
-    setResumeData((prev) => ({
-      ...prev,
-      personal: data.personal,
-      experience: (data.experience ?? []).map((exp, i) => ({
-        id: exp.id || `exp_${Date.now()}_${i}`,
-        title: exp.title || '',
-        company: exp.company || '',
-        period: exp.period || '',
-        description: exp.description || '',
-        bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
-          ? exp.bullets
-          : exp.description ? [exp.description] : [''],
-      })),
-      projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
-      dynamicSections: (data.dynamicSections ?? []).map((s, i) => ({
+    setResumeData((prev) => {
+      const incomingDynamic = (data.dynamicSections ?? []).map((s, i) => ({
         id: s.id || `section_${i}`,
         type: s.type as DynamicSection['type'],
         title: s.title || '',
         content: s.content || '',
-      })),
-      importMeta: {
-        pdfImportsCount: Math.min(getPdfImportCount(prev) + 1, MAX_PDF_IMPORTS_PER_RESUME),
-      },
-    }))
+      }))
+
+      // Prefer the parser's structured `education[]` if present; otherwise fold
+      // legacy text-based education sections into structured cards so the user
+      // can edit each entry as a real form.
+      let nextEducation: EducationEntry[]
+      let nextDynamic: DynamicSection[]
+      if (Array.isArray(data.education) && data.education.length > 0) {
+        nextEducation = data.education.map((entry) => normalizeEducationEntry(entry))
+        nextDynamic = incomingDynamic.filter((section) => section.type !== 'education')
+      } else {
+        const migrated = migrateLegacyEducationSections(incomingDynamic)
+        nextEducation = migrated.education
+        nextDynamic = migrated.remaining
+      }
+
+      return {
+        ...prev,
+        personal: data.personal,
+        experience: (data.experience ?? []).map((exp, i) => ({
+          id: exp.id || `exp_${Date.now()}_${i}`,
+          title: exp.title || '',
+          company: exp.company || '',
+          period: exp.period || '',
+          description: exp.description || '',
+          bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
+            ? exp.bullets
+            : exp.description ? [exp.description] : [''],
+        })),
+        projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
+        education: nextEducation,
+        dynamicSections: nextDynamic,
+        importMeta: {
+          pdfImportsCount: Math.min(getPdfImportCount(prev) + 1, MAX_PDF_IMPORTS_PER_RESUME),
+        },
+      }
+    })
   }
 
   const exportAsLatexPdf = async () => {
@@ -831,6 +952,15 @@ export function ResumeBuilder() {
   }, [activeTab, resumeData.dynamicSections])
 
   const handleAddSection = (section: AddableSection) => {
+    // Education is now a structured field (not a free-text dynamic section).
+    // Redirect to the dedicated handler so the user gets a real form.
+    if (section.type === 'education') {
+      handleAddEducation()
+      setActiveTab('education')
+      setIsAddModalOpen(false)
+      return
+    }
+
     const newSection: DynamicSection = {
       id: `sec_${Date.now()}`,
       type: section.type,
@@ -895,6 +1025,53 @@ export function ResumeBuilder() {
     setResumeData((prev) => ({
       ...prev,
       projects: prev.projects.filter((project) => project.id !== projectId),
+    }))
+  }
+
+  const handleAddEducation = () => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: [
+        ...prev.education,
+        normalizeEducationEntry({
+          id: `edu_${Date.now()}`,
+          institution: '',
+          degree: '',
+        }),
+      ],
+    }))
+  }
+
+  const updateEducationField = (
+    educationId: string,
+    field: 'institution' | 'degree' | 'field' | 'location' | 'description',
+    value: string
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.map((entry) =>
+        entry.id === educationId ? { ...entry, [field]: value } : entry
+      ),
+    }))
+  }
+
+  const updateEducationDateField = (
+    educationId: string,
+    field: 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent',
+    value: number | boolean | undefined
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.map((entry) =>
+        entry.id === educationId ? { ...entry, [field]: value } : entry
+      ),
+    }))
+  }
+
+  const deleteEducation = (educationId: string) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.filter((entry) => entry.id !== educationId),
     }))
   }
 
@@ -1291,7 +1468,7 @@ export function ResumeBuilder() {
               onClick={() => setFixBanner(null)}
               className="text-[#FFFFFF]/60 hover:text-white text-xs shrink-0"
             >
-              âœ•
+              x
             </button>
           </div>
         ) : null}
@@ -1507,67 +1684,19 @@ export function ResumeBuilder() {
                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
                        placeholder="Company"
                      />
-                     <div className="space-y-1">
-                       <p className="text-xs text-white/40 uppercase tracking-wide">Period</p>
-                       <div className="flex items-center gap-1 flex-wrap">
-                         <div className="relative">
-                           <select
-                             value={exp.startMonth ?? ''}
-                             onChange={(e) => updateExperienceDateField(exp.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
-                             className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
-                           >
-                             <option value="">Month</option>
-                             {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                           </select>
-                           <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
-                         </div>
-                         <input
-                           type="number"
-                           value={exp.startYear ?? ''}
-                           onChange={(e) => updateExperienceDateField(exp.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
-                           className="w-[68px] rounded border border-white/10 bg-[#020202] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                           placeholder="Year"
-                           min={1950}
-                           max={2099}
-                         />
-                         <span className="text-white/30 text-xs">–</span>
-                         {exp.isCurrent ? (
-                           <span className="text-xs font-medium text-[#16DB65]">Present</span>
-                         ) : (
-                           <>
-                             <div className="relative">
-                               <select
-                                 value={exp.endMonth ?? ''}
-                                 onChange={(e) => updateExperienceDateField(exp.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
-                                 className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
-                               >
-                                 <option value="">Month</option>
-                                 {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                               </select>
-                               <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
-                             </div>
-                             <input
-                               type="number"
-                               value={exp.endYear ?? ''}
-                               onChange={(e) => updateExperienceDateField(exp.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
-                               className="w-[68px] rounded border border-white/10 bg-[#020202] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                               placeholder="Year"
-                               min={1950}
-                               max={2099}
-                             />
-                           </>
-                         )}
-                         <label className="flex items-center gap-1 ml-1 cursor-pointer">
-                           <input
-                             type="checkbox"
-                             checked={exp.isCurrent ?? false}
-                             onChange={(e) => updateExperienceDateField(exp.id, 'isCurrent', e.target.checked)}
-                             className="accent-[#16DB65] w-3 h-3"
-                           />
-                           <span className="text-xs text-white/50">Present</span>
-                         </label>
-                       </div>
-                     </div>
+                     <MonthYearRangeField
+                       monthLabels={MONTH_LABELS}
+                       startMonth={exp.startMonth}
+                       startYear={exp.startYear}
+                       endMonth={exp.endMonth}
+                       endYear={exp.endYear}
+                       isCurrent={exp.isCurrent ?? false}
+                       onStartMonthChange={(value) => updateExperienceDateField(exp.id, 'startMonth', value)}
+                       onStartYearChange={(value) => updateExperienceDateField(exp.id, 'startYear', value)}
+                       onEndMonthChange={(value) => updateExperienceDateField(exp.id, 'endMonth', value)}
+                       onEndYearChange={(value) => updateExperienceDateField(exp.id, 'endYear', value)}
+                       onIsCurrentChange={(value) => updateExperienceDateField(exp.id, 'isCurrent', value)}
+                     />
 
                      <div className="space-y-2">
                        <div className="flex items-center justify-between">
@@ -1728,67 +1857,19 @@ export function ResumeBuilder() {
                         placeholder="Role / Title (e.g. Solo Founder, Lead Developer)"
                       />
 
-                      <div className="space-y-1">
-                        <p className="text-xs text-white/40 uppercase tracking-wide">Period</p>
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <div className="relative">
-                            <select
-                              value={project.startMonth ?? ''}
-                              onChange={(e) => updateProjectDateField(project.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
-                              className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
-                            >
-                              <option value="">Month</option>
-                              {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
-                          </div>
-                          <input
-                            type="number"
-                            value={project.startYear ?? ''}
-                            onChange={(e) => updateProjectDateField(project.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
-                            className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                            placeholder="Year"
-                            min={1950}
-                            max={2099}
-                          />
-                          <span className="text-white/30 text-xs">–</span>
-                          {project.isCurrent ? (
-                            <span className="text-xs font-medium text-[#16DB65]">Present</span>
-                          ) : (
-                            <>
-                              <div className="relative">
-                                <select
-                                  value={project.endMonth ?? ''}
-                                  onChange={(e) => updateProjectDateField(project.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
-                                  className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
-                                >
-                                  <option value="">Month</option>
-                                  {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                                </select>
-                                <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
-                              </div>
-                              <input
-                                type="number"
-                                value={project.endYear ?? ''}
-                                onChange={(e) => updateProjectDateField(project.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
-                                className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-                                placeholder="Year"
-                                min={1950}
-                                max={2099}
-                              />
-                            </>
-                          )}
-                          <label className="flex items-center gap-1 ml-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={project.isCurrent ?? false}
-                              onChange={(e) => updateProjectDateField(project.id, 'isCurrent', e.target.checked)}
-                              className="accent-[#16DB65] w-3 h-3"
-                            />
-                            <span className="text-xs text-white/50">Present</span>
-                          </label>
-                        </div>
-                      </div>
+                      <MonthYearRangeField
+                        monthLabels={MONTH_LABELS}
+                        startMonth={project.startMonth}
+                        startYear={project.startYear}
+                        endMonth={project.endMonth}
+                        endYear={project.endYear}
+                        isCurrent={project.isCurrent ?? false}
+                        onStartMonthChange={(value) => updateProjectDateField(project.id, 'startMonth', value)}
+                        onStartYearChange={(value) => updateProjectDateField(project.id, 'startYear', value)}
+                        onEndMonthChange={(value) => updateProjectDateField(project.id, 'endMonth', value)}
+                        onEndYearChange={(value) => updateProjectDateField(project.id, 'endYear', value)}
+                        onIsCurrentChange={(value) => updateProjectDateField(project.id, 'isCurrent', value)}
+                      />
 
                       <textarea
                         value={project.description}
@@ -1817,7 +1898,94 @@ export function ResumeBuilder() {
             </div>
           )}
 
-          {['education', 'skills', 'certifications', 'sections'].includes(activeTab) ? (
+          {activeTab === 'education' && (
+            <div className="space-y-4" suppressHydrationWarning>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Education</h2>
+                  <p className="mt-1 text-sm text-[#FFFFFF]/72">Add each institution as a separate entry. Use the date pickers for graduation timelines.</p>
+                </div>
+                <button onClick={handleAddEducation} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Institution</button>
+              </div>
+
+              {resumeData.education.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-[#FFFFFF]/82">
+                  No education entries yet. Click + Add Institution to add your first one.
+                </div>
+              ) : (
+                resumeData.education.map((entry, index) => (
+                  <div key={entry.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
+                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
+                      <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/82">Institution {index + 1}</p>
+                      <div className="flex gap-2" suppressHydrationWarning>
+                        <button
+                          onClick={() => deleteEducation(entry.id)}
+                          className="text-[#16DB65] hover:text-[#2AEA7A] p-1"
+                          aria-label="Delete education entry"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        value={entry.institution}
+                        onChange={(e) => updateEducationField(entry.id, 'institution', e.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Institution (e.g. Stanford University)"
+                      />
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <input
+                          value={entry.degree || ''}
+                          onChange={(e) => updateEducationField(entry.id, 'degree', e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                          placeholder="Degree (e.g. B.Sc. in Computer Science)"
+                        />
+                        <input
+                          value={entry.field || ''}
+                          onChange={(e) => updateEducationField(entry.id, 'field', e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                          placeholder="Field of study (optional)"
+                        />
+                      </div>
+
+                      <input
+                        value={entry.location || ''}
+                        onChange={(e) => updateEducationField(entry.id, 'location', e.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Location (optional, e.g. Stanford, CA)"
+                      />
+
+                      <MonthYearRangeField
+                        monthLabels={MONTH_LABELS}
+                        startMonth={entry.startMonth}
+                        startYear={entry.startYear}
+                        endMonth={entry.endMonth}
+                        endYear={entry.endYear}
+                        isCurrent={entry.isCurrent ?? false}
+                        onStartMonthChange={(value) => updateEducationDateField(entry.id, 'startMonth', value)}
+                        onStartYearChange={(value) => updateEducationDateField(entry.id, 'startYear', value)}
+                        onEndMonthChange={(value) => updateEducationDateField(entry.id, 'endMonth', value)}
+                        onEndYearChange={(value) => updateEducationDateField(entry.id, 'endYear', value)}
+                        onIsCurrentChange={(value) => updateEducationDateField(entry.id, 'isCurrent', value)}
+                      />
+
+                      <textarea
+                        value={entry.description || ''}
+                        onChange={(e) => updateEducationField(entry.id, 'description', e.target.value)}
+                        className="h-24 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        placeholder="Optional details (GPA, honors, relevant coursework, thesis, ...)"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {['skills', 'certifications', 'sections'].includes(activeTab) ? (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-bold text-white">{tabs.find((t) => t.id === activeTab)?.label}</h2>
@@ -1832,12 +2000,8 @@ export function ResumeBuilder() {
                 visibleDynamicSections.map((section) => (
                   <SectionPanel
                     key={section.id}
-                    // Education sections share a single rendered heading, so we ignore
-                    // any legacy garbage stored in `section.title` and always show
-                    // the canonical label in the builder.
-                    title={activeTab === 'education' ? 'Education' : section.title}
+                    title={section.title}
                     content={section.content}
-                    showTitleField={activeTab !== 'education'}
                     onTitleChange={(value) => updateDynamicSection(section.id, { title: value })}
                     onContentChange={(value) => updateDynamicSection(section.id, { content: value })}
                     onDelete={() => deleteDynamicSection(section.id)}

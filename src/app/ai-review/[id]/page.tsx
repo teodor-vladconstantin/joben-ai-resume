@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
+import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { startProCheckout } from '@/lib/client-billing'
 
 const SESSION_KEY = 'ai-fix-patches'
 
@@ -41,6 +43,8 @@ export default function AIReviewEditorPage() {
     remainingTokens?: number | null
     resetAt?: string
   } | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to keep applying AI fixes.')
 
   useEffect(() => {
     let cancelled = false
@@ -104,6 +108,7 @@ export default function AIReviewEditorPage() {
       const payload = (await res.json()) as {
         error?: string
         applied?: boolean
+        showUpgrade?: boolean
         experienceId?: string
         bulletIndex?: number
         originalBullet?: string
@@ -113,6 +118,11 @@ export default function AIReviewEditorPage() {
       }
 
       if (!res.ok || !payload.applied) {
+        if (payload.showUpgrade) {
+          setUpgradeMessage(payload.error || 'This AI fix is available on Pro.')
+          setShowUpgradeModal(true)
+          return
+        }
         setFixErrors((prev) => ({ ...prev, [improvementIndex]: payload.error || 'Could not apply this fix. Try again.' }))
         return
       }
@@ -187,11 +197,17 @@ export default function AIReviewEditorPage() {
 
       const payload = (await res.json()) as {
         error?: string
+        showUpgrade?: boolean
         fixesApplied?: number
         patches?: FixPatchWithContext[]
       }
 
       if (!res.ok) {
+        if (payload.showUpgrade) {
+          setUpgradeMessage(payload.error || 'Auto-fix is available on Pro.')
+          setShowUpgradeModal(true)
+          return
+        }
         setAutoFixError(payload.error || 'Auto-fix failed. Please retry.')
         return
       }
@@ -259,6 +275,14 @@ export default function AIReviewEditorPage() {
           </div>
         </div>
       ) : null}
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        title="Pro Feature"
+        description={upgradeMessage}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={startProCheckout}
+      />
     </div>
   )
 }

@@ -43,10 +43,25 @@ type LatexDynamicSection = {
   content?: string
 }
 
+type LatexEducationEntry = {
+  id?: string
+  institution?: string
+  degree?: string
+  field?: string
+  location?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
+  description?: string
+}
+
 type LatexResumeData = {
   personal?: LatexPersonal
   experience?: LatexExperienceEntry[]
   projects?: LatexProjectEntry[]
+  education?: LatexEducationEntry[]
   dynamicSections?: LatexDynamicSection[]
 }
 
@@ -170,6 +185,32 @@ function resolveProjectBullets(project: LatexProjectEntry): string[] {
   if (fromBullets.length > 0) return fromBullets.slice(0, 8)
 
   return splitProjectDescription(project.description)
+}
+
+const LATEX_MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function formatLatexEducationPeriod(entry: LatexEducationEntry): string {
+  const startLabel = entry.startYear
+    ? entry.startMonth
+      ? `${LATEX_MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}`
+      : `${entry.startYear}`
+    : ''
+  const endLabel = entry.isCurrent
+    ? 'Present'
+    : entry.endYear
+      ? entry.endMonth
+        ? `${LATEX_MONTH_LABELS[entry.endMonth - 1]} ${entry.endYear}`
+        : `${entry.endYear}`
+      : ''
+
+  if (startLabel && endLabel) return `${startLabel} -- ${endLabel}`
+  if (startLabel) return startLabel
+  if (endLabel) return endLabel
+  return ''
+}
+
+function buildLatexEducationDegreeLine(entry: LatexEducationEntry): string {
+  return [entry.degree, entry.field].map((part) => (part || '').trim()).filter(Boolean).join(', ')
 }
 
 type ParsedEducationEntry = {
@@ -390,8 +431,40 @@ ${projectItems}
 `
   }
 
+  // Render structured education entries first. When present, we suppress any
+  // legacy `dynamicSections[type=education]` blocks below so the same data is
+  // not printed twice.
+  const structuredEducation = (data.education || []).filter((entry) => (entry.institution || '').trim())
+  if (structuredEducation.length > 0) {
+    tex += String.raw`\section{Education}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+`
+    for (const entry of structuredEducation) {
+      const institution = escapeLatex(clampLatexText(entry.institution || '', 160))
+      const period = escapeLatex(formatLatexEducationPeriod(entry))
+      const degreeLine = escapeLatex(clampLatexText(buildLatexEducationDegreeLine(entry), 220))
+      const location = escapeLatex(clampLatexText(entry.location || '', 120))
+      const description = escapeLatex(clampLatexText(entry.description || '', 600))
+
+      tex += String.raw`
+    \resumeSubheading
+      {${institution}}{${period || ' '}}
+      {${degreeLine || ' '}}{${location || ' '}}
+`
+      if (description) {
+        tex += String.raw`      \begin{itemize}[leftmargin=0.15in, label={-}]
+        \resumeItem{${description}}
+      \end{itemize}
+`
+      }
+    }
+    tex += String.raw`  \end{itemize}
+`
+  }
+
   const groupedSections = dynamicSections
     .filter((section) => section.type !== 'projects') // projects are now rendered separately
+    .filter((section) => !(structuredEducation.length > 0 && section.type === 'education'))
     .reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
     if (!acc[current.type]) acc[current.type] = []
     acc[current.type].push(current)

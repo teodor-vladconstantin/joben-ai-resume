@@ -9,6 +9,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { AI_LIMITS, estimateTokens } from '@/lib/token-estimator'
 import { getErrorMessage } from '@/lib/api-response'
+import { stripProviderMentions } from '@/lib/ai-errors'
 
 type SummaryMode = 'resume' | 'scratch'
 
@@ -211,12 +212,12 @@ export async function POST(req: Request) {
       })
 
       return jsonWithRequestId(
-        { error: error instanceof Error ? error.message : 'Could not generate summary.' },
+        { error: stripProviderMentions(error instanceof Error ? error.message : 'Could not generate summary.') },
         500,
         requestId
       )
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
   }
 }
