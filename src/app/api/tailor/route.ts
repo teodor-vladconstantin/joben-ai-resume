@@ -8,8 +8,10 @@ import {
 import { parseClaudeJsonText } from '@/lib/claude-json'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
-import { getErrorMessage } from '@/lib/api-response'
 import { stripProviderMentions } from '@/lib/ai-errors'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
+import { tailorSchema } from '@/lib/validation/schemas'
 
 const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
 {
@@ -22,25 +24,33 @@ export async function POST(req: Request) {
   try {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
     const plan = await getUserPlan(userId, emailHint)
 
-    const body = (await req.json()) as {
-      resumeData?: Record<string, unknown>
-      jobDescription?: string
-      optimizationType?: 'job_specific' | 'general'
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    if (!body.resumeData || !body.jobDescription) {
-      return jsonWithRequestId({ error: 'resumeData and jobDescription are required' }, 400, requestId)
+    const parsed = tailorSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
+
+    const body = parsed.data
+    // SECURITY: sanitize both the JD string and every nested string inside
+    // the resumeData blob before they land in the prompt.
+    const safeResumeData = sanitizeJsonForPrompt(body.resumeData, { maxChars: 5_000 })
+    const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })
 
     try {
-      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(body.resumeData)}\n\nJob description:\n${body.jobDescription}`
+      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(safeResumeData)}\n\nJob description:\n${safeJobDescription}`
       const messages: MessageParam[] = [
         {
           role: 'user',
@@ -70,7 +80,7 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
-      const rawMessage = getErrorMessage(error)
+      const rawMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error('Tailor route failed', {
         requestId,
         userId,
@@ -80,6 +90,11 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: stripProviderMentions(rawMessage) }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
+    logger.error('Tailor route top-level failure', {
+      requestId,
+      route: '/api/tailor',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

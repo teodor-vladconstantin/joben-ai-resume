@@ -1,6 +1,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
-import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
+import { apiError, apiSuccess } from '@/lib/api-response'
+import { logger } from '@/lib/logger'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { uuidLike } from '@/lib/validation/schemas'
 
 function isMissingRelation(error: unknown): boolean {
   const err = error as { code?: string; message?: string }
@@ -11,23 +14,29 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError('Unauthorized', 401)
+      return apiError(clientErrorMessage('auth'), 401)
     }
 
     const { id } = await params
+    const parsedId = uuidLike.safeParse(id)
+    if (!parsedId.success) {
+      return apiError(clientErrorMessage('invalid_input'), 400)
+    }
+
     const supabase = createServerClient()
     const { data, error } = await supabase
       .from('ai_reviews')
       .select('id, score, created_at, resume_id, feedback, resumes(title)')
-      .eq('id', id)
+      .eq('id', parsedId.data)
       .eq('user_id', userId)
       .single()
 
     if (error) {
       if (isMissingRelation(error)) {
-        return apiError('AI reviews table is missing in Supabase.', 500)
+        return apiError(clientErrorMessage('server', 'AI reviews table is missing in Supabase.'), 500)
       }
-      return apiError(error.message, 404)
+      logger.error('ai-reviews [id] GET failed', { userId, reviewId: parsedId.data, error: error.message })
+      return apiError(clientErrorMessage('not_found'), 404)
     }
 
     let comparison: {
@@ -66,6 +75,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
     return apiSuccess({ review: data, comparison }, 200)
   } catch (error) {
-    return apiError(getErrorMessage(error), 500)
+    logger.error('ai-reviews [id] GET top-level failure', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return apiError(clientErrorMessage('server'), 500)
   }
 }

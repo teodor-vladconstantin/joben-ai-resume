@@ -7,8 +7,9 @@ import {
   getRedisClient,
   unblockFeature,
 } from '@/lib/ratelimit'
-import { getRequestId, jsonWithRequestId } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/api-response'
+import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { adminRateLimitPostSchema } from '@/lib/validation/schemas'
 
 const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs'])
 const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap'])
@@ -122,12 +123,12 @@ export async function GET(req: Request) {
     const { userId } = await auth()
 
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const admins = parseAdminUserIds()
     if (!admins.has(userId)) {
-      return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('forbidden') }, 403, requestId)
     }
 
     const { searchParams } = new URL(req.url)
@@ -138,7 +139,7 @@ export async function GET(req: Request) {
       const date = searchParams.get('date') || today
 
       if (!isValidIsoDay(date)) {
-        return jsonWithRequestId({ error: 'date must use YYYY-MM-DD format' }, 400, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'date must use YYYY-MM-DD format') }, 400, requestId)
       }
 
       const alerts = await getAlertsForDate(date)
@@ -148,16 +149,21 @@ export async function GET(req: Request) {
     if (action === 'user') {
       const targetUserId = searchParams.get('userId')
       if (!targetUserId) {
-        return jsonWithRequestId({ error: 'userId is required for action=user' }, 400, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'userId is required for action=user') }, 400, requestId)
       }
 
       const status = await getRateLimitStatus(targetUserId)
       return jsonWithRequestId(status, 200, requestId)
     }
 
-    return jsonWithRequestId({ error: 'Unsupported action. Use alerts or user.' }, 400, requestId)
+    return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'Unsupported action. Use alerts or user.') }, 400, requestId)
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('admin rate-limit GET failed', {
+      requestId,
+      route: '/api/admin/rate-limit',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
 
@@ -167,31 +173,27 @@ export async function POST(req: Request) {
     const { userId } = await auth()
 
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const admins = parseAdminUserIds()
     if (!admins.has(userId)) {
-      return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('forbidden') }, 403, requestId)
     }
 
-    const body = (await req.json()) as {
-      action?: 'block' | 'unblock'
-      userId?: string
-      feature?: Feature
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    if (!body.action || (body.action !== 'block' && body.action !== 'unblock')) {
-      return jsonWithRequestId({ error: 'action must be block or unblock' }, 400, requestId)
+    const parsed = adminRateLimitPostSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    if (!body.userId) {
-      return jsonWithRequestId({ error: 'userId is required' }, 400, requestId)
-    }
-
-    if (!body.feature || !FEATURE_SET.has(body.feature)) {
-      return jsonWithRequestId({ error: 'feature must be one of covers, jds, bullets, reviews, summaries, cvs' }, 400, requestId)
-    }
+    const body = parsed.data
 
     if (body.action === 'block') {
       await blockFeature(body.userId, body.feature)
@@ -210,6 +212,11 @@ export async function POST(req: Request) {
       requestId
     )
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('admin rate-limit POST failed', {
+      requestId,
+      route: '/api/admin/rate-limit',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

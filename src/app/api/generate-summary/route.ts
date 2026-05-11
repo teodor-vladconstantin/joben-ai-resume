@@ -8,8 +8,10 @@ import {
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { AI_LIMITS, estimateTokens } from '@/lib/token-estimator'
-import { getErrorMessage } from '@/lib/api-response'
 import { stripProviderMentions } from '@/lib/ai-errors'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
+import { generateSummarySchema } from '@/lib/validation/schemas'
 
 type SummaryMode = 'resume' | 'scratch'
 
@@ -117,26 +119,41 @@ export async function POST(req: Request) {
     const { userId, sessionClaims } = await auth()
 
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
-    const body = (await req.json()) as GenerateSummaryBody
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const parsed = generateSummarySchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const body = parsed.data
     const mode = body.mode
-
-    if (mode !== 'resume' && mode !== 'scratch') {
-      return jsonWithRequestId({ error: 'mode must be either "resume" or "scratch".' }, 400, requestId)
-    }
 
     let userPrompt = ''
 
     if (mode === 'resume') {
       if (!body.resumeData) {
-        return jsonWithRequestId({ error: 'resumeData is required when mode is "resume".' }, 400, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'resumeData is required when mode is "resume".') }, 400, requestId)
       }
 
-      const resumeContext = buildResumeContext(body.resumeData)
+      // SECURITY: sanitize every string in the resumeData JSON before
+      // feeding it to buildResumeContext and ultimately to the prompt.
+      const safeResumeData = sanitizeJsonForPrompt(body.resumeData as ResumeSummaryInput, { maxChars: 4_000 })
+      const resumeContext = buildResumeContext(safeResumeData)
       if (!resumeContext.trim()) {
-        return jsonWithRequestId({ error: 'Resume context is empty. Add experience or sections before generating.' }, 400, requestId)
+        return jsonWithRequestId(
+          { error: clientErrorMessage('invalid_input', 'Resume context is empty. Add experience or sections before generating.') },
+          400,
+          requestId
+        )
       }
 
       userPrompt = [
@@ -149,9 +166,14 @@ export async function POST(req: Request) {
     }
 
     if (mode === 'scratch') {
-      const roleDescription = compactWhitespace(body.roleDescription || '')
+      const safeRoleDescription = sanitizeForPrompt(body.roleDescription, { maxChars: 10_000 })
+      const roleDescription = compactWhitespace(safeRoleDescription)
       if (!roleDescription) {
-        return jsonWithRequestId({ error: 'roleDescription is required when mode is "scratch".' }, 400, requestId)
+        return jsonWithRequestId(
+          { error: clientErrorMessage('invalid_input', 'roleDescription is required when mode is "scratch".') },
+          400,
+          requestId
+        )
       }
 
       userPrompt = [
@@ -218,6 +240,11 @@ export async function POST(req: Request) {
       )
     }
   } catch (error) {
-    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
+    logger.error('Generate-summary route top-level failure', {
+      requestId,
+      route: '/api/generate-summary',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

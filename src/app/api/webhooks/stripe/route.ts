@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -398,13 +398,16 @@ export async function POST(req: Request) {
       }
     }
   } catch (err) {
-    const message = getErrorMessage(err)
+    // SECURITY: Stripe webhook errors must not echo raw exception text back
+    // to Stripe (or anyone replaying the request). Stripe only needs to
+    // know the call failed; the diagnostic stays in the server log.
+    const rawMessage = err instanceof Error ? err.message : 'Unknown error'
     logger.error('Stripe webhook handling failed', {
       requestId,
       route: '/api/webhooks/stripe',
-      error: message,
+      error: rawMessage,
     })
-    return jsonWithRequestId({ error: `Webhook handling failed: ${message}` }, 500, requestId)
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 
   logger.info('Stripe webhook processed', {

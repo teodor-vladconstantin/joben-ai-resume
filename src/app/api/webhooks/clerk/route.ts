@@ -4,7 +4,7 @@ import { WebhookEvent } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
         userId: id,
         error: error.message,
       })
-      return jsonWithRequestId({ error: error.message }, 500, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
     if (primaryEmail) {
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
           userId: id,
           error: existingUserError.message,
         })
-        return jsonWithRequestId({ error: existingUserError.message }, 500, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
       }
 
       const shouldSendWelcome = !existingUser?.welcome_sent_at
@@ -224,7 +224,7 @@ export async function POST(req: Request) {
         userId: id,
         error: error.message,
       })
-      return jsonWithRequestId({ error: error.message }, 500, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
   }
 
@@ -242,7 +242,7 @@ export async function POST(req: Request) {
           userId: id,
           error: error.message,
         })
-        return jsonWithRequestId({ error: error.message }, 500, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
       }
     }
   }
@@ -255,6 +255,11 @@ export async function POST(req: Request) {
     })
     return jsonWithRequestId({ message: 'Success' }, 200, requestId)
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('Clerk webhook top-level failure', {
+      requestId,
+      route: '/api/webhooks/clerk',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

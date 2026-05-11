@@ -8,8 +8,10 @@ import {
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
-import { getErrorMessage } from '@/lib/api-response'
 import { stripProviderMentions } from '@/lib/ai-errors'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { improveBulletSchema } from '@/lib/validation/schemas'
 
 const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
 If numeric evidence is present and the source supports it, prefer this structure: [Action verb] X by Y using Z.
@@ -23,21 +25,37 @@ export async function POST(req: Request) {
   try {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
     const plan = await getUserPlan(userId, emailHint)
 
-    const body = (await req.json()) as { bullet?: string; context?: string }
-    if (!body.bullet) {
-      return jsonWithRequestId({ error: 'bullet is required' }, 400, requestId)
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const parsed = improveBulletSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const body = parsed.data
+    // SECURITY: sanitize user-supplied bullet/context before prompt build.
+    const safeBullet = sanitizeForPrompt(body.bullet, { maxChars: 2_000 })
+    const safeContext = sanitizeForPrompt(body.context, { maxChars: 6_000 })
+
+    if (!safeBullet) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
     try {
-      const hasNumericEvidence = /\d/.test(`${body.bullet} ${body.context || ''}`)
-      const userPrompt = `Bullet: ${body.bullet}\nContext: ${body.context || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
+      const hasNumericEvidence = /\d/.test(`${safeBullet} ${safeContext}`)
+      const userPrompt = `Bullet: ${safeBullet}\nContext: ${safeContext || 'N/A'}\nNumeric evidence present: ${hasNumericEvidence ? 'yes' : 'no'}`
       const messages: MessageParam[] = [
         {
           role: 'user',
@@ -76,7 +94,7 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
-      const rawMessage = getErrorMessage(error)
+      const rawMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error('Improve-bullet route failed', {
         requestId,
         userId,
@@ -86,6 +104,11 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: stripProviderMentions(rawMessage) }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
+    logger.error('Improve-bullet route top-level failure', {
+      requestId,
+      route: '/api/improve-bullet',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
