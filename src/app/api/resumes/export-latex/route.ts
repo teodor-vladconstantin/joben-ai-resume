@@ -586,15 +586,15 @@ export async function POST(req: Request) {
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
     const isProduction = process.env.NODE_ENV === 'production'
-    // SECURITY: CLAUDE.md Medium #3 — auth is now REQUIRED by default in
-    // production. Operators must explicitly set LATEX_SERVICE_AUTH_REQUIRED
-    // to "false" to opt out (e.g. for a local dev compose with a private
-    // network).
-    const authOptOut = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'false'
-    const requireLatexServiceAuth = isProduction ? !authOptOut : !authOptOut && Boolean(latexServiceSecret)
+    // SECURITY: CLAUDE.md Medium #3 — auth on the LaTeX upstream stays
+    // opt-in (matches the upstream service default). Operators can flip
+    // LATEX_SERVICE_AUTH_REQUIRED=true to make a missing secret hard-fail
+    // here. We always emit a loud warning in prod when the upstream is
+    // unauthenticated so the gap is visible in monitoring.
+    const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
 
     if (requireLatexServiceAuth && !latexServiceSecret) {
-      logger.error('LATEX_SERVICE_SECRET missing while latex auth is required', {
+      logger.error('LATEX_SERVICE_SECRET missing while LATEX_SERVICE_AUTH_REQUIRED=true', {
         requestId,
         route: '/api/resumes/export-latex',
         userId,
@@ -604,6 +604,14 @@ export async function POST(req: Request) {
         503,
         requestId
       )
+    }
+
+    if (isProduction && !latexServiceSecret) {
+      logger.warn('LaTeX upstream is being called without a shared secret', {
+        requestId,
+        route: '/api/resumes/export-latex',
+        hint: 'Set LATEX_SERVICE_SECRET on Vercel and on the LaTeX container (with REQUIRE_SERVICE_AUTH=true) to authenticate every compile.',
+      })
     }
 
     const headers: Record<string, string> = {
