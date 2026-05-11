@@ -1,9 +1,24 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { Redis } from '@upstash/redis'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
 
 export const runtime = 'nodejs'
+
+// SECURITY: CLAUDE.md Medium #2 — the detailed checks map (which vendors
+// are configured, which probes failed) is a recon gift to anyone scanning
+// the site. Gate the verbose payload behind the existing admin allowlist
+// and expose only a boolean status to anonymous callers.
+function parseAdminUserIds(): Set<string> {
+  const raw = process.env.ADMIN_USER_IDS || ''
+  return new Set(
+    raw
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  )
+}
 
 type ServiceProbe = 'ok' | 'error' | 'skipped'
 
@@ -49,6 +64,10 @@ function resolveLatexHealthUrl(): string | null {
 
 export async function GET() {
   try {
+    const { userId } = await auth()
+    const admins = parseAdminUserIds()
+    const isAdmin = Boolean(userId && admins.has(userId))
+
     const isProduction = process.env.NODE_ENV === 'production'
     const supabase = createServerClient()
 
@@ -120,12 +139,25 @@ export async function GET() {
       },
     }
 
-    if (status === 'ok') {
-      return NextResponse.json({ success: true, data: payload, ...payload }, { status: 200 })
+    // SECURITY: admins get the detailed probe map; everyone else only sees
+    // a boolean status + timestamp so no vendor configuration is disclosed.
+    const publicPayload = {
+      status,
+      timestamp: payload.timestamp,
     }
 
-    return NextResponse.json({ success: false, error: 'Service degraded', data: payload, ...payload }, { status: 503 })
+    if (status === 'ok') {
+      const body = isAdmin ? { success: true, data: payload, ...payload } : { success: true, ...publicPayload }
+      return NextResponse.json(body, { status: 200 })
+    }
+
+    const body = isAdmin
+      ? { success: false, error: 'Service degraded', data: payload, ...payload }
+      : { success: false, error: 'Service degraded', ...publicPayload }
+    return NextResponse.json(body, { status: 503 })
   } catch (error) {
-    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 })
+    // SECURITY: never echo the underlying failure to the client.
+    console.error('[api/health]', error)
+    return NextResponse.json({ success: false, error: clientErrorMessage('server') }, { status: 500 })
   }
 }

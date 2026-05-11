@@ -1,14 +1,15 @@
-import os
+import hmac
 import io
 import json
+import logging
+import os
 import re
 from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from llama_parse import LlamaParse
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +23,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# SECURITY: CLAUDE.md Critical #3 — the parser is exposed on a public IP so
+# we MUST reject calls that bypass the Next.js layer. The Next.js
+# `/api/parse` route forwards `Authorization: Bearer ${RESUME_PARSER_SHARED_SECRET}`
+# and so must any other caller.
+_SHARED_SECRET = (os.getenv("RESUME_PARSER_SHARED_SECRET") or "").strip()
+
+
+def require_parser_secret(authorization: Optional[str] = Header(default=None)) -> None:
+    if not _SHARED_SECRET:
+        # Operators must explicitly set the secret in production. We refuse
+        # to start serving traffic without one to fail loud rather than
+        # silently expose the parser.
+        logger.error("RESUME_PARSER_SHARED_SECRET is not configured")
+        raise HTTPException(status_code=503, detail="Parser is not configured.")
+
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    presented = authorization.split(" ", 1)[1].strip()
+    if not hmac.compare_digest(presented, _SHARED_SECRET):
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 class WorkExperience(BaseModel):
@@ -1191,7 +1215,10 @@ async def health_check():
 
 
 @app.post("/parse")
-async def parse_resume(file: UploadFile = File(...)):
+async def parse_resume(
+    file: UploadFile = File(...),
+    _auth: None = Depends(require_parser_secret),
+):
     file_extension = os.path.splitext(file.filename or "")[1].lower()
     if file_extension not in {".pdf", ".docx"}:
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF and DOCX files are allowed.")

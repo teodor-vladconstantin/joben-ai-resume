@@ -13,7 +13,13 @@ import {
 } from '@/lib/ratelimit'
 import { sanitizeAiError } from '@/lib/ai-errors'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// SECURITY: CLAUDE.md High #6 — cap the provider call at 30 s so a slow
+// upstream cannot tie up Next.js request handlers indefinitely.
+const ANTHROPIC_TIMEOUT_MS = 30_000
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: ANTHROPIC_TIMEOUT_MS,
+})
 const primaryClaudeModel = 'claude-haiku-4-5-20251001'
 const fallbackClaudeModel = 'claude-3-haiku-20240307'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel

@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sendSevenDayFollowupEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
 
 export const runtime = 'nodejs'
 
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         route: '/api/cron/followup-7d',
         error: error.message,
       })
-      return jsonWithRequestId({ error: error.message }, 500, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
     const candidates = (data || []) as CandidateUser[]
@@ -280,6 +280,11 @@ export async function POST(request: Request) {
       requestId
     )
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('Followup cron top-level failure', {
+      requestId,
+      route: '/api/cron/followup-7d',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

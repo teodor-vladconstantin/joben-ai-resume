@@ -4,13 +4,19 @@ import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 
 export const runtime = 'nodejs'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripePriceId = process.env.STRIPE_PRO_PRICE_ID
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+// SECURITY: CLAUDE.md High #4 — throttle checkout session creation so a
+// single user cannot spam Stripe session inventory and trigger rate limits
+// for legitimate traffic.
+const CHECKOUT_RATE_LIMIT_PER_HOUR = 10
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
@@ -23,7 +29,33 @@ export async function POST(req: Request) {
   try {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
+    }
+
+    const limit = await checkRouteRateLimit({
+      name: 'billing-checkout',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: CHECKOUT_RATE_LIMIT_PER_HOUR,
+      windowSeconds: 3600,
+    })
+    if (!limit.ok) {
+      logger.warn('Checkout rate-limit hit', {
+        requestId,
+        route: '/api/billing/checkout',
+        userId,
+        retryAfter: limit.retryAfter,
+      })
+      return new Response(
+        JSON.stringify({ error: clientErrorMessage('rate_limit') }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(limit.retryAfter),
+            'x-request-id': requestId,
+          },
+        }
+      )
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
@@ -41,6 +73,8 @@ export async function POST(req: Request) {
     }
 
     if (!stripe || !stripePriceId) {
+      // SECURITY: CLAUDE.md Medium #6 — never leak which env vars are missing
+      // to the client. Full diagnostic details stay in the server logs.
       logger.error('Stripe checkout config missing', {
         requestId,
         route: '/api/billing/checkout',
@@ -49,8 +83,8 @@ export async function POST(req: Request) {
         hasStripePriceId: Boolean(stripePriceId),
       })
       return jsonWithRequestId(
-        { error: 'Billing is not configured. Missing STRIPE_SECRET_KEY or STRIPE_PRO_PRICE_ID.' },
-        500,
+        { error: clientErrorMessage('unavailable', 'Billing is temporarily unavailable. Please try again later.') },
+        503,
         requestId
       )
     }
@@ -105,16 +139,20 @@ export async function POST(req: Request) {
 
       return jsonWithRequestId({ url: session.url }, 200, requestId)
     } catch (error) {
-      const message = getErrorMessage(error)
       logger.error('Stripe checkout route failed', {
         requestId,
         route: '/api/billing/checkout',
         userId,
-        error: message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
-      return jsonWithRequestId({ error: message }, 500, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('Stripe checkout route top-level failure', {
+      requestId,
+      route: '/api/billing/checkout',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

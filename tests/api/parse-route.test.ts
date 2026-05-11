@@ -4,6 +4,12 @@ import type { NextRequest } from 'next/server'
 const ORIGINAL_RESUME_PARSER_URL = process.env.RESUME_PARSER_URL
 const ORIGINAL_PUBLIC_RESUME_PARSER_URL = process.env.NEXT_PUBLIC_RESUME_PARSER_URL
 
+const authMock = vi.fn()
+
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: authMock,
+}))
+
 function buildUploadRequest(): Request {
   const formData = new FormData()
   formData.append('file', new Blob(['dummy pdf bytes'], { type: 'application/pdf' }), 'resume.pdf')
@@ -14,10 +20,15 @@ function buildUploadRequest(): Request {
   })
 }
 
+function buildHealthRequest(): Request {
+  return new Request('http://localhost/api/parse', { method: 'GET' })
+}
+
 describe('/api/parse route', () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    authMock.mockResolvedValue({ userId: 'user_test_123' })
   })
 
   afterEach(() => {
@@ -26,7 +37,16 @@ describe('/api/parse route', () => {
     vi.unstubAllGlobals()
   })
 
-  it('uses RESUME_PARSER_URL for upstream requests', async () => {
+  it('rejects anonymous POST with 401', async () => {
+    authMock.mockResolvedValue({ userId: null })
+
+    const { POST } = await import('@/app/api/parse/route')
+    const response = await POST(buildUploadRequest() as unknown as NextRequest)
+
+    expect(response.status).toBe(401)
+  })
+
+  it('uses RESUME_PARSER_URL for upstream requests when authenticated', async () => {
     process.env.RESUME_PARSER_URL = 'http://parser.internal:9000'
     delete process.env.NEXT_PUBLIC_RESUME_PARSER_URL
 
@@ -66,7 +86,7 @@ describe('/api/parse route', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { GET } = await import('@/app/api/parse/route')
-    const response = await GET()
+    const response = await GET(buildHealthRequest())
     const payload = await response.json()
 
     expect(response.status).toBe(200)
@@ -113,7 +133,7 @@ describe('/api/parse route', () => {
     )
   })
 
-  it('returns 503 with useful detail when all parser candidates fail', async () => {
+  it('returns 503 with a generic message when all parser candidates fail', async () => {
     delete process.env.RESUME_PARSER_URL
     delete process.env.NEXT_PUBLIC_RESUME_PARSER_URL
 
@@ -121,12 +141,13 @@ describe('/api/parse route', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { GET } = await import('@/app/api/parse/route')
-    const response = await GET()
-    const payload = await response.json()
+    const response = await GET(buildHealthRequest())
+    const payload = (await response.json()) as { error?: string }
 
+    // SECURITY regression: the raw upstream error must NOT leak to the
+    // client; it should be replaced with a generic message.
     expect(response.status).toBe(503)
-    expect(payload).toEqual({
-      detail: 'parser host unreachable',
-    })
+    expect(payload.error).toBeDefined()
+    expect(payload.error).not.toContain('parser host unreachable')
   })
 })

@@ -11,8 +11,10 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { estimateRequestCost } from '@/lib/token-estimator'
-import { getErrorMessage } from '@/lib/api-response'
 import { stripProviderMentions } from '@/lib/ai-errors'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { analyzeSchema } from '@/lib/validation/schemas'
 
 const ANALYZE_SYSTEM_PROMPT = `You are an elite resume analyst and ATS expert. Analyze the resume and return ONLY valid JSON, no markdown, no preamble.
 
@@ -63,24 +65,36 @@ export async function POST(req: Request) {
   try {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
-    const body = (await req.json()) as {
-      resumeText?: string
-      jobDescription?: string
-      resumeId?: string
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    if (!body.resumeText || !body.resumeText.trim()) {
-      return jsonWithRequestId({ error: 'resumeText is required' }, 400, requestId)
+    const parsed = analyzeSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const body = parsed.data
+
+    // SECURITY: CLAUDE.md High #3 — neutralize prompt injection + hard cap.
+    const safeResume = sanitizeForPrompt(body.resumeText, { maxChars: 10_000 })
+    const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })
+
+    if (!safeResume) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
     const plan = await getUserPlan(userId, emailHint)
 
-    const costEstimate = estimateRequestCost(body.resumeText, body.jobDescription, 'resume_analysis')
+    const costEstimate = estimateRequestCost(safeResume, safeJobDescription, 'resume_analysis')
     if (!costEstimate.withinLimit) {
       const suggested = costEstimate.suggestedMaxChars ?? 16000
       const label = costEstimate.limitType === 'jd_too_long'
@@ -90,7 +104,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      const prompt = `Resume:\n${body.resumeText}\n\nJob description:\n${body.jobDescription || 'N/A'}`
+      const prompt = `Resume:\n${safeResume}\n\nJob description:\n${safeJobDescription || 'N/A'}`
       const messages: MessageParam[] = [
         {
           role: 'user',
@@ -129,7 +143,7 @@ export async function POST(req: Request) {
           route: '/api/analyze',
           error: insertError.message,
         })
-        return jsonWithRequestId({ error: insertError.message }, 500, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
       }
 
       logger.info('AI review created', {
@@ -156,9 +170,10 @@ export async function POST(req: Request) {
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
+      const rawMessage = error instanceof Error ? error.message : 'Unknown error'
       const message = error instanceof ClaudeJsonParseError
         ? 'AI response format was invalid. Please retry.'
-        : stripProviderMentions(getErrorMessage(error))
+        : stripProviderMentions(rawMessage)
 
       logger.error('Analyze route failed', {
         requestId,
@@ -170,6 +185,11 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: message }, 500, requestId)
     }
   } catch (error) {
-    return jsonWithRequestId({ error: stripProviderMentions(getErrorMessage(error)) }, 500, requestId)
+    logger.error('Analyze route top-level failure', {
+      requestId,
+      route: '/api/analyze',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

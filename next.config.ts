@@ -17,8 +17,63 @@ if (missing.length > 0) {
   process.exit(1)
 }
 
+// SECURITY: CLAUDE.md Critical #5 — every response gets a hardened header
+// set. CSP allows Clerk, Supabase, PostHog (rewritten via /ingest), Sentry
+// tunnel (/monitoring), and Stripe. We keep `'unsafe-inline'` on script-src
+// because Next.js + Clerk bootstrap require inline scripts; tighten to
+// nonces in a future iteration if/when we drop those vendors.
+const SECURITY_HEADERS = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.stripe.com")' },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=63072000; includeSubDomains; preload',
+  },
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+      "font-src 'self' data:",
+      "img-src 'self' data: blob: https:",
+      "media-src 'self' data: blob:",
+      "worker-src 'self' blob:",
+      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com",
+      [
+        'connect-src',
+        "'self'",
+        'https://*.clerk.com',
+        'https://*.clerk.accounts.dev',
+        'https://*.supabase.co',
+        'wss://*.supabase.co',
+        'https://eu.i.posthog.com',
+        'https://eu-assets.i.posthog.com',
+        'https://*.ingest.sentry.io',
+        'https://api.stripe.com',
+      ].join(' '),
+      "frame-src 'self' https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com",
+      'upgrade-insecure-requests',
+    ].join('; '),
+  },
+]
+
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: SECURITY_HEADERS,
+      },
+    ]
+  },
   async rewrites() {
     return [
       {

@@ -4,6 +4,7 @@ import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeExportQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { renderInlineLatex } from '@/lib/inline-format'
+import { clientErrorMessage } from '@/lib/security/client-error'
 
 export const runtime = 'nodejs'
 
@@ -584,8 +585,13 @@ export async function POST(req: Request) {
 
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
-    const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
     const isProduction = process.env.NODE_ENV === 'production'
+    // SECURITY: CLAUDE.md Medium #3 — auth is now REQUIRED by default in
+    // production. Operators must explicitly set LATEX_SERVICE_AUTH_REQUIRED
+    // to "false" to opt out (e.g. for a local dev compose with a private
+    // network).
+    const authOptOut = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'false'
+    const requireLatexServiceAuth = isProduction ? !authOptOut : !authOptOut && Boolean(latexServiceSecret)
 
     if (requireLatexServiceAuth && !latexServiceSecret) {
       logger.error('LATEX_SERVICE_SECRET missing while latex auth is required', {
@@ -594,18 +600,10 @@ export async function POST(req: Request) {
         userId,
       })
       return jsonWithRequestId(
-        { error: 'PDF export service is temporarily unavailable.' },
+        { error: clientErrorMessage('unavailable', 'PDF export service is temporarily unavailable.') },
         503,
         requestId
       )
-    }
-
-    if (isProduction && !requireLatexServiceAuth && !latexServiceSecret) {
-      logger.warn('LATEX_SERVICE_SECRET missing, continuing without latex auth', {
-        requestId,
-        route: '/api/resumes/export-latex',
-        userId,
-      })
     }
 
     const headers: Record<string, string> = {
@@ -616,11 +614,33 @@ export async function POST(req: Request) {
       headers.Authorization = `Bearer ${latexServiceSecret}`
     }
 
-    const response = await fetch(latexServiceUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ tex: texStr }),
-    })
+    // SECURITY: CLAUDE.md Medium #4 — bound the upstream call so a stuck
+    // LaTeX compile cannot hold this request handler open indefinitely.
+    const latexController = new AbortController()
+    const latexTimeout = setTimeout(() => latexController.abort(), 20_000)
+    let response: Response
+    try {
+      response = await fetch(latexServiceUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ tex: texStr }),
+        signal: latexController.signal,
+      })
+    } catch (fetchError) {
+      logger.error('LaTeX service request failed', {
+        requestId,
+        route: '/api/resumes/export-latex',
+        userId,
+        error: fetchError instanceof Error ? fetchError.message : 'Unknown error',
+      })
+      return jsonWithRequestId(
+        { error: clientErrorMessage('unavailable', 'PDF export service is temporarily unavailable.') },
+        503,
+        requestId
+      )
+    } finally {
+      clearTimeout(latexTimeout)
+    }
 
     if (!response.ok) {
       let errStr = 'Failed to compile LaTeX'
@@ -637,8 +657,15 @@ export async function POST(req: Request) {
         userId,
         error: errStr,
       })
+      // SECURITY: never leak the LaTeX service error (may contain file
+      // paths, tex source snippets, stack traces). Dev mode keeps the detail
+      // so debugging is still possible locally.
       return jsonWithRequestId(
-        { error: isProduction ? 'PDF export failed. Please try again later.' : errStr },
+        {
+          error: isProduction
+            ? clientErrorMessage('server', 'PDF export failed. Please try again later.')
+            : errStr,
+        },
         500,
         requestId
       )
@@ -664,12 +691,11 @@ export async function POST(req: Request) {
     pdfResponse.headers.set('x-request-id', requestId)
     return pdfResponse
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error exporting to PDF'
     logger.error('Resume export route failed', {
       requestId,
       route: '/api/resumes/export-latex',
-      error: message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return jsonWithRequestId({ error: message }, 500, requestId)
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

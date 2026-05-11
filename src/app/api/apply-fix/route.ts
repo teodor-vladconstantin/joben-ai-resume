@@ -9,6 +9,9 @@ import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
+import { applyFixSchema } from '@/lib/validation/schemas'
 
 type ExperienceEntry = {
   id: string
@@ -79,19 +82,29 @@ export async function POST(req: Request) {
     userId = authResult.userId
     const { sessionClaims } = authResult
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
 
-    const body = (await req.json()) as {
-      resumeId?: string
-      reviewId?: string
-      improvement?: Improvement
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    if (!body.resumeId || !body.improvement) {
-      return jsonWithRequestId({ error: 'resumeId and improvement are required' }, 400, requestId)
+    const parsed = applyFixSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const body = parsed.data
+    // SECURITY: sanitize each improvement field before it lands in the prompt.
+    const safeImprovement = {
+      issue: sanitizeForPrompt(body.improvement.issue, { maxChars: 1_000 }),
+      weak_example: sanitizeForPrompt(body.improvement.weak_example, { maxChars: 1_500 }),
+      strong_example: sanitizeForPrompt(body.improvement.strong_example, { maxChars: 1_500 }),
     }
 
     const plan = await getUserPlan(userId, emailHint)
@@ -120,16 +133,21 @@ export async function POST(req: Request) {
     }
 
     // Build a compact experience snapshot for the prompt (id + bullets only)
+    // SECURITY: sanitize every string from the stored resume before it
+    // lands in the prompt (users can embed instructions inside their own CV).
     const experienceForPrompt = experience.map((exp) => ({
       id: exp.id,
-      title: exp.title || '',
-      company: exp.company || '',
-      bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
-        ? exp.bullets
-        : [exp.description || ''],
+      title: sanitizeForPrompt(exp.title || '', { maxChars: 200 }),
+      company: sanitizeForPrompt(exp.company || '', { maxChars: 200 }),
+      bullets: sanitizeJsonForPrompt(
+        Array.isArray(exp.bullets) && exp.bullets.length > 0
+          ? exp.bullets
+          : [exp.description || ''],
+        { maxChars: 1_500 }
+      ),
     }))
 
-    const imp = body.improvement
+    const imp = safeImprovement
     const prompt = `Resume experience (JSON):
 ${JSON.stringify(experienceForPrompt, null, 2)}
 
@@ -210,7 +228,7 @@ Improvement to apply:
 
     if (updateError) {
       logger.error('apply-fix: save failed', { requestId, userId, error: updateError.message })
-      return jsonWithRequestId({ error: updateError.message }, 500, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
     if (body.reviewId) {

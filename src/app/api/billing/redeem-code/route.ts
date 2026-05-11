@@ -1,7 +1,17 @@
+import { Buffer } from 'node:buffer'
+import { timingSafeEqual } from 'node:crypto'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import {
+  bumpCounter,
+  checkRouteRateLimit,
+  isLocked,
+  resolveRateLimitIdentity,
+  setLock,
+} from '@/lib/security/route-rate-limit'
+import { redeemCodeSchema } from '@/lib/validation/schemas'
 
 export const runtime = 'nodejs'
 
@@ -19,8 +29,37 @@ const PLACEHOLDER_CODE_VALUES = [
   'YOUR_PRIVATE_REDEEM_CODE',
 ] as const
 
+// SECURITY: CLAUDE.md Critical #4 — burst protection + lockout against
+// brute-force redemption.
+const REDEEM_RATE_LIMIT_PER_HOUR = 5
+const REDEEM_LOCKOUT_THRESHOLD = 10
+const REDEEM_LOCKOUT_TTL_SECONDS = 24 * 60 * 60
+const REDEEM_FAIL_COUNTER_TTL_SECONDS = 24 * 60 * 60
+
 function normalizeCode(input: string | null | undefined): string {
   return (input || '').trim().toUpperCase()
+}
+
+// SECURITY: constant-time string compare so the response timing does not
+// leak how many leading characters of the expected code matched.
+function safeStringEqual(a: string, b: string): boolean {
+  const bufferA = Buffer.from(a, 'utf8')
+  const bufferB = Buffer.from(b, 'utf8')
+  if (bufferA.length !== bufferB.length) {
+    // Compare against itself to keep timing roughly constant even on
+    // length mismatch.
+    timingSafeEqual(bufferA, bufferA)
+    return false
+  }
+  return timingSafeEqual(bufferA, bufferB)
+}
+
+function lockKey(userId: string): string {
+  return `redeem-lock:${userId}`
+}
+
+function failKey(userId: string): string {
+  return `redeem-fail:${userId}`
 }
 
 function resolveExpectedCode(): { code: string | null; sourceKey: string | null } {
@@ -43,20 +82,65 @@ export async function POST(req: Request) {
     const { userId } = await auth()
 
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
-    let body: { code?: string } | null = null
+    // SECURITY: respect any standing 24h lockout from previous brute-force.
+    if (await isLocked(lockKey(userId))) {
+      logger.warn('Redeem code attempted while locked', {
+        requestId,
+        route: '/api/billing/redeem-code',
+        userId,
+      })
+      return jsonWithRequestId(
+        { error: clientErrorMessage('rate_limit', 'Too many invalid attempts. Try again in 24 hours.') },
+        429,
+        requestId
+      )
+    }
 
+    // SECURITY: short-window burst protection (5/hour/user).
+    const limit = await checkRouteRateLimit({
+      name: 'redeem-code',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: REDEEM_RATE_LIMIT_PER_HOUR,
+      windowSeconds: 3600,
+    })
+    if (!limit.ok) {
+      logger.warn('Redeem code rate-limit hit', {
+        requestId,
+        route: '/api/billing/redeem-code',
+        userId,
+        retryAfter: limit.retryAfter,
+      })
+      return new Response(
+        JSON.stringify({ error: clientErrorMessage('rate_limit') }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(limit.retryAfter),
+            'x-request-id': requestId,
+          },
+        }
+      )
+    }
+
+    let rawBody: unknown
     try {
-      body = (await req.json()) as { code?: string }
+      rawBody = await req.json()
     } catch {
-      return jsonWithRequestId({ error: 'Invalid JSON body' }, 400, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
-    const submittedCode = normalizeCode(body?.code)
+    const parsed = redeemCodeSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const submittedCode = normalizeCode(parsed.data.code)
     if (!submittedCode) {
-      return jsonWithRequestId({ error: 'code is required' }, 400, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
     const { code: expectedCode, sourceKey } = resolveExpectedCode()
@@ -67,11 +151,32 @@ export async function POST(req: Request) {
         userId,
         checkedEnvKeys: REDEEM_CODE_ENV_KEYS,
       })
-      return jsonWithRequestId({ error: 'Redeem code is not configured.' }, 500, requestId)
+      // SECURITY: keep the status 500 (server misconfig) but strip the env
+      // key names from the client-facing message to avoid info disclosure.
+      return jsonWithRequestId(
+        { error: clientErrorMessage('server', 'Redeem is temporarily unavailable.') },
+        500,
+        requestId
+      )
     }
 
-    if (submittedCode !== expectedCode) {
-      return jsonWithRequestId({ error: 'Invalid code' }, 400, requestId)
+    if (!safeStringEqual(submittedCode, expectedCode)) {
+      // SECURITY: bump per-user fail counter; lock for 24h once threshold hit.
+      const fails = await bumpCounter(failKey(userId), REDEEM_FAIL_COUNTER_TTL_SECONDS)
+      if (fails >= REDEEM_LOCKOUT_THRESHOLD) {
+        await setLock(lockKey(userId), REDEEM_LOCKOUT_TTL_SECONDS)
+        logger.warn('Redeem code user locked after repeated failures', {
+          requestId,
+          route: '/api/billing/redeem-code',
+          userId,
+          fails,
+        })
+      }
+      return jsonWithRequestId(
+        { error: clientErrorMessage('invalid_input', 'Invalid code') },
+        400,
+        requestId
+      )
     }
 
     const supabase = createServerClient()
@@ -88,7 +193,11 @@ export async function POST(req: Request) {
         userId,
         error: lookupError.message,
       })
-      return jsonWithRequestId({ error: 'Could not verify your account right now.' }, 500, requestId)
+      return jsonWithRequestId(
+        { error: clientErrorMessage('server', 'Could not verify your account right now.') },
+        500,
+        requestId
+      )
     }
 
     if (existingUser?.lifetime_recruiting_unlocked) {
@@ -126,7 +235,11 @@ export async function POST(req: Request) {
         userId,
         error: updateError.message,
       })
-      return jsonWithRequestId({ error: 'Could not activate Recruiting plan right now.' }, 500, requestId)
+      return jsonWithRequestId(
+        { error: clientErrorMessage('server', 'Could not activate Recruiting plan right now.') },
+        500,
+        requestId
+      )
     }
 
     logger.info('Lifetime recruiting code redeemed', {
@@ -148,6 +261,11 @@ export async function POST(req: Request) {
       requestId
     )
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('Redeem code route failed', {
+      requestId,
+      route: '/api/billing/redeem-code',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }

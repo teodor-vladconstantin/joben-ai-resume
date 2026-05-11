@@ -1,9 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
-import { getRequestId, jsonWithRequestId } from '@/lib/logger'
+import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
-import { apiError, apiSuccess, getErrorMessage } from '@/lib/api-response'
+import { apiError, apiSuccess } from '@/lib/api-response'
+import { clientErrorMessage } from '@/lib/security/client-error'
+import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validation/schemas'
 
 function isMissingRelation(error: unknown): boolean {
   const err = error as { code?: string; message?: string }
@@ -14,7 +16,7 @@ export async function GET() {
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError('Unauthorized', 401)
+      return apiError(clientErrorMessage('auth'), 401)
     }
 
     const supabase = createServerClient()
@@ -28,12 +30,17 @@ export async function GET() {
       if (isMissingRelation(error)) {
         return apiSuccess({ resumes: [] }, 200)
       }
-      return apiError(error.message, 500)
+      logger.error('resumes GET failed', { route: '/api/resumes', error: error.message })
+      return apiError(clientErrorMessage('server'), 500)
     }
 
     return apiSuccess({ resumes: data || [] }, 200)
   } catch (error) {
-    return apiError(getErrorMessage(error), 500)
+    logger.error('resumes GET top-level failure', {
+      route: '/api/resumes',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return apiError(clientErrorMessage('server'), 500)
   }
 }
 
@@ -42,7 +49,7 @@ export async function POST(req: Request) {
   try {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
-      return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
@@ -66,9 +73,22 @@ export async function POST(req: Request) {
       }
     }
 
-    const body = (await req.json()) as {
-      title?: string
-      data?: Record<string, unknown>
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const parsed = createResumeSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const body = parsed.data
+    // SECURITY: reject oversized resume blobs before they reach Supabase.
+    if (body.data && exceedsJsonBudget(body.data)) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'Resume payload is too large.') }, 413, requestId)
     }
 
     const supabase = createServerClient()
@@ -85,9 +105,10 @@ export async function POST(req: Request) {
 
     if (error) {
       if (isMissingRelation(error)) {
-        return jsonWithRequestId({ error: 'Resumes table is missing in Supabase.' }, 500, requestId)
+        return jsonWithRequestId({ error: clientErrorMessage('server', 'Resumes table is missing in Supabase.') }, 500, requestId)
       }
-      return jsonWithRequestId({ error: error.message }, 500, requestId)
+      logger.error('resumes POST insert failed', { requestId, userId, route: '/api/resumes', error: error.message })
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
     if (!data?.id) {
@@ -106,7 +127,12 @@ export async function POST(req: Request) {
 
     return jsonWithRequestId({ resume: data }, 201, requestId)
   } catch (error) {
-    return jsonWithRequestId({ error: getErrorMessage(error) }, 500, requestId)
+    logger.error('resumes POST top-level failure', {
+      requestId,
+      route: '/api/resumes',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
 
@@ -114,32 +140,38 @@ export async function DELETE(req: Request) {
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError('Unauthorized', 401)
+      return apiError(clientErrorMessage('auth'), 401)
     }
 
     const { searchParams } = new URL(req.url)
     const resumeId = searchParams.get('id')
 
-    if (!resumeId) {
-      return apiError('Missing resume id', 400)
+    const parsedId = uuidLike.safeParse(resumeId)
+    if (!parsedId.success) {
+      return apiError(clientErrorMessage('invalid_input', 'Missing or invalid resume id'), 400)
     }
 
     const supabase = createServerClient()
     const { error } = await supabase
       .from('resumes')
       .delete()
-      .eq('id', resumeId)
+      .eq('id', parsedId.data)
       .eq('user_id', userId)
 
     if (error) {
       if (isMissingRelation(error)) {
-        return apiError('Resumes table is missing in Supabase.', 500)
+        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
       }
-      return apiError(error.message, 500)
+      logger.error('resumes DELETE failed', { userId, route: '/api/resumes', error: error.message })
+      return apiError(clientErrorMessage('server'), 500)
     }
 
     return apiSuccess({ deleted: true }, 200)
   } catch (error) {
-    return apiError(getErrorMessage(error), 500)
+    logger.error('resumes DELETE top-level failure', {
+      route: '/api/resumes',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return apiError(clientErrorMessage('server'), 500)
   }
 }
