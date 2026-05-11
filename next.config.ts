@@ -22,6 +22,24 @@ if (missing.length > 0) {
 // tunnel (/monitoring), and Stripe. We keep `'unsafe-inline'` on script-src
 // because Next.js + Clerk bootstrap require inline scripts; tighten to
 // nonces in a future iteration if/when we drop those vendors.
+//
+// Clerk supports a CNAME proxy (e.g. `clerk.joben.eu`) that does NOT match
+// the default `*.clerk.com` / `*.clerk.accounts.dev` wildcards. Production
+// uses such a proxy, so we read it from env so any future re-host only
+// needs a Vercel env update — no code change.
+const CLERK_PROXY_DOMAIN =
+  process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
+  process.env.NEXT_PUBLIC_CLERK_FRONTEND_API ||
+  'https://clerk.joben.eu'
+const CLERK_PROXY_HOST = (() => {
+  try {
+    const u = new URL(CLERK_PROXY_DOMAIN)
+    return `${u.protocol}//${u.host}`
+  } catch {
+    return 'https://clerk.joben.eu'
+  }
+})()
+
 const SECURITY_HEADERS = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -45,12 +63,33 @@ const SECURITY_HEADERS = [
       "media-src 'self' data: blob:",
       "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com",
+      [
+        'script-src',
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        'https://*.clerk.com',
+        'https://*.clerk.accounts.dev',
+        CLERK_PROXY_HOST,
+        'https://challenges.cloudflare.com',
+        'https://js.stripe.com',
+      ].join(' '),
+      [
+        'script-src-elem',
+        "'self'",
+        "'unsafe-inline'",
+        'https://*.clerk.com',
+        'https://*.clerk.accounts.dev',
+        CLERK_PROXY_HOST,
+        'https://challenges.cloudflare.com',
+        'https://js.stripe.com',
+      ].join(' '),
       [
         'connect-src',
         "'self'",
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
+        CLERK_PROXY_HOST,
         'https://*.supabase.co',
         'wss://*.supabase.co',
         'https://eu.i.posthog.com',
@@ -58,7 +97,15 @@ const SECURITY_HEADERS = [
         'https://*.ingest.sentry.io',
         'https://api.stripe.com',
       ].join(' '),
-      "frame-src 'self' https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com",
+      [
+        'frame-src',
+        "'self'",
+        'https://*.clerk.com',
+        CLERK_PROXY_HOST,
+        'https://challenges.cloudflare.com',
+        'https://js.stripe.com',
+        'https://hooks.stripe.com',
+      ].join(' '),
       'upgrade-insecure-requests',
     ].join('; '),
   },
