@@ -1,8 +1,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
+import { sendFirstResumeEmail } from '@/lib/resend'
 import { apiError, apiSuccess } from '@/lib/api-response'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validation/schemas'
@@ -10,6 +12,10 @@ import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validatio
 function isMissingRelation(error: unknown): boolean {
   const err = error as { code?: string; message?: string }
   return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
+}
+
+function isDuplicateError(error: { code?: string } | null): boolean {
+  return error?.code === '23505'
 }
 
 export async function GET() {
@@ -60,6 +66,14 @@ export async function POST(req: Request) {
     if (!godMode) {
       const quotaCheck = await checkResumeCreationQuota(userId, plan)
       if (!quotaCheck.allowed) {
+        if (quotaCheck.status === 429) {
+          await sendRateLimitEmailIfEligible({
+            userId,
+            requestId,
+            route: '/api/resumes',
+            reason: 'resume_creation_limit',
+          })
+        }
         return jsonWithRequestId(
           {
             error: quotaCheck.error || 'Resume limit reached for your plan.',
@@ -124,6 +138,112 @@ export async function POST(req: Request) {
         title: data.title,
       },
     })
+
+    try {
+      const { data: existingEmail, error: existingEmailError } = await supabase
+        .from('email_events')
+        .select('id')
+        .eq('user_clerk_id', userId)
+        .eq('email_type', 'first_resume_generated')
+        .limit(1)
+
+      if (existingEmailError) {
+        logger.warn('First resume email lookup failed', {
+          requestId,
+          route: '/api/resumes',
+          userId,
+          error: existingEmailError.message,
+        })
+      }
+
+      if (!existingEmail || existingEmail.length === 0) {
+        const { data: userProfile, error: userProfileError } = await supabase
+          .from('users')
+          .select('email, first_name')
+          .eq('clerk_id', userId)
+          .maybeSingle()
+
+        if (userProfileError) {
+          logger.warn('First resume email user lookup failed', {
+            requestId,
+            route: '/api/resumes',
+            userId,
+            error: userProfileError.message,
+          })
+        } else if (userProfile?.email) {
+          const sourceEventId = `resumes.first_generated:${userId}`
+
+          const { error: lockError } = await supabase.from('email_events').insert({
+            user_clerk_id: userId,
+            email: userProfile.email,
+            email_type: 'first_resume_generated',
+            status: 'processing',
+            source_event_id: sourceEventId,
+            metadata: {
+              source: 'api.resumes.post',
+              requestId,
+              resumeId: data.id,
+              stage: 'claimed',
+            },
+          })
+
+          if (lockError) {
+            if (!isDuplicateError(lockError)) {
+              logger.warn('First resume email lock failed', {
+                requestId,
+                route: '/api/resumes',
+                userId,
+                error: lockError.message,
+              })
+            }
+          } else {
+            const emailResult = await sendFirstResumeEmail({
+              to: userProfile.email,
+              firstName: userProfile.first_name,
+            })
+
+            const { error: updateError } = await supabase
+              .from('email_events')
+              .update({
+                status: emailResult.success ? 'sent' : 'failed',
+                provider_id: emailResult.providerId || null,
+                error: emailResult.error || null,
+                metadata: {
+                  source: 'api.resumes.post',
+                  requestId,
+                  resumeId: data.id,
+                },
+              })
+              .eq('source_event_id', sourceEventId)
+
+            if (updateError) {
+              logger.warn('First resume email event update failed', {
+                requestId,
+                route: '/api/resumes',
+                userId,
+                error: updateError.message,
+              })
+            }
+
+            if (!emailResult.success) {
+              logger.warn('First resume email send failed', {
+                requestId,
+                route: '/api/resumes',
+                userId,
+                error: emailResult.error || 'Unknown email error',
+              })
+            }
+          }
+        }
+      }
+    } catch (error) {
+      logger.warn('First resume email flow failed', {
+        requestId,
+        route: '/api/resumes',
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
 
     return jsonWithRequestId({ resume: data }, 201, requestId)
   } catch (error) {

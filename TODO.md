@@ -62,6 +62,7 @@
 
 ## Done
 
+- [DONE] Email automation flows (first resume, inactivity 3d, rate limit)
 - [DONE] Harden LaTeX exporter wrapping/truncation (soft breaks for long tokens, xurl, and safer content limits)
 - [DONE] Fix Education behavior: hide editable education section titles in builder and render a single Education heading in Harvard preview
 - [DONE] Fix Vercel build type error in ResumeBuilder (removed unsupported sectionType prop)

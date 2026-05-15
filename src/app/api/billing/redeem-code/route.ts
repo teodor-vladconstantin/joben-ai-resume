@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import {
   bumpCounter,
@@ -92,6 +93,12 @@ export async function POST(req: Request) {
         route: '/api/billing/redeem-code',
         userId,
       })
+      await sendRateLimitEmailIfEligible({
+        userId,
+        requestId,
+        route: '/api/billing/redeem-code',
+        reason: 'lockout',
+      })
       return jsonWithRequestId(
         { error: clientErrorMessage('rate_limit', 'Too many invalid attempts. Try again in 24 hours.') },
         429,
@@ -112,6 +119,12 @@ export async function POST(req: Request) {
         route: '/api/billing/redeem-code',
         userId,
         retryAfter: limit.retryAfter,
+      })
+      await sendRateLimitEmailIfEligible({
+        userId,
+        requestId,
+        route: '/api/billing/redeem-code',
+        reason: 'route_rate_limit',
       })
       return new Response(
         JSON.stringify({ error: clientErrorMessage('rate_limit') }),

@@ -6,6 +6,7 @@ import {
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import { parseClaudeJsonText } from '@/lib/claude-json'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
@@ -80,6 +81,14 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ result: generated }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
+        if (error.status === 429) {
+          await sendRateLimitEmailIfEligible({
+            userId,
+            requestId,
+            route: '/api/cover-letter',
+            reason: error.payload?.limitType || 'rate_limit',
+          })
+        }
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 

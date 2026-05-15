@@ -8,6 +8,7 @@ import {
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
@@ -257,6 +258,14 @@ Improvement to apply:
     }, 200, requestId)
   } catch (error) {
     if (isRateLimitExceededError(error)) {
+      if (error.status === 429 && userId) {
+        await sendRateLimitEmailIfEligible({
+          userId,
+          requestId,
+          route: '/api/apply-fix',
+          reason: error.payload?.limitType || 'rate_limit',
+        })
+      }
       return jsonWithRequestId(error.payload, error.status, requestId)
     }
     if (error instanceof ClaudeJsonParseError) {

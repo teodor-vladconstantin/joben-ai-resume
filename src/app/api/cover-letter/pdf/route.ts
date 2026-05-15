@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
 import { apiError } from '@/lib/api-response'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { coverLetterPdfSchema } from '@/lib/validation/schemas'
@@ -78,6 +79,12 @@ export async function POST(request: Request) {
         route: '/api/cover-letter/pdf',
         userId,
         retryAfter: limit.retryAfter,
+      })
+      await sendRateLimitEmailIfEligible({
+        userId,
+        requestId,
+        route: '/api/cover-letter/pdf',
+        reason: 'route_rate_limit',
       })
       return new NextResponse(
         JSON.stringify({ error: clientErrorMessage('rate_limit') }),
