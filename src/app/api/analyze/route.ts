@@ -9,6 +9,7 @@ import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { estimateRequestCost } from '@/lib/token-estimator'
 import { stripProviderMentions } from '@/lib/ai-errors'
@@ -100,6 +101,12 @@ export async function POST(req: Request) {
       const label = costEstimate.limitType === 'jd_too_long'
         ? `Job description-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
         : `CV-ul este prea lung. Rezumă la ${suggested} caractere (~${Math.round(suggested / 4)} tokens).`
+      await sendRateLimitEmailIfEligible({
+        userId,
+        requestId,
+        route: '/api/analyze',
+        reason: costEstimate.limitType || 'input_too_long',
+      })
       return jsonWithRequestId({ error: label, limitType: 'input_too_long' }, 429, requestId)
     }
 
@@ -167,6 +174,14 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
+        if (error.status === 429) {
+          await sendRateLimitEmailIfEligible({
+            userId,
+            requestId,
+            route: '/api/analyze',
+            reason: error.payload?.limitType || 'rate_limit',
+          })
+        }
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 

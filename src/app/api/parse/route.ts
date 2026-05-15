@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
@@ -142,6 +143,12 @@ export async function POST(req: NextRequest) {
       route: '/api/parse',
       userId,
       retryAfter: limit.retryAfter,
+    })
+    await sendRateLimitEmailIfEligible({
+      userId,
+      requestId,
+      route: '/api/parse',
+      reason: 'route_rate_limit',
     })
     return new NextResponse(
       JSON.stringify({ error: clientErrorMessage('rate_limit') }),

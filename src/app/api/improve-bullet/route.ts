@@ -7,6 +7,7 @@ import {
 } from '@/lib/anthropic-with-limits'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
+import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
 import { clientErrorMessage } from '@/lib/security/client-error'
@@ -91,6 +92,14 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
+        if (error.status === 429) {
+          await sendRateLimitEmailIfEligible({
+            userId,
+            requestId,
+            route: '/api/improve-bullet',
+            reason: error.payload?.limitType || 'rate_limit',
+          })
+        }
         return jsonWithRequestId(error.payload, error.status, requestId)
       }
 
