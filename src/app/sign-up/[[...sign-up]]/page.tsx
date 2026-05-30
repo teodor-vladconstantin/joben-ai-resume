@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
-import { Navbar } from '@/components/ui/Navbar'
+import { FileText } from 'lucide-react'
 
 type SearchValue = string | string[] | undefined
 
@@ -55,52 +55,63 @@ export default async function SignUpPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-bg-base flex items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-bg-surface border border-border-soft rounded-xl p-8">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 text-text-primary mb-6 justify-center">
+          <FileText size={20} />
+          <span className="font-semibold text-heading">Joben</span>
+        </Link>
 
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <div className="rounded-3xl border border-white/10 bg-[#0A0F0D] p-8">
-          <h1 className="text-3xl font-bold text-white">Create your account</h1>
-          <p className="mt-2 text-sm text-[#FFFFFF]/72">
-            Before continuing to sign up, please review and accept our legal terms.
-          </p>
+        <h1 className="text-title font-semibold text-text-primary text-center">
+          Create your account
+        </h1>
+        <p className="mt-2 text-small text-text-secondary text-center">
+          Before continuing, please review and accept our legal terms.
+        </p>
 
-          <form action={continueToSignUp} className="mt-6 space-y-4">
-            <input type="hidden" name="return_back_url" value={returnBackUrl} />
+        <form action={continueToSignUp} className="mt-6 space-y-4">
+          <input type="hidden" name="return_back_url" value={returnBackUrl} />
 
-            <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-[#020202] p-4 text-sm text-[#FFFFFF]/82">
-              <input
-                type="checkbox"
-                name="accept_legal"
-                required
-                className="mt-0.5 h-4 w-4 rounded border-white/20 bg-[#0A0F0D] text-[#0A9548]"
-              />
-              <span>
-                I agree to the{' '}
-                <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#16DB65] hover:text-[#0A9548]">
-                  Terms and Conditions
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#16DB65] hover:text-[#0A9548]">
-                  Privacy Policy
-                </Link>
-                .
-              </span>
-            </label>
+          <label className="flex items-start gap-3 rounded-md border border-border-soft bg-bg-subtle p-3 text-small text-text-secondary">
+            <input
+              type="checkbox"
+              name="accept_legal"
+              required
+              className="mt-0.5 h-4 w-4 rounded border-border-soft bg-bg-subtle text-accent focus:ring-accent"
+            />
+            <span>
+              I agree to the{' '}
+              <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                Terms and Conditions
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </label>
 
-            {showLegalError ? (
-              <p className="text-sm text-red-400">You must accept the terms and privacy policy to continue.</p>
-            ) : null}
+          {showLegalError ? (
+            <p className="text-small text-error">You must accept the terms and privacy policy to continue.</p>
+          ) : null}
 
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
-            >
-              Continue to Sign Up
-            </button>
-          </form>
-        </div>
-      </main>
+          <button
+            type="submit"
+            className="w-full px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
+          >
+            Continue to Sign Up
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-small text-text-muted">
+          Already have an account?{' '}
+          <Link href="/sign-in" className="text-accent hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }

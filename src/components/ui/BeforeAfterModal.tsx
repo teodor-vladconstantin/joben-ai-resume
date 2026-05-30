@@ -1,95 +1,51 @@
-"use client"
+'use client'
 
-import { X, ArrowDown } from 'lucide-react'
-
-export type FixPatchWithContext = {
+export interface FixPatchWithContext {
   experienceId: string
   bulletIndex: number
-  originalBullet: string
-  updatedBullet: string
+  originalBullet?: string
+  updatedBullet?: string
   experienceTitle?: string
   company?: string
+  original?: string
+  fixed?: string
+  context?: string
 }
 
-type BeforeAfterModalProps = {
+interface BeforeAfterModalProps {
   patches: FixPatchWithContext[]
   onClose: () => void
 }
 
 export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
-  const count = patches.length
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
-
-      <div className="relative w-full max-w-2xl max-h-[82vh] flex flex-col rounded-2xl border border-white/10 bg-[#0A0F0D] shadow-2xl">
-        {/* Header */}
-        <div className="shrink-0 border-b border-white/10 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-white">
-              AI Applied {count} {count === 1 ? 'Improvement' : 'Improvements'}
-            </h2>
-            <p className="text-xs text-[#FFFFFF]/60 mt-0.5">Review each change before editing further</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-[#FFFFFF]/60 hover:text-white transition-colors p-1"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Patches */}
-        <div className="min-h-0 overflow-y-auto p-6 space-y-4">
-          {patches.map((patch, idx) => (
-            <div
-              key={`${patch.experienceId}-${patch.bulletIndex}-${idx}`}
-              className="rounded-xl border border-white/10 overflow-hidden"
-            >
-              {(patch.experienceTitle || patch.company) && (
-                <div className="px-4 py-2 bg-white/5 border-b border-white/10">
-                  <p className="text-xs font-medium text-[#FFFFFF]/60">
-                    {[patch.experienceTitle, patch.company].filter(Boolean).join(' Â· ')}
-                  </p>
-                </div>
-              )}
-
-              <div className="p-4 space-y-2">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-[#16DB65] font-semibold mb-1.5">Before</p>
-                  <p className="text-sm bg-[#0A9548]/12 text-[#C8FFD9] border-l-2 border-[#16DB65] px-3 py-2 rounded-r leading-relaxed">
-                    {patch.originalBullet || <span className="italic opacity-60">(empty)</span>}
-                  </p>
-                </div>
-
-                <div className="flex justify-center">
-                  <ArrowDown className="w-4 h-4 text-[#FFFFFF]/30" />
-                </div>
-
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-[#0A9548] font-semibold mb-1.5">After</p>
-                  <p className="text-sm bg-[#0A9548]/10 text-[#16DB65] border-l-2 border-[#0A9548] px-3 py-2 rounded-r leading-relaxed">
-                    {patch.updatedBullet}
-                  </p>
-                </div>
-              </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div
+        className="w-full max-w-2xl mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-title text-text-primary font-semibold mb-4">Changes Applied</h2>
+        <div className="space-y-4">
+          {patches.map((patch, i) => (
+            <div key={i} className="space-y-2">
+              <div className="text-xs text-text-muted uppercase tracking-wide">Original</div>
+              <pre className="text-small text-text-secondary bg-bg-subtle border border-border-soft rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
+                {patch.originalBullet || patch.original || ''}
+              </pre>
+              <div className="text-xs text-text-muted uppercase tracking-wide">Updated</div>
+              <pre className="text-small text-accent bg-bg-subtle border border-border-soft rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
+                {patch.updatedBullet || patch.fixed || ''}
+              </pre>
             </div>
           ))}
         </div>
-
-        {/* Footer */}
-        <div className="shrink-0 border-t border-white/10 px-6 py-4">
-          <button
-            onClick={onClose}
-            className="w-full bg-linear-to-r from-[#0A9548] to-[#04471C] text-white py-3 rounded-xl font-bold hover:opacity-90 transition-opacity"
-          >
-            View in Editor
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          className="mt-4 w-full px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
+        >
+          Close
+        </button>
       </div>
     </div>
   )
 }
-

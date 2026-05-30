@@ -29,31 +29,31 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative w-full max-w-3xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative w-full max-w-3xl rounded-xl border border-border-medium bg-bg-elevated p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Body Paragraphs</h3>
-          <button onClick={onClose} className="rounded-md p-1 text-[#FFFFFF]/82 hover:bg-[#0A0F0D] hover:text-white">
-            <X className="h-4 w-4" />
+          <h3 className="text-heading font-medium text-text-primary">Body Paragraphs</h3>
+          <button onClick={onClose} className="rounded-md p-1 text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors">
+            <X size={14} />
           </button>
         </div>
 
-        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
           {paragraphs.map((paragraph, index) => (
-            <div key={index} className="rounded-xl border border-white/10 bg-[#0A0F0D] p-3">
+            <div key={index} className="rounded-md border border-border-soft bg-bg-surface p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-medium text-white">Paragraph {index + 1}</p>
+                <p className="text-body font-medium text-text-primary">Paragraph {index + 1}</p>
                 <button
                   onClick={() => removeParagraph(index)}
-                  className="rounded-md border border-[#16DB65]/30 bg-[#0A9548]/12 p-1 text-[#16DB65] hover:bg-[#0A9548]/18"
+                  className="rounded-sm border border-accent-border bg-accent-muted p-1 text-accent hover:bg-accent/20 transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 size={14} />
                 </button>
               </div>
               <textarea
                 value={paragraph}
                 onChange={(e) => updateParagraph(index, e.target.value)}
-                className="h-24 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                className="h-24 w-full resize-none rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
               />
             </div>
           ))}
@@ -62,13 +62,13 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
         <div className="mt-4 flex items-center justify-between">
           <button
             onClick={addParagraph}
-            className="rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm font-semibold text-[#0A9548] hover:bg-[#0A9548]/20"
+            className="rounded-md border border-accent-border bg-accent-muted px-3 py-1.5 text-body font-medium text-accent hover:bg-accent/20 transition-colors"
           >
             + Add Paragraph
           </button>
           <button
             onClick={onClose}
-            className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            className="rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors"
           >
             Save Changes
           </button>
@@ -77,6 +77,3 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
     </div>
   )
 }
-
-
-

@@ -1,5 +1,4 @@
 ## Active
-- [DONE] Project parsing fix: Python parser now extracts inline `role` + period from project description prefixes (e.g. "Solo Founder Jan 2024 - Present ..."), prevents hallucinated 1950 placeholder years, emits `role` + `bullets` fields, and prioritises literal dates over hallucinated explicit fields. `pdf-import.ts`, `ResumeBuilder` projects state, Harvard template, and LaTeX export all consume the new fields and render projects with role/period header + clean per-line bullets. Education builder panels now force the canonical "Education" label so legacy garbage titles never leak into the preview/PDF. Tests: 27 Python + 59 TS pass; `tsc --noEmit`, `npm run lint`, `npm run build` all green.
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
 - [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
 - [DONE] Enriched resume-parser: LinkedIn/GitHub/website/location extraction, 200+ section name mappings (EN+RO), extended bullet chars, company suffix detection, 5 new section types (languages/volunteer/interestories, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
@@ -62,7 +61,6 @@
 
 ## Done
 
-- [DONE] Email automation flows (first resume, inactivity 3d, rate limit)
 - [DONE] Harden LaTeX exporter wrapping/truncation (soft breaks for long tokens, xurl, and safer content limits)
 - [DONE] Fix Education behavior: hide editable education section titles in builder and render a single Education heading in Harvard preview
 - [DONE] Fix Vercel build type error in ResumeBuilder (removed unsupported sectionType prop)

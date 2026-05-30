@@ -3,8 +3,6 @@ import { auth } from '@clerk/nextjs/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeExportQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
-import { renderInlineLatex } from '@/lib/inline-format'
-import { clientErrorMessage } from '@/lib/security/client-error'
 
 export const runtime = 'nodejs'
 
@@ -17,8 +15,6 @@ type LatexPersonal = {
   summary?: string
   linkedin?: string
   github?: string
-  website?: string
-  location?: string
 }
 
 type LatexExperienceEntry = {
@@ -31,10 +27,8 @@ type LatexExperienceEntry = {
 
 type LatexProjectEntry = {
   name?: string
-  role?: string
   period?: string
   description?: string
-  bullets?: unknown
   technologies?: string[]
   url?: string
 }
@@ -45,25 +39,10 @@ type LatexDynamicSection = {
   content?: string
 }
 
-type LatexEducationEntry = {
-  id?: string
-  institution?: string
-  degree?: string
-  field?: string
-  location?: string
-  startMonth?: number
-  startYear?: number
-  endMonth?: number
-  endYear?: number
-  isCurrent?: boolean
-  description?: string
-}
-
 type LatexResumeData = {
   personal?: LatexPersonal
   experience?: LatexExperienceEntry[]
   projects?: LatexProjectEntry[]
-  education?: LatexEducationEntry[]
   dynamicSections?: LatexDynamicSection[]
 }
 
@@ -101,27 +80,6 @@ function makeLatexLink(url: string, label: string): string {
   return String.raw`\href{${normalizeLatexText(url)}}{${escapeLatex(label)}}`
 }
 
-// Mirror `HarvardTemplate` validation: LinkedIn/GitHub/website inputs often
-// contain placeholder copy like "LinkedIn Link" or
-// "https://github.com/yourusername". Render those as nothing instead of
-// emitting a broken `\href`.
-const PLACEHOLDER_URL_TOKENS = /yourusername|placeholder|example\.com/i
-
-function looksLikeUrl(value: string | undefined | null): boolean {
-  if (!value) return false
-  const trimmed = value.trim()
-  if (!trimmed) return false
-  if (PLACEHOLDER_URL_TOKENS.test(trimmed)) return false
-  if (/^https?:\/\//i.test(trimmed)) return true
-  return /^([\w-]+\.)+[a-z]{2,}(\/|$)/i.test(trimmed)
-}
-
-function normalizeHref(value: string): string {
-  const trimmed = value.trim()
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
-  return `https://${trimmed}`
-}
-
 function escapeLatex(text: string | undefined): string {
   const normalized = normalizeLatexText(text)
   if (!normalized) return ''
@@ -143,21 +101,13 @@ function escapeLatex(text: string | undefined): string {
 }
 
 function normalizeBulletCandidate(text: string): string {
-  // Keep inline-format markers (**bold**, *italic*, __underline__) so the
-  // LaTeX renderer can translate them — strip only stray leading bullet
-  // glyphs and outer quotes the user did not intend to keep.
   return clampLatexText(
     text
-      // Require whitespace after the glyph so we do not eat the leading
-      // asterisk of an *italic* marker.
-      .replace(/^[-*•]\s+/, '')
+      .replace(/\*\*/g, '')
+      .replace(/^[-*•]\s*/, '')
       .replace(/^['"`]+|['"`]+$/g, ''),
     260
   )
-}
-
-function escapeLatexFormatted(text: string | undefined): string {
-  return renderInlineLatex(text, (segment) => escapeLatex(segment))
 }
 
 function splitProjectDescription(description: string | undefined): string[] {
@@ -182,45 +132,6 @@ function splitProjectDescription(description: string | undefined): string[] {
     .filter(Boolean)
 
   return (sentenceSplit.length > 1 ? sentenceSplit : [normalized]).slice(0, 4)
-}
-
-function resolveProjectBullets(project: LatexProjectEntry): string[] {
-  const fromBullets = Array.isArray(project.bullets)
-    ? project.bullets
-        .flatMap((bullet: unknown) => (typeof bullet === 'string' ? bullet.split(/\r?\n+/) : []))
-        .map((bullet: string) => normalizeBulletCandidate(bullet))
-        .filter((bullet: string) => Boolean(bullet) && /[\p{L}\p{N}]/u.test(bullet))
-    : []
-
-  if (fromBullets.length > 0) return fromBullets.slice(0, 8)
-
-  return splitProjectDescription(project.description)
-}
-
-const LATEX_MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function formatLatexEducationPeriod(entry: LatexEducationEntry): string {
-  const startLabel = entry.startYear
-    ? entry.startMonth
-      ? `${LATEX_MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}`
-      : `${entry.startYear}`
-    : ''
-  const endLabel = entry.isCurrent
-    ? 'Present'
-    : entry.endYear
-      ? entry.endMonth
-        ? `${LATEX_MONTH_LABELS[entry.endMonth - 1]} ${entry.endYear}`
-        : `${entry.endYear}`
-      : ''
-
-  if (startLabel && endLabel) return `${startLabel} -- ${endLabel}`
-  if (startLabel) return startLabel
-  if (endLabel) return endLabel
-  return ''
-}
-
-function buildLatexEducationDegreeLine(entry: LatexEducationEntry): string {
-  return [entry.degree, entry.field].map((part) => (part || '').trim()).filter(Boolean).join(', ')
 }
 
 type ParsedEducationEntry = {
@@ -273,23 +184,12 @@ function generateLatex(data: LatexResumeData): string {
   const { personal, experience, dynamicSections = [] } = data
 
   const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
-  const linkedinUrl = looksLikeUrl(personal?.linkedin) ? normalizeHref(personal!.linkedin!) : null
-  const githubUrl = looksLikeUrl(personal?.github) ? normalizeHref(personal!.github!) : null
-  const websiteUrl = looksLikeUrl(personal?.website) ? normalizeHref(personal!.website!) : null
-  const titleText = clampLatexText(personal?.title, 90)
-  // Render the professional title on its own line (matches the Harvard web
-  // preview which stacks name, uppercase title, and contact line).
-  const titleBlock = titleText
-    ? String.raw`    {\scshape\large ${escapeLatex(titleText)}} \\ \vspace{2pt}
-`
-    : ''
   const contactParts = [
     personal?.phone ? escapeLatex(`Phone: ${clampLatexText(personal.phone, 40)}`) : '',
     personal?.email ? escapeLatex(`Email: ${clampLatexText(personal.email, 120)}`) : '',
-    personal?.location ? escapeLatex(clampLatexText(personal.location, 80)) : '',
-    linkedinUrl ? `LinkedIn: ${makeLatexLink(linkedinUrl, normalizeContactText(linkedinUrl))}` : '',
-    githubUrl ? `GitHub: ${makeLatexLink(githubUrl, normalizeContactText(githubUrl))}` : '',
-    websiteUrl ? makeLatexLink(websiteUrl, normalizeContactText(websiteUrl)) : '',
+    escapeLatex(clampLatexText(personal?.title, 90)),
+    personal?.linkedin ? `LinkedIn: ${makeLatexLink(personal.linkedin, normalizeContactText(personal.linkedin))}` : '',
+    personal?.github ? `GitHub: ${makeLatexLink(personal.github, normalizeContactText(personal.github))}` : '',
   ].filter(Boolean)
   const contactLine = contactParts.join(' $|$ ')
   const contactBlock = contactLine
@@ -356,15 +256,15 @@ function generateLatex(data: LatexResumeData): string {
 
 %----------HEADING-----------------
 \begin{center}
-    \textbf{\Huge \scshape ${escapeLatex(fullName)}} \\ \vspace{4pt}
-${titleBlock}${contactBlock}\end{center}
+    \textbf{\Huge \scshape ${escapeLatex(fullName)}} \\ \vspace{1pt}
+${contactBlock}\end{center}
 
 `
 
   if (personal?.summary) {
     tex += String.raw`
 \section{Summary}
-\small{${escapeLatexFormatted(clampLatexText(personal.summary, 900))}}
+\small{${escapeLatex(clampLatexText(personal.summary, 900))}}
 `
   }
 
@@ -377,7 +277,7 @@ ${titleBlock}${contactBlock}\end{center}
     for (const exp of experience) {
       const safeBullets = extractSafeBullets(exp)
       const bulletItems = safeBullets
-        .map((bullet: string) => String.raw`        \resumeItem{${escapeLatexFormatted(bullet)}}`)
+        .map((bullet: string) => String.raw`        \resumeItem{${escapeLatex(bullet)}}`)
         .join('\n')
 
       tex += String.raw`
@@ -401,18 +301,17 @@ ${bulletItems}
 `
     for (const proj of data.projects) {
       const projTitle = escapeLatex(clampLatexText(proj.name || 'Project', 220))
-      const projRole = escapeLatex(clampLatexText(proj.role || '', 140))
       const projPeriod = escapeLatex(clampLatexText(proj.period || '', 50))
-      const projBullets = resolveProjectBullets(proj)
+      const projBullets = splitProjectDescription(proj.description)
       const techs = proj.technologies && proj.technologies.length > 0
         ? escapeLatex(clampLatexText(proj.technologies.slice(0, 8).join(', '), 220))
         : ''
 
       const itemLines: string[] = []
+      if (techs) itemLines.push(`Technologies: ${techs}`)
       for (const bullet of projBullets) {
-        itemLines.push(escapeLatexFormatted(clampLatexText(bullet, 900)))
+        itemLines.push(escapeLatex(clampLatexText(bullet, 900)))
       }
-      if (techs) itemLines.push(String.raw`\textit{Technologies:} ${techs}`)
       if (proj.url) {
         itemLines.push(makeLatexLink(proj.url, normalizeContactText(proj.url)))
       }
@@ -421,13 +320,10 @@ ${bulletItems}
         .map((line) => String.raw`        \resumeItem{${line}}`)
         .join('\n')
 
-      // Subheading layout mirrors the Experience block so spacing stays consistent:
-      //   Project name ............................. Period
-      //   Role (italic) .............................(blank)
       tex += String.raw`
     \resumeSubheading
-      {${projTitle}}{${projPeriod || ' '}}
-      {${projRole || ' '}}{ }
+      {${projTitle}}{${projPeriod}}
+      {${techs ? `Technologies: ${techs}` : ' '}}{ }
 `
 
       if (projectItems) {
@@ -441,40 +337,8 @@ ${projectItems}
 `
   }
 
-  // Render structured education entries first. When present, we suppress any
-  // legacy `dynamicSections[type=education]` blocks below so the same data is
-  // not printed twice.
-  const structuredEducation = (data.education || []).filter((entry) => (entry.institution || '').trim())
-  if (structuredEducation.length > 0) {
-    tex += String.raw`\section{Education}
-  \begin{itemize}[leftmargin=0.15in, label={}]
-`
-    for (const entry of structuredEducation) {
-      const institution = escapeLatex(clampLatexText(entry.institution || '', 160))
-      const period = escapeLatex(formatLatexEducationPeriod(entry))
-      const degreeLine = escapeLatex(clampLatexText(buildLatexEducationDegreeLine(entry), 220))
-      const location = escapeLatex(clampLatexText(entry.location || '', 120))
-      const description = escapeLatexFormatted(clampLatexText(entry.description || '', 600))
-
-      tex += String.raw`
-    \resumeSubheading
-      {${institution}}{${period || ' '}}
-      {${degreeLine || ' '}}{${location || ' '}}
-`
-      if (description) {
-        tex += String.raw`      \begin{itemize}[leftmargin=0.15in, label={-}]
-        \resumeItem{${description}}
-      \end{itemize}
-`
-      }
-    }
-    tex += String.raw`  \end{itemize}
-`
-  }
-
   const groupedSections = dynamicSections
     .filter((section) => section.type !== 'projects') // projects are now rendered separately
-    .filter((section) => !(structuredEducation.length > 0 && section.type === 'education'))
     .reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
     if (!acc[current.type]) acc[current.type] = []
     acc[current.type].push(current)
@@ -504,30 +368,19 @@ ${projectItems}
             }
             continue
           }
-          // No structured entries — render the raw content directly without
-          // leaking the (potentially-corrupt) section.title into the heading.
-          const fallback = escapeLatexFormatted(clampLatexText(section.content, 900))
-          if (fallback) {
-            tex += String.raw`
-    \resumeSubheading
-      {${fallback}}{ }
-      { }{ }
-`
-          }
-          continue
         }
 
         tex += String.raw`
     \resumeSubheading
       {${escapeLatex(clampLatexText(section.title, 120))}}{ }
-      {${escapeLatexFormatted(clampLatexText(section.content, 900))}}{ }
+      {${escapeLatex(clampLatexText(section.content, 900))}}{ }
 `
       }
       tex += String.raw`  \end{itemize}
 `
     } else {
       for (const section of sections) {
-        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatexFormatted(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
+        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatex(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
 `
       }
     }
@@ -585,32 +438,27 @@ export async function POST(req: Request) {
 
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
-    const isProduction = process.env.NODE_ENV === 'production'
-    // SECURITY: CLAUDE.md Medium #3 — auth on the LaTeX upstream stays
-    // opt-in (matches the upstream service default). Operators can flip
-    // LATEX_SERVICE_AUTH_REQUIRED=true to make a missing secret hard-fail
-    // here. We always emit a loud warning in prod when the upstream is
-    // unauthenticated so the gap is visible in monitoring.
     const requireLatexServiceAuth = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true'
+    const isProduction = process.env.NODE_ENV === 'production'
 
     if (requireLatexServiceAuth && !latexServiceSecret) {
-      logger.error('LATEX_SERVICE_SECRET missing while LATEX_SERVICE_AUTH_REQUIRED=true', {
+      logger.error('LATEX_SERVICE_SECRET missing while latex auth is required', {
         requestId,
         route: '/api/resumes/export-latex',
         userId,
       })
       return jsonWithRequestId(
-        { error: clientErrorMessage('unavailable', 'PDF export service is temporarily unavailable.') },
+        { error: 'PDF export service is temporarily unavailable.' },
         503,
         requestId
       )
     }
 
-    if (isProduction && !latexServiceSecret) {
-      logger.warn('LaTeX upstream is being called without a shared secret', {
+    if (isProduction && !requireLatexServiceAuth && !latexServiceSecret) {
+      logger.warn('LATEX_SERVICE_SECRET missing, continuing without latex auth', {
         requestId,
         route: '/api/resumes/export-latex',
-        hint: 'Set LATEX_SERVICE_SECRET on Vercel and on the LaTeX container (with REQUIRE_SERVICE_AUTH=true) to authenticate every compile.',
+        userId,
       })
     }
 
@@ -622,33 +470,11 @@ export async function POST(req: Request) {
       headers.Authorization = `Bearer ${latexServiceSecret}`
     }
 
-    // SECURITY: CLAUDE.md Medium #4 — bound the upstream call so a stuck
-    // LaTeX compile cannot hold this request handler open indefinitely.
-    const latexController = new AbortController()
-    const latexTimeout = setTimeout(() => latexController.abort(), 20_000)
-    let response: Response
-    try {
-      response = await fetch(latexServiceUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ tex: texStr }),
-        signal: latexController.signal,
-      })
-    } catch (fetchError) {
-      logger.error('LaTeX service request failed', {
-        requestId,
-        route: '/api/resumes/export-latex',
-        userId,
-        error: fetchError instanceof Error ? fetchError.message : 'Unknown error',
-      })
-      return jsonWithRequestId(
-        { error: clientErrorMessage('unavailable', 'PDF export service is temporarily unavailable.') },
-        503,
-        requestId
-      )
-    } finally {
-      clearTimeout(latexTimeout)
-    }
+    const response = await fetch(latexServiceUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ tex: texStr }),
+    })
 
     if (!response.ok) {
       let errStr = 'Failed to compile LaTeX'
@@ -665,15 +491,8 @@ export async function POST(req: Request) {
         userId,
         error: errStr,
       })
-      // SECURITY: never leak the LaTeX service error (may contain file
-      // paths, tex source snippets, stack traces). Dev mode keeps the detail
-      // so debugging is still possible locally.
       return jsonWithRequestId(
-        {
-          error: isProduction
-            ? clientErrorMessage('server', 'PDF export failed. Please try again later.')
-            : errStr,
-        },
+        { error: isProduction ? 'PDF export failed. Please try again later.' : errStr },
         500,
         requestId
       )
@@ -699,11 +518,12 @@ export async function POST(req: Request) {
     pdfResponse.headers.set('x-request-id', requestId)
     return pdfResponse
   } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error exporting to PDF'
     logger.error('Resume export route failed', {
       requestId,
       route: '/api/resumes/export-latex',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: message,
     })
-    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+    return jsonWithRequestId({ error: message }, 500, requestId)
   }
 }
