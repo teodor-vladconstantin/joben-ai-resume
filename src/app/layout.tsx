@@ -1,14 +1,22 @@
+import { Geist, Geist_Mono } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
 import { PostHogProvider } from '@/components/PostHogProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 validateEnv()
 
@@ -110,7 +118,7 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${inter.className} bg-(--background) text-(--foreground) min-h-screen flex flex-col`} suppressHydrationWarning>
+        <body className={`${geist.variable} ${geistMono.variable} font-sans bg-bg-base text-text-primary min-h-screen flex flex-col antialiased`} suppressHydrationWarning>
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"

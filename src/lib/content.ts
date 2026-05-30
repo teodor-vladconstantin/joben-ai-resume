@@ -86,6 +86,7 @@ export const pricingPlans = [
     ],
     excludedFeatures: [],
     cta: "Upgrade to Pro",
+    isComingSoon: true,
     isPrimary: true,
   },
   {
@@ -105,6 +106,7 @@ export const pricingPlans = [
     ],
     excludedFeatures: [],
     cta: "Get Recruiting Plan",
+    isComingSoon: true,
     isPrimary: false,
     isBestValue: true,
   },

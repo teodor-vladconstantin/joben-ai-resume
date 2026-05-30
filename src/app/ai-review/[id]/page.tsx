@@ -225,7 +225,7 @@ export default function AIReviewEditorPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#020202]">
+    <div className="min-h-screen flex flex-col bg-bg-base">
       <Navbar />
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-20">
         <ResumeAnalyzer
@@ -245,14 +245,14 @@ export default function AIReviewEditorPage() {
 
       {showAutoFixTokenWarning ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowAutoFixTokenWarning(false)} />
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Auto-fix unavailable</h3>
-            <p className="mt-2 text-sm text-[#FFFFFF]/82">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowAutoFixTokenWarning(false)} />
+          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
+            <h3 className="text-heading font-medium text-text-primary">Auto-fix unavailable</h3>
+            <p className="mt-2 text-small text-text-secondary">
               {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}
             </p>
             {autoFixTokenDetails ? (
-              <div className="mt-4 rounded-xl border border-white/10 bg-[#020202] px-4 py-3 text-xs text-[#FFFFFF]/72 space-y-1">
+              <div className="mt-4 rounded-md border border-border-soft bg-bg-subtle px-3 py-2 text-xs text-text-secondary space-y-1">
                 {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
                   <p>Estimated input tokens: {autoFixTokenDetails.estimatedInputTokens}</p>
                 ) : null}
@@ -267,7 +267,7 @@ export default function AIReviewEditorPage() {
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowAutoFixTokenWarning(false)}
-                className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                className="rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors"
               >
                 Got it
               </button>

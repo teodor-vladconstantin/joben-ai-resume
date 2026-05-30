@@ -1,135 +1,164 @@
 @import "tailwindcss";
 
+/* ── Design System Tokens (CLAUDE.md source of truth) ── */
+
 :root {
-  --brand-black: #020202;
-  --brand-deep: #0a0f0d;
-  --brand-mid: #101715;
-  --brand-accent: #0a9548;
-  --brand-accent-bright: #16db65;
-  --brand-white: #ffffff;
+  /* Backgrounds */
+  --bg-base:      #080808;
+  --bg-subtle:    #0F0F0F;
+  --bg-surface:   #141414;
+  --bg-elevated:  #1A1A1A;
+  --bg-hover:     #1F1F1F;
 
-  --background: var(--brand-black);
-  --surface: var(--brand-deep);
-  --surface-strong: var(--brand-mid);
-  --foreground: var(--brand-white);
-  --muted: color-mix(in srgb, var(--brand-white) 72%, transparent);
-  --muted-2: color-mix(in srgb, var(--brand-white) 58%, transparent);
-  --border: color-mix(in srgb, var(--brand-white) 10%, transparent);
-  --accent: var(--brand-accent);
-  --accent-strong: var(--brand-accent-bright);
+  /* Borders */
+  --border-faint:  #1C1C1C;
+  --border-soft:   #242424;
+  --border-medium: #2E2E2E;
+  --border-strong: #3D3D3D;
+
+  /* Text */
+  --text-primary:   #F2F2F2;
+  --text-secondary: #A0A0A0;
+  --text-muted:     #5A5A5A;
+  --text-disabled:  #333333;
+
+  /* Accent — Joben Green */
+  --accent:        #2CB87A;
+  --accent-hover:  #34C985;
+  --accent-muted:  #2CB87A1A;
+  --accent-border: #2CB87A40;
+
+  /* Semantic */
+  --success:       #2CB87A;
+  --success-muted: #2CB87A1A;
+  --error:         #E5484D;
+  --error-muted:   #E5484D1A;
+  --warning:       #F76B15;
+  --warning-muted: #F76B151A;
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
+@theme {
+  /* Fonts */
+  --font-sans:  var(--font-geist), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:  var(--font-geist-mono), ui-monospace, SFMono-Regular, 'Cascadia Code', monospace;
+
+  /* Colors → bg.* */
+  --color-bg-base:      var(--bg-base);
+  --color-bg-subtle:    var(--bg-subtle);
+  --color-bg-surface:   var(--bg-surface);
+  --color-bg-elevated:  var(--bg-elevated);
+  --color-bg-hover:     var(--bg-hover);
+
+  /* Colors → border.* */
+  --color-border-faint:  var(--border-faint);
+  --color-border-soft:   var(--border-soft);
+  --color-border-medium: var(--border-medium);
+  --color-border-strong: var(--border-strong);
+
+  /* Colors → text.* */
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-text-disabled:  var(--text-disabled);
+
+  /* Colors → accent.* */
+  --color-accent:        var(--accent);
+  --color-accent-hover:  var(--accent-hover);
+  --color-accent-muted:  var(--accent-muted);
+  --color-accent-border: var(--accent-border);
+
+  /* Colors → semantic */
+  --color-success:       var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-error:         var(--error);
+  --color-error-muted:   var(--error-muted);
+  --color-warning:       var(--warning);
+  --color-warning-muted: var(--warning-muted);
+
+  /* Font sizes */
+  --text-display:   2.5rem;
+  --text-title:     1.5rem;
+  --text-heading:   1.125rem;
+  --text-body:      0.875rem;
+  --text-small:     0.8125rem;
+  --text-xs:        0.75rem;
+
+  /* Line heights */
+  --leading-display: 1.1;
+  --leading-title:   1.2;
+  --leading-heading: 1.4;
+  --leading-body:    1.6;
+  --leading-small:   1.5;
+
+  /* Letter spacing */
+  --tracking-display:   -0.03em;
+  --tracking-title:     -0.02em;
+  --tracking-heading:   -0.01em;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* Spacing */
+  --spacing-page:    1.5rem;
+  --spacing-page-lg: 2.5rem;
 }
 
-html,
-body {
+/* ── Base styles ── */
+
+html {
   overflow-x: hidden;
 }
 
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Scrollbar — minimal, design-system compliant */
 * {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--brand-accent) 75%, black) color-mix(in srgb, var(--brand-white) 8%, transparent);
+  scrollbar-color: var(--accent) var(--bg-subtle);
 }
 
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--brand-white) 6%, transparent);
-  border-radius: 9999px;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--brand-accent-bright), var(--brand-accent));
-  border: 2px solid color-mix(in srgb, var(--brand-black) 88%, transparent);
+  background: var(--accent);
   border-radius: 9999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 75%, black));
+  background: var(--accent-hover);
 }
 
+/* Utility: hide scrollbar */
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--brand-accent) 82%, black) color-mix(in srgb, var(--brand-white) 6%, transparent);
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--brand-white) 6%, transparent);
-  border-radius: 9999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--brand-accent-bright), var(--brand-accent));
-  border-radius: 9999px;
-}
-
-.tabs-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--brand-accent) 90%, black) color-mix(in srgb, var(--brand-accent) 18%, transparent);
-}
-
-.tabs-scrollbar::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-.tabs-scrollbar::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--brand-accent) 16%, transparent);
-  border-radius: 9999px;
-}
-
-.tabs-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, var(--brand-accent-bright), var(--brand-accent));
-  border-radius: 9999px;
-}
-
-.tabs-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 74%, black));
-}
-
-.builder-panel-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--brand-accent) 86%, black) color-mix(in srgb, var(--brand-white) 5%, transparent);
-}
-
-.builder-panel-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.builder-panel-scrollbar::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--brand-white) 5%, transparent);
-  border-radius: 9999px;
-}
-
-.builder-panel-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-accent-bright) 92%, white), var(--brand-accent));
-  border-radius: 9999px;
-}
-
-.builder-panel-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--brand-accent-bright), color-mix(in srgb, var(--brand-accent) 74%, black));
-}
-
+/* Print */
 @media print {
   @page {
     margin: 0;

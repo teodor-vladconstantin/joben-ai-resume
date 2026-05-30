@@ -77,29 +77,26 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen flex flex-col pb-20">
+    <div className="min-h-screen flex flex-col bg-bg-base">
       <Navbar />
 
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
-        <header className="mb-8 rounded-2xl border border-white/10 bg-[#0A0F0D] p-6">
-          <h1 className="text-3xl font-bold text-white">Terms and Conditions</h1>
-          <p className="mt-2 text-sm text-[#FFFFFF]/72">Last updated: {lastUpdated}</p>
-          <p className="mt-4 text-[#FFFFFF]/82">
-            Please read these terms carefully before using Joben.
-          </p>
+      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full pb-20">
+        <header className="mb-8">
+          <h1 className="text-title font-semibold text-text-primary">Terms and Conditions</h1>
+          <p className="mt-1 text-small text-text-muted">Last updated: {lastUpdated}</p>
         </header>
 
-        <article className="space-y-4">
+        <div className="space-y-2">
           {sections.map((section) => (
-            <section key={section.title} className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-6">
-              <h2 className="text-lg font-semibold text-white">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-[#FFFFFF]/80">{section.content}</p>
+            <section key={section.title} className="bg-bg-surface border border-border-soft rounded-lg p-4">
+              <h2 className="text-heading font-medium text-text-primary">{section.title}</h2>
+              <p className="mt-1 text-body text-text-secondary">{section.content}</p>
             </section>
           ))}
-        </article>
+        </div>
 
-        <p className="mt-8 text-sm text-[#FFFFFF]/60">
-          Read our <Link href="/privacy" className="text-[#16DB65] hover:text-[#0A9548]">Privacy Policy</Link> for details on how we collect and process data.
+        <p className="mt-6 text-small text-text-muted">
+          Read our <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>.
         </p>
       </main>
     </div>

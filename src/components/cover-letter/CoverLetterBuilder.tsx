@@ -95,6 +95,8 @@ function toResumeLikeText(sections: CoverLetterSections) {
     .join('\n')
 }
 
+import { cn } from '@/lib/cn'
+
 export function CoverLetterBuilder() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
@@ -443,62 +445,65 @@ export function CoverLetterBuilder() {
 
   return (
     <div className="w-full h-full flex flex-col lg:flex-row">
-      <div className="w-full lg:w-112.5 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full z-10 shadow-2xl">
-        <div className="p-6 border-b border-white/10 bg-linear-to-r from-[#0D2818] to-[#04471C]">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2"><Sparkles className="text-[#0A9548] w-5 h-5"/> Cover Letter Sections</h2>
-          <p className="text-sm text-[#FFFFFF]/82 mt-2">Progress {completedSections}/{sectionItems.length} complete</p>
-          <div className="mt-3 h-2 w-full rounded-full bg-[#020202]">
-            <div className="h-2 rounded-full bg-linear-to-r from-[#0A9548] to-[#04471C]" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
+      {/* Editor sidebar */}
+      <div className="w-full lg:w-112.5 bg-bg-surface border-r border-border-faint flex flex-col h-full z-10">
+        {/* Header with progress */}
+        <div className="p-4 border-b border-border-faint bg-bg-subtle">
+          <h2 className="text-heading font-medium text-text-primary flex items-center gap-2"><Sparkles size={14} className="text-accent"/> Cover Letter</h2>
+          <p className="text-xs text-text-muted mt-1">Progress {completedSections}/{sectionItems.length} complete</p>
+          <div className="mt-2 h-1.5 w-full rounded-full bg-bg-subtle border border-border-soft">
+            <div className="h-1.5 rounded-full bg-accent" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
           </div>
         </div>
 
-        <div className="grow p-6 overflow-y-auto">
+        <div className="grow p-4 overflow-y-auto space-y-3">
           <SectionList sections={sectionItems} onSelect={openSectionEditor} />
 
-          <div className="space-y-2 pt-5">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><Building2 className="w-4 h-4 text-[#FFFFFF]/60" /> Company Name</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-text-muted flex items-center gap-1.5"><Building2 size={12} /> Company</label>
             <input
               value={sections.company}
               onChange={(e) => setSections((prev) => ({ ...prev, company: e.target.value }))}
               type="text"
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65]"
+              className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
               placeholder="e.g., Google"
             />
           </div>
 
-          <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><Briefcase className="w-4 h-4 text-[#FFFFFF]/60" /> Job Title</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-text-muted flex items-center gap-1.5"><Briefcase size={12} /> Job Title</label>
             <input
               value={sections.position}
               onChange={(e) => setSections((prev) => ({ ...prev, position: e.target.value }))}
               type="text"
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65]"
+              className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
               placeholder="e.g., Senior Frontend Engineer"
             />
           </div>
 
-          <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><FileText className="w-4 h-4 text-[#FFFFFF]/60" /> Job Description</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-text-muted flex items-center gap-1.5"><FileText size={12} /> Job Description</label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] h-32 resize-none text-sm"
+              className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors h-32 resize-none"
               placeholder="Paste the full job description here..."
             ></textarea>
           </div>
 
-          <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72">Tone</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-text-muted">Tone</label>
             <div className="grid grid-cols-3 gap-2">
               {(['formal', 'professional', 'conversational'] as const).map((tone) => (
                 <button
                   key={tone}
                   onClick={() => setSections((prev) => ({ ...prev, tone }))}
-                  className={`rounded-lg border px-3 py-2 text-sm ${
+                  className={cn(
+                    'rounded-md border px-3 py-1.5 text-body transition-colors',
                     sections.tone === tone
-                      ? 'border-[#0A9548]/50 bg-[#0A9548]/10 text-[#0A9548]'
-                      : 'border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/72'
-                  }`}
+                      ? 'border-accent-border bg-accent-muted text-accent'
+                      : 'border-border-soft bg-bg-surface text-text-secondary hover:text-text-primary'
+                  )}
                 >
                   {tone[0].toUpperCase() + tone.slice(1)}
                 </button>
@@ -510,38 +515,40 @@ export function CoverLetterBuilder() {
             feature="covers"
             onClick={generateDraft}
             disabled={isGenerating}
-            className="mt-6 w-full bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-3 rounded-xl font-bold hover:opacity-90 shadow-lg shadow-[#0A9548]/20"
+            className="mt-2 w-full bg-accent hover:bg-accent-hover text-white px-4 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1.5"
           >
             {isGenerating ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-current" /> Generate Draft
+                <Play size={14} className="fill-current" /> Generate Draft
               </>
             )}
           </FeatureButton>
         </div>
 
-        <div className="p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4">
+        {/* Bottom action bar */}
+        <div className="p-3 border-t border-border-faint bg-bg-subtle flex justify-between items-center gap-3">
           <button
             onClick={() => void persistLetter()}
             disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
-            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-bg-surface border border-border-soft hover:bg-bg-hover text-text-primary px-3 py-1.5 rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-body disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Save className="w-4 h-4" /> Save
+            <Save size={14} /> Save
           </button>
           <button
             onClick={() => void exportAsPdf()}
             disabled={isLoading || isExportingPdf}
-            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-bg-surface border border-border-soft hover:bg-bg-hover text-text-primary px-3 py-1.5 rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-body disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Download className="w-4 h-4" /> Export PDF
+            <Download size={14} /> Export PDF
           </button>
         </div>
       </div>
 
-      <div className="grow bg-[#020202] h-full flex flex-col p-4 lg:p-8 overflow-hidden">
-        <div className="w-full max-w-200 h-full bg-white rounded-lg shadow-2xl mx-auto overflow-hidden">
+      {/* Preview pane */}
+      <div className="grow bg-bg-base h-full flex flex-col p-4 lg:p-8 overflow-hidden relative">
+        <div className="w-full max-w-200 h-full bg-white rounded-lg shadow-subtle mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto p-12 text-black font-serif text-[15px] leading-relaxed">
             <div className="mb-8 text-sm text-gray-700">
               <p className="font-semibold">{sections.headerName}</p>
@@ -566,7 +573,13 @@ export function CoverLetterBuilder() {
           </div>
         </div>
 
-        <div className="absolute top-3 right-4 text-xs text-[#FFFFFF]/82 bg-black/40 px-2 py-1 rounded">
+        <div className={cn(
+          'absolute top-3 right-4 text-xs px-2 py-1 rounded-md',
+          saveStatus === 'saving' && 'text-text-muted bg-bg-hover',
+          saveStatus === 'saved' && 'text-accent bg-accent-muted/50',
+          saveStatus === 'error' && 'text-error bg-error-muted/50',
+          (saveStatus === 'idle') && 'text-text-muted bg-bg-hover',
+        )}>
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : 'Idle'}
         </div>
       </div>
@@ -580,22 +593,22 @@ export function CoverLetterBuilder() {
 
       {activeModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="mb-3 text-lg font-bold text-white">Edit Section</h3>
+          <div className="absolute inset-0 bg-black/60" onClick={() => setActiveModal(null)} />
+          <div className="relative w-full max-w-xl rounded-xl border border-border-medium bg-bg-elevated p-6">
+            <h3 className="mb-3 text-heading font-medium text-text-primary">Edit Section</h3>
             <textarea
               value={modalDraft}
               onChange={(e) => setModalDraft(e.target.value)}
-              className="h-52 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+              className="h-52 w-full resize-none rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
             />
-            <p className="mt-2 text-xs text-[#FFFFFF]/82">
+            <p className="mt-2 text-xs text-text-muted">
               Use new lines for multi-field sections like Header, Recipient, and Position.
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setActiveModal(null)} className="rounded-lg border border-white/10 bg-[#0A0F0D] px-4 py-2 text-sm text-[#FFFFFF]/72">
+              <button onClick={() => setActiveModal(null)} className="rounded-md border border-border-soft bg-bg-surface px-4 py-1.5 text-body text-text-secondary hover:text-text-primary transition-colors">
                 Cancel
               </button>
-              <button onClick={applyModalChanges} className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+              <button onClick={applyModalChanges} className="rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors">
                 Save Changes
               </button>
             </div>

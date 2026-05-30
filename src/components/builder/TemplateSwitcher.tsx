@@ -1,38 +1,22 @@
-"use client"
+'use client'
 
-type TemplateValue = 'harvard'
+type ResumeTemplate = 'harvard'
 
-type TemplateSwitcherProps = {
-  value: TemplateValue
-  onChange: (value: TemplateValue) => void
+interface TemplateSwitcherProps {
+  value: ResumeTemplate
+  onChange: (value: ResumeTemplate) => void
 }
-
-const templates: Array<{ id: TemplateValue; name: string; description: string }> = [
-  { id: 'harvard', name: 'Harvard', description: 'Classic academic layout' },
-]
 
 export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
   return (
-    <div className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4">
-      <p className="text-xs uppercase tracking-wider text-[#FFFFFF]/82 mb-3">Template</p>
-      <div className="grid grid-cols-1 gap-2.5">
-        {templates.map((template) => (
-          <button
-            key={template.id}
-            onClick={() => onChange(template.id)}
-            className={`text-left rounded-lg border px-3.5 py-2.5 transition-colors ${
-              value === template.id
-                ? 'bg-[#0A9548]/10 border-white/12 text-white'
-                : 'bg-[#0A0F0D] border-white/10 text-[#FFFFFF]/72 hover:border-[#16DB65]/60'
-            }`}
-          >
-            <p className="text-sm font-semibold">{template.name}</p>
-            <p className="text-[11px] text-[#FFFFFF]/82 mt-0.5">{template.description}</p>
-          </button>
-        ))}
-      </div>
+    <div className="flex items-center gap-2 mb-3">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as ResumeTemplate)}
+        className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+      >
+        <option value="harvard">Harvard</option>
+      </select>
     </div>
   )
 }
-
-

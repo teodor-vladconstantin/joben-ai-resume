@@ -1,119 +1,91 @@
-"use client"
+'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
-import { useAuth, UserButton } from '@clerk/nextjs'
-import { Plus } from 'lucide-react'
-import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
-import { motion } from 'framer-motion'
+import { usePathname } from 'next/navigation'
+import { UserButton, useUser } from '@clerk/nextjs'
+import { FileText, Menu, X } from 'lucide-react'
+import { useState } from 'react'
+import { cn } from '@/lib/cn'
 
 export function Navbar() {
-  const { isLoaded, isSignedIn } = useAuth()
+  const { isSignedIn } = useUser()
+  const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  const publicLinks = [
-    { href: '/#builder', label: 'AI Resume Builder' },
-    { href: '/#analysis', label: 'ATS Analysis' },
-    { href: '/#pricing', label: 'Pricing' },
-    { href: '/#faq', label: 'FAQ' },
-  ]
-
-  const appLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/resumes', label: 'Resumes' },
-    { href: '/cover-letters', label: 'Cover Letters' },
-    { href: '/ai-review', label: 'AI Review' },
+  const navLinks: { label: string; href: string; auth?: boolean }[] = [
+    { label: 'Resume Builder', href: '/resumes/new' },
+    { label: 'AI Review', href: '/ai-review', auth: true },
+    { label: 'Cover Letters', href: '/cover-letters/new', auth: true },
+    { label: 'Pricing', href: '/pricing' },
   ]
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#020202]/90 backdrop-blur-md">
-      <section className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <section className="flex items-center space-x-8">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="relative h-8 w-8 overflow-hidden rounded-lg shadow-lg shadow-[#0A9548]/25">
-              <Image
-                src="/jobeneu_logo.jpg"
-                alt="Joben logo"
-                fill
-                sizes="32px"
-                className="object-cover"
-                priority
-              />
-            </span>
-            <span className="text-2xl font-bold tracking-tight text-white">Joben</span>
-          </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-bg-base/95 backdrop-blur-sm border-b border-border-faint">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 text-text-primary hover:text-accent transition-colors">
+          <FileText size={18} />
+          <span className="font-semibold text-heading">Joben</span>
+        </Link>
 
-          <section className="hidden items-center space-x-1 md:flex">
-            {(isLoaded && isSignedIn ? appLinks : publicLinks).map((link) => (
-              <motion.div
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-1">
+          {navLinks.filter(l => !l.auth || isSignedIn).map(link => {
+            const isActive = pathname?.startsWith(link.href)
+            return (
+              <Link
                 key={link.href}
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+                href={link.href}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-body transition-colors',
+                  isActive
+                    ? 'bg-bg-hover text-text-primary'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
+                )}
               >
-                <Link
-                  href={link.href}
-                  className="block rounded-md px-3 py-2 text-sm font-medium text-[#FFFFFF]/75 transition-colors hover:bg-[#0A0F0D] hover:text-[#FFFFFF]"
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
-            ))}
-          </section>
-        </section>
+                {link.label}
+              </Link>
+            )
+          })}
+        </div>
 
-        <section className="flex items-center space-x-3">
-          {isLoaded && !isSignedIn && (
-            <>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-              >
-                <Link href="/sign-in" className="text-sm font-medium text-[#FFFFFF]/75 hover:text-[#FFFFFF]">
-                  Log in
-                </Link>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.03, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-              >
-                <AuthAwareSignupLink
-                  className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                >
-                  Get Started Free
-                </AuthAwareSignupLink>
-              </motion.div>
-            </>
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <Link
+              href="/sign-in"
+              className="hidden sm:inline-flex px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
+            >
+              Sign In
+            </Link>
           )}
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden p-1.5 text-text-secondary hover:text-text-primary transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </div>
 
-          {isLoaded && isSignedIn && (
-            <>
-              <motion.div
-                whileHover={{ scale: 1.03, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-              >
-                <Link
-                  href="/resumes/new"
-                  className="hidden items-center space-x-1 rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Create New</span>
-                </Link>
-              </motion.div>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: 'h-9 w-9 border border-white/12'
-                  }
-                }}
-              />
-            </>
-          )}
-        </section>
-      </section>
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border-faint bg-bg-base px-4 py-3 space-y-1">
+          {navLinks.filter(l => !l.auth || isSignedIn).map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2 rounded-md text-body text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </nav>
   )
 }
-
