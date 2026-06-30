@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { trackProductEvent } from '@/lib/analytics'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeExportQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { renderInlineLatex } from '@/lib/inline-format'
@@ -688,6 +689,13 @@ export async function POST(req: Request) {
       metadata: {
         dynamicSections: Array.isArray(data?.dynamicSections) ? data.dynamicSections.length : 0,
       },
+    })
+
+    // Only one template exists today ('harvard'); hardcoded until the schema gains a template_id field.
+    await capturePostHogEvent({
+      distinctId: userId,
+      event: 'pdf_exported',
+      properties: { template_id: 'harvard' },
     })
 
     const pdfResponse = new NextResponse(pdfBuffer, {

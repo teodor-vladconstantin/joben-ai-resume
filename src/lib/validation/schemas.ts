@@ -67,6 +67,7 @@ export const createResumeSchema = z
   .object({
     title: optionalTrimmedString(SHORT_TEXT_MAX),
     data: resumeDataSchema.optional(),
+    source: z.enum(['import', 'scratch']).optional(),
   })
   .strict()
 

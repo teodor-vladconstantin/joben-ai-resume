@@ -84,6 +84,7 @@ export async function POST(req: Request) {
             requestId,
             route: '/api/tailor',
             reason: error.payload?.limitType || 'rate_limit',
+            plan,
           })
         }
         return jsonWithRequestId(error.payload, error.status, requestId)
