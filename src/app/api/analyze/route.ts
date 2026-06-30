@@ -9,6 +9,7 @@ import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { estimateRequestCost } from '@/lib/token-estimator'
@@ -106,6 +107,7 @@ export async function POST(req: Request) {
         requestId,
         route: '/api/analyze',
         reason: costEstimate.limitType || 'input_too_long',
+        plan,
       })
       return jsonWithRequestId({ error: label, limitType: 'input_too_long' }, 429, requestId)
     }
@@ -171,6 +173,12 @@ export async function POST(req: Request) {
         },
       })
 
+      await capturePostHogEvent({
+        distinctId: userId,
+        event: 'ai_rewrite_used',
+        properties: { feature: 'ats_analysis' },
+      })
+
       return jsonWithRequestId({ result: analysis, reviewId: createdReview.id }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
@@ -180,6 +188,7 @@ export async function POST(req: Request) {
             requestId,
             route: '/api/analyze',
             reason: error.payload?.limitType || 'rate_limit',
+            plan,
           })
         }
         return jsonWithRequestId(error.payload, error.status, requestId)

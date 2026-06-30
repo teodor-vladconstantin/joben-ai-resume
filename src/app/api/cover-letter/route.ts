@@ -8,6 +8,7 @@ import {
 import { parseClaudeJsonText } from '@/lib/claude-json'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
 import { clientErrorMessage } from '@/lib/security/client-error'
@@ -78,6 +79,13 @@ export async function POST(req: Request) {
       })
 
       const generated = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
+
+      await capturePostHogEvent({
+        distinctId: userId,
+        event: 'ai_rewrite_used',
+        properties: { feature: 'cover_letter' },
+      })
+
       return jsonWithRequestId({ result: generated }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
@@ -87,6 +95,7 @@ export async function POST(req: Request) {
             requestId,
             route: '/api/cover-letter',
             reason: error.payload?.limitType || 'rate_limit',
+            plan,
           })
         }
         return jsonWithRequestId(error.payload, error.status, requestId)

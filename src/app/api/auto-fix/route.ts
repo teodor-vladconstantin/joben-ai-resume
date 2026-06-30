@@ -18,6 +18,7 @@ import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
@@ -118,6 +119,7 @@ export async function POST(req: Request) {
         requestId,
         route: '/api/auto-fix',
         reason,
+        plan,
       })
     }
 
@@ -341,6 +343,12 @@ ${improvementsText}`
     const responseText = extractTextFromAnthropicMessage(aiResponse)
     const result = parseClaudeJsonText(responseText) as { patches?: RawPatch[]; fixesApplied?: number }
     const rawPatches: RawPatch[] = Array.isArray(result?.patches) ? result.patches : []
+
+    await capturePostHogEvent({
+      distinctId: userId,
+      event: 'ai_rewrite_used',
+      properties: { feature: 'auto_fix' },
+    })
 
     if (rawPatches.length === 0) {
       return jsonWithRequestId({ fixesApplied: 0, patches: [] }, 200, requestId)

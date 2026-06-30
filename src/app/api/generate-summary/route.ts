@@ -474,6 +474,8 @@ export async function POST(req: Request) {
 
             reason: error.payload?.limitType || 'rate_limit',
 
+            plan,
+
           })
 
         }
