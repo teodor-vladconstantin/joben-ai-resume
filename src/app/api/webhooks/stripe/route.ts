@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -100,11 +101,12 @@ export async function POST(req: Request) {
 
   const syncPlanFromSubscription = async (
     customerId: string,
-    subscription: Stripe.Subscription
+    subscription: Stripe.Subscription,
+    paymentCapture?: { amount: number | null }
   ): Promise<Response | null> => {
     const { data: user, error: userLookupError } = await supabase
       .from('users')
-      .select('id, stripe_last_event_created, lifetime_recruiting_unlocked')
+      .select('id, clerk_id, stripe_last_event_created, lifetime_recruiting_unlocked')
       .eq('stripe_customer_id', customerId)
       .maybeSingle()
 
@@ -177,6 +179,15 @@ export async function POST(req: Request) {
         eventId: event.id,
         eventType: event.type,
       })
+
+      if (paymentCapture && user.clerk_id) {
+        await capturePostHogEvent({
+          distinctId: user.clerk_id,
+          event: 'payment_completed',
+          properties: { plan: 'recruiting', amount: paymentCapture.amount },
+        })
+      }
+
       return null
     }
 
@@ -204,6 +215,14 @@ export async function POST(req: Request) {
         error: error.message,
       })
       return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
+    }
+
+    if (paymentCapture && user.clerk_id) {
+      await capturePostHogEvent({
+        distinctId: user.clerk_id,
+        event: 'payment_completed',
+        properties: { plan, amount: paymentCapture.amount },
+      })
     }
 
     return null
@@ -256,6 +275,12 @@ export async function POST(req: Request) {
           })
           return jsonWithRequestId({ message: 'Stale webhook ignored' }, 200, requestId)
         }
+
+        await capturePostHogEvent({
+          distinctId: userId,
+          event: 'payment_completed',
+          properties: { plan: planId || 'pro', amount: session.amount_total ?? null },
+        })
 
         const updatePayload: {
           plan?: string
@@ -370,7 +395,9 @@ export async function POST(req: Request) {
         }
 
         if (subscription) {
-          const response = await syncPlanFromSubscription(invoice.customer, subscription)
+          const response = await syncPlanFromSubscription(invoice.customer, subscription, {
+            amount: invoice.amount_paid ?? null,
+          })
           if (response) {
             return response
           }

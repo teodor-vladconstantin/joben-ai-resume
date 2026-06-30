@@ -319,6 +319,7 @@ export function ResumeBuilder() {
   const [generatedSummaryDraft, setGeneratedSummaryDraft] = useState('')
   const [summaryGenerationError, setSummaryGenerationError] = useState<string | null>(null)
   const [pendingBulletScrollKey, setPendingBulletScrollKey] = useState<string | null>(null)
+  const creationSourceRef = useRef<'import' | 'scratch'>('scratch')
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -502,7 +503,7 @@ export function ResumeBuilder() {
       const createRes = await fetch('/api/resumes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, source: creationSourceRef.current }),
       })
 
       if (!createRes.ok) {
@@ -927,6 +928,7 @@ export function ResumeBuilder() {
     try {
       const result = await importPdfClientSide(pendingUploadFile)
       handleOnboardingImport(result.data)
+      creationSourceRef.current = 'import'
       setActiveTab('personal')
       setPendingUploadFile(null)
     } catch (err) {
