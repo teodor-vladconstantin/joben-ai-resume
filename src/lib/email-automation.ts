@@ -1,12 +1,14 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sendRateLimitEmail } from '@/lib/resend'
 import { logger } from '@/lib/logger'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 
 type RateLimitEmailTriggerInput = {
   userId: string
   requestId?: string
   route?: string
   reason?: string
+  plan?: string
 }
 
 const RATE_LIMIT_EMAIL_TYPE = 'rate_limit_hit'
@@ -22,6 +24,17 @@ function buildSourceEventId(userId: string, now: number): string {
 }
 
 export async function sendRateLimitEmailIfEligible(input: RateLimitEmailTriggerInput): Promise<void> {
+  // Captured on every call (not gated by the email dedup below) so product
+  // analytics sees every limit hit, not just the first one per 24h window.
+  await capturePostHogEvent({
+    distinctId: input.userId,
+    event: 'feature_limit_hit',
+    properties: {
+      feature: input.route?.replace(/^\/api\//, '') || 'unknown',
+      plan: input.plan || null,
+    },
+  })
+
   try {
     const supabase = createServerClient()
     const now = Date.now()

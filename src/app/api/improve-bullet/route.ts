@@ -7,6 +7,7 @@ import {
 } from '@/lib/anthropic-with-limits'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
@@ -89,6 +90,12 @@ export async function POST(req: Request) {
         },
       })
 
+      await capturePostHogEvent({
+        distinctId: userId,
+        event: 'ai_rewrite_used',
+        properties: { feature: 'bullet_rewrite' },
+      })
+
       return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
@@ -98,6 +105,7 @@ export async function POST(req: Request) {
             requestId,
             route: '/api/improve-bullet',
             reason: error.payload?.limitType || 'rate_limit',
+            plan,
           })
         }
         return jsonWithRequestId(error.payload, error.status, requestId)

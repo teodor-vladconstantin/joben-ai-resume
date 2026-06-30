@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -120,6 +121,12 @@ export async function POST(req: Request) {
       })
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
+
+    await capturePostHogEvent({
+      distinctId: id,
+      event: 'signup_completed',
+      properties: { method: 'clerk' },
+    })
 
     if (primaryEmail) {
       const { data: existingUser, error: existingUserError } = await supabase

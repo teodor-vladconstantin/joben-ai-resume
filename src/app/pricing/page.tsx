@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { Metadata } from 'next'
 import { Check, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { UpgradeToProButton } from '@/components/pricing/UpgradeToProButton'
 
 export const metadata: Metadata = {
   title: 'Pricing | Joben AI Resume Builder',
@@ -129,9 +130,7 @@ export default async function PricingPage() {
                 ))}
               </ul>
               <div className="block w-full text-center">
-                <Button variant="primary" className="w-full">
-                  Upgrade to Pro
-                </Button>
+                <UpgradeToProButton signedIn={Boolean(userId)} />
               </div>
             </div>
           </div>
