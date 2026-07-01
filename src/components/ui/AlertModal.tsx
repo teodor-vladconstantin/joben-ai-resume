@@ -33,7 +33,7 @@ export function AlertModal({ isOpen, onConfirm, onCancel, title }: AlertModalPro
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card ref={ref} elevated className="p-6 max-w-md w-full mx-4">
+      <Card ref={ref} elevated radius="lg" className="p-6 max-w-md w-full mx-4">
         <div className="text-center">
           <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
           <h3 className="text-lg font-medium text-(--foreground) mt-4">Important Notice</h3>

@@ -8,14 +8,17 @@
   --brand-accent-bright: #4fd69b;
   --brand-accent-muted: #2cb87a1f;
   --brand-white: #f5f1eb;
+  --radius: 0.625rem;
+  --radius-lg: 1rem;
   --brand-text-faint: #5e5e66;
+  --brand-muted: #8a8a92;
 
   --background: var(--brand-black);
   --surface: var(--brand-deep);
   --surface-strong: var(--brand-mid);
   --surface-elevated: var(--brand-mid);
   --foreground: var(--brand-white);
-  --muted: color-mix(in srgb, var(--brand-white) 54%, transparent);
+  --muted: var(--brand-muted);
   --muted-2: var(--brand-text-faint);
   --border: color-mix(in srgb, var(--brand-white) 8%, transparent);
   --accent: var(--brand-accent);
