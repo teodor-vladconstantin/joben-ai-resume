@@ -29,7 +29,9 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
       properties: input.properties,
     })
   } catch (error) {
-    logger.warn('PostHog server-side capture threw error', {
+    // TEMP: bumped from warn to error for extra visibility while debugging
+    // server-side capture delivery; revert to warn once confirmed stable.
+    logger.error('PostHog server-side capture threw error', {
       source: 'capturePostHogEvent',
       event: input.event,
       distinctId: input.distinctId,
@@ -39,7 +41,9 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
     try {
       await client.shutdown()
     } catch (error) {
-      logger.warn('PostHog server-side client shutdown failed', {
+      // TEMP: bumped from warn to error for extra visibility while debugging
+      // server-side capture delivery; revert to warn once confirmed stable.
+      logger.error('PostHog server-side client shutdown failed', {
         source: 'capturePostHogEvent',
         event: input.event,
         error: error instanceof Error ? error.message : 'Unknown error',
