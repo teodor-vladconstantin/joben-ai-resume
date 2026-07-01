@@ -2,7 +2,6 @@
 
 import { X } from 'lucide-react'
 import Link from 'next/link'
-import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface UpgradeModalProps {
   open: boolean
@@ -19,14 +18,11 @@ export function UpgradeModal({ open, title = 'Upgrade to Pro', description, chil
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div
-        className="w-full max-w-md mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 animate-fade-in-up"
+        className="w-full max-w-md mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
-          <div>
-            <Eyebrow className="mb-1.5">Pro feature</Eyebrow>
-            <h2 className="text-title text-text-primary font-semibold">{title}</h2>
-          </div>
+          <h2 className="text-title text-text-primary font-semibold">{title}</h2>
           {onClose && (
             <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
               <X size={16} />

@@ -21,7 +21,7 @@ export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div
-        className="w-full max-w-2xl mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 max-h-[80vh] overflow-y-auto animate-fade-in-up"
+        className="w-full max-w-2xl mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-title text-text-primary font-semibold mb-4">Changes Applied</h2>

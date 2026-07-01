@@ -3,7 +3,6 @@ import { auth } from '@clerk/nextjs/server'
 import { Metadata } from 'next'
 import { Check, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Eyebrow } from '@/components/ui/Eyebrow'
 import { UpgradeToProButton } from '@/components/pricing/UpgradeToProButton'
 
 export const metadata: Metadata = {
@@ -72,7 +71,6 @@ export default async function PricingPage() {
       {/* Hero */}
       <section className="py-16 sm:py-20">
         <div className="max-w-2xl mx-auto px-6 text-center">
-          <Eyebrow className="justify-center mb-3">Pricing</Eyebrow>
           <h1 className="text-display font-semibold tracking-tight text-text-primary">
             Simple, transparent pricing
           </h1>
@@ -87,7 +85,7 @@ export default async function PricingPage() {
         <div className="max-w-3xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Free */}
-            <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up">
+            <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
               <h3 className="text-heading font-medium text-text-primary">Free</h3>
               <p className="text-text-muted text-xs mt-1">Get started with the basics</p>
               <div className="mt-4 mb-6">
@@ -113,10 +111,7 @@ export default async function PricingPage() {
             </div>
 
             {/* Pro */}
-            <div
-              className="bg-bg-surface border border-accent-border rounded-lg p-6 relative animate-fade-in-up"
-              style={{ animationDelay: '60ms' }}
-            >
+            <div className="bg-bg-surface border border-accent-border rounded-lg p-6 relative">
               <span className="absolute -top-2.5 left-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border">
                 Pro
               </span>
