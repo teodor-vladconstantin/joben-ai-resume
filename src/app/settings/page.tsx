@@ -20,7 +20,7 @@ export default async function SettingsPage() {
     <DashboardShell title="Settings">
       <div className="max-w-2xl space-y-6">
         {/* Account */}
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up">
+        <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-heading font-medium text-text-primary">Account</h2>
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
         </div>
 
         {/* Billing */}
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up" style={{ animationDelay: '40ms' }}>
+        <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
           <div>
             <h2 className="text-heading font-medium text-text-primary">Billing</h2>
             <p className="text-small text-text-secondary mt-1">
@@ -61,7 +61,7 @@ export default async function SettingsPage() {
         </div>
 
         {/* Notifications */}
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+        <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
           <div>
             <h2 className="text-heading font-medium text-text-primary">Notifications</h2>
             <p className="text-small text-text-secondary mt-1">
@@ -79,7 +79,7 @@ export default async function SettingsPage() {
         </div>
 
         {/* Security */}
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+        <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
           <div>
             <h2 className="text-heading font-medium text-text-primary">Security</h2>
             <p className="text-small text-text-secondary mt-1">
@@ -97,7 +97,7 @@ export default async function SettingsPage() {
         </div>
 
         {/* Danger zone */}
-        <div className="bg-bg-surface border border-error-muted rounded-lg p-6 animate-fade-in-up" style={{ animationDelay: '160ms' }}>
+        <div className="bg-bg-surface border border-error-muted rounded-lg p-6">
           <div>
             <h2 className="text-heading font-medium text-error">Danger Zone</h2>
             <p className="text-small text-text-secondary mt-1">

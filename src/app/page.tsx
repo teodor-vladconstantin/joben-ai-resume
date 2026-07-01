@@ -114,11 +114,10 @@ export default async function LandingPage() {
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((feature, i) => (
+            {features.map(feature => (
               <div
                 key={feature.title}
-                className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up"
-                style={{ animationDelay: `${i * 40}ms` }}
+                className="bg-bg-surface border border-border-soft rounded-lg p-6"
               >
                 <feature.icon size={16} className="text-accent mb-3" />
                 <h3 className="text-heading font-medium text-text-primary mb-2">
@@ -141,7 +140,7 @@ export default async function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Free */}
-            <div className="bg-bg-surface border border-border-soft rounded-lg p-6 animate-fade-in-up">
+            <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
               <h3 className="text-heading font-medium text-text-primary">Free</h3>
               <p className="text-text-muted text-xs mt-1">Get started with the basics</p>
               <div className="mt-4 mb-6">
@@ -170,10 +169,7 @@ export default async function LandingPage() {
             </div>
 
             {/* Pro */}
-            <div
-              className="bg-bg-surface border border-accent-border rounded-lg p-6 relative animate-fade-in-up"
-              style={{ animationDelay: '60ms' }}
-            >
+            <div className="bg-bg-surface border border-accent-border rounded-lg p-6 relative">
               <span className="absolute -top-2.5 left-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border">
                 Pro
               </span>

@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
-import { LockedFeatureCard } from '@/components/ui/LockedFeatureCard'
 import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 
@@ -492,21 +491,6 @@ export function CoverLetterBuilder() {
             ></textarea>
           </div>
 
-          <LockedFeatureCard
-            className="animate-fade-in-up"
-            title="Auto job matching"
-            description="Skip the copy-paste. Joben will pull live roles daily and draft a tailored cover letter for each one automatically."
-            cta={
-              <button
-                type="button"
-                disabled
-                className="mt-2 inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-accent-border bg-transparent px-2.5 py-1 text-xs font-medium text-accent opacity-70"
-              >
-                Notify me when it ships
-              </button>
-            }
-          />
-
           <div className="space-y-1.5">
             <label className="text-xs text-text-muted">Tone</label>
             <div className="grid grid-cols-3 gap-2">
@@ -610,7 +594,7 @@ export function CoverLetterBuilder() {
       {activeModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-xl rounded-xl border border-border-medium bg-bg-elevated p-6 animate-fade-in-up">
+          <div className="relative w-full max-w-xl rounded-xl border border-border-medium bg-bg-elevated p-6">
             <h3 className="mb-3 text-heading font-medium text-text-primary">Edit Section</h3>
             <textarea
               value={modalDraft}

@@ -246,7 +246,7 @@ export default function AIReviewEditorPage() {
       {showAutoFixTokenWarning ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowAutoFixTokenWarning(false)} />
-          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6 animate-fade-in-up">
+          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
             <h3 className="text-heading font-medium text-text-primary">Auto-fix unavailable</h3>
             <p className="mt-2 text-small text-text-secondary">
               {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}

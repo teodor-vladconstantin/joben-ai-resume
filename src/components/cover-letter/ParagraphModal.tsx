@@ -30,7 +30,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-3xl rounded-xl border border-border-medium bg-bg-elevated p-6 animate-fade-in-up">
+      <div className="relative w-full max-w-3xl rounded-xl border border-border-medium bg-bg-elevated p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-heading font-medium text-text-primary">Body Paragraphs</h3>
           <button onClick={onClose} className="rounded-md p-1 text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors">
