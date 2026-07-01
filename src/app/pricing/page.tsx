@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { Metadata } from 'next'
-import { Check, FileText } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Navbar } from '@/components/ui/Navbar'
 import { UpgradeToProButton } from '@/components/pricing/UpgradeToProButton'
 
 export const metadata: Metadata = {
@@ -36,44 +37,13 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-bg-base text-text-primary font-sans antialiased">
-      {/* Navbar */}
-      <nav className="h-14 border-b border-border-faint">
-        <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-text-primary hover:text-accent transition-colors">
-            <FileText size={18} />
-            <span className="font-semibold text-heading">Joben</span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Link
-              href="/"
-              className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-transparent transition-colors"
-            >
-              Home
-            </Link>
-            {userId ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Get Started
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
-      <section className="py-16 sm:py-20">
+      <section className="pt-16 py-16 sm:py-20">
         <div className="max-w-2xl mx-auto px-6 text-center">
           <Eyebrow className="justify-center mb-3">Pricing</Eyebrow>
-          <h1 className="text-display font-semibold tracking-tight text-text-primary">
+          <h1 className="text-4xl sm:text-5xl leading-tight font-semibold tracking-hero text-text-primary">
             Simple, transparent pricing
           </h1>
           <p className="mt-3 text-body text-text-secondary">
