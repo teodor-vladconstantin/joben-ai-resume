@@ -103,7 +103,6 @@ theme: {
       mono: ['Geist Mono', 'monospace'],
     },
     fontSize: {
-      'hero':    ['clamp(2.75rem, 6vw, 5.5rem)', { lineHeight: '1.02', letterSpacing: '-0.04em', fontWeight: '600' }],
       'display': ['2.5rem', { lineHeight: '1.1', letterSpacing: '-0.03em', fontWeight: '600' }],
       'title':   ['1.5rem',  { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '600' }],
       'heading': ['1.125rem',{ lineHeight: '1.4', letterSpacing: '-0.01em', fontWeight: '500' }],
@@ -413,22 +412,14 @@ Minimal. Only these are allowed:
 - No `shadow-lg` or heavy box shadows on cards
 - No text gradients (no bg-clip-text tricks)
 - No glassmorphism (no backdrop-blur unless it's a modal overlay)
-- No border-radius above `rounded-xl` (12px) — **except** the marketing hero CTA, which may use `rounded-full` (pill), matching the ResuMax-inspired hero treatment below
-- No font sizes above `2.5rem` for in-app display text — **except** the marketing hero H1, which uses the `--text-hero` token (see Marketing Hero Exception)
+- No border-radius above `rounded-xl` (12px)
+- No font sizes above `2.5rem` for display
 - No `font-black` or `font-extrabold`
 - No colored backgrounds on sections (no purple sections, no dark-blue hero)
 - No stock photo backgrounds
-- No decorative SVG blobs — a faint, non-interactive "live product data" text texture on the marketing hero is allowed (see Marketing Hero Exception), since it's product-flavored, not decorative
+- No decorative SVG blobs
 - No `opacity-50` as a hover state (use color tokens instead)
-- No mixing of accent colors — green only, no rainbow
-
-### Marketing Hero Exception
-
-The public marketing surface (`/`, `/pricing`) intentionally matches ResuMax's visual energy (adapted to Joben green, never pink):
-- H1 uses `text-hero` (`clamp(2.75rem, 6vw, 5.5rem)`, tracking `-0.04em`) instead of `text-display`
-- Primary hero CTA uses `rounded-full` instead of `rounded-md`
-- Hero section may render a `HeroDataTexture` background: faint (`opacity ~10-15%`), `pointer-events-none`, monospace snippets of realistic product events (e.g. "resume tailored", "match found · Stripe"), never real user data
-- This exception is scoped to the marketing hero only — dashboard, builder, settings, and all authenticated app screens stay within the original brutal-minimal constraints (`rounded-xl` max, `text-display` max, no background texture)
+- No mixing of accent colors — violet only, no rainbow
 
 ---
 
