@@ -205,4 +205,109 @@ export async function sendRateLimitEmail(input: {
   }
 }
 
+export async function sendReengagementEmail(input: {
+  to: string
+  firstName?: string | null
+}): Promise<EmailResult> {
+  const client = getResendClient()
+  if (!client) {
+    return { success: false, error: 'RESEND_API_KEY is not configured.' }
+  }
+
+  const firstName = input.firstName?.trim() || 'there'
+
+  try {
+    const response = (await client.emails.send({
+      from: automationFromEmail,
+      to: input.to,
+      subject: 'Still there? See what is new on Joben',
+      html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">Hey ${firstName}, it has been a while.</h1>
+  <p style="margin:0 0 12px 0;">Joben keeps getting better: a faster AI review, sharper bullet rewrites, and a cleaner PDF export.</p>
+  <p style="margin:0 0 18px 0;">No pressure, just a nudge in case you want to pick up where you left off.</p>
+  <a href="${appUrl}/dashboard" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Open Dashboard</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">You are receiving this because you have a Joben account.</p>
+</div>`,
+    })) as ResendResponse
+
+    if (response.error) {
+      return { success: false, error: response.error.message || 'Resend send failed.' }
+    }
+
+    return { success: true, providerId: response.data?.id }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function sendPaymentFailedEmail(input: {
+  to: string
+  firstName?: string | null
+}): Promise<EmailResult> {
+  const client = getResendClient()
+  if (!client) {
+    return { success: false, error: 'RESEND_API_KEY is not configured.' }
+  }
+
+  const firstName = input.firstName?.trim() || 'there'
+
+  try {
+    const response = (await client.emails.send({
+      from: automationFromEmail,
+      to: input.to,
+      subject: 'Action needed: your Joben payment failed',
+      html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">Heads up, ${firstName}.</h1>
+  <p style="margin:0 0 12px 0;">We could not process your latest payment for Joben Pro. This is usually an expired card or insufficient funds.</p>
+  <p style="margin:0 0 18px 0;">Update your payment details to keep your Pro features active without interruption.</p>
+  <a href="${appUrl}/settings" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Update Payment Method</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">If this was already resolved, you can ignore this email.</p>
+</div>`,
+    })) as ResendResponse
+
+    if (response.error) {
+      return { success: false, error: response.error.message || 'Resend send failed.' }
+    }
+
+    return { success: true, providerId: response.data?.id }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function sendWinbackEmail(input: {
+  to: string
+  firstName?: string | null
+}): Promise<EmailResult> {
+  const client = getResendClient()
+  if (!client) {
+    return { success: false, error: 'RESEND_API_KEY is not configured.' }
+  }
+
+  const firstName = input.firstName?.trim() || 'there'
+
+  try {
+    const response = (await client.emails.send({
+      from: automationFromEmail,
+      to: input.to,
+      subject: 'Sorry to see you go',
+      html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">Thanks for giving Joben a try, ${firstName}.</h1>
+  <p style="margin:0 0 12px 0;">Your Pro subscription was just cancelled. We are sorry to see you go.</p>
+  <p style="margin:0 0 18px 0;">If you have a minute, we would love to know what did not work for you — just reply to this email.</p>
+  <a href="${appUrl}/pricing" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Come Back Anytime</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">Your account and resumes are still here whenever you are ready.</p>
+</div>`,
+    })) as ResendResponse
+
+    if (response.error) {
+      return { success: false, error: response.error.message || 'Resend send failed.' }
+    }
+
+    return { success: true, providerId: response.data?.id }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
 

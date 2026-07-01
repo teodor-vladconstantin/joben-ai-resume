@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
+import { sendPaymentFailedEmailIfEligible, sendWinbackEmailIfEligible } from '@/lib/email-automation'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -13,6 +14,29 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
+}
+
+async function lookupClerkIdByCustomerId(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  customerId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('clerk_id')
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle()
+
+  if (error) {
+    logger.warn('Billing email user lookup failed', {
+      route: '/api/webhooks/stripe',
+      customerId,
+      error: error.message,
+    })
+    return null
+  }
+
+  return data?.clerk_id || null
 }
 
 function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' | 'pro' {
@@ -345,6 +369,21 @@ export async function POST(req: Request) {
         if (response) {
           return response
         }
+
+        const previousStatus = (event.data.previous_attributes as Record<string, unknown> | undefined)?.status
+        const becamePastDue = subscription.status === 'past_due' && previousStatus !== 'past_due'
+
+        if (becamePastDue) {
+          const clerkId = await lookupClerkIdByCustomerId(supabase, subscription.customer)
+          if (clerkId) {
+            await sendPaymentFailedEmailIfEligible({
+              userId: clerkId,
+              requestId,
+              subscriptionId: subscription.id,
+              stripeEventId: event.id,
+            })
+          }
+        }
       }
     }
 
@@ -355,6 +394,15 @@ export async function POST(req: Request) {
         const response = await syncPlanFromSubscription(subscription.customer, subscription)
         if (response) {
           return response
+        }
+
+        const clerkId = await lookupClerkIdByCustomerId(supabase, subscription.customer)
+        if (clerkId) {
+          await sendWinbackEmailIfEligible({
+            userId: clerkId,
+            requestId,
+            subscriptionId: subscription.id,
+          })
         }
       }
     }
@@ -377,6 +425,16 @@ export async function POST(req: Request) {
           if (response) {
             return response
           }
+        }
+
+        const clerkId = await lookupClerkIdByCustomerId(supabase, invoice.customer)
+        if (clerkId) {
+          await sendPaymentFailedEmailIfEligible({
+            userId: clerkId,
+            requestId,
+            invoiceId: invoice.id,
+            stripeEventId: event.id,
+          })
         }
       }
     }
