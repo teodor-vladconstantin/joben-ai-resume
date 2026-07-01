@@ -23,6 +23,10 @@
   --accent-muted: var(--brand-accent-muted);
 }
 
+@theme inline {
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
