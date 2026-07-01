@@ -11,10 +11,10 @@ import {
   Sparkles,
   CreditCard,
   ChevronRight,
-  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useState } from 'react'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const navGroups = [
   {
@@ -37,7 +37,7 @@ const navGroups = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { isSignedIn } = useUser()
+  const { isSignedIn, user } = useUser()
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -62,9 +62,7 @@ export function Sidebar() {
         {navGroups.map(group => (
           <div key={group.label} className="mb-2">
             {!collapsed && (
-              <div className="px-2.5 py-1 text-xs font-medium text-text-muted uppercase tracking-wide">
-                {group.label}
-              </div>
+              <Eyebrow className="px-2.5 py-1">{group.label}</Eyebrow>
             )}
             {group.items.map(item => {
               const isActive =
@@ -116,7 +114,7 @@ export function Sidebar() {
             <UserButton />
             {!collapsed && (
               <span className="text-xs text-text-muted truncate">
-                {useUser().user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || ''}
+                {user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || ''}
               </span>
             )}
           </div>

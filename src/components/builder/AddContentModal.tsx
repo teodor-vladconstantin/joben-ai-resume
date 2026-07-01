@@ -32,7 +32,7 @@ export function AddContentModal({ open, onClose, onAdd }: AddContentModalProps) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div
-        className="w-full max-w-sm mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6"
+        className="w-full max-w-sm mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-title text-text-primary font-semibold mb-4">Add Section</h2>

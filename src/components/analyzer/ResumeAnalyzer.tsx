@@ -48,17 +48,15 @@ function getResumeTitle(value: AnalyzerReview['resumes']) {
 /** Tailwind color class keyed to 0-100 score */
 function scoreColorClass(score: number): string {
   if (score >= 85) return 'text-success'
-  if (score >= 70) return 'text-[#84CC16]'
   if (score >= 50) return 'text-warning'
   return 'text-error'
 }
 
-/** Hex color for score ring (still needs inline style for SVG) */
+/** Design-token color for score ring (still needs inline style for SVG) */
 function scoreColorHex(score: number): string {
-  if (score >= 85) return '#2CB87A'
-  if (score >= 70) return '#84CC16'
-  if (score >= 50) return '#F76B15'
-  return '#E5484D'
+  if (score >= 85) return 'var(--success)'
+  if (score >= 50) return 'var(--warning)'
+  return 'var(--error)'
 }
 
 /** Hex color for category progress bars based on fraction achieved. */

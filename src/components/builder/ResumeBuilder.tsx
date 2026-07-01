@@ -14,6 +14,8 @@ import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { AILoadingState } from '@/components/ui/AILoadingState'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { LockedFeatureCard } from '@/components/ui/LockedFeatureCard'
 
 type ResumeTemplate = 'harvard'
 
@@ -1875,7 +1877,8 @@ export function ResumeBuilder() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setIsTailorModalOpen(false)} />
           <div className="relative w-full max-w-2xl rounded-xl border border-border-medium bg-bg-elevated p-6">
-            <h3 className="text-heading font-medium text-text-primary">AI Resume Tailor</h3>
+            <Eyebrow>Manual tailor</Eyebrow>
+            <h3 className="mt-1.5 text-heading font-medium text-text-primary">AI Resume Tailor</h3>
             <p className="mt-1 text-small text-text-secondary">Paste a job description and tailor your resume bullets for this role.</p>
 
             <textarea
@@ -1883,6 +1886,21 @@ export function ResumeBuilder() {
               onChange={(e) => setTailorJobDescription(e.target.value)}
               className="mt-4 h-52 w-full resize-none rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
               placeholder="Paste job description here..."
+            />
+
+            <LockedFeatureCard
+              className="mt-4 animate-fade-in-up"
+              title="Auto job matching"
+              description="Skip the copy-paste. Joben will pull live roles daily and tailor your resume for each one automatically."
+              cta={
+                <button
+                  type="button"
+                  disabled
+                  className="mt-2 inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-accent-border bg-transparent px-2.5 py-1 text-xs font-medium text-accent opacity-70"
+                >
+                  Notify me when it ships
+                </button>
+              }
             />
 
             <div className="mt-4 flex items-center justify-end gap-2">
@@ -1913,7 +1931,7 @@ export function ResumeBuilder() {
       {showUploadWarning ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={cancelUpload} />
-          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
+          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6 animate-fade-in-up">
             <h3 className="text-heading font-medium text-text-primary">Before you upload</h3>
             <p className="mt-2 text-small text-text-secondary">
               For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
@@ -1946,7 +1964,7 @@ export function ResumeBuilder() {
       {showImportLimitModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={closeImportLimitModal} />
-          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
+          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6 animate-fade-in-up">
             <h3 className="text-heading font-medium text-text-primary">Import limit reached</h3>
             <p className="mt-2 text-small text-text-secondary">
               {MAX_FILES_ERROR_MESSAGE}
