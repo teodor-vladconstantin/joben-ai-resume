@@ -2,12 +2,15 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import { JetBrains_Mono } from 'next/font/google'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
 import { PostHogProvider } from '@/components/PostHogProvider'
 
 validateEnv()
+
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://joben.eu'),
@@ -107,7 +110,7 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className="bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans" suppressHydrationWarning>
+        <body className={`${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"
