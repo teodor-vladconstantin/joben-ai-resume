@@ -19,7 +19,16 @@
       "Bash(tar *)",
       "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@89.167.48.64 \"echo connected && ls /root\")",
       "Bash(npm install *)",
-      "Bash(node -e \"require\\('class-variance-authority'\\)\")"
+      "Bash(node -e \"require\\('class-variance-authority'\\)\")",
+      "Bash(powershell -Command \"Get-ChildItem -Force -Name .env* \")",
+      "PowerShell(npm install *)",
+      "PowerShell(npm ls *)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.json; \"EXIT_CODE=$LASTEXITCODE\")",
+      "PowerShell(npx eslint src/app/api/generate-summary/route.ts)",
+      "PowerShell(npx eslint src/components/PostHogProvider.tsx src/lib/client-billing.ts src/app/pricing/page.tsx src/components/pricing/UpgradeToProButton.tsx src/lib/email-automation.ts src/components/builder/ResumeBuilder.tsx src/app/api/webhooks/clerk/route.ts src/app/api/webhooks/stripe/route.ts src/app/api/resumes/route.ts src/app/api/improve-bullet/route.ts src/app/api/cover-letter/route.ts src/app/api/analyze/route.ts src/app/api/auto-fix/route.ts src/app/api/tailor/route.ts src/app/api/billing/checkout/route.ts src/lib/validation/schemas.ts src/lib/posthog-server.ts)",
+      "Bash(git branch *)",
+      "Bash(git stash *)",
+      "mcp__claude_ai_Sentry__find_organizations"
     ]
   }
 }
