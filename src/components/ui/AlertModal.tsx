@@ -30,18 +30,18 @@ export function AlertModal({ isOpen, onConfirm, onCancel, title }: AlertModalPro
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div ref={ref} className="bg-[#111] border border-white/20 rounded-2xl p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div ref={ref} className="bg-bg-elevated border border-border-medium rounded-xl p-6 max-w-md w-full mx-4 animate-fade-in-up">
         <div className="text-center">
-          <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
-          <h3 className="text-lg font-medium text-white mt-4">Important Notice</h3>
-          <p className="text-white/80 mt-2 mb-4 text-sm">
+          <AlertTriangle size={28} className="mx-auto text-warning" />
+          <h3 className="text-heading font-medium text-text-primary mt-4">Important Notice</h3>
+          <p className="text-small text-text-secondary mt-2 mb-4">
             {title || "Please note that only PDF and DOCX files are supported for import. Scanned documents or images in PDF format will not be imported correctly."}
           </p>
           <div className="flex justify-center gap-3">
             <button
               onClick={onConfirm}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+              className="bg-accent hover:bg-accent-hover text-white text-body font-medium px-4 py-1.5 rounded-md border border-accent-border transition-colors"
             >
               I Understand
             </button>

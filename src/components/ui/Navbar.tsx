@@ -73,7 +73,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-faint bg-bg-base px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-border-faint bg-bg-base px-4 py-3 space-y-1 animate-fade-in-up">
           {navLinks.filter(l => !l.auth || isSignedIn).map(link => (
             <Link
               key={link.href}

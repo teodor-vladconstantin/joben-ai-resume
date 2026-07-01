@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/layout/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 import { FileText, Sparkles, Mail, Plus, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -29,25 +30,31 @@ export default async function DashboardPage() {
     >
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-4">
-          <div className="flex items-center gap-2 text-text-muted text-xs mb-1">
+        <div className="bg-bg-surface border border-border-soft rounded-lg p-4 animate-fade-in-up">
+          <Eyebrow className="mb-1">
             <FileText size={12} />
             Resumes
-          </div>
+          </Eyebrow>
           <div className="text-title font-semibold text-text-primary">0</div>
         </div>
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-4">
-          <div className="flex items-center gap-2 text-text-muted text-xs mb-1">
+        <div
+          className="bg-bg-surface border border-border-soft rounded-lg p-4 animate-fade-in-up"
+          style={{ animationDelay: '40ms' }}
+        >
+          <Eyebrow className="mb-1">
             <Sparkles size={12} />
             AI Reviews
-          </div>
+          </Eyebrow>
           <div className="text-title font-semibold text-text-primary">0</div>
         </div>
-        <div className="bg-bg-surface border border-border-soft rounded-lg p-4">
-          <div className="flex items-center gap-2 text-text-muted text-xs mb-1">
+        <div
+          className="bg-bg-surface border border-border-soft rounded-lg p-4 animate-fade-in-up"
+          style={{ animationDelay: '80ms' }}
+        >
+          <Eyebrow className="mb-1">
             <Mail size={12} />
             Cover Letters
-          </div>
+          </Eyebrow>
           <div className="text-title font-semibold text-text-primary">0</div>
         </div>
       </div>
@@ -58,7 +65,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             href="/resumes/new"
-            className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium hover:bg-bg-hover cursor-pointer transition-colors"
+            className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium hover:bg-bg-hover cursor-pointer transition-colors animate-fade-in-up"
           >
             <div className="flex items-center gap-2 text-accent mb-2">
               <FileText size={14} />
@@ -70,7 +77,8 @@ export default async function DashboardPage() {
           </Link>
           <Link
             href="/cover-letters/new"
-            className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium hover:bg-bg-hover cursor-pointer transition-colors"
+            className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium hover:bg-bg-hover cursor-pointer transition-colors animate-fade-in-up"
+            style={{ animationDelay: '40ms' }}
           >
             <div className="flex items-center gap-2 text-accent mb-2">
               <Mail size={14} />
@@ -82,8 +90,10 @@ export default async function DashboardPage() {
           </Link>
           <Link
             href="/pricing"
-            className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium hover:bg-bg-hover cursor-pointer transition-colors"
+            className="relative bg-accent-muted border border-accent-border rounded-lg p-4 hover:bg-accent/10 cursor-pointer transition-colors animate-fade-in-up"
+            style={{ animationDelay: '80ms' }}
           >
+            <Badge variant="accent" className="absolute -top-2 right-3">Pro</Badge>
             <div className="flex items-center gap-2 text-accent mb-2">
               <Sparkles size={14} />
               <span className="text-body font-medium text-text-primary">Upgrade to Pro</span>
