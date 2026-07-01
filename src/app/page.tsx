@@ -7,9 +7,9 @@ import {
   Download,
   Check,
   ArrowRight,
+  Mail,
+  Zap,
 } from 'lucide-react'
-import { Navbar } from '@/components/ui/Navbar'
-import { HeroDataTexture } from '@/components/marketing/HeroDataTexture'
 
 export const metadata: Metadata = {
   title: 'Joben — AI Resume Builder',
@@ -39,31 +39,61 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-bg-base text-text-primary font-sans antialiased">
-      <Navbar />
+      {/* Navbar */}
+      <nav className="h-14 border-b border-border-faint">
+        <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-text-primary hover:text-accent transition-colors">
+            <FileText size={18} />
+            <span className="font-semibold text-heading">Joben</span>
+          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-transparent transition-colors"
+            >
+              Pricing
+            </Link>
+            {userId ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
+              >
+                Get Started
+              </Link>
+            )}
+          </div>
+        </div>
+      </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-16 py-20 sm:py-28">
-        <HeroDataTexture />
-        <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border mb-8">
+      <section className="py-20 sm:py-28">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border mb-6">
             AI-Powered Resume Builder
           </span>
-          <h1 className="text-hero leading-hero font-semibold tracking-hero text-text-primary">
-            Build a resume that <span className="text-accent">gets you hired.</span>
+          <h1 className="text-display font-semibold tracking-tight text-text-primary">
+            Build a resume that gets you hired
           </h1>
-          <p className="mt-6 max-w-xl mx-auto text-body text-text-secondary leading-relaxed">
+          <p className="mt-4 text-body text-text-secondary leading-relaxed">
             Create professional, ATS-optimized resumes in minutes. AI-powered suggestions, proven templates, and real-time scoring — free to start.
           </p>
-          <div className="mt-9 flex items-center justify-center gap-3">
+          <div className="mt-8 flex items-center justify-center gap-3">
             <Link
               href={userId ? '/resumes/new' : '/sign-up'}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-full border border-accent-border transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
             >
               Build your resume <ArrowRight size={14} />
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center px-5 py-2.5 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-full border border-border-soft transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-border-soft transition-colors"
             >
               View pricing
             </Link>
