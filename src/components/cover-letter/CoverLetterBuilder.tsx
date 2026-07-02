@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { Modal } from '@/components/ui/Modal'
 import { FeatureButton } from '@/components/FeatureButton'
 import { buttonVariants } from '@/components/ui/Button'
 import { startProCheckout } from '@/lib/client-billing'
@@ -579,30 +580,31 @@ export function CoverLetterBuilder() {
         onChange={(next) => setSections((prev) => ({ ...prev, bodyParagraphs: next }))}
       />
 
-      {activeModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-xl rounded-2xl border border-(--border) bg-(--surface) p-6 shadow-2xl">
-            <h3 className="mb-3 text-lg font-bold text-(--foreground)">Edit Section</h3>
-            <textarea
-              value={modalDraft}
-              onChange={(e) => setModalDraft(e.target.value)}
-              className="h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-            />
-            <p className="mt-2 text-xs text-(--muted)">
-              Use new lines for multi-field sections like Header, Recipient, and Position.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setActiveModal(null)} className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)">
-                Cancel
-              </button>
-              <button onClick={applyModalChanges} className={buttonVariants('primary', 'md')}>
-                Save Changes
-              </button>
-            </div>
+      <Modal
+        open={activeModal !== null}
+        onClose={() => setActiveModal(null)}
+        title="Edit Section"
+        maxWidth="lg"
+        footer={
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setActiveModal(null)} className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)">
+              Cancel
+            </button>
+            <button onClick={applyModalChanges} className={buttonVariants('primary', 'md')}>
+              Save Changes
+            </button>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <textarea
+          value={modalDraft}
+          onChange={(e) => setModalDraft(e.target.value)}
+          className="h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+        />
+        <p className="mt-2 text-xs text-(--muted)">
+          Use new lines for multi-field sections like Header, Recipient, and Position.
+        </p>
+      </Modal>
 
       <UpgradeModal
         open={showUpgradeModal}
