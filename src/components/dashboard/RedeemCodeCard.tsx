@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2, Gift, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { UserPlan } from '@/lib/plans'
+import { buttonVariants } from '@/components/ui/Button'
 
 type RedeemCodeCardProps = {
   currentPlan: UserPlan
@@ -72,20 +73,20 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 mb-8"
+      className="bg-(--surface) p-6 rounded-2xl border border-(--border) mb-8"
       suppressHydrationWarning
     >
       <div className="flex items-start justify-between gap-4 mb-4" suppressHydrationWarning>
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Gift className="w-5 h-5 text-[#0A9548]" /> Redeem Access Code
+          <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
+            <Gift className="w-5 h-5 text-(--accent)" /> Redeem Access Code
           </h3>
-          <p className="text-sm text-[#FFFFFF]/72 mt-1">
+          <p className="text-sm text-(--muted) mt-1">
             Activate special access instantly. Code is case-insensitive.
           </p>
         </div>
         {alreadyRecruiting ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-[#0A9548]/40 bg-[#0A9548]/10 px-3 py-1 text-xs font-semibold text-[#16DB65]">
+          <span className="inline-flex items-center gap-1 rounded-full border border-(--accent)/40 bg-(--accent-muted) px-3 py-1 text-xs font-semibold text-(--accent)">
             <CheckCircle2 className="w-3.5 h-3.5" /> Recruiting Active
           </span>
         ) : null}
@@ -98,7 +99,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           onChange={(event) => setCode(event.target.value)}
           placeholder="Enter private access code"
           disabled={isSubmitting || alreadyRecruiting}
-          className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none disabled:opacity-60"
+          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none disabled:opacity-60"
           whileFocus={{ scale: 1.01 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         />
@@ -106,7 +107,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           type="button"
           onClick={() => void handleRedeem()}
           disabled={isSubmitting || alreadyRecruiting}
-          className="inline-flex min-w-36 items-center justify-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+          className={`min-w-36 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
@@ -117,13 +118,12 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       </div>
 
       {errorMessage ? (
-        <p className="mt-3 text-sm text-[#16DB65]">{errorMessage}</p>
+        <p className="mt-3 text-sm text-red-400">{errorMessage}</p>
       ) : null}
 
       {successMessage ? (
-        <p className="mt-3 text-sm text-[#16DB65]">{successMessage}</p>
+        <p className="mt-3 text-sm text-(--accent)">{successMessage}</p>
       ) : null}
     </motion.div>
   )
 }
-

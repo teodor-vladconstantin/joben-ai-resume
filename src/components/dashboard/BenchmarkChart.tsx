@@ -35,13 +35,13 @@ export function BenchmarkChart({ userScore }: Props) {
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -32 }}>
           <defs>
             <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0A9548" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#0A9548" stopOpacity={0.05} />
+              <stop offset="5%" stopColor="#2CB87A" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="#2CB87A" stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="score"
-            tick={{ fill: '#ffffff50', fontSize: 10 }}
+            tick={{ fill: '#8A8A92', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => (v % 20 === 0 ? String(v) : '')}
@@ -52,7 +52,7 @@ export function BenchmarkChart({ userScore }: Props) {
               if (!active || !payload?.length) return null
               const d = payload[0].payload as { score: number; frequency: number }
               return (
-                <div className="bg-[#111] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70">
+                <div className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-1.5 text-xs text-(--muted)">
                   Score {d.score}: {d.frequency}% of resumes
                 </div>
               )
@@ -61,7 +61,7 @@ export function BenchmarkChart({ userScore }: Props) {
           <Area
             type="monotone"
             dataKey="frequency"
-            stroke="#0A9548"
+            stroke="#2CB87A"
             strokeWidth={2}
             fill="url(#scoreGrad)"
             dot={false}
@@ -69,13 +69,13 @@ export function BenchmarkChart({ userScore }: Props) {
           />
           <ReferenceLine
             x={userScore}
-            stroke="#16DB65"
+            stroke="#4FD69B"
             strokeWidth={2}
             strokeDasharray="4 2"
             label={{
               value: `You: ${userScore}`,
               position: userScore > 70 ? 'insideTopLeft' : 'insideTopRight',
-              fill: '#16DB65',
+              fill: '#4FD69B',
               fontSize: 11,
               fontWeight: 700,
             }}
@@ -83,9 +83,9 @@ export function BenchmarkChart({ userScore }: Props) {
         </AreaChart>
       </ResponsiveContainer>
 
-      <p className="text-xs text-white/50 mt-3">
-        Your score of <span className="text-white font-medium">{userScore}</span> is higher than approximately{' '}
-        <span className="text-[#16DB65] font-medium">{percentile}%</span> of resumes in our system.
+      <p className="text-xs text-(--muted) mt-3">
+        Your score of <span className="text-(--foreground) font-medium">{userScore}</span> is higher than approximately{' '}
+        <span className="text-(--accent) font-medium">{percentile}%</span> of resumes in our system.
       </p>
     </div>
   )
