@@ -1823,25 +1823,25 @@ export function ResumeBuilder() {
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Projects</h2>
-                  <p className="mt-1 text-sm text-[#FFFFFF]/72">Manage your imported and manual projects here. These are rendered separately from custom sections.</p>
+                  <h2 className="text-xl font-bold text-(--foreground)">Projects</h2>
+                  <p className="mt-1 text-sm text-(--muted)">Manage your imported and manual projects here. These are rendered separately from custom sections.</p>
                 </div>
-                <button onClick={handleAddProject} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Project</button>
+                <button onClick={handleAddProject} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Project</button>
               </div>
 
               {resumeData.projects.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-[#FFFFFF]/82">
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
                   No projects yet. Add one to keep it separate from custom sections.
                 </div>
               ) : (
                 resumeData.projects.map((project, index) => (
-                  <div key={project.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
+                  <div key={project.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                     <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                      <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/82">Project {index + 1}</p>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">Project {index + 1}</p>
                       <div className="flex gap-2" suppressHydrationWarning>
                         <button
                           onClick={() => deleteProject(project.id)}
-                          className="text-[#16DB65] hover:text-[#2AEA7A] p-1"
+                          className="text-(--accent-strong) hover:text-(--accent) p-1"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1852,14 +1852,14 @@ export function ResumeBuilder() {
                       <input
                         value={project.name}
                         onChange={(e) => updateProjectField(project.id, { name: e.target.value })}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Project name"
                       />
 
                       <input
                         value={project.role || ''}
                         onChange={(e) => updateProjectField(project.id, { role: e.target.value })}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Role / Title (e.g. Solo Founder, Lead Developer)"
                       />
 
@@ -1880,7 +1880,7 @@ export function ResumeBuilder() {
                       <RichTextarea
                         value={project.description}
                         onValueChange={(value) => updateProjectField(project.id, { description: value })}
-                        className="h-32 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="h-32 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder={`Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%`}
                         toolbarLabel="Project description formatting"
                       />
@@ -1888,14 +1888,14 @@ export function ResumeBuilder() {
                       <input
                         value={getProjectTechnologies(project).join(', ')}
                         onChange={(e) => updateProjectTechnologies(project.id, e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Technologies separated by commas (React, Node.js, AWS)"
                       />
 
                       <input
                         value={project.url || ''}
                         onChange={(e) => updateProjectField(project.id, { url: e.target.value })}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Project URL or GitHub link"
                       />
                     </div>
@@ -1909,25 +1909,25 @@ export function ResumeBuilder() {
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Education</h2>
-                  <p className="mt-1 text-sm text-[#FFFFFF]/72">Add each institution as a separate entry. Use the date pickers for graduation timelines.</p>
+                  <h2 className="text-xl font-bold text-(--foreground)">Education</h2>
+                  <p className="mt-1 text-sm text-(--muted)">Add each institution as a separate entry. Use the date pickers for graduation timelines.</p>
                 </div>
-                <button onClick={handleAddEducation} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Institution</button>
+                <button onClick={handleAddEducation} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Institution</button>
               </div>
 
               {resumeData.education.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-[#FFFFFF]/82">
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
                   No education entries yet. Click + Add Institution to add your first one.
                 </div>
               ) : (
                 resumeData.education.map((entry, index) => (
-                  <div key={entry.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
+                  <div key={entry.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                     <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                      <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/82">Institution {index + 1}</p>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">Institution {index + 1}</p>
                       <div className="flex gap-2" suppressHydrationWarning>
                         <button
                           onClick={() => deleteEducation(entry.id)}
-                          className="text-[#16DB65] hover:text-[#2AEA7A] p-1"
+                          className="text-(--accent-strong) hover:text-(--accent) p-1"
                           aria-label="Delete education entry"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1939,7 +1939,7 @@ export function ResumeBuilder() {
                       <input
                         value={entry.institution}
                         onChange={(e) => updateEducationField(entry.id, 'institution', e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Institution (e.g. Stanford University)"
                       />
 
@@ -1947,13 +1947,13 @@ export function ResumeBuilder() {
                         <input
                           value={entry.degree || ''}
                           onChange={(e) => updateEducationField(entry.id, 'degree', e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                           placeholder="Degree (e.g. B.Sc. in Computer Science)"
                         />
                         <input
                           value={entry.field || ''}
                           onChange={(e) => updateEducationField(entry.id, 'field', e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                           placeholder="Field of study (optional)"
                         />
                       </div>
@@ -1961,7 +1961,7 @@ export function ResumeBuilder() {
                       <input
                         value={entry.location || ''}
                         onChange={(e) => updateEducationField(entry.id, 'location', e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Location (optional, e.g. Stanford, CA)"
                       />
 
@@ -1982,7 +1982,7 @@ export function ResumeBuilder() {
                       <RichTextarea
                         value={entry.description || ''}
                         onValueChange={(value) => updateEducationField(entry.id, 'description', value)}
-                        className="h-24 w-full resize-y rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="h-24 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Optional details (GPA, honors, relevant coursework, thesis, ...)"
                         toolbarLabel="Education description formatting"
                       />
