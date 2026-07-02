@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                              <span className="text-(--muted)">{score}/{item.max}</span>
                            </div>
                            <div className="w-full bg-(--background) rounded-full h-2 mb-1">
-                             <div className="bg-(--accent) h-2 rounded-full" style={{ width: `${(score/item.max)*100}%` }}></div>
+                             <div className="bg-(--accent) h-2 rounded-full" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
                            </div>
                              {isWarning && <p className="text-xs text-(--accent)">Warning: Better match job keywords</p>}
                          </div>
