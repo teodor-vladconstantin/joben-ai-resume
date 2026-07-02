@@ -81,9 +81,9 @@ export const productLoopSteps = [
     number: "05",
     category: "Export & Manage",
     heading: "Export clean, keep every version organized.",
-    description: "Download ATS-ready PDF or DOCX, and keep multiple tailored resumes managed from one dashboard.",
+    description: "Download a clean, ATS-ready PDF and keep multiple tailored resumes managed from one dashboard.",
     bullets: [
-      "Clean, unwatermarked PDF and DOCX exports",
+      "Clean, unwatermarked PDF exports",
       "Keep multiple tailored versions per role",
       "Manage everything from one dashboard",
     ],
