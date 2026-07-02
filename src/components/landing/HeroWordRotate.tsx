@@ -29,7 +29,7 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
           {word}
         </span>
       ))}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.span
           key={words[index]}
           initial={{ y: 12, opacity: 0 }}
