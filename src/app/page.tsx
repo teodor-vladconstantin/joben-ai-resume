@@ -293,17 +293,18 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-[#020202] py-12 border-t border-white/10 text-center" suppressHydrationWarning>
+      <footer className="bg-(--background) py-12 border-t border-(--border) text-center" suppressHydrationWarning>
         <div className="max-w-4xl mx-auto px-4" suppressHydrationWarning>
-          <h2 className="text-2xl font-bold text-white mb-4">{footerContent.heading}</h2>
+          <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footerContent.heading}</h2>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8" suppressHydrationWarning>
-            <AuthAwareSignupLink className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-6 py-3 rounded-xl font-medium hover:opacity-90">{footerContent.ctaPrimary}</AuthAwareSignupLink>
-            <Link href="/dashboard" className="bg-[#0A0F0D] border border-white/10 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10">{footerContent.ctaSecondary}</Link>
+            <AuthAwareSignupLink className={buttonVariants('primary', 'md')}>{footerContent.ctaPrimary}</AuthAwareSignupLink>
+            <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footerContent.ctaSecondary}</Link>
           </div>
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-[#FFFFFF]/72" suppressHydrationWarning>
-            <Link href="/terms" className="hover:text-[#16DB65]">Terms & Conditions</Link>
-            <Link href="/privacy" className="hover:text-[#16DB65]">Privacy Policy</Link>
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
+            <Link href="/terms" className="hover:text-(--accent)">Terms & Conditions</Link>
+            <Link href="/privacy" className="hover:text-(--accent)">Privacy Policy</Link>
           </div>
+          <p className="mt-8 text-xs text-(--muted)" suppressHydrationWarning>{footerContent.creatorCredit}</p>
         </div>
       </footer>
     </div>
