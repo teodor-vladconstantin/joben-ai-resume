@@ -5,7 +5,11 @@ export const siteConfig = {
 };
 
 export const heroContent = {
-  heading: "Your Resume Is Getting Rejected Before a Human Ever Reads It.",
+  heading: {
+    prefix: "Your Resume Is Getting Rejected Before a ",
+    rotatingWords: ["Recruiter", "Hiring Manager", "Bot"],
+    suffix: " Ever Reads It.",
+  },
   subheading: "Many applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
   cta: "Check My ATS Score. It's Free",
   features: [
