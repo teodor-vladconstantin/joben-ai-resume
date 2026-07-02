@@ -1996,12 +1996,12 @@ export function ResumeBuilder() {
           {['skills', 'certifications', 'sections'].includes(activeTab) ? (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold text-white">{tabs.find((t) => t.id === activeTab)?.label}</h2>
-                <button onClick={() => setIsAddModalOpen(true)} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Section</button>
+                <h2 className="text-xl font-bold text-(--foreground)">{tabs.find((t) => t.id === activeTab)?.label}</h2>
+                <button onClick={() => setIsAddModalOpen(true)} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Section</button>
               </div>
 
               {visibleDynamicSections.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-[#FFFFFF]/82">
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
                   No sections yet for this category. Use Add Section to create one.
                 </div>
               ) : (
