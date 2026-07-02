@@ -69,6 +69,64 @@ export const atsPreviewContent = {
   },
 };
 
+export const productLoopSteps = [
+  {
+    "number": "01",
+    "category": "Score",
+    "heading": "See your score before you apply.",
+    "description": "Upload your resume and get a 0-100 ATS score across five categories, with the exact strengths and gaps recruiters and parsers will see.",
+    "bullets": [
+      "Every resume scored 0-100 across 5 categories",
+      "See exactly what recruiters and ATS parsers see",
+      "Know what to fix before you apply, not after",
+    ],
+  },
+  {
+    "number": "02",
+    "category": "Tailor",
+    "heading": "Tailor your resume to the job description.",
+    "description": "Paste a job description and Joben finds the missing keywords, then rewrites your bullets to fit that specific role.",
+    "bullets": [
+      "Paste any job description, get instant keyword analysis",
+      "Bullets rewritten to match the role, not generic AI filler",
+      "One click, one tailored variant, one new draft",
+    ],
+  },
+  {
+    "number": "03",
+    "category": "Rewrite",
+    "heading": "Turn weak bullets into quantified wins.",
+    "description": "One-click AI rewrite for any bullet: adds metrics, strong verbs, and keeps your voice.",
+    "bullets": [
+      "Weak verbs become strong, measurable outcomes",
+      "Keeps your voice — never reads like generic AI",
+      "Every rewrite tracked live against your monthly limit",
+    ],
+  },
+  {
+    "number": "04",
+    "category": "Cover Letter",
+    "heading": "A cover letter that matches your resume and the job.",
+    "description": "AI-generated, consistent tone with your resume, tailored to the same job description.",
+    "bullets": [
+      "Matches the tone and facts of your tailored resume",
+      "Written for the same job description, not a template",
+      "Ready to send in the time it takes to read this",
+    ],
+  },
+  {
+    "number": "05",
+    "category": "Export & Manage",
+    "heading": "Export clean, keep every version organized.",
+    "description": "Download ATS-ready PDF or DOCX, and keep multiple tailored resumes managed from one dashboard.",
+    "bullets": [
+      "Clean, unwatermarked PDF and DOCX exports",
+      "Keep multiple tailored versions per role",
+      "Manage everything from one dashboard",
+    ],
+  },
+];
+
 export const pricingPlans = [
   {
     name: "Free",
