@@ -8,6 +8,7 @@ import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { buttonVariants } from '@/components/ui/Button'
 import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
 import { RichTextarea } from '@/components/ui/RichTextarea'
 import { FeatureButton } from '@/components/FeatureButton'
@@ -1490,42 +1491,42 @@ export function ResumeBuilder() {
         >
           {activeTab === 'personal' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <h2 className="text-xl font-bold text-white mb-6">Personal details</h2>
+              <h2 className="text-xl font-bold text-(--foreground) mb-6">Personal details</h2>
               {/* Form fields would be controlled components, omitted for brevity */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">First Name</label>
-                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="John" />
+                  <label className="text-sm font-medium text-(--muted)">First Name</label>
+                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="John" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">Last Name</label>
-                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="Doe" />
+                  <label className="text-sm font-medium text-(--muted)">Last Name</label>
+                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Doe" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#FFFFFF]/82">Job Title</label>
-                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="Software Engineer" />
+                <label className="text-sm font-medium text-(--muted)">Job Title</label>
+                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Software Engineer" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">Email</label>
-                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="john@example.com" />
+                  <label className="text-sm font-medium text-(--muted)">Email</label>
+                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="john@example.com" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">Phone</label>
-                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="+1 (555) 000-0000" />
+                  <label className="text-sm font-medium text-(--muted)">Phone</label>
+                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="+1 (555) 000-0000" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#FFFFFF]/82">Location</label>
-                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="Cluj-Napoca, Romania" />
+                <label className="text-sm font-medium text-(--muted)">Location</label>
+                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Cluj-Napoca, Romania" />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">Professional Summary</label>
+                  <label className="text-sm font-medium text-(--muted)">Professional Summary</label>
                   <button
                     onClick={() => setIsSummaryGeneratorOpen((prev) => !prev)}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[#0A9548]/40 bg-[#0A9548]/10 px-2.5 py-1 text-xs font-semibold text-[#16DB65] hover:bg-[#0A9548]/20"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-(--accent)/40 bg-(--accent-muted) px-2.5 py-1 text-xs font-semibold text-(--accent-strong) hover:bg-(--accent)/20"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     Generate with AI
@@ -1535,33 +1536,33 @@ export function ResumeBuilder() {
                 <RichTextarea
                   value={resumeData.personal.summary}
                   onValueChange={(value) => updatePersonalField('summary', value)}
-                  className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors h-28 resize-none"
+                  className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors h-28 resize-none"
                   placeholder="Professional summary"
                   toolbarLabel="Summary formatting"
                 />
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">LinkedIn URL</label>
-                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://linkedin.com/in/yourname" />
+                  <label className="text-sm font-medium text-(--muted)">LinkedIn URL</label>
+                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://linkedin.com/in/yourname" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">GitHub URL</label>
-                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://github.com/yourusername" />
+                  <label className="text-sm font-medium text-(--muted)">GitHub URL</label>
+                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://github.com/yourusername" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#FFFFFF]/82">Website / Portfolio</label>
-                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] transition-colors" placeholder="https://yourdomain.com" />
+                  <label className="text-sm font-medium text-(--muted)">Website / Portfolio</label>
+                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://yourdomain.com" />
                 </div>
 
                 {isSummaryGeneratorOpen ? (
-                  <div className="rounded-xl border border-white/10 bg-[#020202] p-3 space-y-3">
+                  <div className="rounded-xl border border-(--border) bg-(--background) p-3 space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => setSummaryGenerationMode('resume')}
                         className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                           summaryGenerationMode === 'resume'
-                            ? 'border border-[#0A9548]/40 bg-[#0A9548]/15 text-[#16DB65]'
-                            : 'border border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/78 hover:text-white'
+                            ? 'border border-(--accent)/40 bg-(--accent)/15 text-(--accent-strong)'
+                            : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
                         }`}
                       >
                         Based on my resume
@@ -1570,8 +1571,8 @@ export function ResumeBuilder() {
                         onClick={() => setSummaryGenerationMode('scratch')}
                         className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                           summaryGenerationMode === 'scratch'
-                            ? 'border border-[#0A9548]/40 bg-[#0A9548]/15 text-[#16DB65]'
-                            : 'border border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/78 hover:text-white'
+                            ? 'border border-(--accent)/40 bg-(--accent)/15 text-(--accent-strong)'
+                            : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
                         }`}
                       >
                         Write from scratch
@@ -1582,26 +1583,26 @@ export function ResumeBuilder() {
                       <textarea
                         value={summaryRoleDescription}
                         onChange={(e) => setSummaryRoleDescription(e.target.value)}
-                        className="h-24 w-full resize-none rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                        className="h-24 w-full resize-none rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Describe your target role, level, and focus areas..."
                       />
                     ) : null}
 
                     {isGeneratingSummary ? (
-                      <div className="rounded-lg border border-white/10 bg-[#0A0F0D]">
+                      <div className="rounded-lg border border-(--border) bg-(--surface)">
                         <AILoadingState stage="generating" />
                       </div>
                     ) : (
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setIsSummaryGeneratorOpen(false)}
-                          className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white"
+                          className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground)"
                         >
                           Close
                         </button>
                         <button
                           onClick={() => void handleGenerateSummary(summaryGenerationMode)}
-                          className="rounded-md bg-linear-to-r from-[#0A9548] to-[#04471C] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                          className={`rounded-md text-xs ${buttonVariants('primary', 'sm')}`}
                         >
                           Generate summary
                         </button>
@@ -1609,7 +1610,7 @@ export function ResumeBuilder() {
                     )}
 
                     {summaryGenerationError ? (
-                      <p className="text-xs text-[#16DB65]">{summaryGenerationError}</p>
+                      <p className="text-xs text-red-400">{summaryGenerationError}</p>
                     ) : null}
 
                     <AnimatePresence>
@@ -1619,21 +1620,21 @@ export function ResumeBuilder() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 8 }}
                           transition={{ duration: 0.22, ease: 'easeOut' }}
-                          className="rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/8 p-3 space-y-2"
+                          className="rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                         >
-                          <p className="text-xs font-semibold uppercase tracking-wide text-[#16DB65]">AI Draft</p>
-                          <p className="text-sm text-white/95 leading-relaxed">{generatedSummaryDraft}</p>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
+                          <p className="text-sm text-(--foreground)/95 leading-relaxed">{generatedSummaryDraft}</p>
                           <div className="flex items-center justify-end gap-2 pt-1">
                             <button
                               onClick={() => void handleGenerateSummary(summaryGenerationMode)}
                               disabled={isGeneratingSummary}
-                              className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                              className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Regenerate
                             </button>
                             <button
                               onClick={() => updatePersonalField('summary', generatedSummaryDraft)}
-                              className="rounded-md bg-[#16DB65] px-3 py-1.5 text-xs font-semibold text-[#052A14] hover:bg-[#2AEA7A]"
+                              className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                             >
                               Accept summary
                             </button>
@@ -1650,10 +1651,10 @@ export function ResumeBuilder() {
           {activeTab === 'experience' && (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Work Experience</h2>
-                <button onClick={handleAddRole} className="text-[#0A9548] text-sm font-medium hover:text-[#16DB65]">+ Add Role</button>
+                <h2 className="text-xl font-bold text-(--foreground)">Work Experience</h2>
+                <button onClick={handleAddRole} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Role</button>
               </div>
-              
+
               {resumeData.experience.map((exp, expIndex) => {
                 const experienceBullets = getExperienceBullets(exp)
                 const globalBulletOffset = resumeData.experience
@@ -1661,16 +1662,16 @@ export function ResumeBuilder() {
                   .reduce((sum, e) => sum + getExperienceBullets(e).length, 0)
 
                 return (
-                 <div key={exp.id} className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4 hover:border-[#16DB65]/60 transition-colors" suppressHydrationWarning>
+                 <div key={exp.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                     <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/82">Experience Entry</p>
+                     <p className="text-xs uppercase tracking-wide text-(--muted)">Experience Entry</p>
                      <div className="flex gap-2" suppressHydrationWarning>
-                       <button 
+                       <button
                          onClick={() => handleDeleteExperience(exp.id)}
                          disabled={isPending}
-                         className="text-[#16DB65] hover:text-[#2AEA7A] p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                         className="text-(--accent-strong) hover:text-(--accent) p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                        >
-                         {isPending ? <div className="w-4 h-4 border-2 border-[#16DB65] border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
+                         {isPending ? <div className="w-4 h-4 border-2 border-(--accent-strong) border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
                        </button>
                      </div>
                    </div>
@@ -1679,13 +1680,13 @@ export function ResumeBuilder() {
                      <input
                        value={exp.title}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'title', e.target.value)}
-                       className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                       className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                        placeholder="Role title"
                      />
                      <input
                        value={exp.company}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'company', e.target.value)}
-                       className="w-full rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+                       className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                        placeholder="Company"
                      />
                      <MonthYearRangeField
@@ -1704,10 +1705,10 @@ export function ResumeBuilder() {
 
                      <div className="space-y-2">
                        <div className="flex items-center justify-between">
-                         <p className="text-xs uppercase tracking-wide text-[#FFFFFF]/72">Impact Bullets</p>
+                         <p className="text-xs uppercase tracking-wide text-(--muted)">Impact Bullets</p>
                          <button
                            onClick={() => addExperienceBullet(exp.id)}
-                           className="text-xs font-medium text-[#0A9548] hover:text-[#16DB65]"
+                           className="text-xs font-medium text-(--accent) hover:text-(--accent-strong)"
                          >
                            + Add Bullet
                          </button>
@@ -1727,7 +1728,7 @@ export function ResumeBuilder() {
                              transition={{ duration: 0.2, ease: 'easeOut' }}
                              className="flex items-start gap-2"
                            >
-                             <span className="pt-9 text-[#0A9548]">•</span>
+                             <span className="pt-9 text-(--accent)">•</span>
                              <RichTextarea
                                ref={(node) => {
                                  bulletFieldRefs.current[draftKey] = node
@@ -1735,10 +1736,10 @@ export function ResumeBuilder() {
                                data-bullet-global-index={globalIdx}
                                value={bullet}
                                onValueChange={(value) => updateExperienceBulletField(exp.id, bulletIndex, value)}
-                               className={`h-20 w-full resize-none rounded-lg border bg-[#020202] px-3 py-2 text-sm text-white focus:outline-none transition-colors ${
+                               className={`h-20 w-full resize-none rounded-lg border bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:outline-none transition-colors ${
                                  isHighlighted
-                                   ? 'border-[#16DB65] ring-2 ring-[#16DB65]/40 focus:border-[#16DB65]'
-                                   : 'border-white/10 focus:border-[#16DB65]'
+                                   ? 'border-(--accent-strong) ring-2 ring-(--accent-strong)/40 focus:border-(--accent-strong)'
+                                   : 'border-(--border) focus:border-(--accent-strong)'
                                }`}
                                placeholder="Describe measurable impact"
                                toolbarLabel="Bullet formatting"
@@ -1747,14 +1748,14 @@ export function ResumeBuilder() {
                                <button
                                  onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
                                  disabled={Boolean(draftState?.isLoading)}
-                                 className="rounded-md border border-[#0A9548]/40 px-2 py-1 text-[11px] text-[#0A9548] hover:bg-[#0A9548]/10 disabled:cursor-not-allowed disabled:opacity-70"
+                                 className="rounded-md border border-(--accent)/40 px-2 py-1 text-[11px] text-(--accent) hover:bg-(--accent-muted) disabled:cursor-not-allowed disabled:opacity-70"
                                >
                                  {draftState?.isLoading ? 'AI...' : 'AI Draft'}
                                </button>
                                <button
                                  onClick={() => removeExperienceBullet(exp.id, bulletIndex)}
                                  disabled={experienceBullets.length === 1}
-                                 className="rounded-md border border-[#16DB65]/35 px-2 py-1 text-[11px] text-[#16DB65] hover:bg-[#0A9548]/12 disabled:cursor-not-allowed disabled:opacity-40"
+                                 className="rounded-md border border-(--accent-strong)/35 px-2 py-1 text-[11px] text-(--accent-strong) hover:bg-(--accent)/12 disabled:cursor-not-allowed disabled:opacity-40"
                                >
                                  Del
                                </button>
@@ -1766,13 +1767,13 @@ export function ResumeBuilder() {
                            </p>
 
                            {draftState?.isLoading ? (
-                             <div className="ml-5 rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-xs text-[#FFFFFF]/82">
+                             <div className="ml-5 rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-xs text-(--muted)">
                                Generating AI draft...
                              </div>
                            ) : null}
 
                            {draftState?.error ? (
-                             <p className="ml-5 text-xs text-[#16DB65] whitespace-pre-line">{draftState.error}</p>
+                             <p className="ml-5 text-xs text-red-400 whitespace-pre-line">{draftState.error}</p>
                            ) : null}
 
                            <AnimatePresence>
@@ -1782,24 +1783,24 @@ export function ResumeBuilder() {
                                  animate={{ opacity: 1, y: 0 }}
                                  exit={{ opacity: 0, y: 8 }}
                                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                                 className="ml-5 rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/8 p-3 space-y-2"
+                                 className="ml-5 rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                                >
                                  <div className="flex items-center justify-between gap-2">
-                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-[#16DB65]">AI Draft</p>
+                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
                                    <p className="text-[11px] text-amber-300/90">Regenerate uses 1 credit</p>
                                  </div>
-                                 <p className="text-sm text-white/95 leading-relaxed">{draftState?.draft}</p>
+                                 <p className="text-sm text-(--foreground)/95 leading-relaxed">{draftState?.draft}</p>
                                  <div className="flex items-center justify-end gap-2 pt-1">
                                   <button
                                     onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
                                     disabled={Boolean(draftState?.isLoading)}
-                                    className="rounded-md border border-white/10 bg-[#0A0F0D] px-3 py-1.5 text-xs font-medium text-[#FFFFFF]/78 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                                   >
                                      Regenerate
                                    </button>
                                    <button
                                      onClick={() => handleAcceptBulletDraft(exp.id, bulletIndex)}
-                                     className="rounded-md bg-[#16DB65] px-3 py-1.5 text-xs font-semibold text-[#052A14] hover:bg-[#2AEA7A]"
+                                     className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                                    >
                                      Accept
                                    </button>
