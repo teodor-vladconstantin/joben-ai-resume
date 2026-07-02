@@ -41,6 +41,24 @@ export const atsPreviewContent = {
   heading: "See What Recruiters See In Your Resume",
   subheading: "Our AI analyzes your resume against millions of job postings to give you an exact match score.",
   score: 93,
+  scoreLabel: "Excellent",
+  categories: [
+    { label: "ATS readability", value: 23, max: 25 },
+    { label: "Content quality", value: 32, max: 35 },
+    { label: "Writing quality", value: 9, max: 10 },
+    { label: "Job optimization", value: 24, max: 25 },
+    { label: "Application ready", value: 5, max: 5 },
+  ],
+  findings: {
+    strengths: {
+      title: "Strengths identified",
+      description: "Strong action verbs and quantified bullet points throughout your experience section.",
+    },
+    improvements: {
+      title: "Improvement suggestions",
+      description: "Add a technical skills summary near the top and tighten your most recent role's bullets.",
+    },
+  },
   strengths: [
     "Strong action verbs used throughout.",
     "Perfectly structured for ATS parsers.",
