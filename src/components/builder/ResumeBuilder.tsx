@@ -2021,18 +2021,18 @@ export function ResumeBuilder() {
           ) : null}
         </div>
         
-        <div className="shrink-0 p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4" suppressHydrationWarning>
+        <div className="shrink-0 p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4" suppressHydrationWarning>
           <button
             onClick={() => void persistResume()}
             disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
-            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save className="w-4 h-4" /> Save
           </button>
           <button
             onClick={exportAsLatexPdf}
             disabled={isExportingPdf || isImportingPdf}
-            className="flex-1 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2.5 rounded-xl font-medium transition-opacity hover:opacity-90 flex items-center justify-center gap-2 text-sm shadow-lg shadow-[#0A9548]/20 disabled:cursor-not-allowed disabled:opacity-60"
+            className={`flex-1 shadow-lg shadow-(--accent)/20 disabled:cursor-not-allowed disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
           >
             <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
           </button>
@@ -2040,12 +2040,12 @@ export function ResumeBuilder() {
       </div>
 
       {/* Live Preview Pane */}
-      <div className="grow min-w-0 bg-[#020202] h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+      <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
         {/* Mock A4 Paper Preview */}
         <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
           <HarvardTemplate data={resumeData} />
         </div>
-        <div className="absolute top-3 right-4 text-xs text-[#FFFFFF]/82 bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
+        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
         </div>
       </div>
