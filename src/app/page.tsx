@@ -265,27 +265,28 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <section id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
           <div className="text-center mb-12" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-            <p className="text-white/72 max-w-2xl mx-auto">Everything you need to know before building your next resume.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">Frequently Asked Questions</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">Everything you need to know before building your next resume.</p>
           </div>
 
-          <div className="mx-auto max-w-4xl space-y-4" suppressHydrationWarning>
+          <div className="mx-auto max-w-4xl" suppressHydrationWarning>
             {faqItems.map((item, index) => (
               <details
                 key={index}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-[#0A0F0D]"
+                className="group border-b border-(--border) first:border-t"
                 suppressHydrationWarning
               >
                 <summary
-                  className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left text-lg font-semibold text-white [&::-webkit-details-marker]:hidden"
+                  className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left text-lg font-semibold text-(--foreground) [&::-webkit-details-marker]:hidden"
                   suppressHydrationWarning
                 >
                   <span>{item.question}</span>
-                  <span className="text-2xl leading-none text-[#0A9548] transition-transform duration-200 group-open:rotate-45">+</span>
+                  <span className="font-mono text-xs uppercase tracking-wide text-(--accent) group-open:hidden">Open</span>
+                  <span className="hidden font-mono text-xs uppercase tracking-wide text-(--accent) group-open:inline">Close</span>
                 </summary>
-                <div className="px-6 pb-5 text-white/72" suppressHydrationWarning>{item.answer}</div>
+                <div className="pb-5 text-(--muted)" suppressHydrationWarning>{item.answer}</div>
               </details>
             ))}
           </div>
