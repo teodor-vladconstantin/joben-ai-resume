@@ -1,6 +1,6 @@
 "use client"
 
-import { X } from 'lucide-react'
+import { Modal } from '@/components/ui/Modal'
 
 export type AddableSectionType =
   | 'professional_summary'
@@ -40,34 +40,20 @@ type AddContentModalProps = {
 }
 
 export function AddContentModal({ open, onClose, onAdd }: AddContentModalProps) {
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Add Content Section</h3>
-          <button onClick={onClose} className="rounded-md p-1 text-[#FFFFFF]/82 hover:bg-[#0A0F0D] hover:text-white">
-            <X className="h-4 w-4" />
+    <Modal open={open} onClose={onClose} title="Add Content Section" maxWidth="2xl">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTION_OPTIONS.map((item) => (
+          <button
+            key={item.type}
+            onClick={() => onAdd(item)}
+            className="rounded-xl border border-(--border) bg-(--surface) p-4 text-left transition-colors hover:border-(--accent-strong)/60 hover:bg-(--surface-elevated)"
+          >
+            <p className="text-sm font-semibold text-(--foreground)">{item.title}</p>
+            <p className="mt-1 text-xs text-(--muted)">{item.description}</p>
           </button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {SECTION_OPTIONS.map((item) => (
-            <button
-              key={item.type}
-              onClick={() => onAdd(item)}
-                   className="rounded-xl border border-white/10 bg-[#0A0F0D] p-4 text-left transition-colors hover:border-[#16DB65]/60 hover:bg-white/5"
-            >
-              <p className="text-sm font-semibold text-white">{item.title}</p>
-              <p className="mt-1 text-xs text-[#FFFFFF]/82">{item.description}</p>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
-    </div>
+    </Modal>
   )
 }
-
-

@@ -119,7 +119,7 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg mx-4 p-8 shadow-2xl">
+      <div className="bg-(--surface) border border-(--border) rounded-2xl w-full max-w-lg mx-4 p-8 shadow-2xl">
 
         {showAlert && (
           <AlertModal
@@ -132,18 +132,18 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
 
         {step === 'choose' && (
           <>
-            <h2 className="text-2xl font-bold text-white mb-2">Create your resume</h2>
-            <p className="text-white/50 text-sm mb-8">Start from scratch or import an existing PDF resume.</p>
+            <h2 className="text-2xl font-bold text-(--foreground) mb-2">Create your resume</h2>
+            <p className="text-(--muted) text-sm mb-8">Start from scratch or import an existing PDF resume.</p>
 
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setStep('blank-form')}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all text-center group"
+                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-(--border) bg-(--surface-elevated) hover:bg-(--surface-elevated) hover:border-(--accent-strong)/40 transition-all text-center group"
               >
-                <FileText className="w-8 h-8 text-white/60 group-hover:text-white transition-colors" />
+                <FileText className="w-8 h-8 text-(--muted) group-hover:text-(--foreground) transition-colors" />
                 <div>
-                  <p className="text-white font-medium text-sm">Start from scratch</p>
-                  <p className="text-white/40 text-xs mt-1">Build a new resume</p>
+                  <p className="text-(--foreground) font-medium text-sm">Start from scratch</p>
+                  <p className="text-(--muted) text-xs mt-1">Build a new resume</p>
                 </div>
               </button>
 
@@ -151,12 +151,12 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => fileRef.current?.click()}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all text-center group cursor-pointer"
+                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-dashed border-(--border) bg-(--surface-elevated) hover:bg-(--surface-elevated) hover:border-(--accent-strong)/60 transition-all text-center group cursor-pointer"
               >
-                <Upload className="w-8 h-8 text-white/60 group-hover:text-white transition-colors" />
+                <Upload className="w-8 h-8 text-(--muted) group-hover:text-(--foreground) transition-colors" />
                 <div>
-                  <p className="text-white font-medium text-sm">Import PDF</p>
-                  <p className="text-white/40 text-xs mt-1">AI parses your resume</p>
+                  <p className="text-(--foreground) font-medium text-sm">Import PDF</p>
+                  <p className="text-(--muted) text-xs mt-1">AI parses your resume</p>
                 </div>
                 <input
                   ref={fileRef}
@@ -172,42 +172,42 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
 
         {step === 'blank-form' && (
           <>
-            <h2 className="text-2xl font-bold text-white mb-2">Let&apos;s get started</h2>
-            <p className="text-white/50 text-sm mb-8">Just the basics — you&apos;ll fill in everything else in the editor.</p>
+            <h2 className="text-2xl font-bold text-(--foreground) mb-2">Let&apos;s get started</h2>
+            <p className="text-(--muted) text-sm mb-8">Just the basics — you&apos;ll fill in everything else in the editor.</p>
 
             <form onSubmit={handleBlankSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-white/60 text-xs font-medium uppercase tracking-wide">First Name</label>
+                  <label className="text-(--muted) text-xs font-medium uppercase tracking-wide">First Name</label>
                   <input
                     autoFocus
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Jane"
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30"
+                    className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-2.5 text-(--foreground) text-sm placeholder:text-(--muted) focus:outline-none focus:border-(--accent-strong)"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-white/60 text-xs font-medium uppercase tracking-wide">Last Name</label>
+                  <label className="text-(--muted) text-xs font-medium uppercase tracking-wide">Last Name</label>
                   <input
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Smith"
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30"
+                    className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-2.5 text-(--foreground) text-sm placeholder:text-(--muted) focus:outline-none focus:border-(--accent-strong)"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-white/60 text-xs font-medium uppercase tracking-wide">Job Title</label>
+                <label className="text-(--muted) text-xs font-medium uppercase tracking-wide">Job Title</label>
                 <input
                   type="text"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Software Engineer"
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30"
+                  className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-2.5 text-(--foreground) text-sm placeholder:text-(--muted) focus:outline-none focus:border-(--accent-strong)"
                 />
               </div>
 
@@ -215,13 +215,13 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
                 <button
                   type="button"
                   onClick={() => setStep('choose')}
-                  className="flex-1 py-2.5 rounded-lg border border-white/10 text-white/60 text-sm hover:text-white hover:border-white/20 transition-colors"
+                  className="flex-1 py-2.5 rounded-lg border border-(--border) text-(--muted) text-sm hover:text-(--foreground) hover:border-(--accent-strong)/40 transition-colors"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
+                  className="flex-1 py-2.5 rounded-lg bg-(--accent) text-(--background) text-sm font-semibold hover:bg-(--accent-strong) transition-colors"
                 >
                   Open Editor
                 </button>
@@ -232,10 +232,10 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
 
         {step === 'importing' && (
           <div className="flex flex-col items-center gap-4 py-8">
-            <Loader2 className="w-10 h-10 text-white animate-spin" />
+            <Loader2 className="w-10 h-10 text-(--foreground) animate-spin" />
             <div className="text-center">
-              <p className="text-white font-medium">Importing your resume&hellip;</p>
-              <p className="text-white/40 text-sm mt-1">AI is extracting your information</p>
+              <p className="text-(--foreground) font-medium">Importing your resume&hellip;</p>
+              <p className="text-(--muted) text-sm mt-1">AI is extracting your information</p>
             </div>
           </div>
         )}
@@ -243,19 +243,19 @@ export function ResumeOnboardingModal({ onStartBlank, onImported }: Props) {
         {step === 'error' && (
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="text-center">
-              <p className="text-white font-medium">Import failed</p>
-              <p className="text-white/50 text-sm mt-1">{errorMsg}</p>
+              <p className="text-(--foreground) font-medium">Import failed</p>
+              <p className="text-(--muted) text-sm mt-1">{errorMsg}</p>
             </div>
             <div className="flex gap-3 w-full mt-2">
               <button
                 onClick={() => setStep('choose')}
-                className="flex-1 py-2.5 rounded-lg border border-white/10 text-white/60 text-sm hover:text-white hover:border-white/20 transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-(--border) text-(--muted) text-sm hover:text-(--foreground) hover:border-(--accent-strong)/40 transition-colors"
               >
                 Try again
               </button>
               <button
                 onClick={() => setStep('blank-form')}
-                className="flex-1 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
+                className="flex-1 py-2.5 rounded-lg bg-(--accent) text-(--background) text-sm font-semibold hover:bg-(--accent-strong) transition-colors"
               >
                 Start from scratch
               </button>

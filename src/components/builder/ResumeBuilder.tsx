@@ -8,6 +8,7 @@ import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
 import { RichTextarea } from '@/components/ui/RichTextarea'
@@ -2055,107 +2056,102 @@ export function ResumeBuilder() {
         onAdd={handleAddSection}
       />
 
-      {isTailorModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setIsTailorModalOpen(false)} />
-          <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">AI Resume Tailor</h3>
-            <p className="mt-1 text-sm text-[#FFFFFF]/82">Paste a job description and tailor your resume bullets for this role.</p>
-
-            <textarea
-              value={tailorJobDescription}
-              onChange={(e) => setTailorJobDescription(e.target.value)}
-              className="mt-4 h-52 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
-              placeholder="Paste job description here..."
-            />
-
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsTailorModalOpen(false)}
-                className="rounded-lg border border-white/10 bg-[#0A0F0D] px-4 py-2 text-sm text-[#FFFFFF]/72"
-              >
-                Cancel
-              </button>
-              <FeatureButton
-                feature="jds"
-                onClick={handleTailorResume}
-                disabled={isTailoring}
-                className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <Sparkles className="h-4 w-4" />
-                {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
-              </FeatureButton>
-            </div>
+      <Modal
+        open={isTailorModalOpen}
+        onClose={() => setIsTailorModalOpen(false)}
+        title="AI Resume Tailor"
+        maxWidth="xl"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => setIsTailorModalOpen(false)}
+              className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+            >
+              Cancel
+            </button>
+            <FeatureButton
+              feature="jds"
+              onClick={handleTailorResume}
+              disabled={isTailoring}
+              className={`inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+            >
+              <Sparkles className="h-4 w-4" />
+              {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
+            </FeatureButton>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <p className="text-sm text-(--muted)">Paste a job description and tailor your resume bullets for this role.</p>
+
+        <textarea
+          value={tailorJobDescription}
+          onChange={(e) => setTailorJobDescription(e.target.value)}
+          className="mt-4 h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+          placeholder="Paste job description here..."
+        />
+      </Modal>
 
       {showBeforeAfterModal && fixPatches.length > 0 && (
         <BeforeAfterModal patches={fixPatches} onClose={() => setShowBeforeAfterModal(false)} />
       )}
 
-      {showUploadWarning ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={cancelUpload} />
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Before you upload</h3>
-            <p className="mt-2 text-sm text-[#FFFFFF]/82">
-              For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={cancelUpload}
-                className="rounded-lg border border-white/10 bg-[#0A0F0D] px-4 py-2 text-sm text-[#FFFFFF]/72"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={finalizeUpload}
-                disabled={isImportingPdf}
-                className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isImportingPdf ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
-                  </>
-                ) : (
-                  'Got it, continue'
-                )}
-              </button>
-            </div>
+      <Modal
+        open={showUploadWarning}
+        onClose={cancelUpload}
+        title="Before you upload"
+        maxWidth="md"
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={cancelUpload}
+              className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={finalizeUpload}
+              disabled={isImportingPdf}
+              className={`inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+            >
+              {isImportingPdf ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                </>
+              ) : (
+                'Got it, continue'
+              )}
+            </button>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <p className="text-sm text-(--muted)">
+          For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
+        </p>
+      </Modal>
 
-      {showImportLimitModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={closeImportLimitModal} />
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Import limit reached</h3>
-            <p className="mt-2 text-sm text-[#FFFFFF]/82">
-              {MAX_FILES_ERROR_MESSAGE}
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={closeImportLimitModal}
-                className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <Modal
+        open={showImportLimitModal}
+        onClose={closeImportLimitModal}
+        title="Import limit reached"
+        maxWidth="md"
+        footer={
+          <button onClick={closeImportLimitModal} className={buttonVariants('primary', 'md')}>
+            Got it
+          </button>
+        }
+      >
+        <p className="text-sm text-(--muted)">{MAX_FILES_ERROR_MESSAGE}</p>
+      </Modal>
 
       {isImportingPdf ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70" />
-          <div className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
+          <div className="relative w-full max-w-sm rounded-2xl border border-(--border) bg-(--surface) p-6 shadow-2xl">
             <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 animate-spin text-[#16DB65]" />
+              <Loader2 className="h-5 w-5 animate-spin text-(--accent-strong)" />
               <div>
-                <p className="text-sm font-semibold text-white">Importing PDF/DOCX</p>
-                <p className="text-xs text-[#FFFFFF]/72">Parsing your resume. This can take a moment.</p>
+                <p className="text-sm font-semibold text-(--foreground)">Importing PDF/DOCX</p>
+                <p className="text-xs text-(--muted)">Parsing your resume. This can take a moment.</p>
               </div>
             </div>
           </div>
