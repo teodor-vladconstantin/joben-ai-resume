@@ -2642,3 +2642,152 @@ git commit -m "feat(builder): migrate 6 modals onto Modal primitive; restyle Res
 
 ---
 
+### Task 8: Restyle bottom Save/Export bar + live preview panel chrome
+
+**Files:**
+- Modify: `src/components/builder/ResumeBuilder.tsx:2022-2049` (region only)
+
+**Interfaces:** none new. `persistResume`, `isLoading`, `isImportingPdf`, `isExportingPdf`, `saveStatus`, `exportAsLatexPdf`, `resumeData`, `HarvardTemplate` consumed exactly as before.
+
+- [ ] **Step 1: Read the current file first**
+
+Read `src/components/builder/ResumeBuilder.tsx` to confirm current line numbers for the bottom action bar through the end of the Live Preview Pane block (originally lines 2022-2049, immediately after the Skills/Certifications/Sections tab content closes and before `<AddContentModal`).
+
+- [ ] **Step 2: Apply the color-only edit**
+
+Find this exact block:
+
+```tsx
+        <div className="shrink-0 p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4" suppressHydrationWarning>
+          <button
+            onClick={() => void persistResume()}
+            disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
+            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Save className="w-4 h-4" /> Save
+          </button>
+          <button
+            onClick={exportAsLatexPdf}
+            disabled={isExportingPdf || isImportingPdf}
+            className="flex-1 bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2.5 rounded-xl font-medium transition-opacity hover:opacity-90 flex items-center justify-center gap-2 text-sm shadow-lg shadow-[#0A9548]/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
+          </button>
+        </div>
+      </div>
+
+      {/* Live Preview Pane */}
+      <div className="grow min-w-0 bg-[#020202] h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+        {/* Mock A4 Paper Preview */}
+        <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
+          <HarvardTemplate data={resumeData} />
+        </div>
+        <div className="absolute top-3 right-4 text-xs text-[#FFFFFF]/82 bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
+          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
+        </div>
+      </div>
+```
+
+Replace with:
+
+```tsx
+        <div className="shrink-0 p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4" suppressHydrationWarning>
+          <button
+            onClick={() => void persistResume()}
+            disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
+            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Save className="w-4 h-4" /> Save
+          </button>
+          <button
+            onClick={exportAsLatexPdf}
+            disabled={isExportingPdf || isImportingPdf}
+            className={`flex-1 shadow-lg shadow-(--accent)/20 disabled:cursor-not-allowed disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
+          >
+            <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
+          </button>
+        </div>
+      </div>
+
+      {/* Live Preview Pane */}
+      <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+        {/* Mock A4 Paper Preview */}
+        <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
+          <HarvardTemplate data={resumeData} />
+        </div>
+        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
+          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
+        </div>
+      </div>
+```
+
+Implementer notes:
+- The "Mock A4 Paper Preview" white page and `HarvardTemplate` content are **not** touched — they intentionally render a print-realistic white/black page regardless of the app's dark palette, matching resumax's own "exact match to your download" live preview.
+- `buttonVariants` is already imported by this point if Task 4 or Task 7 landed first (both add the same import); if this task runs before either, add `import { buttonVariants } from '@/components/ui/Button'` to the import block.
+- `shadow-(--accent)/20` uses the same "opacity modifier on a CSS-var arbitrary value" syntax already used in Task 4/6 — confirm it compiles the same way in this Tailwind v4 setup (it has been correct through the whole redesign; flag if `tsc`/build output suggests otherwise, since `shadow-*` opacity composition on custom properties is slightly less common than `text-*`/`bg-*`).
+
+- [ ] **Step 3: Verify it compiles**
+
+Run: `npx tsc --noEmit`
+Expected: no output (exit code 0)
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/components/builder/ResumeBuilder.tsx
+git commit -m "feat(builder): restyle bottom Save/Export bar and live preview panel chrome with tokens"
+```
+
+---
+
+### Task 9: Full functional and visual verification with real seeded data
+
+**Files:** none (verification only)
+
+This task requires the REAL authenticated session with REAL Supabase-backed resumes already used throughout Phase 3 and Tasks 1-8 (local Supabase via `npx supabase start`, one signed-up test user, seeded resumes). Reuse that session/data; do not re-seed unless the controller indicates the session was lost.
+
+- [ ] **Step 1: Visual pass across all 7 tabs**
+
+Navigate to `/resumes/[id]` for a seeded resume with real content. For each of the 7 tabs (Personal Info, Experience, Education, Skills, Projects, Certifications, More Sections), click the tab and take a screenshot. Confirm: all text/borders/backgrounds use the dark palette + Joben accent green (no leftover hardcoded hex — spot-check by searching the rendered page for any unexpectedly bright/wrong-toned element), the live preview pane on the right still renders the actual resume content as a white page, and the "Saved" status indicator in the top-right of the preview pane updates correctly after an edit.
+
+- [ ] **Step 2: Verify autosave still works**
+
+Type a change into any field (e.g. the Job Title on Personal Info). Wait ~1 second (the debounced autosave in `persistResume` fires after 800ms of inactivity). Reload the page and confirm the change persisted — this proves the restyle didn't accidentally alter the `onChange`/`value` wiring on any input.
+
+- [ ] **Step 3: Verify PDF import still works**
+
+Click "Import PDF/DOCX" in the action row, upload a real PDF resume file, confirm the upload-warning modal (now on the `Modal` primitive) appears correctly styled, confirm it proceeds to parse and populate the form fields.
+
+- [ ] **Step 4: Verify PDF export still works**
+
+Click "Export PDF" in the bottom bar. Confirm a real PDF file downloads (check the browser's download, or intercept the network response) and that the button's loading/disabled state ("Exporting...") is visible and styled correctly during the request.
+
+- [ ] **Step 5: Verify AI actions still work**
+
+Open the "AI Tailor" modal (now on the `Modal` primitive), paste a short job description, click "Apply Tailoring", confirm the request completes and updates resume content (or, if rate-limited/upgrade-gated in this environment, confirm the `UpgradeModal` — now on `Modal` — appears correctly instead of erroring silently). On the Experience tab, click "AI Draft" on a bullet, confirm the draft appears in the accent-tinted preview card with functional Regenerate/Accept buttons.
+
+- [ ] **Step 6: Verify responsive collapse**
+
+Resize to a narrow viewport (≤1024px). Confirm the builder's own internal layout (not the page-level `Navbar`, which already has its own tested collapse behavior from Phase 3) doesn't break — the two-pane form+preview split may stack or scroll differently at narrow widths, but no content should be clipped or inaccessible.
+
+- [ ] **Step 7: Verify `/resumes` list navigation round-trip**
+
+From the builder, use the page-level `Navbar`'s "Resumes" link to go back to `/resumes` (Task 2's restyled list). Confirm the just-edited resume's title/score/updated-at reflect the changes made in Steps 2-4.
+
+- [ ] **Step 8: Run the full static verification suite**
+
+Run: `npx tsc --noEmit`
+Expected: no output (exit code 0)
+
+Run: `npm run lint`
+Expected: 0 errors (same 4 pre-existing unrelated warnings in `src/app/api/*` are fine)
+
+Run: `npm test`
+Expected: all existing tests pass (77+ tests across 10+ files, matching the count from the end of Phase 3 plus any tests added during this phase)
+
+- [ ] **Step 9: Report to user**
+
+Show screenshots from Step 1, confirm results of Steps 2-7 explicitly (pass/fail per item, not just "looks fine"), and the Step 8 command outputs. Any failure here is a blocking finding — fix it before declaring Phase 4 complete, following the same rigor as Phase 3's UserButton hydration fix and Score Breakdown clamp fix (root-cause it, fix it, re-verify, document it in the ledger).
+
+---
+
