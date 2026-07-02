@@ -1,7 +1,7 @@
 import { Navbar } from '@/components/ui/Navbar'
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
-import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent } from '@/lib/content'
+import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent, productLoopSteps } from '@/lib/content'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
@@ -9,6 +9,12 @@ import { buttonVariants } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
 import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
+import { StepSection } from '@/components/landing/StepSection'
+import { ScoreStepVisual } from '@/components/landing/steps/ScoreStepVisual'
+import { TailorStepVisual } from '@/components/landing/steps/TailorStepVisual'
+import { RewriteStepVisual } from '@/components/landing/steps/RewriteStepVisual'
+import { CoverLetterStepVisual } from '@/components/landing/steps/CoverLetterStepVisual'
+import { ExportStepVisual } from '@/components/landing/steps/ExportStepVisual'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -191,6 +197,31 @@ export default function Home() {
               <ResumeScoreCard score={atsPreviewContent.score} scoreLabel={atsPreviewContent.scoreLabel} categories={atsPreviewContent.categories} />
             </div>
           </div>
+        </section>
+
+        {/* PRODUCT LOOP */}
+        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" suppressHydrationWarning>
+          {productLoopSteps.map((step, index) => {
+            const visuals = [
+              <ScoreStepVisual key="score" />,
+              <TailorStepVisual key="tailor" />,
+              <RewriteStepVisual key="rewrite" />,
+              <CoverLetterStepVisual key="cover-letter" />,
+              <ExportStepVisual key="export" />,
+            ]
+            return (
+              <StepSection
+                key={step.number}
+                number={step.number}
+                totalSteps={productLoopSteps.length}
+                category={step.category}
+                heading={step.heading}
+                description={step.description}
+                bullets={step.bullets}
+                visual={visuals[index]}
+              />
+            )
+          })}
         </section>
 
         {/* PRICING */}
