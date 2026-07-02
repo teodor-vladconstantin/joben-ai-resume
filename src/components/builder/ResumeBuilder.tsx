@@ -1385,7 +1385,7 @@ export function ResumeBuilder() {
     <div className="w-full h-full min-h-0 flex flex-col lg:min-w-315 lg:flex-row print:block" suppressHydrationWarning>
       {/* Editor Sidebar */}
       <div
-        className="w-full min-h-0 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
+        className="w-full min-h-0 bg-(--surface) border-r border-(--border) flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
         suppressHydrationWarning
       >
         <input
@@ -1403,7 +1403,7 @@ export function ResumeBuilder() {
           }}
         />
         <div
-          className="shrink-0 border-b border-white/10 px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
+          className="shrink-0 border-b border-(--border) px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
@@ -1412,9 +1412,9 @@ export function ResumeBuilder() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex min-w-35 items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
-                activeTab === tab.id 
-                ? 'bg-[#0A9548]/10 text-[#0A9548] border border-[#0A9548]/30' 
-                : 'text-[#FFFFFF]/82 hover:bg-[#0A0F0D] hover:text-white border border-transparent'
+                activeTab === tab.id
+                ? 'bg-(--accent-muted) text-(--accent) border border-(--accent)/30'
+                : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground) border border-transparent'
               }`}
             >
               <tab.icon className="w-4 h-4" /> {tab.label}
@@ -1422,7 +1422,7 @@ export function ResumeBuilder() {
           ))}
         </div>
 
-        <div className="shrink-0 p-4 pt-5 border-b border-white/10 space-y-3">
+        <div className="shrink-0 p-4 pt-5 border-b border-(--border) space-y-3">
           <TemplateSwitcher
             value={resumeData.template}
             onChange={(value) =>
@@ -1435,7 +1435,7 @@ export function ResumeBuilder() {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 rounded-lg border border-[#0A9548]/30 bg-[#0A9548]/10 px-3 py-2 text-sm font-semibold text-[#0A9548] hover:bg-[#0A9548]/20"
+              className="flex-1 rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--accent)/20"
             >
               + Add Section
             </button>
@@ -1448,7 +1448,7 @@ export function ResumeBuilder() {
                 importInputRef.current?.click()
               }}
               disabled={isImportingPdf}
-              className="flex-1 rounded-lg border border-white/10 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-white/88 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--foreground) hover:bg-(--surface-elevated) disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isImportingPdf
                 ? 'Importing...'
@@ -1457,19 +1457,19 @@ export function ResumeBuilder() {
             <FeatureButton
               feature="jds"
               onClick={() => setIsTailorModalOpen(true)}
-              className="flex-1 rounded-lg border border-white/12 bg-[#0A0F0D] px-3 py-2 text-sm font-semibold text-[#0A9548] hover:bg-[#0A0F0D]"
+              className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--surface-elevated)"
             >
               AI Tailor
             </FeatureButton>
           </div>
         </div>
-        
+
         {fixBanner ? (
-          <div className="shrink-0 mx-4 mt-3 rounded-xl border border-[#0A9548]/40 bg-[#0A9548]/10 px-4 py-2.5 flex items-center justify-between gap-3">
-            <p className="text-sm text-[#16DB65] font-medium">{fixBanner}</p>
+          <div className="shrink-0 mx-4 mt-3 rounded-xl border border-(--accent)/40 bg-(--accent-muted) px-4 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-sm text-(--accent-strong) font-medium">{fixBanner}</p>
             <button
               onClick={() => setFixBanner(null)}
-              className="text-[#FFFFFF]/60 hover:text-white text-xs shrink-0"
+              className="text-(--muted) hover:text-(--foreground) text-xs shrink-0"
             >
               x
             </button>
