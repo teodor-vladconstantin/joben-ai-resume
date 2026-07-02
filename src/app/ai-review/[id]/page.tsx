@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Navbar } from '@/components/ui/Navbar'
+import { Modal } from '@/components/ui/Modal'
+import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
@@ -225,56 +228,60 @@ export default function AIReviewEditorPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#020202]">
-      <Navbar />
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-20">
-        <ResumeAnalyzer
-          review={review}
-          comparison={comparison}
-          isLoading={isLoading}
-          error={error}
-          canApplyFixes={Boolean(reviewId && resumeId)}
-          isSavingAutoFix={isSavingAutoFix}
-          autoFixError={autoFixError}
-          loadingImprovementIndex={loadingImprovementIndex}
-          fixErrors={fixErrors}
-          onAutoFix={handleAutoFix}
-          onApplyFix={handleApplyFix}
-        />
-      </main>
-
-      {showAutoFixTokenWarning ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowAutoFixTokenWarning(false)} />
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Auto-fix unavailable</h3>
-            <p className="mt-2 text-sm text-[#FFFFFF]/82">
-              {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}
-            </p>
-            {autoFixTokenDetails ? (
-              <div className="mt-4 rounded-xl border border-white/10 bg-[#020202] px-4 py-3 text-xs text-[#FFFFFF]/72 space-y-1">
-                {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
-                  <p>Estimated input tokens: {autoFixTokenDetails.estimatedInputTokens}</p>
-                ) : null}
-                {typeof autoFixTokenDetails.remainingTokens === 'number' ? (
-                  <p>Remaining monthly tokens: {autoFixTokenDetails.remainingTokens}</p>
-                ) : null}
-                {autoFixTokenDetails.resetAt ? (
-                  <p>Resets at: {new Date(autoFixTokenDetails.resetAt).toLocaleString()}</p>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowAutoFixTokenWarning(false)}
-                className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="lg:hidden">
+          <Navbar />
         </div>
-      ) : null}
+
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <ResumeAnalyzer
+            review={review}
+            comparison={comparison}
+            isLoading={isLoading}
+            error={error}
+            canApplyFixes={Boolean(reviewId && resumeId)}
+            isSavingAutoFix={isSavingAutoFix}
+            autoFixError={autoFixError}
+            loadingImprovementIndex={loadingImprovementIndex}
+            fixErrors={fixErrors}
+            onAutoFix={handleAutoFix}
+            onApplyFix={handleApplyFix}
+          />
+        </main>
+      </div>
+
+      <Modal
+        open={showAutoFixTokenWarning}
+        onClose={() => setShowAutoFixTokenWarning(false)}
+        title="Auto-fix unavailable"
+        maxWidth="md"
+        footer={
+          <div className="flex items-center justify-end">
+            <button onClick={() => setShowAutoFixTokenWarning(false)} className={buttonVariants('primary', 'md')}>
+              Got it
+            </button>
+          </div>
+        }
+      >
+        <p className="text-sm text-(--muted)">
+          {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}
+        </p>
+        {autoFixTokenDetails ? (
+          <div className="mt-4 rounded-xl border border-(--border) bg-(--background) px-4 py-3 text-xs text-(--muted) space-y-1">
+            {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
+              <p>Estimated input tokens: {autoFixTokenDetails.estimatedInputTokens}</p>
+            ) : null}
+            {typeof autoFixTokenDetails.remainingTokens === 'number' ? (
+              <p>Remaining monthly tokens: {autoFixTokenDetails.remainingTokens}</p>
+            ) : null}
+            {autoFixTokenDetails.resetAt ? (
+              <p>Resets at: {new Date(autoFixTokenDetails.resetAt).toLocaleString()}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </Modal>
 
       <UpgradeModal
         open={showUpgradeModal}
