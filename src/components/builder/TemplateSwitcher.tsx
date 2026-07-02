@@ -13,8 +13,8 @@ const templates: Array<{ id: TemplateValue; name: string; description: string }>
 
 export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
   return (
-    <div className="bg-[#0A0F0D] border border-white/10 rounded-xl p-4">
-      <p className="text-xs uppercase tracking-wider text-[#FFFFFF]/82 mb-3">Template</p>
+    <div className="bg-(--surface) border border-(--border) rounded-xl p-4">
+      <p className="text-xs uppercase tracking-wider text-(--muted) mb-3">Template</p>
       <div className="grid grid-cols-1 gap-2.5">
         {templates.map((template) => (
           <button
@@ -22,17 +22,15 @@ export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
             onClick={() => onChange(template.id)}
             className={`text-left rounded-lg border px-3.5 py-2.5 transition-colors ${
               value === template.id
-                ? 'bg-[#0A9548]/10 border-white/12 text-white'
-                : 'bg-[#0A0F0D] border-white/10 text-[#FFFFFF]/72 hover:border-[#16DB65]/60'
+                ? 'bg-(--accent-muted) border-(--border) text-(--foreground)'
+                : 'bg-(--surface) border-(--border) text-(--foreground)/72 hover:border-(--accent-strong)/60'
             }`}
           >
             <p className="text-sm font-semibold">{template.name}</p>
-            <p className="text-[11px] text-[#FFFFFF]/82 mt-0.5">{template.description}</p>
+            <p className="text-[11px] text-(--muted) mt-0.5">{template.description}</p>
           </button>
         ))}
       </div>
     </div>
   )
 }
-
-
