@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
-export type ButtonSize = 'sm' | 'md'
+export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
@@ -15,6 +15,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 const SIZE_CLASSES: Record<ButtonSize, string> = {
   sm: 'px-4 py-2 text-[13px] gap-1.5',
   md: 'px-6 py-3 text-sm gap-2',
+  lg: 'px-8 py-4 text-lg gap-2',
 }
 
 export function buttonVariants(variant: ButtonVariant = 'primary', size: ButtonSize = 'md'): string {

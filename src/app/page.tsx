@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent } from '@/lib/content'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
+import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
+import { buttonVariants } from '@/components/ui/Button'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -63,30 +66,33 @@ export default function Home() {
         {/* HERO SECTION */}
         <section id="builder" className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
           <div className="absolute inset-0 -z-10 flex items-center justify-center" suppressHydrationWarning>
-            <div className="w-150 h-150 bg-[#0A9548]/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
-            <div className="w-100 h-100 bg-[#16DB65]/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
+            <div className="w-150 h-150 bg-(--accent)/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
+            <div className="w-100 h-100 bg-(--accent-strong)/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white max-w-4xl mx-auto leading-tight"
-              dangerouslySetInnerHTML={{ __html: heroContent.heading.replace("Before a Human Ever Reads It.", `<span class="text-transparent bg-clip-text bg-linear-to-r from-[#0A9548] to-[#16DB65] underline decoration-[#0A9548]/35 underline-offset-8">Before a Human Ever Reads It.</span>`) }}
-          />
-          
-          <p className="text-xl text-white/72 mb-10 max-w-2xl mx-auto">
+          <AmbientDataTexture />
+
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-(--foreground) max-w-4xl mx-auto leading-tight">
+            {heroContent.heading.prefix}
+            <HeroWordRotate words={heroContent.heading.rotatingWords} />
+            {heroContent.heading.suffix}
+          </h1>
+
+          <p className="text-xl text-(--muted) mb-10 max-w-2xl mx-auto">
             {heroContent.subheading}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" suppressHydrationWarning>
-            <AuthAwareSignupLink className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-8 py-4 rounded-xl text-lg font-bold hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg shadow-[#0A9548]/30 flex items-center justify-center gap-2">
+            <AuthAwareSignupLink className={`${buttonVariants('primary', 'lg')} shadow-lg shadow-(--accent)/30`}>
               {heroContent.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-white/72" suppressHydrationWarning>
+
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
             {heroContent.features.map((feature, index) => {
               const Icon = icons[feature.icon];
               return (
                 <span key={index} className="flex items-center gap-1.5">
-                  <Icon className="w-4 h-4 text-[#0A9548]" /> {feature.text}
+                  <Icon className="w-4 h-4 text-(--accent)" /> {feature.text}
                 </span>
               );
             })}
