@@ -19,7 +19,16 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
   }, [words.length, intervalMs])
 
   return (
-    <span className="relative inline-block align-baseline text-(--accent)">
+    <span className="relative inline-grid align-baseline text-(--accent)">
+      {words.map((word) => (
+        <span
+          key={word}
+          className="invisible col-start-1 row-start-1 inline-block"
+          aria-hidden="true"
+        >
+          {word}
+        </span>
+      ))}
       <AnimatePresence mode="wait">
         <motion.span
           key={words[index]}
@@ -27,7 +36,7 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -12, opacity: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="inline-block"
+          className="col-start-1 row-start-1 inline-block"
         >
           {words[index]}
         </motion.span>
