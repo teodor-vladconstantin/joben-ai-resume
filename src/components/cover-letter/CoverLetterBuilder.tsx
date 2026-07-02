@@ -6,6 +6,7 @@ import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
 import { FeatureButton } from '@/components/FeatureButton'
+import { buttonVariants } from '@/components/ui/Button'
 import { startProCheckout } from '@/lib/client-billing'
 
 type CoverLetterSections = {
@@ -443,12 +444,12 @@ export function CoverLetterBuilder() {
 
   return (
     <div className="w-full h-full flex flex-col lg:flex-row">
-      <div className="w-full lg:w-112.5 bg-[#0A0F0D] border-r border-white/10 flex flex-col h-full z-10 shadow-2xl">
-        <div className="p-6 border-b border-white/10 bg-linear-to-r from-[#0D2818] to-[#04471C]">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2"><Sparkles className="text-[#0A9548] w-5 h-5"/> Cover Letter Sections</h2>
-          <p className="text-sm text-[#FFFFFF]/82 mt-2">Progress {completedSections}/{sectionItems.length} complete</p>
-          <div className="mt-3 h-2 w-full rounded-full bg-[#020202]">
-            <div className="h-2 rounded-full bg-linear-to-r from-[#0A9548] to-[#04471C]" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
+      <div className="w-full lg:w-112.5 bg-(--surface) border-r border-(--border) flex flex-col h-full z-10 shadow-2xl">
+        <div className="p-6 border-b border-(--border) bg-linear-to-r from-(--surface-elevated) to-(--surface)">
+          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--accent) w-5 h-5"/> Cover Letter Sections</h2>
+          <p className="text-sm text-(--muted) mt-2">Progress {completedSections}/{sectionItems.length} complete</p>
+          <div className="mt-3 h-2 w-full rounded-full bg-(--background)">
+            <div className="h-2 rounded-full bg-(--accent)" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
           </div>
         </div>
 
@@ -456,39 +457,39 @@ export function CoverLetterBuilder() {
           <SectionList sections={sectionItems} onSelect={openSectionEditor} />
 
           <div className="space-y-2 pt-5">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><Building2 className="w-4 h-4 text-[#FFFFFF]/60" /> Company Name</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Building2 className="w-4 h-4 text-(--muted)" /> Company Name</label>
             <input
               value={sections.company}
               onChange={(e) => setSections((prev) => ({ ...prev, company: e.target.value }))}
               type="text"
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65]"
+              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
               placeholder="e.g., Google"
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><Briefcase className="w-4 h-4 text-[#FFFFFF]/60" /> Job Title</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Briefcase className="w-4 h-4 text-(--muted)" /> Job Title</label>
             <input
               value={sections.position}
               onChange={(e) => setSections((prev) => ({ ...prev, position: e.target.value }))}
               type="text"
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65]"
+              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
               placeholder="e.g., Senior Frontend Engineer"
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72 flex items-center gap-2"><FileText className="w-4 h-4 text-[#FFFFFF]/60" /> Job Description</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><FileText className="w-4 h-4 text-(--muted)" /> Job Description</label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full bg-[#0A0F0D] border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#16DB65] h-32 resize-none text-sm"
+              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) h-32 resize-none text-sm"
               placeholder="Paste the full job description here..."
             ></textarea>
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-[#FFFFFF]/72">Tone</label>
+            <label className="text-sm font-medium text-(--muted)">Tone</label>
             <div className="grid grid-cols-3 gap-2">
               {(['formal', 'professional', 'conversational'] as const).map((tone) => (
                 <button
@@ -496,8 +497,8 @@ export function CoverLetterBuilder() {
                   onClick={() => setSections((prev) => ({ ...prev, tone }))}
                   className={`rounded-lg border px-3 py-2 text-sm ${
                     sections.tone === tone
-                      ? 'border-[#0A9548]/50 bg-[#0A9548]/10 text-[#0A9548]'
-                      : 'border-white/10 bg-[#0A0F0D] text-[#FFFFFF]/72'
+                      ? 'border-(--accent)/50 bg-(--accent-muted) text-(--accent)'
+                      : 'border-(--border) bg-(--surface) text-(--muted)'
                   }`}
                 >
                   {tone[0].toUpperCase() + tone.slice(1)}
@@ -510,10 +511,10 @@ export function CoverLetterBuilder() {
             feature="covers"
             onClick={generateDraft}
             disabled={isGenerating}
-            className="mt-6 w-full bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-3 rounded-xl font-bold hover:opacity-90 shadow-lg shadow-[#0A9548]/20"
+            className={`mt-6 w-full shadow-lg shadow-(--accent)/20 ${buttonVariants('primary', 'md')}`}
           >
             {isGenerating ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-(--background) border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current" /> Generate Draft
@@ -522,25 +523,25 @@ export function CoverLetterBuilder() {
           </FeatureButton>
         </div>
 
-        <div className="p-4 border-t border-white/10 bg-[#020202] flex justify-between items-center gap-4">
+        <div className="p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4">
           <button
             onClick={() => void persistLetter()}
             disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
-            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save className="w-4 h-4" /> Save
           </button>
           <button
             onClick={() => void exportAsPdf()}
             disabled={isLoading || isExportingPdf}
-            className="flex-1 bg-[#0A0F0D] border border-white/10 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="w-4 h-4" /> Export PDF
           </button>
         </div>
       </div>
 
-      <div className="grow bg-[#020202] h-full flex flex-col p-4 lg:p-8 overflow-hidden">
+      <div className="grow bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative">
         <div className="w-full max-w-200 h-full bg-white rounded-lg shadow-2xl mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto p-12 text-black font-serif text-[15px] leading-relaxed">
             <div className="mb-8 text-sm text-gray-700">
@@ -566,7 +567,7 @@ export function CoverLetterBuilder() {
           </div>
         </div>
 
-        <div className="absolute top-3 right-4 text-xs text-[#FFFFFF]/82 bg-black/40 px-2 py-1 rounded">
+        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded">
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : 'Idle'}
         </div>
       </div>
@@ -581,21 +582,21 @@ export function CoverLetterBuilder() {
       {activeModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-xl rounded-2xl border border-white/10 bg-[#0A0F0D] p-6 shadow-2xl">
-            <h3 className="mb-3 text-lg font-bold text-white">Edit Section</h3>
+          <div className="relative w-full max-w-xl rounded-2xl border border-(--border) bg-(--surface) p-6 shadow-2xl">
+            <h3 className="mb-3 text-lg font-bold text-(--foreground)">Edit Section</h3>
             <textarea
               value={modalDraft}
               onChange={(e) => setModalDraft(e.target.value)}
-              className="h-52 w-full resize-none rounded-lg border border-white/10 bg-[#020202] px-3 py-2 text-sm text-white focus:border-[#16DB65] focus:outline-none"
+              className="h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
             />
-            <p className="mt-2 text-xs text-[#FFFFFF]/82">
+            <p className="mt-2 text-xs text-(--muted)">
               Use new lines for multi-field sections like Header, Recipient, and Position.
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setActiveModal(null)} className="rounded-lg border border-white/10 bg-[#0A0F0D] px-4 py-2 text-sm text-[#FFFFFF]/72">
+              <button onClick={() => setActiveModal(null)} className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)">
                 Cancel
               </button>
-              <button onClick={applyModalChanges} className="rounded-lg bg-linear-to-r from-[#0A9548] to-[#04471C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+              <button onClick={applyModalChanges} className={buttonVariants('primary', 'md')}>
                 Save Changes
               </button>
             </div>
@@ -613,4 +614,3 @@ export function CoverLetterBuilder() {
     </div>
   )
 }
-
