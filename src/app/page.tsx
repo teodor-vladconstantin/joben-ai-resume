@@ -7,6 +7,7 @@ import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
 import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
 import { StepSection } from '@/components/landing/StepSection'
@@ -225,41 +226,40 @@ export default function Home() {
         </section>
 
         {/* PRICING */}
-        <section id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <section id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
           <div className="text-center mb-16" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-white/72 max-w-2xl mx-auto">Start for free, upgrade when you need the competitive edge.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">Start for free, upgrade when you need the competitive edge.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto" suppressHydrationWarning>
             {pricingPlans.map((plan, index) => (
-              <div key={index} className={`
-                ${plan.isPrimary ? 'bg-[#0A0F0D] transform md:-translate-y-4 shadow-xl shadow-[#0A9548]/20' : plan.isBestValue ? 'bg-[#0A0F0D] border-2 border-white/10 shadow-lg shadow-[#0A9548]/25' : 'bg-[#0A0F0D]'}
-                p-8 rounded-3xl border border-white/10 flex flex-col relative
-              `} suppressHydrationWarning>
+              <Card
+                key={index}
+                elevated={plan.isBestValue}
+                radius="lg"
+                className={`p-8 flex flex-col relative ${plan.isBestValue ? 'border-(--accent)' : ''} ${plan.isPrimary ? 'md:-translate-y-4' : ''}`}
+                suppressHydrationWarning
+              >
                 {plan.isBestValue && (
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#0A9548] text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide" suppressHydrationWarning>
-                    Best Value (Save with 6-month plan)
-                  </div>
+                  <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    Best Value
+                  </Badge>
                 )}
 
-                <h3 className={`text-xl font-bold text-white ${plan.isPrimary ? 'text-transparent bg-clip-text bg-linear-to-r from-[#0A9548] to-[#04471C]' : ''}`}>{plan.name}</h3>
-                <p className="text-white/72 text-sm mt-2 mb-6">{plan.description}</p>
-                <div className="text-4xl font-bold text-white mb-6" suppressHydrationWarning>{plan.price}<span className="text-lg text-white/50 font-normal">{plan.price_period}</span></div>
+                <h3 className="text-xl font-bold text-(--foreground)">{plan.name}</h3>
+                <p className="text-(--muted) text-sm mt-2 mb-6">{plan.description}</p>
+                <div className="text-4xl font-bold text-(--foreground) mb-6" suppressHydrationWarning>{plan.price}<span className="text-lg text-(--muted) font-normal">{plan.price_period}</span></div>
                 <ul className="space-y-4 mb-8 grow">
                   {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex gap-3 text-white/78"><CheckCircle2 className="text-[#0A9548] w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                    <li key={fIndex} className="flex gap-3 text-(--foreground)"><CheckCircle2 className="text-(--accent) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                   ))}
                   {plan.excludedFeatures.map((feature, fIndex) => (
-                    <li key={`excluded-${fIndex}`} className="flex gap-3 text-white/42 line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                    <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                   ))}
                 </ul>
-                <AuthAwareSignupLink className={`w-full py-3 rounded-xl text-center font-medium text-white transition-colors ${
-                  plan.isBestValue ? 'bg-linear-to-r from-[#0A9548] to-[#04471C] hover:opacity-90' : 
-                  plan.isPrimary ? 'bg-[#0A9548] hover:bg-[#16DB65]' : 
-                  'border border-white/10 hover:bg-white/10'
-                }`}>{plan.cta}</AuthAwareSignupLink>
-              </div>
+                <AuthAwareSignupLink className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}>{plan.cta}</AuthAwareSignupLink>
+              </Card>
             ))}
           </div>
         </section>
