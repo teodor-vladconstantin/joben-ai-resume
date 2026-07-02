@@ -7,6 +7,8 @@ import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
+import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -118,109 +120,76 @@ export default function Home() {
         </section>
 
         {/* ATS PREVIEW SECTION */}
-        <section id="analysis" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-white/10" suppressHydrationWarning>
+        <section id="analysis" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
           <div className="text-center mb-12" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{atsPreviewContent.heading}</h2>
-            <p className="text-white/72 max-w-2xl mx-auto">{atsPreviewContent.subheading}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{atsPreviewContent.heading}</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">{atsPreviewContent.subheading}</p>
           </div>
-          
-          <div className="relative overflow-hidden bg-[#0A0F0D] rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl" suppressHydrationWarning>
-            <div className="pointer-events-none absolute -left-16 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full bg-[#0A9548]/14 blur-3xl" suppressHydrationWarning></div>
 
-            <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.2fr_1fr]" suppressHydrationWarning>
-              <div className="relative" suppressHydrationWarning>
-                <div className="absolute -right-3 -top-3 sm:-right-4 sm:-top-4" suppressHydrationWarning>
-                  <div className="rounded-full border border-[#16DB65]/40 bg-[#020202]/95 p-2 shadow-[0_0_28px_rgba(10,149,72,0.35)]" suppressHydrationWarning>
-                    <div
-                      className="relative grid h-20 w-20 place-items-center rounded-full"
-                      style={{
-                        background: `conic-gradient(#16DB65 ${atsPreviewContent.score}%, rgba(255,255,255,0.08) ${atsPreviewContent.score}% 100%)`,
-                      }}
-                      suppressHydrationWarning
-                    >
-                      <div className="absolute inset-1.75 rounded-full bg-[#020202]" suppressHydrationWarning></div>
-                      <div className="relative text-center" suppressHydrationWarning>
-                        <p className="text-2xl leading-none font-black text-white">{atsPreviewContent.score}</p>
-                        <p className="mt-0.5 text-[10px] uppercase tracking-wider text-[#16DB65]">Result</p>
+          <div className="relative flex flex-col items-center gap-6 lg:block lg:py-8" suppressHydrationWarning>
+            <div className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
+              <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4" suppressHydrationWarning>
+                <div className="mx-auto rounded-md border border-black/20 bg-white px-4 py-3 font-serif text-[#1F2937] shadow-[0_10px_28px_rgba(0,0,0,0.28)]" suppressHydrationWarning>
+                  <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
+                    <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">John Doe</p>
+                    <p className="mt-0.5 text-[10px] text-gray-700">(+1) 555 120 9087 • john.doe@email.com • linkedin.com/in/john-doe</p>
+                  </div>
+
+                  <div className="mt-2 space-y-2.5 text-[10.5px] leading-relaxed" suppressHydrationWarning>
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Professional Summary</h4>
+                      <p className="mt-1 text-[#374151]">
+                        Product-minded software engineer focused on backend reliability, distributed systems, and measurable business impact.
+                      </p>
+                    </section>
+
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Work Experience</h4>
+
+                      <div className="mt-1" suppressHydrationWarning>
+                        <div className="flex justify-between gap-3" suppressHydrationWarning>
+                          <p className="font-semibold text-[#111827]">Senior Software Engineer, Atlas Commerce</p>
+                          <p className="shrink-0 text-gray-600">2023 - Present</p>
+                        </div>
+                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
+                          <li>Led migration to event-driven services, reducing checkout failures.</li>
+                          <li>Optimized PostgreSQL queries and caching, improving API latency from 410ms to 240ms.</li>
+                        </ul>
                       </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4" suppressHydrationWarning>
-                  <div className="mx-auto rounded-md border border-black/20 bg-white px-4 py-3 font-serif text-[#1F2937] shadow-[0_10px_28px_rgba(0,0,0,0.28)]" suppressHydrationWarning>
-                    <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
-                      <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">John Doe</p>
-                      <p className="mt-0.5 text-[10px] text-gray-700">(+1) 555 120 9087 • john.doe@email.com • linkedin.com/in/john-doe</p>
-                    </div>
-
-                    <div className="mt-2 space-y-2.5 text-[10.5px] leading-relaxed" suppressHydrationWarning>
-                      <section suppressHydrationWarning>
-                        <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Professional Summary</h4>
-                        <p className="mt-1 text-[#374151]">
-                          Product-minded software engineer focused on backend reliability, distributed systems, and measurable business impact.
-                        </p>
-                      </section>
-
-                      <section suppressHydrationWarning>
-                        <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Work Experience</h4>
-
-                        <div className="mt-1" suppressHydrationWarning>
-                          <div className="flex justify-between gap-3" suppressHydrationWarning>
-                            <p className="font-semibold text-[#111827]">Senior Software Engineer, Atlas Commerce</p>
-                            <p className="shrink-0 text-gray-600">2023 - Present</p>
-                          </div>
-                          <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
-                            <li>Led migration to event-driven services, reducing checkout failures.</li>
-                            <li>Optimized PostgreSQL queries and caching, improving API latency from 410ms to 240ms.</li>
-                          </ul>
+                      <div className="mt-1.5" suppressHydrationWarning>
+                        <div className="flex justify-between gap-3" suppressHydrationWarning>
+                          <p className="font-semibold text-[#111827]">Backend Engineer, Cloudline Systems</p>
+                          <p className="shrink-0 text-gray-600">2021 - 2023</p>
                         </div>
+                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
+                          <li>Built internal observability tooling adopted by 8 product teams.</li>
+                          <li>Implemented resilience patterns that improved uptime and reliability.</li>
+                        </ul>
+                      </div>
+                    </section>
 
-                        <div className="mt-1.5" suppressHydrationWarning>
-                          <div className="flex justify-between gap-3" suppressHydrationWarning>
-                            <p className="font-semibold text-[#111827]">Backend Engineer, Cloudline Systems</p>
-                            <p className="shrink-0 text-gray-600">2021 - 2023</p>
-                          </div>
-                          <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
-                            <li>Built internal observability tooling adopted by 8 product teams.</li>
-                            <li>Implemented resilience patterns that improved uptime and reliability.</li>
-                          </ul>
-                        </div>
-                      </section>
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Education</h4>
+                      <p className="mt-1 text-[#374151]">B.Sc. in Computer Science, University of Bucharest</p>
+                    </section>
 
-                      <section suppressHydrationWarning>
-                        <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Education</h4>
-                        <p className="mt-1 text-[#374151]">B.Sc. in Computer Science, University of Bucharest</p>
-                      </section>
-
-                      <section suppressHydrationWarning>
-                        <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Technical Skills</h4>
-                        <p className="mt-1 text-[#374151]">TypeScript, Node.js, Java, PostgreSQL, Redis, Docker, AWS, Kubernetes</p>
-                      </section>
-                    </div>
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Technical Skills</h4>
+                      <p className="mt-1 text-[#374151]">TypeScript, Node.js, Java, PostgreSQL, Redis, Docker, AWS, Kubernetes</p>
+                    </section>
                   </div>
-                </div>
-              </div>
-
-              <div className="space-y-6" suppressHydrationWarning>
-              <div suppressHydrationWarning>
-                <h3 className="text-[#0A9548] font-bold mb-2">Strengths</h3>
-                <ul className="space-y-2">
-                  {atsPreviewContent.strengths.map((strength, index) => (
-                    <li key={index} className="flex gap-2 items-start"><CheckCircle2 className="w-5 h-5 text-[#0A9548] shrink-0" /><span className="text-white/78">{strength}</span></li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div suppressHydrationWarning>
-                <h3 className="text-[#f59e0b] font-bold mb-2">How to Improve</h3>
-                <div className="bg-[#020202] rounded-xl p-4 border border-[#f59e0b]/30" suppressHydrationWarning>
-                  <p className="text-sm text-white/78 mb-2">Change: <span className="text-red-400 line-through">{atsPreviewContent.improvement.before}</span></p>
-                  <p className="text-sm text-white/78">To: <span className="text-[#0A9548] font-medium">{atsPreviewContent.improvement.after}</span></p>
                 </div>
               </div>
             </div>
-          </div>
+
+            <div className="lg:absolute lg:top-8 lg:-left-4 xl:-left-12">
+              <ResumeFindingsCard strengths={atsPreviewContent.findings.strengths} improvements={atsPreviewContent.findings.improvements} />
+            </div>
+
+            <div className="lg:absolute lg:top-24 lg:-right-4 xl:-right-12">
+              <ResumeScoreCard score={atsPreviewContent.score} scoreLabel={atsPreviewContent.scoreLabel} categories={atsPreviewContent.categories} />
+            </div>
           </div>
         </section>
 
