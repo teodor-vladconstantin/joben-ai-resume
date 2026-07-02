@@ -13,24 +13,21 @@ export function QuickTip() {
   const [idx, setIdx] = useState(0)
 
   return (
-    <div className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10 flex flex-col justify-between" suppressHydrationWarning>
+    <div className="bg-(--surface) p-6 rounded-2xl border border-(--border) flex flex-col justify-between" suppressHydrationWarning>
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Lightbulb className="text-[#16DB65] w-5 h-5" /> Quick Tip
+          <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
+            <Lightbulb className="text-(--accent) w-5 h-5" /> Quick Tip
           </h3>
-          <button onClick={() => setIdx((idx + 1) % tips.length)} className="text-[#FFFFFF]/82 hover:text-white p-1">
+          <button onClick={() => setIdx((idx + 1) % tips.length)} className="text-(--muted) hover:text-(--foreground) p-1">
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[#FFFFFF]/72 text-sm leading-relaxed mb-6">{tips[idx]}</p>
+        <p className="text-(--muted) text-sm leading-relaxed mb-6">{tips[idx]}</p>
       </div>
-      <Link href="/resumes" className="text-[#0A9548] hover:text-[#16DB65] text-sm font-medium flex items-center gap-1">
+      <Link href="/resumes" className="text-(--accent) hover:text-(--accent-strong) text-sm font-medium flex items-center gap-1">
         Edit resume <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
   )
 }
-
-
-
