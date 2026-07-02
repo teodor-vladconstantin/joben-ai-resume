@@ -6,6 +6,7 @@ import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -104,13 +105,13 @@ export default function Home() {
             {statCards.map((card, index) => {
               const Icon = icons[card.icon];
               return (
-                <div key={index} className="bg-[#0A0F0D] p-6 rounded-2xl border border-white/10" suppressHydrationWarning>
-                  <div className="w-12 h-12 bg-[#0A9548]/10 rounded-xl flex items-center justify-center mb-4">
-                    <Icon className="text-[#0A9548] w-6 h-6" />
+                <Card key={index} className="p-6">
+                  <div className="w-12 h-12 bg-(--accent-muted) rounded-xl flex items-center justify-center mb-4">
+                    <Icon className="text-(--accent) w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
-                  <p className="text-white/72">{card.description}</p>
-                </div>
+                  <h3 className="text-xl font-bold text-(--foreground) mb-2">{card.title}</h3>
+                  <p className="text-(--muted)">{card.description}</p>
+                </Card>
               );
             })}
           </div>
