@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { useAuth, UserButton } from '@clerk/nextjs'
 import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { isLoaded, isSignedIn } = useAuth()
 
   return (
     <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
@@ -26,7 +27,11 @@ export function Sidebar() {
           </span>
           <span className="text-lg font-bold tracking-tight text-(--foreground)">Joben</span>
         </Link>
-        <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8 border border-(--border)' } }} />
+        {isLoaded && isSignedIn ? (
+          <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8 border border-(--border)' } }} />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-(--surface-elevated)" />
+        )}
       </div>
 
       <div className="px-5 mb-4">
