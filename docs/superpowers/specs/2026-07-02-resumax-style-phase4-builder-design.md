@@ -30,21 +30,25 @@ Observed via Playwright against the account's real session:
   - "Tailor to a Job" modal: compact, tab switcher (Pipeline/For you/Paste), primary CTA.
   - Mobile (≤768px): 2-pane split collapses to a single pane with a bottom tab bar (Sections/Preview/Optimize/Templates).
 
+**IA divergence found while reading Joben's actual `ResumeBuilder.tsx` in full (2176 lines) — resolved with the user:** Joben's builder does NOT structurally match the above. It uses a horizontal **tab switcher** (Personal/Experience/Education/Skills/Projects/Certifications/More Sections — one category visible at a time), has **no dedicated top bar** (the page-level `Navbar` is the only header chrome), **no editable title** (derived automatically from first+last name), and Save/Export PDF live in a **bottom** action bar of the left panel, not a top one. There is no "Resume Readiness" checklist today.
+
+**Decision: pure restyle, IA unchanged.** Keep the tab switcher, the bottom Save/Export bar, the automatic (non-editable) title, and skip building a readiness checklist — only apply tokens/colors to what already exists. The resumax top-bar/checklist/expandable-section-list patterns described above are reference material for spacing/color/component *language* where it maps onto Joben's existing structure (e.g. pill-style tabs, card-style entry rows) — they are **not** being built as new structural features. The existing page-level `Navbar` (with its "Resumes" link) already covers going back, so no new "← Back" affordance is added either.
+
 ## Layout decisions
 
 - **`/resumes` (list)**: gets `<Sidebar/>` exactly like `/dashboard` (Phase 3 pattern: `hidden lg:flex` Sidebar + `lg:hidden`-wrapped `Navbar` fallback below that breakpoint). Closes the jarring style gap where Sidebar's own "Resumes" nav link currently drops the user onto an unstyled page.
-- **Builder editor** (`/resumes/new`, `/resumes/[id]`): **no Sidebar** — full-width "focus mode," just a "← Back" affordance in the top bar. Diverges from resumax's own choice (which keeps its global Sidebar in the editor) because the form+preview split already needs significant horizontal room, and a distraction-free editing surface is a deliberate product choice, not an oversight.
+- **Builder editor** (`/resumes/new`, `/resumes/[id]`): **no Sidebar** — keeps its current page-level `Navbar` exactly as today (which already provides a way back via its "Resumes" link), full-width form+preview split. Diverges from resumax's own choice (which keeps its global Sidebar in the editor) because the form+preview split already needs significant horizontal room, and a distraction-free editing surface is a deliberate product choice, not an oversight.
 
 ## Component plan
 
 - `Modal.tsx` (new primitive): header (uppercase mono title + X close), body (scrollable), footer (action buttons slot). Built first since 4 existing modals depend on it.
 - `src/app/resumes/page.tsx`: full restyle onto tokens + `Sidebar` adoption, same fetch/delete/sort/search logic.
-- `ResumeBuilder.tsx`: restyled in-place (not extracted into smaller files — see Risk below) region by region:
-  - Outer shell / top bar (Back, title, status, action buttons via `Button` primitive)
-  - Personal Info + Experience section UI (form fields, section-list rows, readiness checklist tied to these categories)
-  - Projects + Education section UI
-  - Skills + dynamic/custom sections UI
-  - Live preview panel chrome (label, page border/shadow) — the actual `HarvardTemplate` typeset stays print-realistic (white/black/serif), untouched by the dark palette
+- `ResumeBuilder.tsx`: restyled in-place (not extracted into smaller files — see Risk below), same tab-based IA throughout, region by region:
+  - Outer shell: tab switcher bar, `TemplateSwitcher` + Add Section/Import PDF/AI Tailor action row, fix/upload-error banners — restyled onto tokens, no structural change
+  - Personal Info + Experience tab content (form fields, AI summary generator, role entries + bullet editor)
+  - Projects + Education tab content
+  - Skills + Certifications + More Sections tab content (renders `SectionPanel`)
+  - Bottom Save/Export PDF action bar + live preview panel chrome (label, page border/shadow) — the actual `HarvardTemplate` typeset stays print-realistic (white/black/serif), untouched by the dark palette
 - `AddContentModal.tsx`, `UpgradeModal.tsx`, `BeforeAfterModal.tsx`, `ResumeOnboardingModal.tsx`: migrated onto the new `Modal` primitive and restyled.
 
 ## Risk: the 2176-line `ResumeBuilder.tsx`
@@ -61,12 +65,12 @@ Given the file's size and risk, this phase runs at finer granularity than Phases
 
 1. `Modal` primitive
 2. `/resumes` list page (Sidebar adoption + restyle)
-3. Builder shell (top bar + full-width layout, no Sidebar)
-4. Personal Info + Experience section UI
-5. Projects + Education section UI
-6. Skills + dynamic sections UI
+3. Builder outer shell (tab switcher bar, template switcher + action row, banners) — same tab-based IA, tokens only
+4. Personal Info + Experience tab content
+5. Projects + Education tab content
+6. Skills + Certifications + More Sections tab content (`SectionPanel`)
 7. All 4 modals migrated onto `Modal` primitive
-8. Live preview panel chrome
+8. Bottom Save/Export bar + live preview panel chrome
 9. Full functional + visual verification (real seeded resumes: autosave, PDF import, PDF/DOCX export, AI tailor/optimize-bullet, responsive collapse)
 
 ## Testing / verification
