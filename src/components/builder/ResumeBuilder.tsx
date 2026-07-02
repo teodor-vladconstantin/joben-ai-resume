@@ -615,6 +615,13 @@ export function ResumeBuilder() {
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
 
+    // `derivedTitle` falls back to 'Untitled Resume' whenever firstName/lastName
+    // are empty (e.g. a PDF-imported or manually-titled resume whose structured
+    // personal fields were never filled in). Only send `title` on updates when
+    // it's a real, name-derived value -- otherwise omit it from the PATCH body
+    // so the existing DB title (curated or imported) is left untouched instead
+    // of being silently overwritten back to 'Untitled Resume' on every autosave.
+    const hasDerivedName = derivedTitle !== 'Untitled Resume'
     const payload = {
       title: derivedTitle,
       data: resumeData,
@@ -665,7 +672,7 @@ export function ResumeBuilder() {
     const updateRes = await fetch(`/api/resumes/${targetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(hasDerivedName ? payload : { data: resumeData }),
     })
 
     setSaveStatus(updateRes.ok ? 'saved' : 'error')
