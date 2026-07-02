@@ -1,6 +1,8 @@
 "use client"
 
+import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Navbar } from '@/components/ui/Navbar'
+import { buttonVariants } from '@/components/ui/Button'
 import Link from 'next/link'
 import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -104,75 +106,77 @@ export default function ResumesPage() {
   }, [resumes, query, sortMode])
 
   return (
-    <div className="min-h-screen flex flex-col pb-20">
-      <Navbar />
-      
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Resumes</h1>
-            <p className="text-[#FFFFFF]/82">{resumes.length} resumes</p>
-          </div>
-          <Link href="/resumes/new" className="bg-linear-to-r from-[#0A9548] to-[#04471C] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 w-full sm:w-auto">
-            <Plus className="w-5 h-5" /> Create Resume
-          </Link>
+    <div className="min-h-screen flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="lg:hidden">
+          <Navbar />
         </div>
 
-        <div className="mb-4 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-          <div className="relative w-full lg:max-w-3xl">
-            <Search className="w-4 h-4 text-[#FFFFFF]/60 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search resumes..."
-              className="w-full rounded-lg border border-white/10 bg-[#0A0F0D] py-2 pl-10 pr-3 text-sm text-white focus:border-[#16DB65] focus:outline-none"
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Newest</button>
-            <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>Oldest</button>
-            <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-[#0A9548]/20 text-[#0A9548]' : 'text-[#FFFFFF]/82'}`}>A-Z</button>
-          </div>
-        </div>
-
-
-        <div className="rounded-2xl border border-white/10 bg-[#0A0F0D] overflow-hidden">
-          {visibleResumes.length === 0 ? (
-            <div className="p-10 text-center text-[#FFFFFF]/82">
-              <p>No resumes found.</p>
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
+            <div>
+              <h1 className="text-3xl font-bold text-(--foreground) mb-2">Resumes</h1>
+              <p className="text-(--muted)">{resumes.length} resumes</p>
             </div>
-          ) : (
-            <div className="divide-y divide-[#0A9548]">
-              {visibleResumes.map((resume) => (
-                <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[#0A0F0D] transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold truncate">{resume.title || 'Untitled'}</p>
-                    <p className="text-xs text-[#FFFFFF]/60">Updated {new Date(resume.updated_at).toLocaleDateString()}</p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${Number(resume.score || 0) >= 80 ? 'bg-[#0A9548]/10 text-[#16DB65]' : 'bg-[#16DB65]/10 text-[#16DB65]'}`}>
-                      {Number(resume.score || 0)}
-                    </span>
-                    <span className="text-xs text-[#FFFFFF]/82 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
-                    <Link href={`/resumes/${resume.id}`} className="text-[#FFFFFF]/82 hover:text-white"><Eye className="w-4 h-4" /></Link>
-                    <Link href={`/resumes/${resume.id}`} className="text-[#FFFFFF]/82 hover:text-white"><Edit className="w-4 h-4" /></Link>
-                    <button
-                      onClick={() => handleDelete(resume.id)}
-                      disabled={isPending}
-                      className="text-[#16DB65] hover:text-[#16DB65] disabled:opacity-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
+            <Link href="/resumes/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
+              <Plus className="w-5 h-5" /> Create Resume
+            </Link>
+          </div>
 
+          <div className="mb-4 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+            <div className="relative w-full lg:max-w-3xl">
+              <Search className="w-4 h-4 text-(--muted) absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search resumes..."
+                className="w-full rounded-lg border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Newest</button>
+              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Oldest</button>
+              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>A-Z</button>
+            </div>
+          </div>
+
+
+          <div className="rounded-2xl border border-(--border) bg-(--surface) overflow-hidden">
+            {visibleResumes.length === 0 ? (
+              <div className="p-10 text-center text-(--muted)">
+                <p>No resumes found.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-(--border)">
+                {visibleResumes.map((resume) => (
+                  <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-(--surface-elevated) transition-colors">
+                    <div className="min-w-0">
+                      <p className="text-(--foreground) font-semibold truncate">{resume.title || 'Untitled'}</p>
+                      <p className="text-xs text-(--muted)">Updated {new Date(resume.updated_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-(--accent-muted) text-(--accent)">
+                        {Number(resume.score || 0)}
+                      </span>
+                      <span className="text-xs text-(--muted) hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
+                      <Link href={`/resumes/${resume.id}`} className="text-(--muted) hover:text-(--foreground)"><Eye className="w-4 h-4" /></Link>
+                      <Link href={`/resumes/${resume.id}`} className="text-(--muted) hover:text-(--foreground)"><Edit className="w-4 h-4" /></Link>
+                      <button
+                        onClick={() => handleDelete(resume.id)}
+                        disabled={isPending}
+                        className="text-(--accent-strong) disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
-
-
