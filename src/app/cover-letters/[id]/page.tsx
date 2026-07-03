@@ -3,7 +3,7 @@ import { CoverLetterBuilder } from '@/components/cover-letter/CoverLetterBuilder
 
 export default function CoverLetterEditorPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-bg-base overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#020202] overflow-hidden">
       <Navbar />
       <main className="grow pt-16 flex h-[calc(100vh-64px)]">
         <CoverLetterBuilder />

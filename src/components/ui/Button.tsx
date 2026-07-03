@@ -1,42 +1,36 @@
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-body font-medium rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        primary:
-          'bg-accent hover:bg-accent-hover text-white border border-accent-border',
-        ghost:
-          'bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary border border-transparent',
-        outline:
-          'bg-transparent hover:bg-bg-hover text-text-primary border border-border-soft',
-        destructive:
-          'bg-transparent hover:bg-error/10 text-error border border-transparent hover:border-error/20',
-      },
-      size: {
-        sm: 'px-2 py-1 text-small',
-        md: 'px-3 py-1.5 text-body',
-        lg: 'px-4 py-2 text-heading',
-        icon: 'size-8 p-0',
-      },
-    },
-    defaultVariants: {
-      variant: 'primary',
-      size: 'md',
-    },
-  }
-)
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+export type ButtonSize = 'sm' | 'md' | 'lg'
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  primary:
+    'bg-(--accent) text-(--background) hover:bg-(--accent-strong)',
+  secondary:
+    'bg-transparent text-(--foreground) border border-(--border) hover:border-(--accent)',
+  ghost:
+    'bg-transparent text-(--foreground)/75 hover:text-(--foreground)',
+}
 
-export function Button({ className, variant, size, ...props }: ButtonProps) {
+const SIZE_CLASSES: Record<ButtonSize, string> = {
+  sm: 'px-4 py-2 text-[13px] gap-1.5',
+  md: 'px-6 py-3 text-sm gap-2',
+  lg: 'px-8 py-4 text-lg gap-2',
+}
+
+export function buttonVariants(variant: ButtonVariant = 'primary', size: ButtonSize = 'md'): string {
+  return `inline-flex items-center justify-center rounded-full font-medium transition-colors ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]}`
+}
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant
+  size?: ButtonSize
+}
+
+export function Button({ variant = 'primary', size = 'md', className = '', ...props }: ButtonProps) {
   return (
     <button
-      className={buttonVariants({ variant, size, className })}
+      className={`${buttonVariants(variant, size)} ${className}`.trim()}
       {...props}
     />
   )

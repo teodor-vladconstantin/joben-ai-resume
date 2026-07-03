@@ -1,38 +1,35 @@
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/lib/cn'
+import * as React from 'react'
 
-const badgeVariants = cva(
-  'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border transition-colors duration-150',
-  {
-    variants: {
-      variant: {
-        neutral:
-          'bg-bg-elevated text-text-secondary border-border-soft',
-        accent:
-          'bg-accent-muted text-accent border-accent-border',
-        success:
-          'bg-success-muted text-success border-success/25',
-        error:
-          'bg-error-muted text-error border-error/25',
-        warning:
-          'bg-warning-muted text-warning border-warning/25',
-      },
-    },
-    defaultVariants: {
-      variant: 'neutral',
-    },
-  }
-)
+export type BadgeVariant = 'solid' | 'muted'
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+const BADGE_VARIANT_CLASSES: Record<BadgeVariant, string> = {
+  solid: 'bg-(--accent) text-(--background)',
+  muted: 'bg-(--accent-muted) text-(--accent)',
+}
 
-export function Badge({ className, variant, ...props }: BadgeProps) {
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: BadgeVariant
+}
+
+export function Badge({ variant = 'solid', className = '', ...props }: BadgeProps) {
   return (
     <span
-      className={cn(badgeVariants({ variant }), className)}
+      className={`inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wide ${BADGE_VARIANT_CLASSES[variant]} ${className}`.trim()}
       {...props}
     />
+  )
+}
+
+export interface EyebrowProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function Eyebrow({ children, className = '' }: EyebrowProps) {
+  return (
+    <span className={`inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-wide text-(--accent) ${className}`.trim()}>
+      <span className="h-1.5 w-1.5 rounded-full bg-(--accent)" aria-hidden="true" />
+      {children}
+    </span>
   )
 }

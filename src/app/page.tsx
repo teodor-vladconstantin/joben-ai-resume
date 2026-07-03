@@ -1,244 +1,314 @@
+import { Navbar } from '@/components/ui/Navbar'
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
-import { Metadata } from 'next'
-import {
-  FileText,
-  Sparkles,
-  Download,
-  Check,
-  ArrowRight,
-  Mail,
+import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
+import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent, productLoopSteps } from '@/lib/content'
+import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
+import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
+import { buttonVariants } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
+import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
+import { StepSection } from '@/components/landing/StepSection'
+import { ScoreStepVisual } from '@/components/landing/steps/ScoreStepVisual'
+import { TailorStepVisual } from '@/components/landing/steps/TailorStepVisual'
+import { RewriteStepVisual } from '@/components/landing/steps/RewriteStepVisual'
+import { CoverLetterStepVisual } from '@/components/landing/steps/CoverLetterStepVisual'
+import { ExportStepVisual } from '@/components/landing/steps/ExportStepVisual'
+
+const icons: { [key: string]: React.ElementType } = {
   Zap,
-} from 'lucide-react'
+  ShieldCheck,
+  FileText,
+  CheckCircle2,
+};
 
-export const metadata: Metadata = {
-  title: 'Joben — AI Resume Builder',
-  description: 'Create professional, ATS-optimized resumes in minutes with AI. Free to start.',
-}
-
-const features = [
-  {
-    icon: FileText,
-    title: 'ATS-Optimized Templates',
-    description: 'Clean, professional templates that pass applicant tracking systems and reach human reviewers.',
-  },
-  {
-    icon: Sparkles,
-    title: 'AI Resume Review',
-    description: 'Get targeted feedback and actionable suggestions to strengthen every section of your resume.',
-  },
-  {
-    icon: Download,
-    title: 'Export to PDF & LaTeX',
-    description: 'Download polished PDFs ready to send, or export LaTeX source for full control.',
-  },
-]
-
-export default async function LandingPage() {
-  const { userId } = await auth()
+export default function Home() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://joben.eu/'
+          }
+        ]
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Joben',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Any',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      },
+    ],
+  };
 
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary font-sans antialiased">
-      {/* Navbar */}
-      <nav className="h-14 border-b border-border-faint">
-        <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-text-primary hover:text-accent transition-colors">
-            <FileText size={18} />
-            <span className="font-semibold text-heading">Joben</span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-transparent transition-colors"
-            >
-              Pricing
-            </Link>
-            {userId ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Get Started
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen" suppressHydrationWarning>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Navbar />
 
-      {/* Hero */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border mb-6">
-            AI-Powered Resume Builder
-          </span>
-          <h1 className="text-display font-semibold tracking-tight text-text-primary">
-            Build a resume that gets you hired
+      <main className="grow pt-24 pb-16" suppressHydrationWarning>
+        {/* HERO SECTION */}
+        <section id="builder" className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
+          <div className="absolute inset-0 -z-10 flex items-center justify-center" suppressHydrationWarning>
+            <div className="w-150 h-150 bg-(--accent)/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
+            <div className="w-100 h-100 bg-(--accent-strong)/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
+          </div>
+          <AmbientDataTexture />
+
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-(--foreground) max-w-4xl mx-auto leading-tight">
+            {heroContent.heading.prefix}
+            <HeroWordRotate words={heroContent.heading.rotatingWords} />
+            {heroContent.heading.suffix}
           </h1>
-          <p className="mt-4 text-body text-text-secondary leading-relaxed">
-            Create professional, ATS-optimized resumes in minutes. AI-powered suggestions, proven templates, and real-time scoring — free to start.
+
+          <p className="text-xl text-(--muted) mb-10 max-w-2xl mx-auto">
+            {heroContent.subheading}
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <Link
-              href={userId ? '/resumes/new' : '/sign-up'}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-            >
-              Build your resume <ArrowRight size={14} />
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center px-4 py-2 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-border-soft transition-colors"
-            >
-              View pricing
-            </Link>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" suppressHydrationWarning>
+            <AuthAwareSignupLink className={`${buttonVariants('primary', 'lg')} shadow-lg shadow-(--accent)/30`}>
+              {heroContent.cta} <ChevronRight className="w-5 h-5" />
+            </AuthAwareSignupLink>
           </div>
-        </div>
-      </section>
 
-      {/* Social proof */}
-      <section className="py-8 border-y border-border-faint">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-text-muted text-small">
-            Trusted by job seekers building better resumes
-          </p>
-        </div>
-      </section>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
+            {heroContent.features.map((feature, index) => {
+              const Icon = icons[feature.icon];
+              return (
+                <span key={index} className="flex items-center gap-1.5">
+                  <Icon className="w-4 h-4 text-(--accent)" /> {feature.text}
+                </span>
+              );
+            })}
+          </div>
 
-      {/* Features */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map(feature => (
-              <div
-                key={feature.title}
-                className="bg-bg-surface border border-border-soft rounded-lg p-6"
-              >
-                <feature.icon size={16} className="text-accent mb-3" />
-                <h3 className="text-heading font-medium text-text-primary mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-body text-text-secondary leading-relaxed">
-                  {feature.description}
-                </p>
+          {/* STAT CARDS */}
+          <h2 className="sr-only">Platform Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 text-left" suppressHydrationWarning>
+            {statCards.map((card, index) => {
+              const Icon = icons[card.icon];
+              return (
+                <Card key={index} className="p-6">
+                  <div className="w-12 h-12 bg-(--accent-muted) rounded-xl flex items-center justify-center mb-4">
+                    <Icon className="text-(--accent) w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-(--foreground) mb-2">{card.title}</h3>
+                  <p className="text-(--muted)">{card.description}</p>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ATS PREVIEW SECTION */}
+        <section id="analysis" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
+          <div className="text-center mb-12" suppressHydrationWarning>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{atsPreviewContent.heading}</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">{atsPreviewContent.subheading}</p>
+          </div>
+
+          <div className="relative flex flex-col items-center gap-6 lg:block lg:py-8" suppressHydrationWarning>
+            <div className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
+              <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4" suppressHydrationWarning>
+                <div className="mx-auto rounded-md border border-black/20 bg-white px-4 py-3 font-serif text-[#1F2937] shadow-[0_10px_28px_rgba(0,0,0,0.28)]" suppressHydrationWarning>
+                  <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
+                    <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">John Doe</p>
+                    <p className="mt-0.5 text-[10px] text-gray-700">(+1) 555 120 9087 • john.doe@email.com • linkedin.com/in/john-doe</p>
+                  </div>
+
+                  <div className="mt-2 space-y-2.5 text-[10.5px] leading-relaxed" suppressHydrationWarning>
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Professional Summary</h4>
+                      <p className="mt-1 text-[#374151]">
+                        Product-minded software engineer focused on backend reliability, distributed systems, and measurable business impact.
+                      </p>
+                    </section>
+
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Work Experience</h4>
+
+                      <div className="mt-1" suppressHydrationWarning>
+                        <div className="flex justify-between gap-3" suppressHydrationWarning>
+                          <p className="font-semibold text-[#111827]">Senior Software Engineer, Atlas Commerce</p>
+                          <p className="shrink-0 text-gray-600">2023 - Present</p>
+                        </div>
+                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
+                          <li>Led migration to event-driven services, reducing checkout failures.</li>
+                          <li>Optimized PostgreSQL queries and caching, improving API latency from 410ms to 240ms.</li>
+                        </ul>
+                      </div>
+
+                      <div className="mt-1.5" suppressHydrationWarning>
+                        <div className="flex justify-between gap-3" suppressHydrationWarning>
+                          <p className="font-semibold text-[#111827]">Backend Engineer, Cloudline Systems</p>
+                          <p className="shrink-0 text-gray-600">2021 - 2023</p>
+                        </div>
+                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
+                          <li>Built internal observability tooling adopted by 8 product teams.</li>
+                          <li>Implemented resilience patterns that improved uptime and reliability.</li>
+                        </ul>
+                      </div>
+                    </section>
+
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Education</h4>
+                      <p className="mt-1 text-[#374151]">B.Sc. in Computer Science, University of Bucharest</p>
+                    </section>
+
+                    <section suppressHydrationWarning>
+                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">Technical Skills</h4>
+                      <p className="mt-1 text-[#374151]">TypeScript, Node.js, Java, PostgreSQL, Redis, Docker, AWS, Kubernetes</p>
+                    </section>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="lg:absolute lg:top-8 lg:-left-4 xl:-left-12">
+              <ResumeFindingsCard strengths={atsPreviewContent.findings.strengths} improvements={atsPreviewContent.findings.improvements} />
+            </div>
+
+            <div className="lg:absolute lg:top-24 lg:-right-4 xl:-right-12">
+              <ResumeScoreCard score={atsPreviewContent.score} scoreLabel={atsPreviewContent.scoreLabel} categories={atsPreviewContent.categories} />
+            </div>
+          </div>
+        </section>
+
+        {/* PRODUCT LOOP */}
+        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" suppressHydrationWarning>
+          {productLoopSteps.map((step, index) => {
+            const visuals = [
+              <ScoreStepVisual key="score" />,
+              <TailorStepVisual key="tailor" />,
+              <RewriteStepVisual key="rewrite" />,
+              <CoverLetterStepVisual key="cover-letter" />,
+              <ExportStepVisual key="export" />,
+            ]
+            return (
+              <StepSection
+                key={step.number}
+                number={step.number}
+                totalSteps={productLoopSteps.length}
+                category={step.category}
+                heading={step.heading}
+                description={step.description}
+                bullets={step.bullets}
+                visual={visuals[index]}
+              />
+            )
+          })}
+        </section>
+
+        {/* PRICING */}
+        <section id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
+          <div className="text-center mb-16" suppressHydrationWarning>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">Start for free, upgrade when you need the competitive edge.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto" suppressHydrationWarning>
+            {pricingPlans.map((plan, index) => (
+              <Card
+                key={index}
+                elevated={plan.isBestValue}
+                radius="lg"
+                className={`p-8 flex flex-col relative ${plan.isBestValue ? 'border-(--accent)' : ''} ${plan.isPrimary ? 'md:-translate-y-4' : ''}`}
+                suppressHydrationWarning
+              >
+                {plan.isBestValue && (
+                  <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    Best Value
+                  </Badge>
+                )}
+
+                <h3 className="text-xl font-bold text-(--foreground)">{plan.name}</h3>
+                <p className="text-(--muted) text-sm mt-2 mb-6">{plan.description}</p>
+                <div className="text-4xl font-bold text-(--foreground) mb-6" suppressHydrationWarning>{plan.price}<span className="text-lg text-(--muted) font-normal">{plan.price_period}</span></div>
+                <ul className="space-y-4 mb-8 grow">
+                  {plan.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="flex gap-3 text-(--foreground)"><CheckCircle2 className="text-(--accent) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                  ))}
+                  {plan.excludedFeatures.map((feature, fIndex) => (
+                    <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                  ))}
+                </ul>
+                <AuthAwareSignupLink className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}>{plan.cta}</AuthAwareSignupLink>
+              </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing */}
-      <section className="py-20 border-t border-border-faint">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-title font-semibold text-text-primary text-center mb-10">
-            Simple pricing
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Free */}
-            <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
-              <h3 className="text-heading font-medium text-text-primary">Free</h3>
-              <p className="text-text-muted text-xs mt-1">Get started with the basics</p>
-              <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">$0</span>
-                <span className="text-body text-text-muted"> /month</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                {[
-                  'ATS-optimized templates',
-                  'Resume builder',
-                  'PDF export',
-                  'Cover letter builder',
-                ].map(item => (
-                  <li key={item} className="flex items-start gap-2 text-body text-text-secondary">
-                    <Check size={14} className="text-accent mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={userId ? '/resumes/new' : '/sign-up'}
-                className="block w-full text-center px-3 py-1.5 bg-transparent hover:bg-bg-hover text-text-primary text-body rounded-md border border-border-soft transition-colors"
+        {/* FAQ */}
+        <section id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
+          <div className="text-center mb-12" suppressHydrationWarning>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">Frequently Asked Questions</h2>
+            <p className="text-(--muted) max-w-2xl mx-auto">Everything you need to know before building your next resume.</p>
+          </div>
+
+          <div className="mx-auto max-w-4xl" suppressHydrationWarning>
+            {faqItems.map((item, index) => (
+              <details
+                key={index}
+                className="group border-b border-(--border) first:border-t"
+                suppressHydrationWarning
               >
-                Get started
-              </Link>
-            </div>
+                <summary
+                  className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left text-lg font-semibold text-(--foreground) [&::-webkit-details-marker]:hidden"
+                  suppressHydrationWarning
+                >
+                  <span>{item.question}</span>
+                  <span className="font-mono text-xs uppercase tracking-wide text-(--accent) group-open:hidden">Open</span>
+                  <span className="hidden font-mono text-xs uppercase tracking-wide text-(--accent) group-open:inline">Close</span>
+                </summary>
+                <div className="pb-5 text-(--muted)" suppressHydrationWarning>{item.answer}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+      </main>
 
-            {/* Pro */}
-            <div className="bg-bg-surface border border-accent-border rounded-lg p-6 relative">
-              <span className="absolute -top-2.5 left-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border">
-                Pro
-              </span>
-              <h3 className="text-heading font-medium text-text-primary">Pro</h3>
-              <p className="text-text-muted text-xs mt-1">Unlock AI-powered features</p>
-              <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">$9</span>
-                <span className="text-body text-text-muted"> /month</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                {[
-                  'Everything in Free',
-                  'AI resume review & scoring',
-                  'AI content suggestions',
-                  'AI-powered cover letters',
-                  'LaTeX export',
-                ].map(item => (
-                  <li key={item} className="flex items-start gap-2 text-body text-text-secondary">
-                    <Check size={14} className="text-accent mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/pricing"
-                className="block w-full text-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Upgrade to Pro
-              </Link>
-            </div>
+      <footer className="bg-(--background) py-12 border-t border-(--border) text-center" suppressHydrationWarning>
+        <div className="max-w-4xl mx-auto px-4" suppressHydrationWarning>
+          <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footerContent.heading}</h2>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8" suppressHydrationWarning>
+            <AuthAwareSignupLink className={buttonVariants('primary', 'md')}>{footerContent.ctaPrimary}</AuthAwareSignupLink>
+            <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footerContent.ctaSecondary}</Link>
           </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border-faint py-12">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-2 text-text-primary mb-3">
-                <FileText size={16} />
-                <span className="font-semibold text-body">Joben</span>
-              </div>
-              <p className="text-xs text-text-muted">
-                AI-powered resume builder for modern job seekers.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-3">Product</h4>
-              <ul className="space-y-1.5">
-                <li><Link href="/resumes/new" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Resume Builder</Link></li>
-                <li><Link href="/pricing" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-3">Legal</h4>
-              <ul className="space-y-1.5">
-                <li><Link href="/terms" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Terms</Link></li>
-                <li><Link href="/privacy" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Privacy</Link></li>
-              </ul>
-            </div>
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
+            <Link href="/terms" className="hover:text-(--accent)">Terms & Conditions</Link>
+            <Link href="/privacy" className="hover:text-(--accent)">Privacy Policy</Link>
           </div>
-          <div className="mt-8 pt-6 border-t border-border-faint">
-            <p className="text-xs text-text-muted">
-              &copy; {new Date().getFullYear()} Joben. All rights reserved.
-            </p>
-          </div>
+          <p className="mt-8 text-xs text-(--muted)" suppressHydrationWarning>{footerContent.creatorCredit}</p>
         </div>
       </footer>
     </div>
   )
 }
+
+

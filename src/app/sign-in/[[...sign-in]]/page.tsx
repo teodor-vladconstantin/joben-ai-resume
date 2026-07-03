@@ -1,17 +1,32 @@
-import { auth } from '@clerk/nextjs/server'
+"use client"
 
-type PageProps = {
-  searchParams?: {
-    redirect_url?: string | string[]
-  }
+import { Suspense } from 'react'
+import { SignIn } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
+import { AuthShell } from '@/components/auth/AuthShell'
+
+function sanitizeReturnBackUrl(value: string | null): string {
+  if (!value) return '/dashboard'
+  const trimmed = value.trim()
+  if (!trimmed || !trimmed.startsWith('/') || trimmed.startsWith('//')) return '/dashboard'
+  return trimmed
 }
 
-export default async function SignInPage({ searchParams }: PageProps) {
-  const redirectParam = searchParams?.redirect_url
-  const returnBackUrl = Array.isArray(redirectParam) ? redirectParam[0] : redirectParam
-  const { redirectToSignIn } = await auth()
+function SignInContent() {
+  const searchParams = useSearchParams()
+  const returnBackUrl = sanitizeReturnBackUrl(searchParams.get('redirect_url'))
 
-  return redirectToSignIn({
-    returnBackUrl: returnBackUrl || '/dashboard',
-  })
+  return (
+    <AuthShell eyebrow="Sign in" heading="Continue to Joben" subheading="Sign in to your account to keep building.">
+      <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" fallbackRedirectUrl={returnBackUrl} />
+    </AuthShell>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInContent />
+    </Suspense>
+  )
 }

@@ -18,8 +18,12 @@
       "Bash(scp *)",
       "Bash(tar *)",
       "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@89.167.48.64 \"echo connected && ls /root\")",
-      "Bash(npm install *)",
-      "Bash(node -e \"require\\('class-variance-authority'\\)\")"
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "Bash(npx playwright *)",
+      "PowerShell(Get-Command *)",
+      "Read(//c/Users/const/.claude/plugins/**)",
+      "Read(//c/Users/const/.claude/plugins/cache/**)"
     ]
   }
 }

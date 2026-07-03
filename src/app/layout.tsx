@@ -1,24 +1,16 @@
-import { Geist, Geist_Mono } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import { JetBrains_Mono } from 'next/font/google'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
 import { PostHogProvider } from '@/components/PostHogProvider'
 
-const geist = Geist({
-  subsets: ['latin'],
-  variable: '--font-geist',
-})
-
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
-})
-
 validateEnv()
+
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://joben.eu'),
@@ -118,7 +110,7 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${geist.variable} ${geistMono.variable} font-sans bg-bg-base text-text-primary min-h-screen flex flex-col antialiased`} suppressHydrationWarning>
+        <body className={`${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"

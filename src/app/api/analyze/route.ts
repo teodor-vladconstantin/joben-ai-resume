@@ -6,6 +6,7 @@ import {
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
+import { clampAnalysisScores } from '@/lib/ai-review-validation'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
@@ -131,7 +132,8 @@ export async function POST(req: Request) {
       })
 
       const analysisText = extractTextFromAnthropicMessage(aiResponse)
-      const analysis = parseClaudeJsonText(analysisText) as Record<string, unknown> & { overall_score?: number }
+      const rawAnalysis = parseClaudeJsonText(analysisText)
+      const analysis = clampAnalysisScores(rawAnalysis, { requestId, userId })
 
       const supabase = createServerClient()
       const { data: createdReview, error: insertError } = await supabase
@@ -139,7 +141,7 @@ export async function POST(req: Request) {
         .insert({
           user_id: userId,
           resume_id: body.resumeId || null,
-          score: Number(analysis?.overall_score || 0),
+          score: Number(analysis.overall_score || 0),
           feedback: analysis,
         })
         .select('id')

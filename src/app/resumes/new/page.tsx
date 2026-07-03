@@ -3,7 +3,7 @@ import { ResumeBuilderMount } from '@/components/builder/ResumeBuilderMount'
 
 export default function NewResumePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-bg-base overflow-hidden print:bg-white print:overflow-visible">
+    <div className="min-h-screen flex flex-col bg-[#020202] overflow-hidden print:bg-white print:overflow-visible">
       <div className="print:hidden">
         <Navbar />
       </div>
