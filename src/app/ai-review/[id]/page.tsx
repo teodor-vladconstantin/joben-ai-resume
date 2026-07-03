@@ -9,7 +9,6 @@ import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
-import { startProCheckout } from '@/lib/client-billing'
 
 const SESSION_KEY = 'ai-fix-patches'
 
@@ -288,7 +287,6 @@ export default function AIReviewEditorPage() {
         title="Pro Feature"
         description={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={startProCheckout}
       />
     </div>
   )
