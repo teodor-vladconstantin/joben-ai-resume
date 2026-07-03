@@ -104,7 +104,7 @@ export default async function PricingPage() {
                 href={userId ? '/resumes/new' : '/sign-up'}
                 className="block w-full text-center"
               >
-                <Button variant="outline" className="w-full">
+                <Button variant="secondary" className="w-full">
                   Get started
                 </Button>
               </Link>

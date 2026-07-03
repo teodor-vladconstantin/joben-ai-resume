@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
+import { LayoutDashboard, FileText, Mail, FileSearch, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'
 
 const NAV_ITEMS = [
@@ -59,17 +59,9 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 pb-5 pt-3 border-t border-(--border)">
-        <Link
-          href="/settings"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-            pathname === '/settings' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)'
-          }`}
-        >
-          <Settings className="w-4 h-4" />
-          Settings
-        </Link>
-      </div>
+      {/* Settings link temporarily removed: /settings exists but still uses
+          the old pre-redesign shell (different Sidebar/DashboardShell, no
+          resumax-style tokens) pending its own restyle phase. */}
     </aside>
   )
 }

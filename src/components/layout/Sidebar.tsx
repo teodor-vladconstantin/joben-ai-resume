@@ -11,7 +11,6 @@ import {
   Sparkles,
   CreditCard,
   ChevronRight,
-  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useState } from 'react'
@@ -37,7 +36,7 @@ const navGroups = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { isSignedIn } = useUser()
+  const { isSignedIn, user } = useUser()
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -116,7 +115,7 @@ export function Sidebar() {
             <UserButton />
             {!collapsed && (
               <span className="text-xs text-text-muted truncate">
-                {useUser().user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || ''}
+                {user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || ''}
               </span>
             )}
           </div>
