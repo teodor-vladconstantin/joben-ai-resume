@@ -147,3 +147,29 @@ body {
     size: A4;
   }
 }
+
+/* Clerk's UserButton popover footer ("Secured by Clerk" / dev-mode badge)
+   renders its text on an internal, hashed class not exposed by the public
+   appearance.elements API -- scope through the stable cl-userButtonPopoverFooter
+   parent instead so it stays legible against our dark surface. */
+.cl-userButtonPopoverFooter,
+.cl-userButtonPopoverFooter * {
+  color: var(--muted) !important;
+}
+
+/* Same problem in the "Manage account" modal: its "Account" heading/subtitle
+   and each profile section's value text (e.g. the email address row) are
+   plain unclassed <h1>/<p> tags with Clerk's hardcoded near-black color.
+   Scoped by tag under the stable navbar/profileSectionContent parent
+   classes so buttons, links, and badges (different tags / their own
+   cl-* classes) are untouched. */
+.cl-navbar h1 {
+  color: var(--foreground) !important;
+}
+.cl-navbar p {
+  color: var(--muted) !important;
+}
+.cl-profileSectionContent p,
+.cl-profileSectionItemList p {
+  color: var(--foreground) !important;
+}

@@ -1,6 +1,6 @@
 export const clerkAppearance = {
   variables: {
-    colorBackground: 'transparent',
+    colorBackground: '#12121A',
     colorInputBackground: '#0A0A0E',
     colorText: '#F5F1EB',
     colorTextSecondary: '#8A8A92',
@@ -53,5 +53,17 @@ export const clerkAppearance = {
     scrollBox: '!bg-(--surface)',
     pageScrollBox: '!bg-(--surface)',
     profilePage: '!bg-(--surface)',
+
+    // These render with Clerk's own hardcoded near-black text
+    // (rgb(33,33,38), meant for a light card) instead of picking up
+    // colorText/colorTextSecondary -- illegible against our dark surface.
+    // Same problem repeats throughout the "Manage account" (UserProfile)
+    // modal; the rest of that fix (untargetable internal classes) lives
+    // in globals.css, scoped through the stable cl-navbar/cl-modalContent
+    // parent classes below.
+    userPreviewMainIdentifierText: '!text-(--foreground)',
+    userPreviewSecondaryIdentifierText: '!text-(--muted)',
+    navbarButtonText: '!text-(--foreground)',
+    profileSectionTitleText: '!text-(--foreground)',
   },
 }
