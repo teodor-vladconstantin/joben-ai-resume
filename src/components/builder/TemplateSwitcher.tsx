@@ -1,22 +1,36 @@
-'use client'
+"use client"
 
-type ResumeTemplate = 'harvard'
+type TemplateValue = 'harvard'
 
-interface TemplateSwitcherProps {
-  value: ResumeTemplate
-  onChange: (value: ResumeTemplate) => void
+type TemplateSwitcherProps = {
+  value: TemplateValue
+  onChange: (value: TemplateValue) => void
 }
+
+const templates: Array<{ id: TemplateValue; name: string; description: string }> = [
+  { id: 'harvard', name: 'Harvard', description: 'Classic academic layout' },
+]
 
 export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
   return (
-    <div className="flex items-center gap-2 mb-3">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as ResumeTemplate)}
-        className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-      >
-        <option value="harvard">Harvard</option>
-      </select>
+    <div className="bg-(--surface) border border-(--border) rounded-xl p-4">
+      <p className="text-xs uppercase tracking-wider text-(--muted) mb-3">Template</p>
+      <div className="grid grid-cols-1 gap-2.5">
+        {templates.map((template) => (
+          <button
+            key={template.id}
+            onClick={() => onChange(template.id)}
+            className={`text-left rounded-lg border px-3.5 py-2.5 transition-colors ${
+              value === template.id
+                ? 'bg-(--accent-muted) border-(--border) text-(--foreground)'
+                : 'bg-(--surface) border-(--border) text-(--foreground)/72 hover:border-(--accent-strong)/60'
+            }`}
+          >
+            <p className="text-sm font-semibold">{template.name}</p>
+            <p className="text-[11px] text-(--muted) mt-0.5">{template.description}</p>
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

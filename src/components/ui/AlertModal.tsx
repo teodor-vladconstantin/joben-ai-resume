@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { AlertTriangle } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 interface AlertModalProps {
   isOpen: boolean
@@ -30,24 +32,19 @@ export function AlertModal({ isOpen, onConfirm, onCancel, title }: AlertModalPro
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div ref={ref} className="bg-[#111] border border-white/20 rounded-2xl p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <Card ref={ref} elevated radius="lg" className="p-6 max-w-md w-full mx-4">
         <div className="text-center">
           <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
-          <h3 className="text-lg font-medium text-white mt-4">Important Notice</h3>
-          <p className="text-white/80 mt-2 mb-4 text-sm">
+          <h3 className="text-lg font-medium text-(--foreground) mt-4">Important Notice</h3>
+          <p className="text-(--muted) mt-2 mb-4 text-sm">
             {title || "Please note that only PDF and DOCX files are supported for import. Scanned documents or images in PDF format will not be imported correctly."}
           </p>
           <div className="flex justify-center gap-3">
-            <button
-              onClick={onConfirm}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-            >
-              I Understand
-            </button>
+            <Button onClick={onConfirm}>I Understand</Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

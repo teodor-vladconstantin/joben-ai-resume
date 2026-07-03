@@ -32,58 +32,58 @@ export function MonthYearRangeField({
   onIsCurrentChange,
 }: MonthYearRangeFieldProps) {
   return (
-    <div className="rounded-lg border border-border-soft bg-bg-surface px-3 py-2">
-      <p className="text-[11px] text-text-muted uppercase tracking-[0.15em]">{label}</p>
+    <div className="rounded-xl border border-[#16DB65]/25 bg-linear-to-br from-[#0A0F0D] via-[#08160f] to-[#05110a] px-3 py-2.5">
+      <p className="text-[11px] text-white/45 uppercase tracking-[0.15em]">{label}</p>
       <div className="mt-2 flex items-center gap-1 flex-wrap">
         <div className="relative">
           <select
             value={startMonth ?? ''}
             onChange={(e) => onStartMonthChange(e.target.value ? Number(e.target.value) : undefined)}
-            className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
+            className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
           >
             <option value="">Month</option>
             {monthLabels.map((month, index) => (
               <option key={month} value={index + 1}>{month}</option>
             ))}
           </select>
-          <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
+          <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
         </div>
 
         <input
           type="number"
           value={startYear ?? ''}
           onChange={(e) => onStartYearChange(e.target.value ? Number(e.target.value) : undefined)}
-          className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong transition-colors"
+          className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
           placeholder="Year"
           min={1950}
           max={2099}
         />
 
-        <span className="text-text-muted text-xs">–</span>
+        <span className="text-white/30 text-xs">–</span>
 
         {isCurrent ? (
-          <span className="text-xs font-medium text-accent">Present</span>
+          <span className="text-xs font-medium text-[#16DB65]">Present</span>
         ) : (
           <>
             <div className="relative">
               <select
                 value={endMonth ?? ''}
                 onChange={(e) => onEndMonthChange(e.target.value ? Number(e.target.value) : undefined)}
-                className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
+                className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
               >
                 <option value="">Month</option>
                 {monthLabels.map((month, index) => (
                   <option key={month} value={index + 1}>{month}</option>
                 ))}
               </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
+              <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
             </div>
 
             <input
               type="number"
               value={endYear ?? ''}
               onChange={(e) => onEndYearChange(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong transition-colors"
+              className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
               placeholder="Year"
               min={1950}
               max={2099}
@@ -96,9 +96,9 @@ export function MonthYearRangeField({
             type="checkbox"
             checked={isCurrent}
             onChange={(e) => onIsCurrentChange(e.target.checked)}
-            className="accent-accent w-3 h-3"
+            className="accent-[#16DB65] w-3 h-3"
           />
-          <span className="text-xs text-text-muted">Present</span>
+          <span className="text-xs text-white/55">Present</span>
         </label>
       </div>
     </div>

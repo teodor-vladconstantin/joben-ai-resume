@@ -45,3 +45,6 @@ next-env.d.ts
 .env.local
 .aider*
 .env*.local
+
+# playwright mcp scratch output
+/.playwright-mcp/

@@ -1,45 +1,26 @@
-import { cn } from '@/lib/cn'
+import * as React from 'react'
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type CardRadius = 'base' | 'lg'
 
-export function Card({ className, ...props }: CardProps) {
+const RADIUS_CLASSES: Record<CardRadius, string> = {
+  base: 'rounded-(--radius)',
+  lg: 'rounded-(--radius-lg)',
+}
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  elevated?: boolean
+  radius?: CardRadius
+}
+
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
+  { elevated = false, radius = 'base', className = '', ...props },
+  ref
+) {
   return (
     <div
-      className={cn(
-        'bg-bg-surface border border-border-soft rounded-lg p-4',
-        className
-      )}
+      ref={ref}
+      className={`border border-(--border) ${RADIUS_CLASSES[radius]} ${elevated ? 'bg-(--surface-elevated)' : 'bg-(--surface)'} ${className}`.trim()}
       {...props}
     />
   )
-}
-
-interface CardClickableProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function CardClickable({ className, ...props }: CardClickableProps) {
-  return (
-    <div
-      className={cn(
-        'bg-bg-surface border border-border-soft rounded-lg p-4',
-        'hover:border-border-medium hover:bg-bg-hover',
-        'cursor-pointer transition-colors duration-150',
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-interface CardElevatedProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function CardElevated({ className, ...props }: CardElevatedProps) {
-  return (
-    <div
-      className={cn(
-        'bg-bg-elevated border border-border-medium rounded-xl p-6',
-        className
-      )}
-      {...props}
-    />
-  )
-}
+})

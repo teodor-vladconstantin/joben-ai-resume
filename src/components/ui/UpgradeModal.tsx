@@ -1,47 +1,72 @@
-'use client'
+"use client"
 
-import { X } from 'lucide-react'
-import Link from 'next/link'
+import { useState } from 'react'
+import { Crown } from 'lucide-react'
+import { Modal } from '@/components/ui/Modal'
+import { buttonVariants } from '@/components/ui/Button'
 
-interface UpgradeModalProps {
+type UpgradeModalProps = {
   open: boolean
   title?: string
   description?: string
-  children?: React.ReactNode
-  onClose?: () => void
-  onUpgrade?: () => void | Promise<void>
+  onClose: () => void
+  onUpgrade: () => Promise<void>
 }
 
-export function UpgradeModal({ open, title = 'Upgrade to Pro', description, children, onClose, onUpgrade }: UpgradeModalProps) {
-  if (!open) return null
+export function UpgradeModal({
+  open,
+  title = 'Upgrade to Pro',
+  description = 'Unlock unlimited AI actions and premium optimization tools.',
+  onClose,
+  onUpgrade,
+}: UpgradeModalProps) {
+  const [isUpgrading, setIsUpgrading] = useState(false)
+
+  async function handleUpgrade() {
+    setIsUpgrading(true)
+    try {
+      await onUpgrade()
+    } finally {
+      setIsUpgrading(false)
+    }
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div
-        className="w-full max-w-md mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between">
-          <h2 className="text-title text-text-primary font-semibold">{title}</h2>
-          {onClose && (
-            <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
-              <X size={16} />
-            </button>
-          )}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      maxWidth="md"
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+          >
+            Maybe Later
+          </button>
+          <button
+            onClick={() => void handleUpgrade()}
+            disabled={isUpgrading}
+            className={`disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+          >
+            {isUpgrading ? 'Redirecting...' : 'Upgrade to Pro'}
+          </button>
         </div>
-        {description && (
-          <p className="mt-2 text-body text-text-secondary">{description}</p>
-        )}
-        {children}
-        <button
-          onClick={async () => {
-            if (onUpgrade) await onUpgrade()
-          }}
-          className="mt-4 w-full text-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-        >
-          <Link href="/pricing" className="block">View Pricing</Link>
-        </button>
+      }
+    >
+      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-(--accent-strong)/35 bg-(--accent-muted) text-(--accent-strong)">
+        <Crown className="h-5 w-5" />
       </div>
-    </div>
+
+      <p className="text-sm text-(--foreground)/72">{description}</p>
+
+      <div className="mt-5 rounded-xl border border-(--border) bg-(--surface) p-4 text-sm text-(--foreground)/72">
+        <p>Pro includes:</p>
+        <p className="mt-2">Unlimited AI analysis and tailoring</p>
+        <p>Advanced rewrite and bullet optimization</p>
+        <p>Priority generation and premium templates</p>
+      </div>
+    </Modal>
   )
 }

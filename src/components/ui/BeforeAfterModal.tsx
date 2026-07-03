@@ -1,51 +1,74 @@
-'use client'
+"use client"
 
-export interface FixPatchWithContext {
+import { ArrowDown } from 'lucide-react'
+import { Modal } from '@/components/ui/Modal'
+import { buttonVariants } from '@/components/ui/Button'
+
+export type FixPatchWithContext = {
   experienceId: string
   bulletIndex: number
-  originalBullet?: string
-  updatedBullet?: string
+  originalBullet: string
+  updatedBullet: string
   experienceTitle?: string
   company?: string
-  original?: string
-  fixed?: string
-  context?: string
 }
 
-interface BeforeAfterModalProps {
+type BeforeAfterModalProps = {
   patches: FixPatchWithContext[]
   onClose: () => void
 }
 
 export function BeforeAfterModal({ patches, onClose }: BeforeAfterModalProps) {
+  const count = patches.length
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div
-        className="w-full max-w-2xl mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6 max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-title text-text-primary font-semibold mb-4">Changes Applied</h2>
-        <div className="space-y-4">
-          {patches.map((patch, i) => (
-            <div key={i} className="space-y-2">
-              <div className="text-xs text-text-muted uppercase tracking-wide">Original</div>
-              <pre className="text-small text-text-secondary bg-bg-subtle border border-border-soft rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
-                {patch.originalBullet || patch.original || ''}
-              </pre>
-              <div className="text-xs text-text-muted uppercase tracking-wide">Updated</div>
-              <pre className="text-small text-accent bg-bg-subtle border border-border-soft rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
-                {patch.updatedBullet || patch.fixed || ''}
-              </pre>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={onClose}
-          className="mt-4 w-full px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-        >
-          Close
+    <Modal
+      open
+      onClose={onClose}
+      title={`AI Applied ${count} ${count === 1 ? 'Improvement' : 'Improvements'}`}
+      maxWidth="xl"
+      footer={
+        <button onClick={onClose} className={`w-full ${buttonVariants('primary', 'md')}`}>
+          View in Editor
         </button>
+      }
+    >
+      <div className="space-y-4">
+        {patches.map((patch, idx) => (
+          <div
+            key={`${patch.experienceId}-${patch.bulletIndex}-${idx}`}
+            className="rounded-xl border border-(--border) overflow-hidden"
+          >
+            {(patch.experienceTitle || patch.company) && (
+              <div className="px-4 py-2 bg-(--surface-elevated) border-b border-(--border)">
+                <p className="text-xs font-medium text-(--muted)">
+                  {[patch.experienceTitle, patch.company].filter(Boolean).join(' · ')}
+                </p>
+              </div>
+            )}
+
+            <div className="p-4 space-y-2">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-(--accent-strong) font-semibold mb-1.5">Before</p>
+                <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--accent-strong) px-3 py-2 rounded-r leading-relaxed">
+                  {patch.originalBullet || <span className="italic opacity-60">(empty)</span>}
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <ArrowDown className="w-4 h-4 text-(--muted)" />
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-(--accent) font-semibold mb-1.5">After</p>
+                <p className="text-sm bg-(--accent-muted) text-(--accent-strong) border-l-2 border-(--accent) px-3 py-2 rounded-r leading-relaxed">
+                  {patch.updatedBullet}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -5,7 +5,11 @@ export const siteConfig = {
 };
 
 export const heroContent = {
-  heading: "Your Resume Is Getting Rejected Before a Human Ever Reads It.",
+  heading: {
+    prefix: "Your Resume Is Getting Rejected Before a ",
+    rotatingWords: ["Recruiter", "Hiring Manager", "Bot"],
+    suffix: " Ever Reads It.",
+  },
   subheading: "Many applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
   cta: "Check My ATS Score. It's Free",
   features: [
@@ -37,6 +41,24 @@ export const atsPreviewContent = {
   heading: "See What Recruiters See In Your Resume",
   subheading: "Our AI analyzes your resume against millions of job postings to give you an exact match score.",
   score: 93,
+  scoreLabel: "Excellent",
+  categories: [
+    { label: "ATS readability", value: 23, max: 25 },
+    { label: "Content quality", value: 32, max: 35 },
+    { label: "Writing quality", value: 9, max: 10 },
+    { label: "Job optimization", value: 24, max: 25 },
+    { label: "Application ready", value: 5, max: 5 },
+  ],
+  findings: {
+    strengths: {
+      title: "Strengths identified",
+      description: "Strong action verbs and quantified bullet points throughout your experience section.",
+    },
+    improvements: {
+      title: "Improvement suggestions",
+      description: "Add a technical skills summary near the top and tighten your most recent role's bullets.",
+    },
+  },
   strengths: [
     "Strong action verbs used throughout.",
     "Perfectly structured for ATS parsers.",
@@ -46,6 +68,64 @@ export const atsPreviewContent = {
     after: "Spearheaded initiative driving a sales increase in Q3.",
   },
 };
+
+export const productLoopSteps = [
+  {
+    number: "01",
+    category: "Score",
+    heading: "See your score before you apply.",
+    description: "Upload your resume and get a 0-100 ATS score across five categories, with the exact strengths and gaps recruiters and parsers will see.",
+    bullets: [
+      "Every resume scored 0-100 across 5 categories",
+      "See exactly what recruiters and ATS parsers see",
+      "Know what to fix before you apply, not after",
+    ],
+  },
+  {
+    number: "02",
+    category: "Tailor",
+    heading: "Tailor your resume to the job description.",
+    description: "Paste a job description and Joben finds the missing keywords, then rewrites your bullets to fit that specific role.",
+    bullets: [
+      "Paste any job description, get instant keyword analysis",
+      "Bullets rewritten to match the role, not generic AI filler",
+      "One click, one tailored variant, one new draft",
+    ],
+  },
+  {
+    number: "03",
+    category: "Rewrite",
+    heading: "Turn weak bullets into quantified wins.",
+    description: "One-click AI rewrite for any bullet: adds metrics, strong verbs, and keeps your voice.",
+    bullets: [
+      "Weak verbs become strong, measurable outcomes",
+      "Keeps your voice — never reads like generic AI",
+      "Every rewrite tracked live against your monthly limit",
+    ],
+  },
+  {
+    number: "04",
+    category: "Cover Letter",
+    heading: "A cover letter that matches your resume and the job.",
+    description: "AI-generated, consistent tone with your resume, tailored to the same job description.",
+    bullets: [
+      "Matches the tone and facts of your tailored resume",
+      "Written for the same job description, not a template",
+      "Ready to send in the time it takes to read this",
+    ],
+  },
+  {
+    number: "05",
+    category: "Export & Manage",
+    heading: "Export clean, keep every version organized.",
+    description: "Download a clean, ATS-ready PDF and keep multiple tailored resumes managed from one dashboard.",
+    bullets: [
+      "Clean, unwatermarked PDF exports",
+      "Keep multiple tailored versions per role",
+      "Manage everything from one dashboard",
+    ],
+  },
+];
 
 export const pricingPlans = [
   {

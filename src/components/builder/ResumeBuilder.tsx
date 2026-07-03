@@ -1,13 +1,17 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2, ChevronDown } from 'lucide-react'
+import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { Modal } from '@/components/ui/Modal'
+import { buttonVariants } from '@/components/ui/Button'
+import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
+import { RichTextarea } from '@/components/ui/RichTextarea'
 import { FeatureButton } from '@/components/FeatureButton'
 import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
@@ -54,8 +58,23 @@ type ProjectEntry = {
   endYear?: number
   isCurrent?: boolean
   description: string
+  bullets?: string[]
   technologies: string[]
   url?: string
+}
+
+type EducationEntry = {
+  id: string
+  institution: string
+  degree?: string
+  field?: string
+  location?: string
+  startMonth?: number
+  startYear?: number
+  endMonth?: number
+  endYear?: number
+  isCurrent?: boolean
+  description?: string
 }
 
 type ImportMeta = {
@@ -71,11 +90,14 @@ type ResumeData = {
     email: string
     phone: string
     summary: string
+    location?: string
     linkedin?: string
     github?: string
+    website?: string
   }
   experience: ExperienceEntry[]
   projects: ProjectEntry[]
+  education: EducationEntry[]
   dynamicSections: DynamicSection[]
   importMeta?: ImportMeta
 }
@@ -144,6 +166,10 @@ function computePeriod(entry: DateFields): string {
 function splitCombinedBullet(value: string): string[] {
   const cleaned = value.trim()
   if (!cleaned) return []
+
+  // Newlines are the strongest separator: they map directly to one-bullet-per-line.
+  const newlineSplit = cleaned.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean)
+  if (newlineSplit.length > 1) return newlineSplit
 
   const bulletSplit = cleaned.split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
   if (bulletSplit.length > 1) return bulletSplit.map((s) => s.trim()).filter(Boolean)
@@ -219,6 +245,16 @@ function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
 }
 
 function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
+  const description = entry.description || ''
+  // Bullets are a derived view of the description — re-deriving every time keeps the
+  // builder textarea, the live preview, and the exported PDF in lockstep when the user
+  // edits the description (one bullet per non-empty line).
+  const derivedBullets = description ? splitCombinedBullet(description) : []
+  const incomingBullets = Array.isArray(entry.bullets)
+    ? entry.bullets.map((bullet) => (typeof bullet === 'string' ? bullet.trim() : '')).filter(Boolean)
+    : []
+  const bullets = derivedBullets.length > 0 ? derivedBullets : incomingBullets
+
   return {
     id: entry.id || `proj_${Date.now()}`,
     name: entry.name || '',
@@ -229,7 +265,8 @@ function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
     endMonth: entry.endMonth,
     endYear: entry.endYear,
     isCurrent: entry.isCurrent ?? false,
-    description: entry.description || '',
+    description,
+    bullets,
     technologies: Array.isArray(entry.technologies) ? entry.technologies.filter((tech) => typeof tech === 'string') : [],
     url: entry.url || '',
   }
@@ -241,11 +278,72 @@ function getProjectTechnologies(project: ProjectEntry): string[] {
     : []
 }
 
+function normalizeEducationEntry(entry: Partial<EducationEntry>): EducationEntry {
+  const description = typeof entry.description === 'string' ? entry.description.trim() : ''
+  return {
+    id: entry.id || `edu_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    institution: typeof entry.institution === 'string' ? entry.institution.trim() : '',
+    degree: typeof entry.degree === 'string' ? entry.degree.trim() : '',
+    field: typeof entry.field === 'string' ? entry.field.trim() : '',
+    location: typeof entry.location === 'string' ? entry.location.trim() : '',
+    startMonth: typeof entry.startMonth === 'number' ? entry.startMonth : undefined,
+    startYear: typeof entry.startYear === 'number' ? entry.startYear : undefined,
+    endMonth: typeof entry.endMonth === 'number' ? entry.endMonth : undefined,
+    endYear: typeof entry.endYear === 'number' ? entry.endYear : undefined,
+    isCurrent: entry.isCurrent ?? false,
+    description,
+  }
+}
+
+/**
+ * Migrate legacy `dynamicSections[type=education]` text blobs into structured
+ * `EducationEntry` cards. Each blank-line-separated block becomes one card; the
+ * first line is treated as the institution and the remaining lines are folded
+ * into `degree` (line 2) and `description` (everything else, including periods
+ * we cannot reliably parse without a structured source).
+ */
+function migrateLegacyEducationSections(
+  dynamicSections: DynamicSection[]
+): { education: EducationEntry[]; remaining: DynamicSection[] } {
+  const education: EducationEntry[] = []
+  const remaining: DynamicSection[] = []
+
+  for (const section of dynamicSections) {
+    if (section.type !== 'education') {
+      remaining.push(section)
+      continue
+    }
+
+    const blocks = (section.content || '')
+      .split(/\n\s*\n/)
+      .map((block) => block.trim())
+      .filter(Boolean)
+
+    if (blocks.length === 0) continue
+
+    for (const block of blocks) {
+      const lines = block.split(/\n+/).map((line) => line.trim()).filter(Boolean)
+      if (lines.length === 0) continue
+      const [institution, degreeLine, ...rest] = lines
+      education.push(
+        normalizeEducationEntry({
+          institution,
+          degree: degreeLine || '',
+          description: rest.join('\n'),
+        })
+      )
+    }
+  }
+
+  return { education, remaining }
+}
+
 const initialResumeData: ResumeData = {
   template: 'harvard',
   personal: { firstName: '', lastName: '', title: '', email: '', phone: '', summary: '', linkedin: '', github: '' },
   experience: [],
   projects: [],
+  education: [],
   dynamicSections: [],
   importMeta: { pdfImportsCount: 0 },
 }
@@ -283,8 +381,6 @@ function getPdfImportCount(data: ResumeData): number {
   return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0
 }
 
-
-import { cn } from '@/lib/cn'
 
 export function ResumeBuilder() {
   const importInputRef = useRef<HTMLInputElement | null>(null)
@@ -383,13 +479,38 @@ export function ResumeBuilder() {
             const incomingProjects = Array.isArray(loadedData.projects)
               ? loadedData.projects.map((project) => normalizeProjectEntry(project as Partial<ProjectEntry>))
               : prev.projects
+            const rawDynamic = Array.isArray(loadedData.dynamicSections)
+              ? (loadedData.dynamicSections as DynamicSection[])
+              : prev.dynamicSections
+            const hasStructuredEducation =
+              Array.isArray((loadedData as { education?: unknown }).education) &&
+              ((loadedData as { education?: unknown[] }).education?.length || 0) > 0
+
+            // Two paths:
+            //  • New CVs persist `education[]` directly; reuse it verbatim.
+            //  • Legacy CVs only ship education as a `dynamicSections[type=education]`
+            //    text blob; fold those into structured cards on load and strip the
+            //    legacy entries so we never render the same data twice.
+            let nextEducation: EducationEntry[]
+            let nextDynamic: DynamicSection[]
+            if (hasStructuredEducation) {
+              nextEducation = (
+                (loadedData as { education: Partial<EducationEntry>[] }).education
+              ).map((entry) => normalizeEducationEntry(entry))
+              nextDynamic = rawDynamic.filter((section) => section.type !== 'education')
+            } else {
+              const migrated = migrateLegacyEducationSections(rawDynamic)
+              nextEducation = migrated.education
+              nextDynamic = migrated.remaining
+            }
 
             return {
               template: normalizeTemplate() || prev.template,
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
               projects: incomingProjects,
-              dynamicSections: loadedData.dynamicSections || prev.dynamicSections,
+              education: nextEducation,
+              dynamicSections: nextDynamic,
               importMeta: loadedData.importMeta || prev.importMeta,
             }
           })
@@ -494,6 +615,13 @@ export function ResumeBuilder() {
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
 
+    // `derivedTitle` falls back to 'Untitled Resume' whenever firstName/lastName
+    // are empty (e.g. a PDF-imported or manually-titled resume whose structured
+    // personal fields were never filled in). Only send `title` on updates when
+    // it's a real, name-derived value -- otherwise omit it from the PATCH body
+    // so the existing DB title (curated or imported) is left untouched instead
+    // of being silently overwritten back to 'Untitled Resume' on every autosave.
+    const hasDerivedName = derivedTitle !== 'Untitled Resume'
     const payload = {
       title: derivedTitle,
       data: resumeData,
@@ -544,7 +672,7 @@ export function ResumeBuilder() {
     const updateRes = await fetch(`/api/resumes/${targetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(hasDerivedName ? payload : { data: resumeData }),
     })
 
     setSaveStatus(updateRes.ok ? 'saved' : 'error')
@@ -570,30 +698,49 @@ export function ResumeBuilder() {
   }
 
   const handleOnboardingImport = (data: ResumeTemplateData) => {
-    setResumeData((prev) => ({
-      ...prev,
-      personal: data.personal,
-      experience: (data.experience ?? []).map((exp, i) => ({
-        id: exp.id || `exp_${Date.now()}_${i}`,
-        title: exp.title || '',
-        company: exp.company || '',
-        period: exp.period || '',
-        description: exp.description || '',
-        bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
-          ? exp.bullets
-          : exp.description ? [exp.description] : [''],
-      })),
-      projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
-      dynamicSections: (data.dynamicSections ?? []).map((s, i) => ({
+    setResumeData((prev) => {
+      const incomingDynamic = (data.dynamicSections ?? []).map((s, i) => ({
         id: s.id || `section_${i}`,
         type: s.type as DynamicSection['type'],
         title: s.title || '',
         content: s.content || '',
-      })),
-      importMeta: {
-        pdfImportsCount: Math.min(getPdfImportCount(prev) + 1, MAX_PDF_IMPORTS_PER_RESUME),
-      },
-    }))
+      }))
+
+      // Prefer the parser's structured `education[]` if present; otherwise fold
+      // legacy text-based education sections into structured cards so the user
+      // can edit each entry as a real form.
+      let nextEducation: EducationEntry[]
+      let nextDynamic: DynamicSection[]
+      if (Array.isArray(data.education) && data.education.length > 0) {
+        nextEducation = data.education.map((entry) => normalizeEducationEntry(entry))
+        nextDynamic = incomingDynamic.filter((section) => section.type !== 'education')
+      } else {
+        const migrated = migrateLegacyEducationSections(incomingDynamic)
+        nextEducation = migrated.education
+        nextDynamic = migrated.remaining
+      }
+
+      return {
+        ...prev,
+        personal: data.personal,
+        experience: (data.experience ?? []).map((exp, i) => ({
+          id: exp.id || `exp_${Date.now()}_${i}`,
+          title: exp.title || '',
+          company: exp.company || '',
+          period: exp.period || '',
+          description: exp.description || '',
+          bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
+            ? exp.bullets
+            : exp.description ? [exp.description] : [''],
+        })),
+        projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
+        education: nextEducation,
+        dynamicSections: nextDynamic,
+        importMeta: {
+          pdfImportsCount: Math.min(getPdfImportCount(prev) + 1, MAX_PDF_IMPORTS_PER_RESUME),
+        },
+      }
+    })
   }
 
   const exportAsLatexPdf = async () => {
@@ -816,6 +963,15 @@ export function ResumeBuilder() {
   }, [activeTab, resumeData.dynamicSections])
 
   const handleAddSection = (section: AddableSection) => {
+    // Education is now a structured field (not a free-text dynamic section).
+    // Redirect to the dedicated handler so the user gets a real form.
+    if (section.type === 'education') {
+      handleAddEducation()
+      setActiveTab('education')
+      setIsAddModalOpen(false)
+      return
+    }
+
     const newSection: DynamicSection = {
       id: `sec_${Date.now()}`,
       type: section.type,
@@ -880,6 +1036,53 @@ export function ResumeBuilder() {
     setResumeData((prev) => ({
       ...prev,
       projects: prev.projects.filter((project) => project.id !== projectId),
+    }))
+  }
+
+  const handleAddEducation = () => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: [
+        ...prev.education,
+        normalizeEducationEntry({
+          id: `edu_${Date.now()}`,
+          institution: '',
+          degree: '',
+        }),
+      ],
+    }))
+  }
+
+  const updateEducationField = (
+    educationId: string,
+    field: 'institution' | 'degree' | 'field' | 'location' | 'description',
+    value: string
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.map((entry) =>
+        entry.id === educationId ? { ...entry, [field]: value } : entry
+      ),
+    }))
+  }
+
+  const updateEducationDateField = (
+    educationId: string,
+    field: 'startMonth' | 'startYear' | 'endMonth' | 'endYear' | 'isCurrent',
+    value: number | boolean | undefined
+  ) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.map((entry) =>
+        entry.id === educationId ? { ...entry, [field]: value } : entry
+      ),
+    }))
+  }
+
+  const deleteEducation = (educationId: string) => {
+    setResumeData((prev) => ({
+      ...prev,
+      education: prev.education.filter((entry) => entry.id !== educationId),
     }))
   }
 
@@ -1191,7 +1394,7 @@ export function ResumeBuilder() {
     <div className="w-full h-full min-h-0 flex flex-col lg:min-w-315 lg:flex-row print:block" suppressHydrationWarning>
       {/* Editor Sidebar */}
       <div
-        className="w-full min-h-0 bg-bg-surface border-r border-border-faint flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
+        className="w-full min-h-0 bg-(--surface) border-r border-(--border) flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 shadow-2xl lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
         suppressHydrationWarning
       >
         <input
@@ -1208,9 +1411,8 @@ export function ResumeBuilder() {
             }
           }}
         />
-        {/* Tab bar */}
         <div
-          className="shrink-0 border-b border-border-faint px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth"
+          className="shrink-0 border-b border-(--border) px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
@@ -1218,20 +1420,18 @@ export function ResumeBuilder() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex min-w-35 items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-body font-medium whitespace-nowrap transition-colors shrink-0',
+              className={`flex min-w-35 items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
                 activeTab === tab.id
-                  ? 'bg-accent-muted text-accent border border-accent-border'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent'
-              )}
+                ? 'bg-(--accent-muted) text-(--accent) border border-(--accent)/30'
+                : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground) border border-transparent'
+              }`}
             >
-              <tab.icon size={14} /> {tab.label}
+              <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Quick actions */}
-        <div className="shrink-0 p-4 pt-5 border-b border-border-faint space-y-3">
+        <div className="shrink-0 p-4 pt-5 border-b border-(--border) space-y-3">
           <TemplateSwitcher
             value={resumeData.template}
             onChange={(value) =>
@@ -1244,7 +1444,7 @@ export function ResumeBuilder() {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 rounded-md border border-accent-border bg-accent-muted px-3 py-1.5 text-body font-medium text-accent hover:bg-accent/20 transition-colors"
+              className="flex-1 rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--accent)/20"
             >
               + Add Section
             </button>
@@ -1257,7 +1457,7 @@ export function ResumeBuilder() {
                 importInputRef.current?.click()
               }}
               disabled={isImportingPdf}
-              className="flex-1 rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-body font-medium text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--foreground) hover:bg-(--surface-elevated) disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isImportingPdf
                 ? 'Importing...'
@@ -1266,117 +1466,122 @@ export function ResumeBuilder() {
             <FeatureButton
               feature="jds"
               onClick={() => setIsTailorModalOpen(true)}
-              className="flex-1 rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-body font-medium text-accent hover:bg-bg-hover transition-colors"
+              className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--surface-elevated)"
             >
               AI Tailor
             </FeatureButton>
           </div>
         </div>
 
-        {/* Fix banner */}
         {fixBanner ? (
-          <div className="shrink-0 mx-4 mt-3 rounded-md border border-accent-border bg-accent-muted px-3 py-2 flex items-center justify-between gap-3">
-            <p className="text-small text-accent font-medium">{fixBanner}</p>
+          <div className="shrink-0 mx-4 mt-3 rounded-xl border border-(--accent)/40 bg-(--accent-muted) px-4 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-sm text-(--accent-strong) font-medium">{fixBanner}</p>
             <button
               onClick={() => setFixBanner(null)}
-              className="text-text-muted hover:text-text-primary text-xs shrink-0 transition-colors"
+              className="text-(--muted) hover:text-(--foreground) text-xs shrink-0"
             >
-              ✕
+              x
             </button>
           </div>
         ) : null}
 
-        {/* Upload error */}
         {uploadError ? (
-          <div className="shrink-0 mx-4 mt-3 flex gap-3 rounded-md border border-error/30 bg-error-muted px-3 py-2">
-            <AlertCircle size={16} className="shrink-0 text-error mt-0.5" />
-            <p className="text-small text-error">{uploadError}</p>
+          <div className="shrink-0 mx-4 mt-3 flex gap-3 rounded-xl border border-red-800/60 bg-red-900/20 px-4 py-2.5">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+            <p className="text-sm text-red-300">{uploadError}</p>
           </div>
         ) : null}
 
-        {/* Scrollable form area */}
         <div
-          className="min-h-0 grow p-4 overflow-y-auto no-scrollbar"
+          className="min-h-0 grow p-6 overflow-y-auto custom-scrollbar builder-panel-scrollbar"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
           {activeTab === 'personal' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <h2 className="text-heading font-medium text-text-primary">Personal details</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">First Name</label>
-                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="John" />
+              <h2 className="text-xl font-bold text-(--foreground) mb-6">Personal details</h2>
+              {/* Form fields would be controlled components, omitted for brevity */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">First Name</label>
+                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="John" />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">Last Name</label>
-                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="Doe" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs text-text-muted">Job Title</label>
-                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="Software Engineer" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">Email</label>
-                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="john@example.com" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">Phone</label>
-                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="+1 (555) 000-0000" />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">Last Name</label>
+                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Doe" />
                 </div>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-(--muted)">Job Title</label>
+                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Software Engineer" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">Email</label>
+                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="john@example.com" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">Phone</label>
+                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="+1 (555) 000-0000" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-(--muted)">Location</label>
+                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Cluj-Napoca, Romania" />
+              </div>
+              <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <label className="text-xs text-text-muted">Professional Summary</label>
+                  <label className="text-sm font-medium text-(--muted)">Professional Summary</label>
                   <button
                     onClick={() => setIsSummaryGeneratorOpen((prev) => !prev)}
-                    className="inline-flex items-center gap-1 rounded-sm border border-accent-border bg-accent-muted px-2 py-0.5 text-xs font-medium text-accent hover:bg-accent/20 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-(--accent)/40 bg-(--accent-muted) px-2.5 py-1 text-xs font-semibold text-(--accent-strong) hover:bg-(--accent)/20"
                   >
-                    <Sparkles size={12} />
+                    <Sparkles className="h-3.5 w-3.5" />
                     Generate with AI
                   </button>
                 </div>
 
-                <textarea
+                <RichTextarea
                   value={resumeData.personal.summary}
-                  onChange={(e) => updatePersonalField('summary', e.target.value)}
-                  className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors h-28 resize-none"
+                  onValueChange={(value) => updatePersonalField('summary', value)}
+                  className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors h-28 resize-none"
                   placeholder="Professional summary"
+                  toolbarLabel="Summary formatting"
                 />
 
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">LinkedIn URL</label>
-                  <input type="text" value={resumeData.personal.linkedin} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="https://linkedin.com/in/yourname" />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">LinkedIn URL</label>
+                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://linkedin.com/in/yourname" />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-text-muted">GitHub URL</label>
-                  <input type="text" value={resumeData.personal.github} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full px-3 py-1.5 bg-bg-subtle border border-border-soft text-text-primary text-body placeholder:text-text-muted rounded-md focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors" placeholder="https://github.com/yourusername" />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">GitHub URL</label>
+                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://github.com/yourusername" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-(--muted)">Website / Portfolio</label>
+                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://yourdomain.com" />
                 </div>
 
                 {isSummaryGeneratorOpen ? (
-                  <div className="rounded-md border border-border-soft bg-bg-subtle p-3 space-y-3">
+                  <div className="rounded-xl border border-(--border) bg-(--background) p-3 space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => setSummaryGenerationMode('resume')}
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                           summaryGenerationMode === 'resume'
-                            ? 'border border-accent-border bg-accent-muted text-accent'
-                            : 'border border-border-soft bg-bg-surface text-text-secondary hover:text-text-primary'
-                        )}
+                            ? 'border border-(--accent)/40 bg-(--accent)/15 text-(--accent-strong)'
+                            : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
+                        }`}
                       >
                         Based on my resume
                       </button>
                       <button
                         onClick={() => setSummaryGenerationMode('scratch')}
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                           summaryGenerationMode === 'scratch'
-                            ? 'border border-accent-border bg-accent-muted text-accent'
-                            : 'border border-border-soft bg-bg-surface text-text-secondary hover:text-text-primary'
-                        )}
+                            ? 'border border-(--accent)/40 bg-(--accent)/15 text-(--accent-strong)'
+                            : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
+                        }`}
                       >
                         Write from scratch
                       </button>
@@ -1386,26 +1591,26 @@ export function ResumeBuilder() {
                       <textarea
                         value={summaryRoleDescription}
                         onChange={(e) => setSummaryRoleDescription(e.target.value)}
-                        className="h-24 w-full resize-none rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+                        className="h-24 w-full resize-none rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Describe your target role, level, and focus areas..."
                       />
                     ) : null}
 
                     {isGeneratingSummary ? (
-                      <div className="rounded-md border border-border-soft bg-bg-surface">
+                      <div className="rounded-lg border border-(--border) bg-(--surface)">
                         <AILoadingState stage="generating" />
                       </div>
                     ) : (
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setIsSummaryGeneratorOpen(false)}
-                          className="rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors"
+                          className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground)"
                         >
                           Close
                         </button>
                         <button
                           onClick={() => void handleGenerateSummary(summaryGenerationMode)}
-                          className="rounded-md bg-accent hover:bg-accent-hover px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                          className={`rounded-md text-xs ${buttonVariants('primary', 'sm')}`}
                         >
                           Generate summary
                         </button>
@@ -1413,7 +1618,7 @@ export function ResumeBuilder() {
                     )}
 
                     {summaryGenerationError ? (
-                      <p className="text-xs text-error">{summaryGenerationError}</p>
+                      <p className="text-xs text-red-400">{summaryGenerationError}</p>
                     ) : null}
 
                     <AnimatePresence>
@@ -1423,21 +1628,21 @@ export function ResumeBuilder() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 8 }}
                           transition={{ duration: 0.22, ease: 'easeOut' }}
-                          className="rounded-md border border-accent-border bg-accent-muted/50 p-3 space-y-2"
+                          className="rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                         >
-                          <p className="text-xs font-medium uppercase tracking-wide text-accent">AI Draft</p>
-                          <p className="text-body text-text-primary leading-relaxed">{generatedSummaryDraft}</p>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
+                          <p className="text-sm text-(--foreground)/95 leading-relaxed">{generatedSummaryDraft}</p>
                           <div className="flex items-center justify-end gap-2 pt-1">
                             <button
                               onClick={() => void handleGenerateSummary(summaryGenerationMode)}
                               disabled={isGeneratingSummary}
-                              className="rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                              className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Regenerate
                             </button>
                             <button
                               onClick={() => updatePersonalField('summary', generatedSummaryDraft)}
-                              className="rounded-md bg-accent hover:bg-accent-hover px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                              className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                             >
                               Accept summary
                             </button>
@@ -1450,12 +1655,12 @@ export function ResumeBuilder() {
               </div>
             </div>
           )}
-
+          
           {activeTab === 'experience' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <div className="flex justify-between items-center">
-                <h2 className="text-heading font-medium text-text-primary">Work Experience</h2>
-                <button onClick={handleAddRole} className="text-accent text-small font-medium hover:text-accent-hover transition-colors">+ Add Role</button>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-(--foreground)">Work Experience</h2>
+                <button onClick={handleAddRole} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Role</button>
               </div>
 
               {resumeData.experience.map((exp, expIndex) => {
@@ -1465,16 +1670,16 @@ export function ResumeBuilder() {
                   .reduce((sum, e) => sum + getExperienceBullets(e).length, 0)
 
                 return (
-                 <div key={exp.id} className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium transition-colors" suppressHydrationWarning>
+                 <div key={exp.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                     <p className="text-xs text-text-muted uppercase tracking-wide">Experience Entry</p>
+                     <p className="text-xs uppercase tracking-wide text-(--muted)">Experience Entry</p>
                      <div className="flex gap-2" suppressHydrationWarning>
                        <button
                          onClick={() => handleDeleteExperience(exp.id)}
                          disabled={isPending}
-                         className="text-accent hover:text-accent-hover p-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                         className="text-(--accent-strong) hover:text-(--accent) p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                        >
-                         {isPending ? <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"></div> : <Trash2 size={14} />}
+                         {isPending ? <div className="w-4 h-4 border-2 border-(--accent-strong) border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
                        </button>
                      </div>
                    </div>
@@ -1483,83 +1688,35 @@ export function ResumeBuilder() {
                      <input
                        value={exp.title}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'title', e.target.value)}
-                       className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+                       className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                        placeholder="Role title"
                      />
                      <input
                        value={exp.company}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'company', e.target.value)}
-                       className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+                       className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                        placeholder="Company"
                      />
-                     <div className="space-y-1">
-                       <p className="text-xs text-text-muted uppercase tracking-wide">Period</p>
-                       <div className="flex items-center gap-1 flex-wrap">
-                         <div className="relative">
-                           <select
-                             value={exp.startMonth ?? ''}
-                             onChange={(e) => updateExperienceDateField(exp.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
-                             className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
-                           >
-                             <option value="">Month</option>
-                             {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                           </select>
-                           <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
-                         </div>
-                         <input
-                           type="number"
-                           value={exp.startYear ?? ''}
-                           onChange={(e) => updateExperienceDateField(exp.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
-                           className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                           placeholder="Year"
-                           min={1950}
-                           max={2099}
-                         />
-                         <span className="text-text-muted text-xs">–</span>
-                         {exp.isCurrent ? (
-                           <span className="text-xs font-medium text-accent">Present</span>
-                         ) : (
-                           <>
-                             <div className="relative">
-                               <select
-                                 value={exp.endMonth ?? ''}
-                                 onChange={(e) => updateExperienceDateField(exp.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
-                                 className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
-                               >
-                                 <option value="">Month</option>
-                                 {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                               </select>
-                               <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
-                             </div>
-                             <input
-                               type="number"
-                               value={exp.endYear ?? ''}
-                               onChange={(e) => updateExperienceDateField(exp.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
-                               className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                               placeholder="Year"
-                               min={1950}
-                               max={2099}
-                             />
-                           </>
-                         )}
-                         <label className="flex items-center gap-1 ml-1 cursor-pointer">
-                           <input
-                             type="checkbox"
-                             checked={exp.isCurrent ?? false}
-                             onChange={(e) => updateExperienceDateField(exp.id, 'isCurrent', e.target.checked)}
-                             className="accent-accent w-3 h-3"
-                           />
-                           <span className="text-xs text-text-muted">Present</span>
-                         </label>
-                       </div>
-                     </div>
+                     <MonthYearRangeField
+                       monthLabels={MONTH_LABELS}
+                       startMonth={exp.startMonth}
+                       startYear={exp.startYear}
+                       endMonth={exp.endMonth}
+                       endYear={exp.endYear}
+                       isCurrent={exp.isCurrent ?? false}
+                       onStartMonthChange={(value) => updateExperienceDateField(exp.id, 'startMonth', value)}
+                       onStartYearChange={(value) => updateExperienceDateField(exp.id, 'startYear', value)}
+                       onEndMonthChange={(value) => updateExperienceDateField(exp.id, 'endMonth', value)}
+                       onEndYearChange={(value) => updateExperienceDateField(exp.id, 'endYear', value)}
+                       onIsCurrentChange={(value) => updateExperienceDateField(exp.id, 'isCurrent', value)}
+                     />
 
                      <div className="space-y-2">
                        <div className="flex items-center justify-between">
-                         <p className="text-xs text-text-muted uppercase tracking-wide">Impact Bullets</p>
+                         <p className="text-xs uppercase tracking-wide text-(--muted)">Impact Bullets</p>
                          <button
                            onClick={() => addExperienceBullet(exp.id)}
-                           className="text-xs font-medium text-accent hover:text-accent-hover transition-colors"
+                           className="text-xs font-medium text-(--accent) hover:text-(--accent-strong)"
                          >
                            + Add Bullet
                          </button>
@@ -1579,52 +1736,52 @@ export function ResumeBuilder() {
                              transition={{ duration: 0.2, ease: 'easeOut' }}
                              className="flex items-start gap-2"
                            >
-                             <span className="pt-2 text-accent">•</span>
-                             <textarea
+                             <span className="pt-9 text-(--accent)">•</span>
+                             <RichTextarea
                                ref={(node) => {
                                  bulletFieldRefs.current[draftKey] = node
                                }}
                                data-bullet-global-index={globalIdx}
                                value={bullet}
-                               onChange={(e) => updateExperienceBulletField(exp.id, bulletIndex, e.target.value)}
-                               className={cn(
-                                 'h-20 w-full resize-none rounded-md border bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none transition-colors',
+                               onValueChange={(value) => updateExperienceBulletField(exp.id, bulletIndex, value)}
+                               className={`h-20 w-full resize-none rounded-lg border bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:outline-none transition-colors ${
                                  isHighlighted
-                                   ? 'border-accent ring-1 ring-accent/40 focus:border-accent'
-                                   : 'border-border-soft focus:border-border-strong'
-                               )}
+                                   ? 'border-(--accent-strong) ring-2 ring-(--accent-strong)/40 focus:border-(--accent-strong)'
+                                   : 'border-(--border) focus:border-(--accent-strong)'
+                               }`}
                                placeholder="Describe measurable impact"
+                               toolbarLabel="Bullet formatting"
                              />
-                             <div className="flex flex-col gap-1">
+                             <div className="flex flex-col gap-1 pt-7">
                                <button
                                  onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
                                  disabled={Boolean(draftState?.isLoading)}
-                                 className="rounded-sm border border-accent-border px-2 py-0.5 text-[11px] text-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-70 transition-colors"
+                                 className="rounded-md border border-(--accent)/40 px-2 py-1 text-[11px] text-(--accent) hover:bg-(--accent-muted) disabled:cursor-not-allowed disabled:opacity-70"
                                >
                                  {draftState?.isLoading ? 'AI...' : 'AI Draft'}
                                </button>
                                <button
                                  onClick={() => removeExperienceBullet(exp.id, bulletIndex)}
                                  disabled={experienceBullets.length === 1}
-                                 className="rounded-sm border border-accent-border px-2 py-0.5 text-[11px] text-accent hover:bg-accent-muted disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+                                 className="rounded-md border border-(--accent-strong)/35 px-2 py-1 text-[11px] text-(--accent-strong) hover:bg-(--accent)/12 disabled:cursor-not-allowed disabled:opacity-40"
                                >
                                  Del
                                </button>
                              </div>
                            </motion.div>
 
-                           <p className="pl-5 text-[11px] text-warning">
+                           <p className="pl-5 text-[11px] text-amber-300/90">
                              AI Draft and Regenerate each consume 1 bullet rewrite credit.
                            </p>
 
                            {draftState?.isLoading ? (
-                             <div className="ml-5 rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-xs text-text-secondary">
+                             <div className="ml-5 rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-xs text-(--muted)">
                                Generating AI draft...
                              </div>
                            ) : null}
 
                            {draftState?.error ? (
-                             <p className="ml-5 text-xs text-error whitespace-pre-line">{draftState.error}</p>
+                             <p className="ml-5 text-xs text-red-400 whitespace-pre-line">{draftState.error}</p>
                            ) : null}
 
                            <AnimatePresence>
@@ -1634,24 +1791,24 @@ export function ResumeBuilder() {
                                  animate={{ opacity: 1, y: 0 }}
                                  exit={{ opacity: 0, y: 8 }}
                                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                                 className="ml-5 rounded-md border border-accent-border bg-accent-muted/50 p-3 space-y-2"
+                                 className="ml-5 rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                                >
                                  <div className="flex items-center justify-between gap-2">
-                                   <p className="text-[11px] font-medium uppercase tracking-wide text-accent">AI Draft</p>
-                                   <p className="text-[11px] text-warning">Regenerate uses 1 credit</p>
+                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
+                                   <p className="text-[11px] text-amber-300/90">Regenerate uses 1 credit</p>
                                  </div>
-                                 <p className="text-body text-text-primary leading-relaxed">{draftState?.draft}</p>
+                                 <p className="text-sm text-(--foreground)/95 leading-relaxed">{draftState?.draft}</p>
                                  <div className="flex items-center justify-end gap-2 pt-1">
                                   <button
                                     onClick={() => void handleGenerateBulletDraft(exp.id, bulletIndex)}
                                     disabled={Boolean(draftState?.isLoading)}
-                                    className="rounded-md border border-border-soft bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                                   >
                                      Regenerate
                                    </button>
                                    <button
                                      onClick={() => handleAcceptBulletDraft(exp.id, bulletIndex)}
-                                     className="rounded-md bg-accent hover:bg-accent-hover px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                                     className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                                    >
                                      Accept
                                    </button>
@@ -1664,7 +1821,7 @@ export function ResumeBuilder() {
                        })}
                      </div>
                    </div>
-                 </div>
+                </div>
                 )
               })}
             </div>
@@ -1672,29 +1829,29 @@ export function ResumeBuilder() {
 
           {activeTab === 'projects' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-heading font-medium text-text-primary">Projects</h2>
-                  <p className="mt-1 text-small text-text-secondary">Manage your imported and manual projects here.</p>
+                  <h2 className="text-xl font-bold text-(--foreground)">Projects</h2>
+                  <p className="mt-1 text-sm text-(--muted)">Manage your imported and manual projects here. These are rendered separately from custom sections.</p>
                 </div>
-                <button onClick={handleAddProject} className="text-accent text-small font-medium hover:text-accent-hover transition-colors">+ Add Project</button>
+                <button onClick={handleAddProject} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Project</button>
               </div>
 
               {resumeData.projects.length === 0 ? (
-                <div className="rounded-md border border-dashed border-border-soft p-5 text-small text-text-secondary text-center">
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
                   No projects yet. Add one to keep it separate from custom sections.
                 </div>
               ) : (
                 resumeData.projects.map((project, index) => (
-                  <div key={project.id} className="bg-bg-surface border border-border-soft rounded-lg p-4 hover:border-border-medium transition-colors" suppressHydrationWarning>
+                  <div key={project.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                     <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                      <p className="text-xs text-text-muted uppercase tracking-wide">Project {index + 1}</p>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">Project {index + 1}</p>
                       <div className="flex gap-2" suppressHydrationWarning>
                         <button
                           onClick={() => deleteProject(project.id)}
-                          className="text-accent hover:text-accent-hover p-1 transition-colors"
+                          className="text-(--accent-strong) hover:text-(--accent) p-1"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -1703,97 +1860,50 @@ export function ResumeBuilder() {
                       <input
                         value={project.name}
                         onChange={(e) => updateProjectField(project.id, { name: e.target.value })}
-                        className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Project name"
                       />
 
                       <input
                         value={project.role || ''}
                         onChange={(e) => updateProjectField(project.id, { role: e.target.value })}
-                        className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                        placeholder="Role / Title"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder="Role / Title (e.g. Solo Founder, Lead Developer)"
                       />
 
-                      <div className="space-y-1">
-                        <p className="text-xs text-text-muted uppercase tracking-wide">Period</p>
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <div className="relative">
-                            <select
-                              value={project.startMonth ?? ''}
-                              onChange={(e) => updateProjectDateField(project.id, 'startMonth', e.target.value ? Number(e.target.value) : undefined)}
-                              className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
-                            >
-                              <option value="">Month</option>
-                              {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                            </select>
-                            <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
-                          </div>
-                          <input
-                            type="number"
-                            value={project.startYear ?? ''}
-                            onChange={(e) => updateProjectDateField(project.id, 'startYear', e.target.value ? Number(e.target.value) : undefined)}
-                            className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                            placeholder="Year"
-                            min={1950}
-                            max={2099}
-                          />
-                          <span className="text-text-muted text-xs">–</span>
-                          {project.isCurrent ? (
-                            <span className="text-xs font-medium text-accent">Present</span>
-                          ) : (
-                            <>
-                              <div className="relative">
-                                <select
-                                  value={project.endMonth ?? ''}
-                                  onChange={(e) => updateProjectDateField(project.id, 'endMonth', e.target.value ? Number(e.target.value) : undefined)}
-                                  className="appearance-none rounded-md border border-border-soft bg-bg-surface pl-2 pr-6 py-1 text-small text-text-primary focus:outline-none focus:border-border-strong transition-colors [&>option]:bg-bg-surface"
-                                >
-                                  <option value="">Month</option>
-                                  {MONTH_LABELS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                                </select>
-                                <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
-                              </div>
-                              <input
-                                type="number"
-                                value={project.endYear ?? ''}
-                                onChange={(e) => updateProjectDateField(project.id, 'endYear', e.target.value ? Number(e.target.value) : undefined)}
-                                className="w-[68px] rounded-md border border-border-soft bg-bg-subtle px-2 py-1 text-small text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                                placeholder="Year"
-                                min={1950}
-                                max={2099}
-                              />
-                            </>
-                          )}
-                          <label className="flex items-center gap-1 ml-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={project.isCurrent ?? false}
-                              onChange={(e) => updateProjectDateField(project.id, 'isCurrent', e.target.checked)}
-                              className="accent-accent w-3 h-3"
-                            />
-                            <span className="text-xs text-text-muted">Present</span>
-                          </label>
-                        </div>
-                      </div>
+                      <MonthYearRangeField
+                        monthLabels={MONTH_LABELS}
+                        startMonth={project.startMonth}
+                        startYear={project.startYear}
+                        endMonth={project.endMonth}
+                        endYear={project.endYear}
+                        isCurrent={project.isCurrent ?? false}
+                        onStartMonthChange={(value) => updateProjectDateField(project.id, 'startMonth', value)}
+                        onStartYearChange={(value) => updateProjectDateField(project.id, 'startYear', value)}
+                        onEndMonthChange={(value) => updateProjectDateField(project.id, 'endMonth', value)}
+                        onEndYearChange={(value) => updateProjectDateField(project.id, 'endYear', value)}
+                        onIsCurrentChange={(value) => updateProjectDateField(project.id, 'isCurrent', value)}
+                      />
 
-                      <textarea
+                      <RichTextarea
                         value={project.description}
-                        onChange={(e) => updateProjectField(project.id, { description: e.target.value })}
-                        className="h-28 w-full resize-none rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                        placeholder="Describe what you built, shipped, or learned"
+                        onValueChange={(value) => updateProjectField(project.id, { description: value })}
+                        className="h-32 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder={`Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%`}
+                        toolbarLabel="Project description formatting"
                       />
 
                       <input
                         value={getProjectTechnologies(project).join(', ')}
                         onChange={(e) => updateProjectTechnologies(project.id, e.target.value)}
-                        className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-                        placeholder="Technologies (React, Node.js, AWS)"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder="Technologies separated by commas (React, Node.js, AWS)"
                       />
 
                       <input
                         value={project.url || ''}
                         onChange={(e) => updateProjectField(project.id, { url: e.target.value })}
-                        className="w-full rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
                         placeholder="Project URL or GitHub link"
                       />
                     </div>
@@ -1803,15 +1913,103 @@ export function ResumeBuilder() {
             </div>
           )}
 
-          {['education', 'skills', 'certifications', 'sections'].includes(activeTab) ? (
+          {activeTab === 'education' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <div className="flex items-center justify-between">
-                <h2 className="text-heading font-medium text-text-primary">{tabs.find((t) => t.id === activeTab)?.label}</h2>
-                <button onClick={() => setIsAddModalOpen(true)} className="text-accent text-small font-medium hover:text-accent-hover transition-colors">+ Add Section</button>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-(--foreground)">Education</h2>
+                  <p className="mt-1 text-sm text-(--muted)">Add each institution as a separate entry. Use the date pickers for graduation timelines.</p>
+                </div>
+                <button onClick={handleAddEducation} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Institution</button>
+              </div>
+
+              {resumeData.education.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
+                  No education entries yet. Click + Add Institution to add your first one.
+                </div>
+              ) : (
+                resumeData.education.map((entry, index) => (
+                  <div key={entry.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
+                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">Institution {index + 1}</p>
+                      <div className="flex gap-2" suppressHydrationWarning>
+                        <button
+                          onClick={() => deleteEducation(entry.id)}
+                          className="text-(--accent-strong) hover:text-(--accent) p-1"
+                          aria-label="Delete education entry"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        value={entry.institution}
+                        onChange={(e) => updateEducationField(entry.id, 'institution', e.target.value)}
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder="Institution (e.g. Stanford University)"
+                      />
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <input
+                          value={entry.degree || ''}
+                          onChange={(e) => updateEducationField(entry.id, 'degree', e.target.value)}
+                          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                          placeholder="Degree (e.g. B.Sc. in Computer Science)"
+                        />
+                        <input
+                          value={entry.field || ''}
+                          onChange={(e) => updateEducationField(entry.id, 'field', e.target.value)}
+                          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                          placeholder="Field of study (optional)"
+                        />
+                      </div>
+
+                      <input
+                        value={entry.location || ''}
+                        onChange={(e) => updateEducationField(entry.id, 'location', e.target.value)}
+                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder="Location (optional, e.g. Stanford, CA)"
+                      />
+
+                      <MonthYearRangeField
+                        monthLabels={MONTH_LABELS}
+                        startMonth={entry.startMonth}
+                        startYear={entry.startYear}
+                        endMonth={entry.endMonth}
+                        endYear={entry.endYear}
+                        isCurrent={entry.isCurrent ?? false}
+                        onStartMonthChange={(value) => updateEducationDateField(entry.id, 'startMonth', value)}
+                        onStartYearChange={(value) => updateEducationDateField(entry.id, 'startYear', value)}
+                        onEndMonthChange={(value) => updateEducationDateField(entry.id, 'endMonth', value)}
+                        onEndYearChange={(value) => updateEducationDateField(entry.id, 'endYear', value)}
+                        onIsCurrentChange={(value) => updateEducationDateField(entry.id, 'isCurrent', value)}
+                      />
+
+                      <RichTextarea
+                        value={entry.description || ''}
+                        onValueChange={(value) => updateEducationField(entry.id, 'description', value)}
+                        className="h-24 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+                        placeholder="Optional details (GPA, honors, relevant coursework, thesis, ...)"
+                        toolbarLabel="Education description formatting"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {['skills', 'certifications', 'sections'].includes(activeTab) ? (
+            <div className="space-y-4" suppressHydrationWarning>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-bold text-(--foreground)">{tabs.find((t) => t.id === activeTab)?.label}</h2>
+                <button onClick={() => setIsAddModalOpen(true)} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Section</button>
               </div>
 
               {visibleDynamicSections.length === 0 ? (
-                <div className="rounded-md border border-dashed border-border-soft p-5 text-small text-text-secondary text-center">
+                <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
                   No sections yet for this category. Use Add Section to create one.
                 </div>
               ) : (
@@ -1820,7 +2018,6 @@ export function ResumeBuilder() {
                     key={section.id}
                     title={section.title}
                     content={section.content}
-                    sectionType={section.type}
                     onTitleChange={(value) => updateDynamicSection(section.id, { title: value })}
                     onContentChange={(value) => updateDynamicSection(section.id, { content: value })}
                     onDelete={() => deleteDynamicSection(section.id)}
@@ -1830,37 +2027,32 @@ export function ResumeBuilder() {
             </div>
           ) : null}
         </div>
-
-        {/* Bottom action bar */}
-        <div className="shrink-0 p-3 border-t border-border-faint bg-bg-subtle flex justify-between items-center gap-3" suppressHydrationWarning>
+        
+        <div className="shrink-0 p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4" suppressHydrationWarning>
           <button
             onClick={() => void persistResume()}
             disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
-            className="flex-1 bg-bg-surface border border-border-soft hover:bg-bg-hover text-text-primary px-4 py-1.5 rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-body disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Save size={14} /> Save
+            <Save className="w-4 h-4" /> Save
           </button>
           <button
             onClick={exportAsLatexPdf}
             disabled={isExportingPdf || isImportingPdf}
-            className="flex-1 bg-accent hover:bg-accent-hover text-white px-4 py-1.5 rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-body disabled:cursor-not-allowed disabled:opacity-60"
+            className={`flex-1 shadow-lg shadow-(--accent)/20 disabled:cursor-not-allowed disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
           >
-            <Download size={14} /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
+            <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
           </button>
         </div>
       </div>
 
       {/* Live Preview Pane */}
-      <div className="grow min-w-0 bg-bg-base h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
-        <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-subtle mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
+      <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+        {/* Mock A4 Paper Preview */}
+        <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
           <HarvardTemplate data={resumeData} />
         </div>
-        <div className={cn(
-          'absolute top-3 right-4 text-xs px-2 py-1 rounded-md print:hidden',
-          saveStatus === 'saving' && 'text-text-muted bg-bg-hover',
-          saveStatus === 'saved' && 'text-accent bg-accent-muted/50',
-          saveStatus === 'error' && 'text-error bg-error-muted/50',
-        )} suppressHydrationWarning>
+        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
         </div>
       </div>
@@ -1871,107 +2063,102 @@ export function ResumeBuilder() {
         onAdd={handleAddSection}
       />
 
-      {isTailorModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setIsTailorModalOpen(false)} />
-          <div className="relative w-full max-w-2xl rounded-xl border border-border-medium bg-bg-elevated p-6">
-            <h3 className="text-heading font-medium text-text-primary">AI Resume Tailor</h3>
-            <p className="mt-1 text-small text-text-secondary">Paste a job description and tailor your resume bullets for this role.</p>
-
-            <textarea
-              value={tailorJobDescription}
-              onChange={(e) => setTailorJobDescription(e.target.value)}
-              className="mt-4 h-52 w-full resize-none rounded-md border border-border-soft bg-bg-subtle px-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-border-strong transition-colors"
-              placeholder="Paste job description here..."
-            />
-
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsTailorModalOpen(false)}
-                className="rounded-md border border-border-soft bg-bg-surface px-4 py-1.5 text-body text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-              <FeatureButton
-                feature="jds"
-                onClick={handleTailorResume}
-                disabled={isTailoring}
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <Sparkles size={14} />
-                {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
-              </FeatureButton>
-            </div>
+      <Modal
+        open={isTailorModalOpen}
+        onClose={() => setIsTailorModalOpen(false)}
+        title="AI Resume Tailor"
+        maxWidth="xl"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => setIsTailorModalOpen(false)}
+              className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+            >
+              Cancel
+            </button>
+            <FeatureButton
+              feature="jds"
+              onClick={handleTailorResume}
+              disabled={isTailoring}
+              className={`inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+            >
+              <Sparkles className="h-4 w-4" />
+              {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
+            </FeatureButton>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <p className="text-sm text-(--muted)">Paste a job description and tailor your resume bullets for this role.</p>
+
+        <textarea
+          value={tailorJobDescription}
+          onChange={(e) => setTailorJobDescription(e.target.value)}
+          className="mt-4 h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+          placeholder="Paste job description here..."
+        />
+      </Modal>
 
       {showBeforeAfterModal && fixPatches.length > 0 && (
         <BeforeAfterModal patches={fixPatches} onClose={() => setShowBeforeAfterModal(false)} />
       )}
 
-      {showUploadWarning ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={cancelUpload} />
-          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
-            <h3 className="text-heading font-medium text-text-primary">Before you upload</h3>
-            <p className="mt-2 text-small text-text-secondary">
-              For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={cancelUpload}
-                className="rounded-md border border-border-soft bg-bg-surface px-4 py-1.5 text-body text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={finalizeUpload}
-                disabled={isImportingPdf}
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isImportingPdf ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" /> Uploading...
-                  </>
-                ) : (
-                  'Got it, continue'
-                )}
-              </button>
-            </div>
+      <Modal
+        open={showUploadWarning}
+        onClose={cancelUpload}
+        title="Before you upload"
+        maxWidth="md"
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={cancelUpload}
+              className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={finalizeUpload}
+              disabled={isImportingPdf}
+              className={`inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+            >
+              {isImportingPdf ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                </>
+              ) : (
+                'Got it, continue'
+              )}
+            </button>
           </div>
-        </div>
-      ) : null}
+        }
+      >
+        <p className="text-sm text-(--muted)">
+          For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
+        </p>
+      </Modal>
 
-      {showImportLimitModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={closeImportLimitModal} />
-          <div className="relative w-full max-w-md rounded-xl border border-border-medium bg-bg-elevated p-6">
-            <h3 className="text-heading font-medium text-text-primary">Import limit reached</h3>
-            <p className="mt-2 text-small text-text-secondary">
-              {MAX_FILES_ERROR_MESSAGE}
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={closeImportLimitModal}
-                className="rounded-md bg-accent hover:bg-accent-hover px-4 py-1.5 text-body font-medium text-white transition-colors"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <Modal
+        open={showImportLimitModal}
+        onClose={closeImportLimitModal}
+        title="Import limit reached"
+        maxWidth="md"
+        footer={
+          <button onClick={closeImportLimitModal} className={buttonVariants('primary', 'md')}>
+            Got it
+          </button>
+        }
+      >
+        <p className="text-sm text-(--muted)">{MAX_FILES_ERROR_MESSAGE}</p>
+      </Modal>
 
       {isImportingPdf ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="relative w-full max-w-sm rounded-xl border border-border-medium bg-bg-elevated p-6">
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="relative w-full max-w-sm rounded-2xl border border-(--border) bg-(--surface) p-6 shadow-2xl">
             <div className="flex items-center gap-3">
-              <Loader2 size={18} className="animate-spin text-accent" />
+              <Loader2 className="h-5 w-5 animate-spin text-(--accent-strong)" />
               <div>
-                <p className="text-body font-medium text-text-primary">Importing PDF/DOCX</p>
-                <p className="text-xs text-text-muted">Parsing your resume. This can take a moment.</p>
+                <p className="text-sm font-semibold text-(--foreground)">Importing PDF/DOCX</p>
+                <p className="text-xs text-(--muted)">Parsing your resume. This can take a moment.</p>
               </div>
             </div>
           </div>

@@ -1,55 +1,59 @@
-'use client'
+"use client"
+
+import { Modal } from '@/components/ui/Modal'
+
+export type AddableSectionType =
+  | 'professional_summary'
+  | 'career_objective'
+  | 'education'
+  | 'leadership'
+  | 'projects'
+  | 'research'
+  | 'certifications'
+  | 'awards'
+  | 'publications'
+  | 'skills'
 
 export type AddableSection = {
-  type: string
+  type: AddableSectionType
   title: string
+  description: string
 }
 
-const defaultSections: AddableSection[] = [
-  { type: 'summary', title: 'Summary' },
-  { type: 'experience', title: 'Work Experience' },
-  { type: 'education', title: 'Education' },
-  { type: 'skills', title: 'Skills' },
-  { type: 'projects', title: 'Projects' },
-  { type: 'certifications', title: 'Certifications' },
-  { type: 'languages', title: 'Languages' },
-  { type: 'volunteer', title: 'Volunteer' },
-  { type: 'awards', title: 'Awards' },
-  { type: 'publications', title: 'Publications' },
-  { type: 'references', title: 'References' },
-  { type: 'custom', title: 'Custom Section' },
+const SECTION_OPTIONS: AddableSection[] = [
+  { type: 'professional_summary', title: 'Professional Summary', description: 'Concise overview of your profile' },
+  { type: 'career_objective', title: 'Career Objective', description: 'Role-focused positioning statement' },
+  { type: 'education', title: 'Education', description: 'Degrees and academic background' },
+  { type: 'leadership', title: 'Leadership', description: 'Leadership and ownership examples' },
+  { type: 'projects', title: 'Projects', description: 'Notable projects and outcomes' },
+  { type: 'research', title: 'Research', description: 'Research work and findings' },
+  { type: 'certifications', title: 'Certifications', description: 'Professional certifications' },
+  { type: 'awards', title: 'Awards & Honors', description: 'Awards, scholarships, distinctions' },
+  { type: 'publications', title: 'Publications', description: 'Articles and publications' },
+  { type: 'skills', title: 'Skills', description: 'Technical and professional skills' },
 ]
 
-interface AddContentModalProps {
+type AddContentModalProps = {
   open: boolean
   onClose: () => void
   onAdd: (section: AddableSection) => void
 }
 
 export function AddContentModal({ open, onClose, onAdd }: AddContentModalProps) {
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div
-        className="w-full max-w-sm mx-4 bg-bg-elevated border border-border-medium rounded-xl p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-title text-text-primary font-semibold mb-4">Add Section</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {defaultSections.map(s => (
-            <button
-              key={s.type}
-              onClick={() => { onAdd(s); onClose() }}
-              className="px-3 py-2 bg-bg-surface border border-border-soft rounded-md text-body text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors text-left"
-            >
-              {s.title}
-            </button>
-          ))}
-        </div>
+    <Modal open={open} onClose={onClose} title="Add Content Section" maxWidth="2xl">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTION_OPTIONS.map((item) => (
+          <button
+            key={item.type}
+            onClick={() => onAdd(item)}
+            className="rounded-xl border border-(--border) bg-(--surface) p-4 text-left transition-colors hover:border-(--accent-strong)/60 hover:bg-(--surface-elevated)"
+          >
+            <p className="text-sm font-semibold text-(--foreground)">{item.title}</p>
+            <p className="mt-1 text-xs text-(--muted)">{item.description}</p>
+          </button>
+        ))}
       </div>
-    </div>
+    </Modal>
   )
 }
-
-export type { AddContentModalProps }
