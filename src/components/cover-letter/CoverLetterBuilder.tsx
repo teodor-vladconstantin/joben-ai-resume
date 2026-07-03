@@ -8,7 +8,6 @@ import { UpgradeModal } from '@/components/ui/UpgradeModal'
 import { Modal } from '@/components/ui/Modal'
 import { FeatureButton } from '@/components/FeatureButton'
 import { buttonVariants } from '@/components/ui/Button'
-import { startProCheckout } from '@/lib/client-billing'
 
 type CoverLetterSections = {
   headerName: string
@@ -611,7 +610,6 @@ export function CoverLetterBuilder() {
         title="Upgrade to Continue AI Generation"
         description={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={startProCheckout}
       />
     </div>
   )
