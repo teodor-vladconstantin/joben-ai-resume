@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/layout/Sidebar'
-import { SignOutButton, UserButton } from '@clerk/nextjs'
+import { UserButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/Button'
 import { Divider } from '@/components/ui/Divider'
 import { Badge } from '@/components/ui/Badge'
@@ -37,7 +37,7 @@ export default async function SettingsPage() {
                 <Mail size={14} className="text-text-muted" />
                 Email settings
               </div>
-              <Badge variant="neutral">Managed by Clerk</Badge>
+              <Badge variant="muted">Managed by Clerk</Badge>
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
               <CreditCard size={14} className="text-text-muted" />
               Current plan
             </div>
-            <Badge variant="accent">Free</Badge>
+            <Badge variant="solid">Free</Badge>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ export default async function SettingsPage() {
               <Bell size={14} className="text-text-muted" />
               Email notifications
             </div>
-            <Badge variant="neutral">Enabled</Badge>
+            <Badge variant="muted">Enabled</Badge>
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export default async function SettingsPage() {
               <Shield size={14} className="text-text-muted" />
               Two-factor authentication
             </div>
-            <Badge variant="neutral">Managed by Clerk</Badge>
+            <Badge variant="muted">Managed by Clerk</Badge>
           </div>
         </div>
 
@@ -110,7 +110,7 @@ export default async function SettingsPage() {
               <Trash2 size={14} className="text-text-muted" />
               Delete account
             </div>
-            <Button variant="destructive" size="sm">
+            <Button variant="secondary" size="sm" className="border-red-400/40 text-red-400 hover:border-red-400">
               Delete Account
             </Button>
           </div>
