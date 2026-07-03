@@ -34,5 +34,24 @@ export const clerkAppearance = {
     formFieldErrorText: '!text-red-400 text-xs',
     alertText: '!text-(--foreground)/80',
     badge: '!bg-(--accent-muted) !text-(--accent)',
+
+    // UserButton popover and the "Manage account" modal float freely over
+    // the page with no wrapper card behind them (unlike SignIn/SignUp,
+    // which sit inside AuthShell's own card) -- they need an opaque
+    // background of their own instead of inheriting colorBackground/card's
+    // transparency above.
+    userButtonPopoverCard: '!bg-(--surface) !border !border-(--border) !shadow-2xl',
+    userButtonPopoverMain: '!bg-(--surface)',
+    userButtonPopoverActions: '!bg-(--surface)',
+    userButtonPopoverActionButton: '!text-(--foreground) hover:!bg-(--surface-elevated)',
+    userButtonPopoverActionButtonText: '!text-(--foreground)',
+    userButtonPopoverActionButtonIcon: '!text-(--muted)',
+    userButtonPopoverFooter: '!bg-(--surface)',
+    modalBackdrop: '!bg-black/70',
+    modalContent: '!bg-(--surface) !border !border-(--border)',
+    navbar: '!bg-(--surface)',
+    scrollBox: '!bg-(--surface)',
+    pageScrollBox: '!bg-(--surface)',
+    profilePage: '!bg-(--surface)',
   },
 }
