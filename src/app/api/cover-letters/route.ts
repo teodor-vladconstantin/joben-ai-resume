@@ -2,14 +2,11 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { apiError, apiSuccess } from '@/lib/api-response'
+import { apiError, apiSuccess, fetchOwnedList, isMissingRelation } from '@/lib/api-response'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { createCoverLetterSchema } from '@/lib/validation/schemas'
 
-function isMissingRelation(error: unknown): boolean {
-  const err = error as { code?: string; message?: string }
-  return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
-}
+type CoverLetterListItem = { id: string; title: string | null; updated_at: string }
 
 export async function GET() {
   try {
@@ -18,22 +15,17 @@ export async function GET() {
       return apiError(clientErrorMessage('auth'), 401)
     }
 
-    const supabase = createServerClient()
-    const { data, error } = await supabase
-      .from('cover_letters')
-      .select('id, title, updated_at')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
+    const result = await fetchOwnedList<CoverLetterListItem>({
+      table: 'cover_letters',
+      columns: 'id, title, updated_at',
+      userId,
+      logLabel: 'cover-letters GET failed',
+      logContext: { userId },
+    })
 
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiSuccess({ letters: [] }, 200)
-      }
-      logger.error('cover-letters GET failed', { userId, error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
+    if (!result.ok) return result.response
 
-    return apiSuccess({ letters: data || [] }, 200)
+    return apiSuccess({ letters: result.data }, 200)
   } catch (error) {
     logger.error('cover-letters GET top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',

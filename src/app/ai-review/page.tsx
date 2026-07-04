@@ -9,7 +9,6 @@ import { buttonVariants } from '@/components/ui/Button'
 import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } from 'lucide-react'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { UpgradeModal } from '@/components/ui/UpgradeModal'
-import { startProCheckout } from '@/lib/client-billing'
 import { importPdfClientSide } from '@/lib/pdf-import'
 
 type ResumeItem = {
@@ -445,7 +444,6 @@ export default function AIReviewPage() {
         title="Upgrade to Pro Analyzer"
         description={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={startProCheckout}
       />
     </div>
   )

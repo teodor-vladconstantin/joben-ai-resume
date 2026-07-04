@@ -7,6 +7,7 @@ export type ProductEventName =
   | 'resume_analyzed'
   | 'bullet_improved'
   | 'resume_exported_pdf'
+  | 'cover_letter_exported_pdf'
   | 'checkout_started'
 
 type TrackProductEventInput = {

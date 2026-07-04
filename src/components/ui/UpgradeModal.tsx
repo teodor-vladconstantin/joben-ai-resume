@@ -1,41 +1,25 @@
 "use client"
 
-import { useState } from 'react'
-import { Crown } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
+
+const FEEDBACK_FORM_URL = 'https://app.youform.com/forms/vorotlgc'
 
 type UpgradeModalProps = {
   open: boolean
   title?: string
   description?: string
   onClose: () => void
-  onUpgrade: () => Promise<void>
+  onUpgrade?: () => Promise<void>
 }
 
-export function UpgradeModal({
-  open,
-  title = 'Upgrade to Pro',
-  description = 'Unlock unlimited AI actions and premium optimization tools.',
-  onClose,
-  onUpgrade,
-}: UpgradeModalProps) {
-  const [isUpgrading, setIsUpgrading] = useState(false)
-
-  async function handleUpgrade() {
-    setIsUpgrading(true)
-    try {
-      await onUpgrade()
-    } finally {
-      setIsUpgrading(false)
-    }
-  }
-
+export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={title}
+      title="Suntem încă în testare"
       maxWidth="md"
       footer={
         <div className="flex items-center justify-end gap-2">
@@ -43,30 +27,30 @@ export function UpgradeModal({
             onClick={onClose}
             className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
           >
-            Maybe Later
+            Am înțeles
           </button>
-          <button
-            onClick={() => void handleUpgrade()}
-            disabled={isUpgrading}
-            className={`disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
+          <a
+            href={FEEDBACK_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants('primary', 'md')}
           >
-            {isUpgrading ? 'Redirecting...' : 'Upgrade to Pro'}
-          </button>
+            Lasă-mi feedback
+          </a>
         </div>
       }
     >
       <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-(--accent-strong)/35 bg-(--accent-muted) text-(--accent-strong)">
-        <Crown className="h-5 w-5" />
+        <MessageCircle className="h-5 w-5" />
       </div>
 
-      <p className="text-sm text-(--foreground)/72">{description}</p>
-
-      <div className="mt-5 rounded-xl border border-(--border) bg-(--surface) p-4 text-sm text-(--foreground)/72">
-        <p>Pro includes:</p>
-        <p className="mt-2">Unlimited AI analysis and tailoring</p>
-        <p>Advanced rewrite and bullet optimization</p>
-        <p>Priority generation and premium templates</p>
-      </div>
+      <p className="text-sm text-(--foreground)/72">
+        Salut! Joben e încă în perioada de testare, așa că nu încasăm plăți acum — poți continua să folosești
+        aplicația liber.
+      </p>
+      <p className="mt-3 text-sm text-(--foreground)/72">
+        Mi-ar fi de mare ajutor să aflu ce părere ai: ce funcționează bine, ce lipsește, ce ai schimba.
+      </p>
     </Modal>
   )
 }
