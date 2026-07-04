@@ -8,10 +8,14 @@
 - [DONE] Parser cleanup: imports, types, formatting, verification
 - [DONE] Final launch execution gates (Vercel deploy + service keys)
 - [DONE] Deep cleanup FAZA 0: add svix as direct dependency
-- [IN PROGRESS] Deep cleanup FAZA 1: dead code removal (knip/depcheck) on branch `cleanup`
-- [ ] Deep cleanup FAZA 2: deduplication (resend.ts, cron routes, CRUD routes, apply-fix/auto-fix)
-- [ ] Deep cleanup FAZA 3: API consistency audit (report only, awaiting approval)
+- [DONE] Deep cleanup FAZA 1: dead code removal (knip/depcheck) on branch `cleanup`
+- [DONE] Deep cleanup FAZA 2: deduplication (resend.ts, cron routes, CRUD routes, apply-fix/auto-fix) - 4 commits
+- [DONE] Deep cleanup FAZA 3: API consistency audit (report only, findings below)
+- [DONE] Deep cleanup FAZA 3 fix: Zod validation + Upstash rate limiting (20/hour) on resumes/export-latex and resumes POST
 - [ ] Deep cleanup FAZA 4: operational cleanup (console.log, TODO/FIXME list, env var list)
+- [ ] post-monetizare: unify API error-response shapes (4 concurrent conventions found: jsonWithRequestId, apiError/apiSuccess, raw NextResponse on 429 branches in parse/cover-letter-pdf/redeem-code, health/route.ts manual reimplementation)
+- [ ] post-monetizare: add Zod validation for hand-parsed query params (admin/rate-limit GET, auto-fix dryRun, cron parseCronOptions)
+- [ ] post-monetizare: decide fate of pdfjs-dist dependency (still referenced by root Dockerfile:44 COPY for standard_fonts, but PDF parsing moved to external Hetzner service)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [IN PROGRESS] Parser + builder: projects bullets/dates, LinkedIn/GitHub parsing
 - [DONE] Final technical polish pass (types, errors, loading, empty states, logs, env, API response shape, mobile, lint)
