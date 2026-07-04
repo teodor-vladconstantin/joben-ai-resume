@@ -1,8 +1,6 @@
-import { auth } from '@clerk/nextjs/server'
 import {
   callAnthropicWithLimits,
   extractTextFromAnthropicMessage,
-  isRateLimitExceededError,
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import {
@@ -14,37 +12,25 @@ import {
   incrementFeatureCounterBy,
   recordLimitHit,
 } from '@/lib/ratelimit'
-import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
+import { parseClaudeJsonText } from '@/lib/claude-json'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { capturePostHogEvent } from '@/lib/posthog-server'
-import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
+import { getUserPlan } from '@/lib/plans'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
+import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
 import { autoFixSchema } from '@/lib/validation/schemas'
-
-type ExperienceEntry = {
-  id: string
-  title?: string
-  company?: string
-  period?: string
-  description?: string
-  bullets?: string[]
-}
-
-type ResumeData = {
-  template?: string
-  personal?: Record<string, unknown>
-  experience?: ExperienceEntry[]
-  dynamicSections?: unknown[]
-}
-
-type Improvement = {
-  issue?: string
-  weak_example?: string
-  strong_example?: string
-}
+import {
+  buildExperienceForPrompt,
+  fetchOwnedResumeForFix,
+  handleFixRouteError,
+  isDuplicateOf,
+  normalizeBullet,
+  parseFixRequestBody,
+  requireFixRouteAuth,
+} from '@/lib/fix-improvements'
+import type { ResumeData } from '@/lib/fix-improvements'
 
 type RawPatch = {
   experienceId: string
@@ -59,20 +45,6 @@ export type FixPatchWithContext = {
   updatedBullet: string
   experienceTitle?: string
   company?: string
-}
-
-function normalizeBullet(b: string): string {
-  return b.trim().toLowerCase().replace(/\s+/g, ' ')
-}
-
-function isDuplicateOf(candidate: string, existing: string): boolean {
-  const a = normalizeBullet(candidate)
-  const b = normalizeBullet(existing)
-  if (!a || !b) return false
-  if (a === b) return true
-  const longer = a.length > b.length ? a : b
-  const shorter = a.length > b.length ? b : a
-  return shorter.length > 20 && longer.includes(shorter)
 }
 
 const AUTO_FIX_SYSTEM = `You are an expert resume editor. Apply ALL improvement suggestions to the resume.
@@ -105,12 +77,10 @@ export async function POST(req: Request) {
     const url = new URL(req.url)
     const dryRun = url.searchParams.get('dryRun') === 'true'
 
-    const authResult = await auth()
+    const authResult = await requireFixRouteAuth(requestId)
+    if (!authResult.ok) return authResult.response
     userId = authResult.userId
-    const { sessionClaims } = authResult
-    if (!userId) {
-      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
-    }
+    const emailHint = authResult.emailHint
 
     const notifyRateLimit = async (reason: string) => {
       if (!userId) return
@@ -123,21 +93,10 @@ export async function POST(req: Request) {
       })
     }
 
-    const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+    const parsedBody = await parseFixRequestBody(req, autoFixSchema, requestId)
+    if (!parsedBody.ok) return parsedBody.response
+    const body = parsedBody.body
 
-    let rawBody: unknown
-    try {
-      rawBody = await req.json()
-    } catch {
-      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
-    }
-
-    const parsed = autoFixSchema.safeParse(rawBody)
-    if (!parsed.success) {
-      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
-    }
-
-    const body = parsed.data
     // SECURITY: sanitize each improvement's user-provided copy before it
     // reaches the prompt. Schema already capped each string via Zod.
     const safeImprovements = body.improvements.map((imp) => ({
@@ -189,19 +148,9 @@ export async function POST(req: Request) {
 
     const supabase = createServerClient()
 
-    const { data: resume, error: resumeError } = await supabase
-      .from('resumes')
-      .select('id, data, user_id')
-      .eq('id', body.resumeId)
-      .single()
-
-    if (resumeError || !resume) {
-      return jsonWithRequestId({ error: 'Resume not found' }, 404, requestId)
-    }
-
-    if (resume.user_id !== userId) {
-      return jsonWithRequestId({ error: 'Forbidden' }, 403, requestId)
-    }
+    const ownedResume = await fetchOwnedResumeForFix(supabase, body.resumeId, userId, requestId)
+    if (!ownedResume.ok) return ownedResume.response
+    const resume = ownedResume.resume
 
     const resumeData = resume.data as ResumeData
     const experience = resumeData.experience || []
@@ -214,17 +163,7 @@ export async function POST(req: Request) {
     // before sending them back through the prompt — the builder accepts
     // rich text so a user could inject an instruction string into their
     // own CV.
-    const experienceForPrompt = experience.map((exp) => ({
-      id: exp.id,
-      title: sanitizeForPrompt(exp.title || '', { maxChars: 200 }),
-      company: sanitizeForPrompt(exp.company || '', { maxChars: 200 }),
-      bullets: sanitizeJsonForPrompt(
-        Array.isArray(exp.bullets) && exp.bullets.length > 0
-          ? exp.bullets
-          : [exp.description || ''],
-        { maxChars: 1_500 }
-      ),
-    }))
+    const experienceForPrompt = buildExperienceForPrompt(experience)
 
     const improvementsText = safeImprovements
       .map((imp, i) =>
@@ -495,24 +434,11 @@ ${improvementsText}`
 
     return jsonWithRequestId({ fixesApplied: appliedCount, patches: enrichedPatches }, 200, requestId)
   } catch (error) {
-    if (isRateLimitExceededError(error)) {
-      if (error.status === 429 && userId) {
-        await sendRateLimitEmailIfEligible({
-          userId,
-          requestId,
-          route: '/api/auto-fix',
-          reason: error.payload?.limitType || 'rate_limit',
-        })
-      }
-      return jsonWithRequestId(error.payload, error.status, requestId)
-    }
-    if (error instanceof ClaudeJsonParseError) {
-      return jsonWithRequestId({ error: 'AI response format invalid. Please retry.' }, 500, requestId)
-    }
-    logger.error('auto-fix route failed', {
-      requestId, userId,
-      error: error instanceof Error ? error.message : 'Unknown error',
+    return handleFixRouteError(error, {
+      requestId,
+      userId,
+      route: '/api/auto-fix',
+      routeLogLabel: 'auto-fix route failed',
     })
-    return jsonWithRequestId({ error: 'Internal server error' }, 500, requestId)
   }
 }
