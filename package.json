@@ -37,6 +37,7 @@
     "recharts": "^3.8.1",
     "resend": "^6.10.0",
     "stripe": "^22.0.1",
+    "svix": "^1.96.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
