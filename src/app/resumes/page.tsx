@@ -6,29 +6,13 @@ import { buttonVariants } from '@/components/ui/Button'
 import Link from 'next/link'
 import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { timeAgo } from '@/lib/time-ago'
 
 type ResumeListItem = {
   id: string
   title: string | null
   score: number | null
   updated_at: string
-}
-
-
-function timeAgo(dateValue: string): string {
-  const date = new Date(dateValue)
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + " years ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + " months ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + " days ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + " hours ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + " minutes ago";
-  return Math.floor(seconds) + " seconds ago";
 }
 
 export default function ResumesPage() {
