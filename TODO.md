@@ -7,6 +7,11 @@
 - [DONE] Remove unsubstantiated marketing claims from UI copy
 - [DONE] Parser cleanup: imports, types, formatting, verification
 - [DONE] Final launch execution gates (Vercel deploy + service keys)
+- [DONE] Deep cleanup FAZA 0: add svix as direct dependency
+- [IN PROGRESS] Deep cleanup FAZA 1: dead code removal (knip/depcheck) on branch `cleanup`
+- [ ] Deep cleanup FAZA 2: deduplication (resend.ts, cron routes, CRUD routes, apply-fix/auto-fix)
+- [ ] Deep cleanup FAZA 3: API consistency audit (report only, awaiting approval)
+- [ ] Deep cleanup FAZA 4: operational cleanup (console.log, TODO/FIXME list, env var list)
 - [IN PROGRESS] Bullet AI draft flow (generate, regenerate, accept) with explicit credit usage messaging
 - [IN PROGRESS] Parser + builder: projects bullets/dates, LinkedIn/GitHub parsing
 - [DONE] Final technical polish pass (types, errors, loading, empty states, logs, env, API response shape, mobile, lint)
