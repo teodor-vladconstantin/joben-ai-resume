@@ -1,48 +1,43 @@
-import { auth } from '@clerk/nextjs/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { apiError, apiSuccess } from '@/lib/api-response'
 import { logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { exceedsJsonBudget, updateResumeSchema, uuidLike } from '@/lib/validation/schemas'
+import { exceedsJsonBudget, updateResumeSchema } from '@/lib/validation/schemas'
+import {
+  apiError,
+  apiSuccess,
+  fetchOwnedRow,
+  requireAuthenticatedResourceId,
+  updateOwnedRow,
+} from '@/lib/api-response'
 
-function isMissingRelation(error: unknown): boolean {
-  const err = error as { code?: string; message?: string }
-  return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
+type ResumeRow = {
+  id: string
+  title: string | null
+  updated_at: string
+  score: number | null
+  data: unknown
 }
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
-    }
+    const authResult = await requireAuthenticatedResourceId(params)
+    if (!authResult.ok) return authResult.response
+    const { userId, id } = authResult.value
 
-    const { id } = await params
-    const parsedId = uuidLike.safeParse(id)
-    if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
-    }
-
-    const supabase = createServerClient()
-
-    const { data, error } = await supabase
-      .from('resumes')
-      .select('id, title, updated_at, score, data')
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-      .single()
-
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
-      }
+    const result = await fetchOwnedRow<ResumeRow>({
+      table: 'resumes',
+      columns: 'id, title, updated_at, score, data',
+      id,
+      userId,
+      missingRelationMessage: 'Resumes table is missing in Supabase.',
       // SECURITY: never echo Supabase error message; .single() returns
       // PGRST116 when no row matches which maps cleanly to 404.
-      logger.error('resumes [id] GET failed', { userId, resumeId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('not_found'), 404)
-    }
+      logLabel: 'resumes [id] GET failed',
+      logContext: { userId, resumeId: id },
+    })
 
-    return apiSuccess({ resume: data }, 200)
+    if (!result.ok) return result.response
+
+    return apiSuccess({ resume: result.data }, 200)
   } catch (error) {
     logger.error('resumes [id] GET top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -53,16 +48,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
-    }
-
-    const { id } = await params
-    const parsedId = uuidLike.safeParse(id)
-    if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
-    }
+    const authResult = await requireAuthenticatedResourceId(params)
+    if (!authResult.ok) return authResult.response
+    const { userId, id } = authResult.value
 
     let rawBody: unknown
     try {
@@ -82,27 +70,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return apiError(clientErrorMessage('invalid_input', 'Resume payload is too large.'), 413)
     }
 
-    const supabase = createServerClient()
-    const { data, error } = await supabase
-      .from('resumes')
-      .update({
+    const result = await updateOwnedRow<ResumeRow>({
+      table: 'resumes',
+      columns: 'id, title, updated_at, score, data',
+      id,
+      userId,
+      update: {
         title: body.title,
         data: body.data,
-      })
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-      .select('id, title, updated_at, score, data')
-      .single()
+      },
+      missingRelationMessage: 'Resumes table is missing in Supabase.',
+      logLabel: 'resumes [id] PATCH failed',
+      logContext: { userId, resumeId: id },
+    })
 
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
-      }
-      logger.error('resumes [id] PATCH failed', { userId, resumeId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
+    if (!result.ok) return result.response
 
-    return apiSuccess({ resume: data }, 200)
+    return apiSuccess({ resume: result.data }, 200)
   } catch (error) {
     logger.error('resumes [id] PATCH top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',
