@@ -13,7 +13,6 @@ import { buttonVariants } from '@/components/ui/Button'
 import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
 import { RichTextarea } from '@/components/ui/RichTextarea'
 import { FeatureButton } from '@/components/FeatureButton'
-import { startProCheckout } from '@/lib/client-billing'
 import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
@@ -2170,7 +2169,6 @@ export function ResumeBuilder() {
         title="Pro Feature"
         description={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={startProCheckout}
       />
     </div>
   )

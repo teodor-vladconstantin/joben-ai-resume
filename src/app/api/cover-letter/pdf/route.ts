@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
 import { apiError } from '@/lib/api-response'
+import { trackProductEvent } from '@/lib/analytics'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
@@ -161,6 +162,15 @@ export async function POST(request: Request) {
 
     const blob = await pdf(doc).toBlob()
     const arrayBuffer = await blob.arrayBuffer()
+
+    await trackProductEvent({
+      userId,
+      eventName: 'cover_letter_exported_pdf',
+      requestId,
+      metadata: {
+        bodyParagraphs: bodyParagraphs.length,
+      },
+    })
 
     return new NextResponse(arrayBuffer, {
       status: 200,

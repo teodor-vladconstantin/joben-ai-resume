@@ -187,9 +187,91 @@ export const redeemCodeSchema = z
   })
   .strict()
 
+// Mirrors `LatexResumeData` in src/app/api/resumes/export-latex/route.ts — the
+// shape consumed by generateLatex() before the .tex source is forwarded to
+// the external LaTeX compile microservice. Fields stay optional (drafts can
+// be partially filled) but are strictly typed and length-capped so a
+// malformed/oversized payload never reaches the LaTeX service. `.passthrough()`
+// at every level so extra builder-only fields (e.g. entry `id`, `startYear`)
+// that generateLatex() doesn't read are not rejected.
+
+export const latexPersonalSchema = z
+  .object({
+    firstName: optionalTrimmedString(SHORT_TEXT_MAX),
+    lastName: optionalTrimmedString(SHORT_TEXT_MAX),
+    phone: optionalTrimmedString(SHORT_TEXT_MAX),
+    email: optionalTrimmedString(SHORT_TEXT_MAX),
+    title: optionalTrimmedString(SHORT_TEXT_MAX),
+    summary: optionalTrimmedString(LONG_TEXT_MAX),
+    linkedin: optionalTrimmedString(SHORT_TEXT_MAX),
+    github: optionalTrimmedString(SHORT_TEXT_MAX),
+    website: optionalTrimmedString(SHORT_TEXT_MAX),
+    location: optionalTrimmedString(SHORT_TEXT_MAX),
+  })
+  .passthrough()
+
+const latexBulletsSchema = z.array(trimmedString(MEDIUM_TEXT_MAX)).max(40).optional()
+
+export const latexExperienceEntrySchema = z
+  .object({
+    title: optionalTrimmedString(SHORT_TEXT_MAX),
+    period: optionalTrimmedString(SHORT_TEXT_MAX),
+    company: optionalTrimmedString(SHORT_TEXT_MAX),
+    description: optionalTrimmedString(LONG_TEXT_MAX),
+    bullets: latexBulletsSchema,
+  })
+  .passthrough()
+
+export const latexProjectEntrySchema = z
+  .object({
+    name: optionalTrimmedString(SHORT_TEXT_MAX),
+    role: optionalTrimmedString(SHORT_TEXT_MAX),
+    period: optionalTrimmedString(SHORT_TEXT_MAX),
+    description: optionalTrimmedString(LONG_TEXT_MAX),
+    bullets: latexBulletsSchema,
+    technologies: z.array(trimmedString(SHORT_TEXT_MAX)).max(30).optional(),
+    url: optionalTrimmedString(SHORT_TEXT_MAX),
+  })
+  .passthrough()
+
+export const latexEducationEntrySchema = z
+  .object({
+    id: optionalTrimmedString(SHORT_TEXT_MAX),
+    institution: optionalTrimmedString(SHORT_TEXT_MAX),
+    degree: optionalTrimmedString(SHORT_TEXT_MAX),
+    field: optionalTrimmedString(SHORT_TEXT_MAX),
+    location: optionalTrimmedString(SHORT_TEXT_MAX),
+    startMonth: z.number().int().min(1).max(12).optional(),
+    startYear: z.number().int().min(1900).max(2100).optional(),
+    endMonth: z.number().int().min(1).max(12).optional(),
+    endYear: z.number().int().min(1900).max(2100).optional(),
+    isCurrent: z.boolean().optional(),
+    description: optionalTrimmedString(LONG_TEXT_MAX),
+  })
+  .passthrough()
+
+export const latexDynamicSectionSchema = z
+  .object({
+    type: nonEmptyTrimmedString(SHORT_TEXT_MAX),
+    title: optionalTrimmedString(SHORT_TEXT_MAX),
+    content: optionalTrimmedString(LONG_TEXT_MAX),
+  })
+  .passthrough()
+
+export const exportLatexResumeDataSchema = z
+  .object({
+    template: optionalTrimmedString(SHORT_TEXT_MAX),
+    personal: latexPersonalSchema.optional(),
+    experience: z.array(latexExperienceEntrySchema).max(60).optional(),
+    projects: z.array(latexProjectEntrySchema).max(60).optional(),
+    education: z.array(latexEducationEntrySchema).max(30).optional(),
+    dynamicSections: z.array(latexDynamicSectionSchema).max(30).optional(),
+  })
+  .passthrough()
+
 export const exportLatexSchema = z
   .object({
-    data: resumeDataSchema,
+    data: exportLatexResumeDataSchema,
   })
   .passthrough()
 

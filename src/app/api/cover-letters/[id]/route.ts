@@ -1,46 +1,41 @@
-import { auth } from '@clerk/nextjs/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { apiError, apiSuccess } from '@/lib/api-response'
 import { logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { updateCoverLetterSchema, uuidLike } from '@/lib/validation/schemas'
+import { updateCoverLetterSchema } from '@/lib/validation/schemas'
+import {
+  apiError,
+  apiSuccess,
+  deleteOwnedRow,
+  fetchOwnedRow,
+  requireAuthenticatedResourceId,
+  updateOwnedRow,
+} from '@/lib/api-response'
 
-function isMissingRelation(error: unknown): boolean {
-  const err = error as { code?: string; message?: string }
-  return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
+type CoverLetterRow = {
+  id: string
+  title: string | null
+  content: string | null
+  updated_at: string
 }
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
-    }
+    const authResult = await requireAuthenticatedResourceId(params)
+    if (!authResult.ok) return authResult.response
+    const { userId, id } = authResult.value
 
-    const { id } = await params
-    const parsedId = uuidLike.safeParse(id)
-    if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
-    }
+    const result = await fetchOwnedRow<CoverLetterRow>({
+      table: 'cover_letters',
+      columns: 'id, title, content, updated_at',
+      id,
+      userId,
+      missingRelationMessage: 'Cover letters table is missing in Supabase.',
+      logLabel: 'cover-letters [id] GET failed',
+      logContext: { userId, letterId: id },
+    })
 
-    const supabase = createServerClient()
+    if (!result.ok) return result.response
 
-    const { data, error } = await supabase
-      .from('cover_letters')
-      .select('id, title, content, updated_at')
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-      .single()
-
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Cover letters table is missing in Supabase.'), 500)
-      }
-      logger.error('cover-letters [id] GET failed', { userId, letterId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('not_found'), 404)
-    }
-
-    return apiSuccess({ letter: data }, 200)
+    return apiSuccess({ letter: result.data }, 200)
   } catch (error) {
     logger.error('cover-letters [id] GET top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -51,16 +46,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
-    }
-
-    const { id } = await params
-    const parsedId = uuidLike.safeParse(id)
-    if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
-    }
+    const authResult = await requireAuthenticatedResourceId(params)
+    if (!authResult.ok) return authResult.response
+    const { userId, id } = authResult.value
 
     let rawBody: unknown
     try {
@@ -75,28 +63,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = parsed.data
-    const supabase = createServerClient()
 
-    const { data, error } = await supabase
-      .from('cover_letters')
-      .update({
+    const result = await updateOwnedRow<CoverLetterRow>({
+      table: 'cover_letters',
+      columns: 'id, title, content, updated_at',
+      id,
+      userId,
+      update: {
         title: body.title,
         content: body.content,
-      })
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-      .select('id, title, content, updated_at')
-      .single()
+      },
+      missingRelationMessage: 'Cover letters table is missing in Supabase.',
+      logLabel: 'cover-letters [id] PATCH failed',
+      logContext: { userId, letterId: id },
+    })
 
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Cover letters table is missing in Supabase.'), 500)
-      }
-      logger.error('cover-letters [id] PATCH failed', { userId, letterId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
+    if (!result.ok) return result.response
 
-    return apiSuccess({ letter: data }, 200)
+    return apiSuccess({ letter: result.data }, 200)
   } catch (error) {
     logger.error('cover-letters [id] PATCH top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -107,34 +91,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
-    }
+    const authResult = await requireAuthenticatedResourceId(params)
+    if (!authResult.ok) return authResult.response
+    const { userId, id } = authResult.value
 
-    const { id } = await params
-    const parsedId = uuidLike.safeParse(id)
-    if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
-    }
-
-    const supabase = createServerClient()
-
-    const { error } = await supabase
-      .from('cover_letters')
-      .delete()
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Cover letters table is missing in Supabase.'), 500)
-      }
-      logger.error('cover-letters [id] DELETE failed', { userId, letterId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
-
-    return apiSuccess({ deleted: true }, 200)
+    return await deleteOwnedRow({
+      table: 'cover_letters',
+      id,
+      userId,
+      missingRelationMessage: 'Cover letters table is missing in Supabase.',
+      logLabel: 'cover-letters [id] DELETE failed',
+      logContext: { userId, letterId: id },
+    })
   } catch (error) {
     logger.error('cover-letters [id] DELETE top-level failure', {
       error: error instanceof Error ? error.message : 'Unknown error',

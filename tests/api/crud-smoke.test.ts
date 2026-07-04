@@ -20,6 +20,9 @@ vi.mock('@/lib/ratelimit', () => ({
   incrementFeatureCounter: incrementFeatureCounterMock,
   recordLimitHit: recordLimitHitMock,
   getMonthlyResetAtIso: getMonthlyResetAtIsoMock,
+  // /api/resumes now also calls checkRouteRateLimit (src/lib/security/route-rate-limit.ts),
+  // which pulls Redis from here. Returning null puts it in fail-open/degraded mode.
+  getRedisClient: vi.fn(() => null),
 }))
 
 describe('CRUD smoke tests for resumes and cover letters APIs', () => {

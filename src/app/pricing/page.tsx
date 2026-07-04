@@ -141,7 +141,7 @@ export default async function PricingPage() {
       <footer className="border-t border-border-faint py-8">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <p className="text-xs text-text-muted">
-            Questions? Contact us at <a href="mailto:admin@joben.eu" className="text-accent hover:underline">admin@joben.eu</a>
+            Questions? Contact us at <a href="mailto:duku@joben.eu" className="text-accent hover:underline">duku@joben.eu</a>
           </p>
         </div>
       </footer>

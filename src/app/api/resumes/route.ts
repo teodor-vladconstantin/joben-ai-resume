@@ -6,18 +6,21 @@ import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
 import { sendFirstResumeEmail } from '@/lib/resend'
-import { apiError, apiSuccess } from '@/lib/api-response'
+import { apiError, apiSuccess, deleteOwnedRow, fetchOwnedList, isMissingRelation } from '@/lib/api-response'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validation/schemas'
 
-function isMissingRelation(error: unknown): boolean {
-  const err = error as { code?: string; message?: string }
-  return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
-}
+// SECURITY: burst-protect resume creation (DB writes + first-resume email
+// side effects) beyond the existing monthly plan quota, same pattern as
+// /api/cover-letter/pdf and /api/resumes/export-latex.
+const RESUME_CREATE_RATE_LIMIT_PER_HOUR = 20
 
 function isDuplicateError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
+
+type ResumeListItem = { id: string; title: string | null; updated_at: string; score: number | null }
 
 export async function GET() {
   try {
@@ -26,22 +29,17 @@ export async function GET() {
       return apiError(clientErrorMessage('auth'), 401)
     }
 
-    const supabase = createServerClient()
-    const { data, error } = await supabase
-      .from('resumes')
-      .select('id, title, updated_at, score')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
+    const result = await fetchOwnedList<ResumeListItem>({
+      table: 'resumes',
+      columns: 'id, title, updated_at, score',
+      userId,
+      logLabel: 'resumes GET failed',
+      logContext: { route: '/api/resumes' },
+    })
 
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiSuccess({ resumes: [] }, 200)
-      }
-      logger.error('resumes GET failed', { route: '/api/resumes', error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
+    if (!result.ok) return result.response
 
-    return apiSuccess({ resumes: data || [] }, 200)
+    return apiSuccess({ resumes: result.data }, 200)
   } catch (error) {
     logger.error('resumes GET top-level failure', {
       route: '/api/resumes',
@@ -57,6 +55,26 @@ export async function POST(req: Request) {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
       return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
+    }
+
+    const rateLimit = await checkRouteRateLimit({
+      name: 'resumes-create',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: RESUME_CREATE_RATE_LIMIT_PER_HOUR,
+      windowSeconds: 3600,
+    })
+    if (!rateLimit.ok) {
+      logger.warn('Resume creation rate-limit hit', {
+        requestId,
+        route: '/api/resumes',
+        userId,
+        retryAfter: rateLimit.retryAfter,
+      })
+      return jsonWithRequestId(
+        { error: clientErrorMessage('rate_limit'), retryAfter: rateLimit.retryAfter },
+        429,
+        requestId
+      )
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
@@ -285,22 +303,14 @@ export async function DELETE(req: Request) {
       return apiError(clientErrorMessage('invalid_input', 'Missing or invalid resume id'), 400)
     }
 
-    const supabase = createServerClient()
-    const { error } = await supabase
-      .from('resumes')
-      .delete()
-      .eq('id', parsedId.data)
-      .eq('user_id', userId)
-
-    if (error) {
-      if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
-      }
-      logger.error('resumes DELETE failed', { userId, route: '/api/resumes', error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
-    }
-
-    return apiSuccess({ deleted: true }, 200)
+    return await deleteOwnedRow({
+      table: 'resumes',
+      id: parsedId.data,
+      userId,
+      missingRelationMessage: 'Resumes table is missing in Supabase.',
+      logLabel: 'resumes DELETE failed',
+      logContext: { userId, route: '/api/resumes' },
+    })
   } catch (error) {
     logger.error('resumes DELETE top-level failure', {
       route: '/api/resumes',
