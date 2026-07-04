@@ -12,7 +12,8 @@
 - [DONE] Deep cleanup FAZA 2: deduplication (resend.ts, cron routes, CRUD routes, apply-fix/auto-fix) - 4 commits
 - [DONE] Deep cleanup FAZA 3: API consistency audit (report only, findings below)
 - [DONE] Deep cleanup FAZA 3 fix: Zod validation + Upstash rate limiting (20/hour) on resumes/export-latex and resumes POST
-- [ ] Deep cleanup FAZA 4: operational cleanup (console.log, TODO/FIXME list, env var list)
+- [DONE] Deep cleanup FAZA 4: operational cleanup audit — console.log: none in src/ (already clean); console.error: 7 sites audited, none have Sentry.captureException at the same catch site, all kept (src/lib/logger.ts:46, src/lib/anthropic-with-limits.ts:236, src/lib/ratelimit.ts:497, src/app/api/health/route.ts:160, src/app/error.tsx:12, src/app/resumes/page.tsx:62/64); TODO/FIXME: none in src/; env vars: 32 referenced in code (5 hard-required via src/lib/env.ts, rest optional/feature-gated) - see chat history for full list to diff against Vercel
+- [ ] post-monetizare: CLAUDE.md references .env.prod.example as the canonical env var doc but the file does not exist in the repo (not tracked, not present locally) - recreate it or update CLAUDE.md
 - [ ] post-monetizare: unify API error-response shapes (4 concurrent conventions found: jsonWithRequestId, apiError/apiSuccess, raw NextResponse on 429 branches in parse/cover-letter-pdf/redeem-code, health/route.ts manual reimplementation)
 - [ ] post-monetizare: add Zod validation for hand-parsed query params (admin/rate-limit GET, auto-fix dryRun, cron parseCronOptions)
 - [ ] post-monetizare: decide fate of pdfjs-dist dependency (still referenced by root Dockerfile:44 COPY for standard_fonts, but PDF parsing moved to external Hetzner service)
