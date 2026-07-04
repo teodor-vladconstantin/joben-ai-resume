@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/inactivity-3d",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/feedback-request",
-      "schedule": "*/10 * * * *"
     }
   ]
 }
