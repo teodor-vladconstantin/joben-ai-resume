@@ -2,90 +2,36 @@ import { createServerClient } from '@/lib/supabase/server'
 import { sendInactivityEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import {
+  type CronCandidateUser,
+  isAuthorizedCronRequest,
+  isDuplicateKeyError,
+  parseCronOptions,
+  sendEmailWithRetry,
+} from '@/lib/cron-utils'
 
 export const runtime = 'nodejs'
 
-type CandidateUser = {
-  clerk_id: string
-  email: string | null
-  first_name: string | null
-}
-
-type CronOptions = {
-  dryRun: boolean
-  limit: number
-  maxRetries: number
-}
+type CandidateUser = CronCandidateUser
 
 const INACTIVITY_EVENT_SOURCE = 'cron.inactivity-3d'
-
-function parseOptions(request: Request): CronOptions {
-  const url = new URL(request.url)
-  const dryRunParam = url.searchParams.get('dryRun')
-  const limitParam = Number(url.searchParams.get('limit') || '100')
-  const retriesParam = Number(url.searchParams.get('retries') || '1')
-
-  return {
-    dryRun: dryRunParam === '1' || dryRunParam === 'true',
-    limit: Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 500) : 100,
-    maxRetries: Number.isFinite(retriesParam) ? Math.min(Math.max(retriesParam, 0), 3) : 1,
-  }
-}
-
-function isDuplicateError(error: { code?: string } | null): boolean {
-  return error?.code === '23505'
-}
 
 function buildSourceEventId(userClerkId: string): string {
   return `${INACTIVITY_EVENT_SOURCE}:${userClerkId}`
 }
 
 async function sendWithRetry(input: { to: string; firstName: string | null; maxRetries: number }) {
-  let lastError = ''
-
-  for (let attempt = 0; attempt <= input.maxRetries; attempt += 1) {
-    const result = await sendInactivityEmail({
-      to: input.to,
-      firstName: input.firstName,
-    })
-
-    if (result.success) {
-      return {
-        success: true,
-        attempts: attempt + 1,
-        providerId: result.providerId,
-      }
-    }
-
-    lastError = result.error || 'Send failed'
-  }
-
-  return {
-    success: false,
-    attempts: input.maxRetries + 1,
-    error: lastError,
-  }
-}
-
-function isAuthorized(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return false
-
-  const authHeader = request.headers.get('authorization') || ''
-  const tokenFromBearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  const tokenFromHeader = request.headers.get('x-cron-secret') || ''
-
-  return tokenFromBearer === cronSecret || tokenFromHeader === cronSecret
+  return sendEmailWithRetry(sendInactivityEmail, input)
 }
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request)
   try {
-    if (!isAuthorized(request)) {
+    if (!isAuthorizedCronRequest(request)) {
       return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
-    const options = parseOptions(request)
+    const options = parseCronOptions(request)
     const supabase = createServerClient()
 
     const now = Date.now()
@@ -208,7 +154,7 @@ export async function POST(request: Request) {
       })
 
       if (lockError) {
-        if (isDuplicateError(lockError)) {
+        if (isDuplicateKeyError(lockError)) {
           deduped += 1
           logger.info('Inactivity send skipped due to duplicate lock', {
             requestId,
