@@ -8,7 +8,13 @@ import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, i
 import { sendFirstResumeEmail } from '@/lib/resend'
 import { apiError, apiSuccess, deleteOwnedRow, fetchOwnedList, isMissingRelation } from '@/lib/api-response'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validation/schemas'
+
+// SECURITY: burst-protect resume creation (DB writes + first-resume email
+// side effects) beyond the existing monthly plan quota, same pattern as
+// /api/cover-letter/pdf and /api/resumes/export-latex.
+const RESUME_CREATE_RATE_LIMIT_PER_HOUR = 20
 
 function isDuplicateError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
@@ -49,6 +55,26 @@ export async function POST(req: Request) {
     const { userId, sessionClaims } = await auth()
     if (!userId) {
       return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
+    }
+
+    const rateLimit = await checkRouteRateLimit({
+      name: 'resumes-create',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: RESUME_CREATE_RATE_LIMIT_PER_HOUR,
+      windowSeconds: 3600,
+    })
+    if (!rateLimit.ok) {
+      logger.warn('Resume creation rate-limit hit', {
+        requestId,
+        route: '/api/resumes',
+        userId,
+        retryAfter: rateLimit.retryAfter,
+      })
+      return jsonWithRequestId(
+        { error: clientErrorMessage('rate_limit'), retryAfter: rateLimit.retryAfter },
+        429,
+        requestId
+      )
     }
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)

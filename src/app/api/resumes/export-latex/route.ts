@@ -6,8 +6,15 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { checkResumeExportQuota, getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { renderInlineLatex } from '@/lib/inline-format'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
+import { exportLatexSchema } from '@/lib/validation/schemas'
 
 export const runtime = 'nodejs'
+
+// SECURITY: burst-protect the external LaTeX compile microservice the same
+// way /api/cover-letter/pdf protects react-pdf — monthly quotas alone don't
+// stop a fast client-side loop within a single billing period.
+const EXPORT_LATEX_RATE_LIMIT_PER_HOUR = 20
 
 type LatexPersonal = {
   firstName?: string
@@ -548,6 +555,26 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
+    const rateLimit = await checkRouteRateLimit({
+      name: 'resumes-export-latex',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: EXPORT_LATEX_RATE_LIMIT_PER_HOUR,
+      windowSeconds: 3600,
+    })
+    if (!rateLimit.ok) {
+      logger.warn('Resume LaTeX export rate-limit hit', {
+        requestId,
+        route: '/api/resumes/export-latex',
+        userId,
+        retryAfter: rateLimit.retryAfter,
+      })
+      return jsonWithRequestId(
+        { error: clientErrorMessage('rate_limit'), retryAfter: rateLimit.retryAfter },
+        429,
+        requestId
+      )
+    }
+
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
     const plan = await getUserPlan(userId, emailHint)
     const quotaCheck = await checkResumeExportQuota(userId, plan)
@@ -566,12 +593,19 @@ export async function POST(req: Request) {
       )
     }
 
-    const payload = await req.json()
-    const { data } = payload
-
-    if (!data) {
-      return jsonWithRequestId({ error: 'Missing resume data' }, 400, requestId)
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
+
+    const parsedBody = exportLatexSchema.safeParse(rawBody)
+    if (!parsedBody.success) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+    }
+
+    const { data } = parsedBody.data
 
     const serializedData = JSON.stringify(data)
     if (serializedData.length > MAX_EXPORT_PAYLOAD_CHARS) {
