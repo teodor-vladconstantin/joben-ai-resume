@@ -5,6 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   '/resumes(.*)',
   '/cover-letters(.*)',
   '/ai-review(.*)',
+  '/feedback(.*)',
 ])
 
 export default clerkMiddleware(
