@@ -39,7 +39,7 @@ export const statCards = [
 
 export const atsPreviewContent = {
   heading: "See What Recruiters See In Your Resume",
-  subheading: "Our AI analyzes your resume against millions of job postings to give you an exact match score.",
+  subheading: "Our AI reviews your resume against real job postings so you know where you stand.",
   score: 93,
   scoreLabel: "Excellent",
   categories: [
