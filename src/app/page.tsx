@@ -47,7 +47,7 @@ export default function Home() {
         offers: {
           '@type': 'Offer',
           price: '0',
-          priceCurrency: 'USD',
+          priceCurrency: 'EUR',
         },
       },
       {
