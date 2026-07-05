@@ -89,7 +89,7 @@ export default async function PricingPage() {
               <h3 className="text-heading font-medium text-text-primary">Free</h3>
               <p className="text-text-muted text-xs mt-1">Get started with the basics</p>
               <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">$0</span>
+                <span className="text-display text-text-primary font-semibold">€0</span>
                 <span className="text-body text-text-muted"> /month</span>
               </div>
               <ul className="space-y-2 mb-6">
@@ -118,7 +118,7 @@ export default async function PricingPage() {
               <h3 className="text-heading font-medium text-text-primary">Pro</h3>
               <p className="text-text-muted text-xs mt-1">Unlock AI-powered features</p>
               <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">$9</span>
+                <span className="text-display text-text-primary font-semibold">€9</span>
                 <span className="text-body text-text-muted"> /month</span>
               </div>
               <ul className="space-y-2 mb-6">
