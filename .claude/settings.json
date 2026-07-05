@@ -19,6 +19,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify update . >/dev/null 2>&1 || true",
+            "statusMessage": "Updating graphify knowledge graph..."
+          }
+        ]
+      }
     ]
   }
 }
