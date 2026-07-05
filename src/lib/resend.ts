@@ -180,7 +180,7 @@ export async function sendFeedbackRequestEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">Salut, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">${introLine}</p>
   <p style="margin:0 0 18px 0;">Sunt Duku, fac Joben. Mi-ar plăcea să aflu părerea ta directă — răspunde la acest email cu orice gând ai, bun sau rău.</p>
-  <p style="margin-top:18px;color:#6b7280;font-size:13px;">Preferi un formular scurt? <a href="https://app.youform.com/forms/vorotlgc" style="color:#0A9548;">Lasă feedback aici</a>.</p>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">Preferi un formular scurt? <a href="https://joben.eu/feedback" style="color:#0A9548;">Lasă feedback aici</a>.</p>
 </div>`,
   })
 }
