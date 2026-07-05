@@ -116,10 +116,12 @@ Config: docker-compose.prod.yml, CI/CD: .github/workflows/deploy.yml
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships. graphify-out/graph.json exists in this repo.
 
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+MANDATORY rules (not optional guidance — a PreToolUse hook in .claude/settings.json already enforces this at the tool level for Bash grep/rg/find and for Read/Glob on source files, injecting a reminder if you skip it):
+- Before grepping, reading, or exploring source files for a codebase question, you MUST first run `graphify query "<question>"` (or `graphify path "<A>" "<B>"` for relationships, `graphify explain "<concept>"` for a focused concept). These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output. Only fall back to raw grep/Read after graphify has oriented you, or when modifying/debugging specific lines you already located.
+- This rule applies to subagents too — include it explicitly in every subagent prompt that involves code exploration, since subagents don't inherit this file's hooks/instructions automatically.
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+Keeping the graph current is automatic: a PostToolUse hook in .claude/settings.json runs `graphify update .` (AST-only, no API cost) after every Edit/MultiEdit/Write. You do not need to remember to run this yourself — it fires unconditionally after any file change in this repo.
