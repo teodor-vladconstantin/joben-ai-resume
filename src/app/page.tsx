@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { heroContent, statCards, atsPreviewContent, pricingPlans, faqItems, footerContent, productLoopSteps } from '@/lib/content'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import { PlanCta } from '@/components/pricing/PlanCta'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
@@ -258,7 +259,11 @@ export default function Home() {
                     <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                   ))}
                 </ul>
-                <AuthAwareSignupLink className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}>{plan.cta}</AuthAwareSignupLink>
+                <PlanCta
+                  label={plan.cta}
+                  paid={Boolean(plan.isComingSoon)}
+                  className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}
+                />
               </Card>
             ))}
           </div>
