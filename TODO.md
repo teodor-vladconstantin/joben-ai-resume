@@ -1,4 +1,11 @@
 ## Active
+- feature/feedback-beta (branch off cleanup):
+  - [DONE] T1 Currency USD($)→EUR(€) in UI (content.ts, pricing/page.tsx, page.tsx JSON-LD)
+  - [DONE] T2 UpgradeModal → "Payments not active yet" beta notice, CTA to /feedback
+  - [DONE] T3 /feedback page (Clerk-protected, Supabase insert, already-submitted guard)
+  - [DONE] T4 Resend: replace Youform link with https://joben.eu/feedback
+  - [DONE] T5 Admin — skipped by design (feedback viewed in Supabase)
+  - NOTE: feedback table does NOT exist in Supabase yet — run migrations/feedback.sql manually
 - [DONE] Project parsing fix: Python parser now extracts inline `role` + period from project description prefixes (e.g. "Solo Founder Jan 2024 - Present ..."), prevents hallucinated 1950 placeholder years, emits `role` + `bullets` fields, and prioritises literal dates over hallucinated explicit fields. `pdf-import.ts`, `ResumeBuilder` projects state, Harvard template, and LaTeX export all consume the new fields and render projects with role/period header + clean per-line bullets. Education builder panels now force the canonical "Education" label so legacy garbage titles never leak into the preview/PDF. Tests: 27 Python + 59 TS pass; `tsc --noEmit`, `npm run lint`, `npm run build` all green.
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
 - [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports
