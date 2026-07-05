@@ -130,7 +130,7 @@ export default async function PricingPage() {
                 ))}
               </ul>
               <div className="block w-full text-center">
-                <UpgradeToProButton signedIn={Boolean(userId)} />
+                <UpgradeToProButton />
               </div>
             </div>
           </div>
