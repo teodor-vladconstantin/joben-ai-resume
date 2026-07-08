@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/layout/Sidebar'
-import { UserButton } from '@clerk/nextjs'
+import { AccountUserButton } from '@/components/settings/AccountUserButton'
 import { Button } from '@/components/ui/Button'
 import { Divider } from '@/components/ui/Divider'
 import { Badge } from '@/components/ui/Badge'
@@ -28,7 +28,7 @@ export default async function SettingsPage() {
                 Manage your profile and account details.
               </p>
             </div>
-            <UserButton />
+            <AccountUserButton />
           </div>
           <Divider className="my-4" />
           <div className="space-y-3">
