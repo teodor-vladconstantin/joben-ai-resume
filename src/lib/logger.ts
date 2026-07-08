@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 
 export type LogLevel = 'info' | 'warn' | 'error'
 
@@ -44,6 +45,10 @@ function emit(level: LogLevel, message: string, context?: LogContext) {
   const line = JSON.stringify(payload)
   if (level === 'error') {
     console.error(line)
+    // These are caught-and-handled errors (the client only ever sees the
+    // sanitized clientErrorMessage()), so without this they never reach
+    // Sentry and the real cause is unrecoverable after the fact.
+    Sentry.captureMessage(message, { level: 'error', extra: context })
   } else if (level === 'warn') {
     console.warn(line)
   } else {

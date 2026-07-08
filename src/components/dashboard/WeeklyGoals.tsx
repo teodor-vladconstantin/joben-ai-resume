@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { Flame, Target, CheckCircle2 } from 'lucide-react'
 
 type Stats = { resumes: number; coverLetters: number; aiReviews: number }
@@ -43,11 +43,18 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
   const goalsCompleted = [resumeGoalMet, aiGoalMet, clGoalMet].filter(Boolean).length
   const isActiveToday = goalsCompleted > 0
 
-  const streak = useMemo(() => computeStreak(isActiveToday), [isActiveToday])
+  // `computeStreak` reads localStorage, which doesn't exist on the server —
+  // computing it inline (e.g. via useMemo) would make the client's first
+  // render disagree with the server-rendered markup. Start at a
+  // server-safe default and only read the real value after mount.
+  const [streak, setStreak] = useState(0)
 
   useEffect(() => {
-    if (isActiveToday) saveStreak(streak)
-  }, [isActiveToday, streak])
+    const computed = computeStreak(isActiveToday)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount read of localStorage, not a subscribable external store
+    setStreak(computed)
+    if (isActiveToday) saveStreak(computed)
+  }, [isActiveToday])
 
   const goals = [
     { label: 'Build a resume', current: rsCount, target: 1, done: resumeGoalMet },
