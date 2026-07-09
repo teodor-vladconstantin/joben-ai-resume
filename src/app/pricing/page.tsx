@@ -11,6 +11,28 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/pricing',
   },
+  openGraph: {
+    title: 'Pricing | Joben AI Resume Builder',
+    description: 'Free and Pro plans for AI-powered resume building. Start free, upgrade when you need AI features.',
+    url: '/pricing',
+    siteName: 'Joben',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Joben AI Resume Builder',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pricing | Joben AI Resume Builder',
+    description: 'Free and Pro plans for AI-powered resume building. Start free, upgrade when you need AI features.',
+    images: ['/og-image.png'],
+  },
 }
 
 const freeFeatures = [
