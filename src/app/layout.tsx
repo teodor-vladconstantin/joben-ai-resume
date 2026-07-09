@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     siteName: 'Joben',
     images: [
       {
-        url: '/jobeneu_logo.jpg', // Fallback, recommend adding a proper 1200x630 og-image.jpg
-        width: 800,
-        height: 600,
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
         alt: 'Joben AI Resume Builder',
       },
     ],
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     title: 'Joben | Best Free AI Resume Builder for ATS Optimization',
     description: 'Joben is a free AI resume builder that helps you create ATS-optimized resumes and cover letters in minutes. Pass resume screeners and get more interviews with our proven templates.',
     creator: '@joben_ai',
-    images: ['/jobeneu_logo.jpg'], // Fallback
+    images: ['/og-image.png'],
   },
 }
 
