@@ -145,7 +145,9 @@ export async function fetchOwnedRow<T>(opts: {
     if (isMissingRelation(error)) {
       return { ok: false, response: apiError(clientErrorMessage('server', opts.missingRelationMessage), 500) }
     }
-    logger.error(opts.logLabel, { ...opts.logContext, error: error.message })
+    // Expected case (deleted resource, stale link, wrong owner) — warn, not
+    // error, so it doesn't get forwarded to Sentry as a real failure.
+    logger.warn(opts.logLabel, { ...opts.logContext, error: error.message })
     return { ok: false, response: apiError(clientErrorMessage('not_found'), 404) }
   }
 
