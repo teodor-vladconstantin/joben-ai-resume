@@ -5,7 +5,30 @@
   - [DONE] T3 /feedback page (Clerk-protected, Supabase insert, already-submitted guard)
   - [DONE] T4 Resend: replace Youform link with https://joben.eu/feedback
   - [DONE] T5 Admin — skipped by design (feedback viewed in Supabase)
-  - NOTE: feedback table does NOT exist in Supabase yet — run migrations/feedback.sql manually
+  - NOTE (stale, corrected 2026-07-11): `npx supabase migration list` confirms both
+    `20260705120000_add_feedback_table.sql` and `20260421000000_add_resume_analyses_table.sql`
+    are already applied on the linked remote project (ResumeAIMax) — Local/Remote match for
+    all 12 migrations. No action needed.
+- [DONE] 2026-07-11 error audit + fixes (tsc/lint clean, CI green, prod deploy verified up to date via Vercel API):
+  - `src/components/dashboard/RecentDocuments.tsx`: pinned `toLocaleDateString('en-US')` — SSR used server
+    locale, client used browser locale, causing the still-open dashboard hydration error (JAVASCRIPT-NEXTJS-5,
+    4 users, mobile Safari en-GB) that the prior `fd297fd` hydration fix (WeeklyGoals streak) didn't cover.
+  - `src/lib/api-response.ts` `fetchOwnedRow()`: downgraded the expected "not found / not owned" `.single()`
+    case from `logger.error` to `logger.warn`, so it stops forwarding to Sentry as a real error
+    (`logger.ts`'s `Sentry.captureMessage` on every `error`-level log was turning legitimate 404s into noise —
+    this was JAVASCRIPT-NEXTJS-M).
+  - Several other Sentry "unresolved" issues (E, 4, 7, 8, G, 1/2/3, 9/A, 6) were confirmed already fixed by
+    earlier refactors (PDF parsing moved off pdfjs-dist to the external Hetzner service; JSON.parse wrapped
+    in try/catch for upstream parser errors; heroContent no longer a string with `.replace()`) or are dev/
+    browser-extension noise (Firefox reader mode, Clerk live keys on localhost) — need manual Resolved/Ignored
+    in the Sentry dashboard, no code change.
+  - `src/app/api/resumes/export-latex/route.ts`: fixed bold/italic/underline text in builder losing the
+    space on both sides in the exported PDF (e.g. "coordinateda team of 7to build"). Root cause: `escapeLatex()`
+    calls `normalizeLatexText()` which `.trim()`s — and `escapeLatexFormatted()` was calling it per-segment
+    via `renderInlineLatex`'s escape callback, so the space at each text/bold boundary got trimmed away
+    independently on both sides. Fixed by normalizing the whole string once before tokenizing, and extracting
+    a `escapeLatexChars()` (char-escaping only, no trim) used for per-segment escaping. Verified with a
+    standalone repro script against old vs. new logic. Not a Hetzner/LaTeX-service issue — pure Next.js bug.
 - [DONE] Project parsing fix: Python parser now extracts inline `role` + period from project description prefixes (e.g. "Solo Founder Jan 2024 - Present ..."), prevents hallucinated 1950 placeholder years, emits `role` + `bullets` fields, and prioritises literal dates over hallucinated explicit fields. `pdf-import.ts`, `ResumeBuilder` projects state, Harvard template, and LaTeX export all consume the new fields and render projects with role/period header + clean per-line bullets. Education builder panels now force the canonical "Education" label so legacy garbage titles never leak into the preview/PDF. Tests: 27 Python + 59 TS pass; `tsc --noEmit`, `npm run lint`, `npm run build` all green.
 - [DONE] Replaced navbar "J" badge with jobeneu logo and set favicon to `jobeneu_logo.jpg`
 - [DONE] Updated Free plan limits across UI + Upstash/Redis (15 bullets, 3 cover letters, 3 tailoring, 5 exports) and added subtle watermark on Free PDF exports

@@ -130,11 +130,13 @@ function normalizeHref(value: string): string {
   return `https://${trimmed}`
 }
 
-function escapeLatex(text: string | undefined): string {
-  const normalized = normalizeLatexText(text)
-  if (!normalized) return ''
-
-  const escaped = normalized
+// Escapes LaTeX-special characters only — no whitespace normalization. Used
+// both for whole strings (via `escapeLatex`, after normalizing once) and for
+// individual inline-format segments (via `escapeLatexFormatted`), where
+// re-normalizing per segment would trim the space right at a bold/italic
+// boundary and glue adjacent words together.
+function escapeLatexChars(text: string): string {
+  const escaped = text
     .replace(/\\/g, '\\textbackslash ')
     .replace(/&/g, '\\&')
     .replace(/%/g, '\\%')
@@ -148,6 +150,12 @@ function escapeLatex(text: string | undefined): string {
 
   // Prevent overfull lines for very long unbroken strings (ids, hashes, accidental keyboard mash).
   return escaped.replace(/([A-Za-z0-9]{24})(?=[A-Za-z0-9])/g, '$1\\allowbreak{}')
+}
+
+function escapeLatex(text: string | undefined): string {
+  const normalized = normalizeLatexText(text)
+  if (!normalized) return ''
+  return escapeLatexChars(normalized)
 }
 
 function normalizeBulletCandidate(text: string): string {
@@ -165,7 +173,9 @@ function normalizeBulletCandidate(text: string): string {
 }
 
 function escapeLatexFormatted(text: string | undefined): string {
-  return renderInlineLatex(text, (segment) => escapeLatex(segment))
+  const normalized = normalizeLatexText(text)
+  if (!normalized) return ''
+  return renderInlineLatex(normalized, (segment) => escapeLatexChars(segment))
 }
 
 function splitProjectDescription(description: string | undefined): string[] {
