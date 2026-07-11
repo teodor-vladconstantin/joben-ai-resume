@@ -32,7 +32,7 @@ export function RecentDocuments({ recentDocs }: { recentDocs: RecentDocument[] }
             </div>
             <h4 className="text-(--foreground) font-medium mb-1">{doc.title || 'Untitled Document'}</h4>
             <p className="text-xs text-(--muted)">
-              {getDocumentTypeLabel(doc)}  -  Updated {doc.updated_at ? new Date(doc.updated_at).toLocaleDateString() : 'N/A'}
+              {getDocumentTypeLabel(doc)}  -  Updated {doc.updated_at ? new Date(doc.updated_at).toLocaleDateString('en-US') : 'N/A'}
             </p>
           </Link>
         )) : null}
