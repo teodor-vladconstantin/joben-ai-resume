@@ -110,6 +110,16 @@ export default function RootLayout({
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={`${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+          {process.env.NEXT_PUBLIC_GTM_ID && (
+            <noscript>
+              <iframe
+                src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+                height="0"
+                width="0"
+                style={{ display: 'none', visibility: 'hidden' }}
+              />
+            </noscript>
+          )}
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"

@@ -1,10 +1,13 @@
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleTagManager } from '@next/third-parties/google'
 import { PostHogProvider } from '@/components/PostHogProvider'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+// GA4 is configured inside the GTM container (not here) — add a
+// "Google Analytics: GA4 Configuration" tag pointed at G-FBR6C4DH8B
+// with an "All Pages" trigger in the GTM UI.
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +16,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       <WebVitalsReporter />
       <Analytics />
       <SpeedInsights />
-      {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
+      {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
     </PostHogProvider>
   )
 }
