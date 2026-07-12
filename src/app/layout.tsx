@@ -4,9 +4,8 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import { JetBrains_Mono } from 'next/font/google'
 import { clerkAppearance } from '@/lib/clerk-appearance'
-import { Analytics } from '@vercel/analytics/next'
 import { validateEnv } from '@/lib/env'
-import { PostHogProvider } from '@/components/PostHogProvider'
+import { ClientProviders } from '@/components/ClientProviders'
 
 validateEnv()
 
@@ -141,10 +140,9 @@ export default function RootLayout({
               })
             }}
           />
-          <PostHogProvider>
+          <ClientProviders>
             {children}
-          </PostHogProvider>
-          <Analytics />
+          </ClientProviders>
         </body>
       </html>
     </ClerkProvider>

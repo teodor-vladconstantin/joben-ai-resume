@@ -1,4 +1,16 @@
 ## Active
+- [DONE] 2026-07-12 Analytics/observability setup: PostHog (fixed missing `.env.local` token — was silently
+  a no-op), GA4 (`G-FBR6C4DH8B` via `@next/third-parties/google`, soft-nav pageviews are automatic per GA4
+  Enhanced Measurement), Sentry (verified already fully wired: client/server/edge configs, tunnelRoute,
+  global-error.tsx — no changes needed), Vercel Speed Insights + Web Vitals→PostHog (`WebVitalsReporter.tsx`).
+  New `src/components/ClientProviders.tsx` consolidates all providers; `layout.tsx` simplified to use it.
+  CSP (`next.config.ts`) extended for googletagmanager.com/google-analytics.com. Verified live in browser
+  (PostHog + Sentry both round-tripped 200s to real backends; GA4/Vercel scripts render correctly in HTML/CSP
+  but couldn't be network-verified from this sandboxed browser, which blocks external script loads).
+  Follow-ups (not done, need user decision): (1) no `SENTRY_AUTH_TOKEN` in Dockerfile/CI → source maps
+  aren't uploaded on the self-hosted Docker build, stack traces in Sentry will be minified; (2) `CLAUDE.md`
+  "Deployment Target: VPS" section is stale — repo confirms hybrid: Next.js app on Vercel, only
+  latex-service/resume-parser on Hetzner via `docker-compose.prod.yml`.
 - feature/feedback-beta (branch off cleanup):
   - [DONE] T1 Currency USD($)→EUR(€) in UI (content.ts, pricing/page.tsx, page.tsx JSON-LD)
   - [DONE] T2 UpgradeModal → "Payments not active yet" beta notice, CTA to /feedback

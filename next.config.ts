@@ -74,6 +74,7 @@ const SECURITY_HEADERS = [
         CLERK_PROXY_HOST,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
+        'https://www.googletagmanager.com',
       ].join(' '),
       [
         'script-src-elem',
@@ -84,6 +85,7 @@ const SECURITY_HEADERS = [
         CLERK_PROXY_HOST,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
+        'https://www.googletagmanager.com',
       ].join(' '),
       [
         'connect-src',
@@ -97,6 +99,10 @@ const SECURITY_HEADERS = [
         'https://eu-assets.i.posthog.com',
         'https://*.ingest.sentry.io',
         'https://api.stripe.com',
+        'https://www.googletagmanager.com',
+        'https://www.google-analytics.com',
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
       ].join(' '),
       [
         'frame-src',
