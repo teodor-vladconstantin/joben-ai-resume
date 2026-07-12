@@ -1,4 +1,4 @@
-import { Analytics } from '@vercel/analytics/next'
+import { AnalyticsGate } from '@/components/AnalyticsGate'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
 import { PostHogProvider } from '@/components/PostHogProvider'
@@ -14,7 +14,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     <PostHogProvider>
       {children}
       <WebVitalsReporter />
-      <Analytics />
+      <AnalyticsGate />
       <SpeedInsights />
       {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
     </PostHogProvider>
