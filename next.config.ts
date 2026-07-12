@@ -112,6 +112,7 @@ const SECURITY_HEADERS = [
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://hooks.stripe.com',
+        'https://www.googletagmanager.com',
       ].join(' '),
       'upgrade-insecure-requests',
     ].join('; '),
