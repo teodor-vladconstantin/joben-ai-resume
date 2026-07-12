@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/layout/Sidebar'
 import { AccountUserButton } from '@/components/settings/AccountUserButton'
 import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
+import { ExportDataButton } from '@/components/settings/ExportDataButton'
 import { Divider } from '@/components/ui/Divider'
 import { Badge } from '@/components/ui/Badge'
 import { Mail, CreditCard, Bell, Shield } from 'lucide-react'
@@ -39,6 +40,7 @@ export default async function SettingsPage() {
               </div>
               <Badge variant="muted">Managed by Clerk</Badge>
             </div>
+            <ExportDataButton />
           </div>
         </div>
 
