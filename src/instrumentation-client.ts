@@ -4,6 +4,7 @@
 
 import posthog from 'posthog-js'
 import * as Sentry from "@sentry/nextjs";
+import { getCookieConsent } from '@/lib/cookie-consent'
 
 const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 
@@ -15,6 +16,7 @@ if (posthogProjectToken) {
     capture_pageview: 'history_change',
     capture_pageleave: true,
     disable_session_recording: false,
+    opt_out_capturing_by_default: getCookieConsent() !== 'accepted',
   })
 }
 
