@@ -6,6 +6,7 @@ import { JetBrains_Mono } from 'next/font/google'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { validateEnv } from '@/lib/env'
 import { ClientProviders } from '@/components/ClientProviders'
+import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
 validateEnv()
 
@@ -110,6 +111,11 @@ export default function RootLayout({
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={`${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+          <Script
+            id="consent-mode-default"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: CONSENT_MODE_DEFAULT_SCRIPT }}
+          />
           {process.env.NEXT_PUBLIC_GTM_ID && (
             <noscript>
               <iframe
