@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
 }
 
-const lastUpdated = 'April 20, 2026'
+const lastUpdated = 'July 12, 2026'
 
 const sections = [
   {
@@ -43,7 +43,7 @@ const sections = [
   {
     title: '2. Eligibility and Accounts',
     content:
-      'You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account.',
+      'You must be at least 16 years old to use Joben. You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account.',
   },
   {
     title: '3. Description of Services',
@@ -51,49 +51,59 @@ const sections = [
       'Joben provides resume and cover letter tools, AI-powered analysis, and export features. Features and limits may depend on your plan.',
   },
   {
-    title: '4. Billing, Upgrades, and Refunds',
+    title: '4. No Guarantee of Employment Outcomes',
+    content:
+      'Joben is a resume-writing and optimization tool. We do not guarantee interviews, job offers, or any specific employment outcome. AI-generated scores and suggestions are informational aids, not a promise of results.',
+  },
+  {
+    title: '5. Billing, Upgrades, and Refunds',
     content:
       'Paid plans are billed according to the pricing shown at checkout. Taxes may apply. Unless required by law, fees are non-refundable.',
   },
   {
-    title: '5. Acceptable Use',
+    title: '6. Acceptable Use',
     content:
       'You agree not to use Joben for unlawful, abusive, or fraudulent activity, and not to attempt unauthorized access, disruption, or misuse of the platform.',
   },
   {
-    title: '6. AI Output Disclaimer',
+    title: '7. AI Output Disclaimer',
     content:
-      'AI-generated suggestions are provided for informational purposes. You are responsible for reviewing, editing, and validating all generated content before use.',
+      'AI-generated suggestions are produced by processing your resume and job-description text through a third-party AI provider (Anthropic). Outputs are provided for informational purposes only. You are responsible for reviewing, editing, and validating all generated content before use, including for accuracy.',
   },
   {
-    title: '7. Your Content',
+    title: '8. Your Content',
     content:
-      'You retain ownership of content you upload or create. You grant us a limited license to process that content only to provide, maintain, and improve the service.',
+      'You retain ownership of content you upload or create. You grant us a limited license to process that content — including sending it to our AI provider — only to provide, maintain, and improve the service.',
   },
   {
-    title: '8. Intellectual Property',
+    title: '9. Intellectual Property',
     content:
       'The Joben platform, branding, software, and related materials are protected by intellectual property laws and remain the property of Joben and its licensors.',
   },
   {
-    title: '9. Suspension and Termination',
+    title: '10. Suspension and Termination',
     content:
-      'We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements.',
+      'We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements. You may delete your account at any time from Settings.',
   },
   {
-    title: '10. Disclaimers and Limitation of Liability',
+    title: '11. Disclaimers and Limitation of Liability',
     content:
-      'The service is provided on an "as is" and "as available" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages.',
+      'The service is provided on an "as is" and "as available" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages, including loss of employment opportunity.',
   },
   {
-    title: '11. Changes to Terms',
+    title: '12. Governing Law',
+    content:
+      'These terms are governed by the laws of the European Union and the jurisdiction in which Joben is established, without regard to conflict-of-law principles, without prejudice to any mandatory consumer-protection rights you have under the law of your country of residence.',
+  },
+  {
+    title: '13. Changes to Terms',
     content:
       'We may update these terms from time to time. Continued use after updates means you accept the revised terms.',
   },
   {
-    title: '12. Contact',
+    title: '14. Contact',
     content:
-      'For legal or privacy-related questions, contact us at duku@joben.eu.',
+      'For legal or privacy-related questions, contact us at privacy@joben.eu.',
   },
 ]
 
