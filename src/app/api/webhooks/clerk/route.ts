@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
     // Handle user creation
     if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data
+    const { id, email_addresses, first_name, last_name } = evt.data
     const primaryEmail = email_addresses?.[0]?.email_address ?? null
 
     const { error } = await supabase.from('users').upsert(
@@ -105,7 +105,6 @@ export async function POST(req: Request) {
         email: primaryEmail,
         first_name: first_name,
         last_name: last_name,
-        avatar_url: image_url,
         plan: 'free',
       },
       { onConflict: 'clerk_id' }
@@ -207,7 +206,7 @@ export async function POST(req: Request) {
 
     // Handle user updates
     if (eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data
+    const { id, email_addresses, first_name, last_name } = evt.data
     const primaryEmail = email_addresses?.[0]?.email_address ?? null
 
     const { error } = await supabase
@@ -218,7 +217,6 @@ export async function POST(req: Request) {
           email: primaryEmail,
           first_name: first_name,
           last_name: last_name,
-          avatar_url: image_url,
         },
         { onConflict: 'clerk_id' }
       )

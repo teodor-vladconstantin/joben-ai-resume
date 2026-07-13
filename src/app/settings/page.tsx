@@ -2,10 +2,11 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/layout/Sidebar'
 import { AccountUserButton } from '@/components/settings/AccountUserButton'
-import { Button } from '@/components/ui/Button'
+import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
+import { ExportDataButton } from '@/components/settings/ExportDataButton'
 import { Divider } from '@/components/ui/Divider'
 import { Badge } from '@/components/ui/Badge'
-import { Mail, CreditCard, Bell, Shield, Trash2 } from 'lucide-react'
+import { Mail, CreditCard, Bell, Shield } from 'lucide-react'
 
 export const metadata = {
   title: 'Settings | Joben',
@@ -39,6 +40,7 @@ export default async function SettingsPage() {
               </div>
               <Badge variant="muted">Managed by Clerk</Badge>
             </div>
+            <ExportDataButton />
           </div>
         </div>
 
@@ -105,15 +107,7 @@ export default async function SettingsPage() {
             </p>
           </div>
           <Divider className="my-4" />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-body text-text-secondary">
-              <Trash2 size={14} className="text-text-muted" />
-              Delete account
-            </div>
-            <Button variant="secondary" size="sm" className="border-red-400/40 text-red-400 hover:border-red-400">
-              Delete Account
-            </Button>
-          </div>
+          <DeleteAccountButton />
         </div>
       </div>
     </DashboardShell>
