@@ -3,7 +3,6 @@
 const resendApiKey = process.env.RESEND_API_KEY
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'Joben <onboarding@resend.dev>'
 const automationFromEmail = 'Joben <no-reply@joben.eu>'
-const feedbackFromEmail = 'Duku from Joben <duku@joben.eu>'
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 function getResendClient() {
@@ -156,31 +155,6 @@ export async function sendRateLimitEmail(input: {
   </ul>
   <a href="${appUrl}/pricing" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Upgrade to Pro</a>
   <p style="margin-top:18px;color:#6b7280;font-size:13px;">Thanks for building with Joben.</p>
-</div>`,
-  })
-}
-
-export async function sendFeedbackRequestEmail(input: {
-  to: string
-  firstName?: string | null
-  trigger: 'resume_created' | 'document_downloaded'
-}): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'acolo'
-
-  const introLine =
-    input.trigger === 'resume_created'
-      ? 'Văd că tocmai ai creat un CV pe Joben.'
-      : 'Văd că tocmai ai descărcat un CV sau o scrisoare de intenție de pe Joben.'
-
-  return sendEmail({
-    from: feedbackFromEmail,
-    to: input.to,
-    subject: 'Cum a fost experiența cu Joben?',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Salut, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">${introLine}</p>
-  <p style="margin:0 0 18px 0;">Sunt Duku, fac Joben. Mi-ar plăcea să aflu părerea ta directă — răspunde la acest email cu orice gând ai, bun sau rău.</p>
-  <p style="margin-top:18px;color:#6b7280;font-size:13px;">Preferi un formular scurt? <a href="https://joben.eu/feedback" style="color:#0A9548;">Lasă feedback aici</a>.</p>
 </div>`,
   })
 }
