@@ -5,6 +5,7 @@
 import posthog from 'posthog-js'
 import * as Sentry from "@sentry/nextjs";
 import { getCookieConsent } from '@/lib/cookie-consent'
+import { scrubSentryEvent } from '@/lib/security/sentry-scrub'
 
 const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 
@@ -42,6 +43,7 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+  beforeSend: scrubSentryEvent,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -6,6 +6,7 @@
 // Design: INCR + EXPIRE on first hit. The race between two concurrent first
 // calls is acceptable: at worst the key keeps the original TTL.
 
+import { createHash } from 'crypto'
 import { getRedisClient } from '@/lib/ratelimit'
 
 export type RouteRateLimitOptions = {
@@ -67,14 +68,15 @@ export async function checkRouteRateLimit(opts: RouteRateLimitOptions): Promise<
 
 /**
  * Best-effort identifier resolver: prefer the authenticated userId, then
- * the X-Forwarded-For client IP, finally a string literal so the limiter
- * still works in development.
+ * a hashed X-Forwarded-For client IP (hashed so raw IPs are never stored
+ * as Redis key names), finally a string literal so the limiter still
+ * works in development.
  */
 export function resolveRateLimitIdentity(req: Request, userId?: string | null): string {
   if (userId) return `u:${userId}`
   const xff = req.headers.get('x-forwarded-for') || ''
   const ip = xff.split(',')[0]?.trim()
-  if (ip) return `ip:${ip}`
+  if (ip) return `ip:${createHash('sha256').update(ip).digest('hex').slice(0, 16)}`
   return 'ip:unknown'
 }
 
