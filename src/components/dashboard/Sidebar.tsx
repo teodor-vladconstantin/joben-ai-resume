@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { LayoutDashboard, FileText, Mail, FileSearch, Plus } from 'lucide-react'
+import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'
 
 const NAV_ITEMS = [
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/resumes', label: 'Resumes', icon: FileText },
   { href: '/cover-letters', label: 'Cover Letters', icon: Mail },
   { href: '/ai-review', label: 'AI Review', icon: FileSearch },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -58,10 +59,6 @@ export function Sidebar() {
           )
         })}
       </nav>
-
-      {/* Settings link temporarily removed: /settings exists but still uses
-          the old pre-redesign shell (different Sidebar/DashboardShell, no
-          resumax-style tokens) pending its own restyle phase. */}
     </aside>
   )
 }
