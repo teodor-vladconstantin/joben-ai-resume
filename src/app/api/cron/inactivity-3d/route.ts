@@ -24,10 +24,24 @@ async function sendWithRetry(input: { to: string; firstName: string | null; maxR
   return sendEmailWithRetry(sendInactivityEmail, input)
 }
 
+// Vercel Cron Jobs always invoke the configured path with GET, never POST —
+// this route (and followup-7d) only exported POST, so every scheduled
+// invocation hit Next.js's default 405 before any route code ran, including
+// the auth check below (confirmed in prod logs: GET .../inactivity-3d 405).
+// GET is aliased to the same handler so Vercel's scheduler actually works;
+// POST stays for manual/ops-script triggers (see RUNBOOK.md).
 export async function POST(request: Request) {
   const requestId = getRequestId(request)
   try {
     if (!isAuthorizedCronRequest(request)) {
+      // Kept as defense-in-depth / fast diagnosis: a misconfigured or
+      // missing CRON_SECRET in the deployment env would otherwise 401 every
+      // invocation silently, with no trace anywhere else.
+      logger.warn('Inactivity cron request rejected: missing or invalid CRON_SECRET', {
+        requestId,
+        route: '/api/cron/inactivity-3d',
+        cronSecretConfigured: Boolean(process.env.CRON_SECRET),
+      })
       return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
@@ -42,6 +56,7 @@ export async function POST(request: Request) {
       .from('users')
       .select('clerk_id, email, first_name')
       .gte('created_at', recentCutoff)
+      .is('inactivity_email_sent_at', null)
       .limit(options.limit)
 
     if (error) {
@@ -56,8 +71,11 @@ export async function POST(request: Request) {
     const candidates = (data || []) as CandidateUser[]
     const candidateIds = candidates.map((user) => user.clerk_id).filter(Boolean)
 
+    // "Already emailed" exclusion lives on users.inactivity_email_sent_at
+    // (set only on confirmed send success, below) — not on the presence of
+    // an email_events row, which used to permanently exclude a user after
+    // any failed/skipped/stuck-processing attempt regardless of outcome.
     const recentActivityIds = new Set<string>()
-    const emailedIds = new Set<string>()
 
     if (candidateIds.length > 0) {
       const { data: recentEvents, error: eventsError } = await supabase
@@ -97,30 +115,9 @@ export async function POST(request: Request) {
       for (const row of recentResumes || []) {
         if (row?.user_id) recentActivityIds.add(row.user_id)
       }
-
-      const { data: priorEmails, error: emailError } = await supabase
-        .from('email_events')
-        .select('user_clerk_id')
-        .eq('email_type', 'inactivity_3d')
-        .in('user_clerk_id', candidateIds)
-
-      if (emailError) {
-        logger.error('Failed to load inactivity email events', {
-          requestId,
-          route: '/api/cron/inactivity-3d',
-          error: emailError.message,
-        })
-        return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
-      }
-
-      for (const row of priorEmails || []) {
-        if (row?.user_clerk_id) emailedIds.add(row.user_clerk_id)
-      }
     }
 
-    const eligibleCandidates = candidates.filter(
-      (user) => !recentActivityIds.has(user.clerk_id) && !emailedIds.has(user.clerk_id)
-    )
+    const eligibleCandidates = candidates.filter((user) => !recentActivityIds.has(user.clerk_id))
 
     if (options.dryRun) {
       return jsonWithRequestId(
@@ -189,6 +186,11 @@ export async function POST(request: Request) {
             email: null,
             status: 'skipped',
             error: 'Missing email',
+            // Release the unique (user, type, source_event_id) slot so a
+            // future run can re-attempt once the user has an email — a
+            // permanent source_event_id here is what caused this class of
+            // bug (skipped/failed rows silently locking users out forever).
+            source_event_id: null,
             metadata: { source: INACTIVITY_EVENT_SOURCE, reason: 'missing-email' },
           })
           .eq('source_event_id', sourceEventId)
@@ -220,6 +222,10 @@ export async function POST(request: Request) {
           .update({
             status: 'failed',
             error: reason,
+            // Same as the missing-email path: null this out so a permanent
+            // send failure (e.g. a transient Resend outage) doesn't lock the
+            // user out of ever getting this email again.
+            source_event_id: null,
             metadata: { source: INACTIVITY_EVENT_SOURCE, attempts: result.attempts },
           })
           .eq('source_event_id', sourceEventId)
@@ -236,6 +242,20 @@ export async function POST(request: Request) {
           metadata: { source: INACTIVITY_EVENT_SOURCE, attempts: result.attempts },
         })
         .eq('source_event_id', sourceEventId)
+
+      const { error: markSentError } = await supabase
+        .from('users')
+        .update({ inactivity_email_sent_at: new Date().toISOString() })
+        .eq('clerk_id', user.clerk_id)
+
+      if (markSentError) {
+        logger.error('Failed to update user inactivity_email_sent_at', {
+          requestId,
+          route: '/api/cron/inactivity-3d',
+          userId: user.clerk_id,
+          error: markSentError.message,
+        })
+      }
 
       sent += 1
     }
@@ -276,3 +296,5 @@ export async function POST(request: Request) {
     return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
+
+export const GET = POST

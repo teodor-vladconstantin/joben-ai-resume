@@ -28,10 +28,23 @@ async function sendWithRetry(input: {
   return sendEmailWithRetry(sendSevenDayFollowupEmail, input)
 }
 
+// Vercel Cron Jobs always invoke the configured path with GET, never POST —
+// this route (and inactivity-3d) only exported POST for months, so every
+// scheduled invocation hit Next.js's default 405 before any route code ran,
+// including the auth check. GET is aliased to the same handler so Vercel's
+// scheduler works; POST stays for manual/ops-script triggers (see RUNBOOK.md).
 export async function POST(request: Request) {
   const requestId = getRequestId(request)
   try {
     if (!isAuthorizedCronRequest(request)) {
+      // See inactivity-3d for why this is logged: a missing/misconfigured
+      // CRON_SECRET in the deployment env silently 401s every invocation
+      // forever, with no trace anywhere else.
+      logger.warn('Followup cron request rejected: missing or invalid CRON_SECRET', {
+        requestId,
+        route: '/api/cron/followup-7d',
+        cronSecretConfigured: Boolean(process.env.CRON_SECRET),
+      })
       return jsonWithRequestId({ error: 'Unauthorized' }, 401, requestId)
     }
 
@@ -234,3 +247,5 @@ export async function POST(request: Request) {
     return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
+
+export const GET = POST
