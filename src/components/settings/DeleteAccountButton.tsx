@@ -33,8 +33,8 @@ export function DeleteAccountButton() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-body text-text-secondary">
-          <Trash2 size={14} className="text-text-muted" />
+        <div className="flex items-center gap-2 text-sm text-(--muted)">
+          <Trash2 size={14} />
           Delete account
         </div>
         <Button
@@ -48,11 +48,11 @@ export function DeleteAccountButton() {
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Delete your account">
-        <p className="text-body text-text-secondary">
+        <p className="text-sm text-(--muted)">
           This permanently deletes your account, all resumes, cover letters, AI reviews, and cancels any active
           subscription. This cannot be undone.
         </p>
-        {error ? <p className="mt-3 text-small text-error">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={deleting}>
             Cancel
