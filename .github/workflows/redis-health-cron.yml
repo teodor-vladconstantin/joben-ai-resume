@@ -1,0 +1,20 @@
+name: Redis Health Check
+
+# Vercel Hobby caps cron jobs at 2 (already used by followup-7d/inactivity-3d
+# in vercel.json) and daily-only frequency, so /api/cron/redis-health can't
+# be scheduled there. This workflow is the free substitute — see
+# RUNBOOK.md "Cron Operations" for details.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping /api/cron/redis-health
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/redis-health" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
