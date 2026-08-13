@@ -106,6 +106,13 @@ export const env = {
   latex: {
     serviceUrl: process.env.LATEX_SERVICE_URL ?? 'http://localhost:3005/api/compile',
   },
+  upstash: {
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    // Not in REQUIRED — the system is designed to run with Redis absent in
+    // dev (rate limiting/quotas fail open in that case, see RUNBOOK.md #5).
+    isConfigured: isEnvSet('UPSTASH_REDIS_REST_URL') && isEnvSet('UPSTASH_REDIS_REST_TOKEN'),
+  },
   app: {
     url: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
   },

@@ -20,6 +20,8 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 
 import { clientErrorMessage } from '@/lib/security/client-error'
 
+import { parseAdminUserIds } from '@/lib/security/admin'
+
 import { adminRateLimitPostSchema } from '@/lib/validation/schemas'
 
 
@@ -27,24 +29,6 @@ import { adminRateLimitPostSchema } from '@/lib/validation/schemas'
 const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs'])
 
 const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap'])
-
-
-
-function parseAdminUserIds(): Set<string> {
-
-  const raw = process.env.ADMIN_USER_IDS || ''
-
-  const ids = raw
-
-    .split(',')
-
-    .map((item) => item.trim())
-
-    .filter(Boolean)
-
-  return new Set(ids)
-
-}
 
 
 

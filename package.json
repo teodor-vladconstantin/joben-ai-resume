@@ -22,6 +22,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
+    "disposable-email-domains": "^1.0.62",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
     "next": "^16.2.6",

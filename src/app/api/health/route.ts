@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
-import { Redis } from '@upstash/redis'
+import { pingUpstash } from '@/lib/upstash'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { parseAdminUserIds } from '@/lib/security/admin'
+import { env } from '@/lib/env'
 
 export const runtime = 'nodejs'
 
@@ -10,15 +12,6 @@ export const runtime = 'nodejs'
 // are configured, which probes failed) is a recon gift to anyone scanning
 // the site. Gate the verbose payload behind the existing admin allowlist
 // and expose only a boolean status to anonymous callers.
-function parseAdminUserIds(): Set<string> {
-  const raw = process.env.ADMIN_USER_IDS || ''
-  return new Set(
-    raw
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
-  )
-}
 
 type ServiceProbe = 'ok' | 'error' | 'skipped'
 
@@ -84,18 +77,9 @@ export async function GET() {
     const latexServiceAuthConfigured = !requireLatexServiceAuth || Boolean(process.env.LATEX_SERVICE_SECRET)
 
     let rateLimitBackend: ServiceProbe = 'skipped'
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      try {
-        const redis = new Redis({
-          url: process.env.UPSTASH_REDIS_REST_URL,
-          token: process.env.UPSTASH_REDIS_REST_TOKEN,
-        })
-
-        await withTimeout(redis.ping(), 2500)
-        rateLimitBackend = 'ok'
-      } catch {
-        rateLimitBackend = 'error'
-      }
+    if (env.upstash.isConfigured) {
+      const pingResult = await pingUpstash(2500)
+      rateLimitBackend = pingResult.ok ? 'ok' : 'error'
     }
 
     let latexService: ServiceProbe = 'skipped'
