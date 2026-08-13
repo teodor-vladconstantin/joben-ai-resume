@@ -1,11 +1,12 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import { WebhookEvent, clerkClient } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
+import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -97,7 +98,90 @@ export async function POST(req: Request) {
     // Handle user creation
     if (eventType === 'user.created') {
     const { id, email_addresses, first_name, last_name } = evt.data
-    const primaryEmail = email_addresses?.[0]?.email_address ?? null
+    const primaryEmail = normalizeEmail(email_addresses?.[0]?.email_address)
+
+    if (isDisposableEmailDomain(primaryEmail)) {
+      logger.error('Blocked signup: disposable email domain', {
+        requestId,
+        route: '/api/webhooks/clerk',
+        eventId: svixId,
+        userId: id,
+      })
+      await capturePostHogEvent({
+        distinctId: id,
+        event: 'signup_blocked_disposable_email',
+        properties: { method: 'clerk' },
+      })
+      try {
+        const client = await clerkClient()
+        await client.users.deleteUser(id)
+      } catch (deleteError) {
+        logger.error('Failed to delete Clerk user with disposable email', {
+          requestId,
+          route: '/api/webhooks/clerk',
+          eventId: svixId,
+          userId: id,
+          error: deleteError instanceof Error ? deleteError.message : 'Unknown error',
+        })
+      }
+      // Return 200 (event already claimed via webhook_events) so svix does
+      // not retry-storm; no `users` row is created, so no free-tier quota
+      // is ever granted for this account.
+      return jsonWithRequestId({ message: 'Signup blocked' }, 200, requestId)
+    }
+
+    if (email_addresses?.[0]?.verification?.status !== 'verified') {
+      logger.warn('Signup completed with unverified email', {
+        requestId,
+        route: '/api/webhooks/clerk',
+        eventId: svixId,
+        userId: id,
+      })
+    }
+
+    const consentFields: { tos_accepted_at?: string; tos_version?: string; signup_ip_hash?: string } = {}
+    const consentToken = evt.data.unsafe_metadata?.consentToken
+    if (typeof consentToken === 'string' && consentToken.length > 0) {
+      const { data: consent, error: consentLookupError } = await supabase
+        .from('signup_consents')
+        .select('ip_hash, tos_version, consumed_at, expires_at')
+        .eq('token', consentToken)
+        .maybeSingle()
+
+      if (consentLookupError) {
+        logger.warn('Signup consent lookup failed', {
+          requestId,
+          route: '/api/webhooks/clerk',
+          eventId: svixId,
+          userId: id,
+          error: consentLookupError.message,
+        })
+      } else if (consent && !consent.consumed_at && new Date(consent.expires_at) > new Date()) {
+        await supabase
+          .from('signup_consents')
+          .update({ consumed_at: new Date().toISOString() })
+          .eq('token', consentToken)
+        consentFields.tos_accepted_at = new Date().toISOString()
+        consentFields.tos_version = consent.tos_version
+        consentFields.signup_ip_hash = consent.ip_hash
+      } else {
+        logger.warn('Signup consent token missing, consumed, or expired', {
+          requestId,
+          route: '/api/webhooks/clerk',
+          eventId: svixId,
+          userId: id,
+        })
+      }
+    } else {
+      // SECURITY: not a hard gate — consistent with this codebase's bias
+      // toward availability — but auditable in Sentry.
+      logger.warn('Signup completed without verifiable ToS consent', {
+        requestId,
+        route: '/api/webhooks/clerk',
+        eventId: svixId,
+        userId: id,
+      })
+    }
 
     const { error } = await supabase.from('users').upsert(
       {
@@ -105,6 +189,7 @@ export async function POST(req: Request) {
         email: primaryEmail,
         first_name: first_name,
         last_name: last_name,
+        ...consentFields,
         plan: 'free',
       },
       { onConflict: 'clerk_id' }
@@ -207,7 +292,7 @@ export async function POST(req: Request) {
     // Handle user updates
     if (eventType === 'user.updated') {
     const { id, email_addresses, first_name, last_name } = evt.data
-    const primaryEmail = email_addresses?.[0]?.email_address ?? null
+    const primaryEmail = normalizeEmail(email_addresses?.[0]?.email_address)
 
     const { error } = await supabase
       .from('users')

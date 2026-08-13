@@ -1,6 +1,8 @@
-import { Redis } from '@upstash/redis'
+import type { Redis } from '@upstash/redis'
 import { createServerClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
+import { getUpstashClient } from '@/lib/upstash'
+import { isGodModeEmailAddress } from '@/lib/plans'
 
 export type Plan = 'free' | 'pro' | 'recruiting'
 export type Feature = 'covers' | 'jds' | 'bullets' | 'reviews' | 'summaries' | 'cvs'
@@ -95,12 +97,7 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   },
 }
 
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null
+const redis = getUpstashClient()
 
 function normalizePlan(input: string | null | undefined): Plan | null {
   if (input === 'free' || input === 'pro' || input === 'recruiting') {
@@ -237,7 +234,7 @@ export async function getUserPlan(userId: string): Promise<Plan> {
     const supabase = createServerClient()
     const { data, error } = await supabase
       .from('users')
-      .select('plan, lifetime_recruiting_unlocked')
+      .select('plan, email, lifetime_recruiting_unlocked')
       .eq('clerk_id', userId)
       .maybeSingle()
 
@@ -250,9 +247,15 @@ export async function getUserPlan(userId: string): Promise<Plan> {
       return 'free'
     }
 
-    const resolvedPlan = data?.lifetime_recruiting_unlocked
+    // Keep this consistent with @/lib/plans's getUserPlan(), which callers
+    // use for actual AI-call gating — otherwise a god-mode account could get
+    // cached here as free/pro for up to PLAN_CACHE_TTL_SECONDS and see a
+    // wrong (capped) rate-limit status in the UI.
+    const resolvedPlan = isGodModeEmailAddress(data?.email as string | undefined)
       ? 'recruiting'
-      : normalizePlan((data?.plan as string | undefined) || null) || 'free'
+      : data?.lifetime_recruiting_unlocked
+        ? 'recruiting'
+        : normalizePlan((data?.plan as string | undefined) || null) || 'free'
 
     if (redis) {
       try {
@@ -467,7 +470,11 @@ export async function recordLimitHit(userId: string, flagType: FlagType): Promis
     const result = (await pipeline.exec()) as unknown[]
     const hits = toCounter(result[0])
 
-    if (hits >= 5) {
+    // Alert once on the exact threshold crossing, not on every hit from 5
+    // onward — repeat callers past the threshold would otherwise spam the
+    // alert channel every single time they hit a limit for the rest of the
+    // month.
+    if (hits === 5) {
       void notifyAdmin(userId, flagType, hits)
     }
   } catch (error) {
@@ -498,6 +505,16 @@ export async function notifyAdmin(userId: string, flagType: FlagType, hits: numb
   } catch {
     // Intentionally swallow console transport errors.
   }
+
+  // logger.error fans out to Sentry (and ALERT_WEBHOOK_URL, if configured)
+  // — see src/lib/logger.ts — so this is now a real, actionable alert
+  // instead of only a console line nobody is watching.
+  logger.error('Abuse threshold exceeded', {
+    userId,
+    flagType,
+    hits,
+    source: 'ratelimit.notifyAdmin',
+  })
 }
 
 export async function blockFeature(userId: string, feature: Feature): Promise<void> {

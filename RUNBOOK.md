@@ -60,6 +60,12 @@ curl -X POST "https://<host>/api/cron/followup-7d?dryRun=true&limit=25" -H "Auth
 curl -X POST "https://<host>/api/cron/followup-7d?limit=100&retries=1" -H "Authorization: Bearer <CRON_SECRET>"
 ```
 
+`/api/cron/redis-health` pings Upstash and alerts via `logger.error` (→ Sentry) on failure. It is **not** registered in `vercel.json` — this project is on Vercel's Hobby plan, which caps cron jobs at 2 total and daily-only frequency, and both slots are already used by `followup-7d`/`inactivity-3d`. Instead, `.github/workflows/redis-health-cron.yml` pings it every 30 minutes via GitHub Actions (free, no Vercel plan dependency). It needs two repo secrets set once under GitHub → Settings → Secrets and variables → Actions:
+- `PROD_APP_URL` — the production URL (e.g. `https://joben.eu`)
+- `CRON_SECRET` — same value as the app's `CRON_SECRET` env var
+
+GitHub Actions `schedule` triggers are best-effort and can lag during high platform load, so treat this as "checked every ~30 min," not real-time. If the project later moves to Vercel Pro, this can be added back to `vercel.json` instead: `{"path": "/api/cron/redis-health", "schedule": "*/15 * * * *"}`, and the workflow file can be removed.
+
 ## Incident Playbooks
 
 ### 1) Health endpoint degraded
@@ -89,8 +95,9 @@ curl -X POST "https://<host>/api/cron/followup-7d?limit=100&retries=1" -H "Autho
 ### 5) Rate limiting degraded or bypass risk
 1. Confirm `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set and valid.
 2. Verify health check shows `rateLimitBackend=ok`.
-3. If Redis is unavailable, APIs should fail closed with 503; do not bypass this behavior in production.
-4. Restore Redis connectivity before reopening traffic.
+3. By design, `src/lib/ratelimit.ts` and `src/lib/security/route-rate-limit.ts` **fail open** when Redis is unreachable — a deliberate availability tradeoff (a missing/degraded Redis must not lock users out of the product), not a bug. The one deliberate exception is `/api/signup/consent`, which fails **closed** (503) on missing Redis, since it is a low-traffic, abuse-specific gate rather than an AI-quota hot path.
+4. `/api/cron/redis-health` pushes a `logger.error` (→ Sentry) when Upstash is unreachable, so a Redis outage is now alerted instead of silently degrading quota enforcement — but it needs an external scheduler to actually fire on Vercel Hobby (see "Cron Operations" above). Check Sentry for `Upstash Redis health check failed` if you suspect an outage went unnoticed, and confirm the external scheduler is still active if alerts have gone quiet for a suspiciously long time.
+5. Restore Redis connectivity before reopening traffic; there is no need to change the fail-open code path to recover — it self-heals once Redis is reachable again.
 
 ### 6) Checkout failures for Pro upgrades
 1. Verify `STRIPE_SECRET_KEY` and `STRIPE_PRO_PRICE_ID`.
