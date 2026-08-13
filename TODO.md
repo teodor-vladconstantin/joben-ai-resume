@@ -1,4 +1,39 @@
 ## Active
+- [DONE] 2026-08-13 Free-trial abuse prevention + security fine-tuning (Stripe untouched, per user request):
+  - Faza 1: disposable-email blocking in Clerk webhook (`src/lib/security/disposable-email.ts`, new dep
+    `disposable-email-domains`) — blocked signups get their Clerk user deleted, no `users` row created, no
+    free-tier quota granted. Email normalization (trim+lowercase) added to `user.created`/`user.updated`.
+  - Faza 2: server-side ToS/Privacy consent tracking (`users.tos_accepted_at/tos_version/signup_ip_hash` +
+    `signup_consents` table, migration `20260813000000_add_signup_consent.sql`) + new
+    `POST /api/signup/consent` (fails CLOSED with 503 if Redis is down — the one deliberate exception to
+    this codebase's global fail-open rate-limit policy, since it's a low-traffic abuse gate not an AI-quota
+    hot path), 6/hour per-IP throttle. Sign-up page now calls it before showing Clerk's form and threads the
+    token through `unsafeMetadata`; webhook consumes it into the `users` upsert.
+  - Faza 3: `src/lib/upstash.ts` (single Redis client source of truth, replaces duplicated construction in
+    ratelimit.ts + health/route.ts) + `/api/cron/redis-health` pushes `logger.error`→Sentry on Upstash
+    outage (previously silent). Confirmed user is on Vercel Hobby (2 cron jobs max, daily-only), which was
+    already fully used by followup-7d/inactivity-3d — removed the 3rd `vercel.json` entry (would likely have
+    broken deploy) and added `.github/workflows/redis-health-cron.yml` instead (pings every 30 min, free,
+    no Vercel plan dependency). RUNBOOK.md #5 corrected (previously claimed fail-closed-with-503, code
+    actually fails open by design).
+  - Faza 4: `notifyAdmin()` abuse alerts (5+ hits/month/feature) now also `logger.error` (→ Sentry), and only
+    fire once at the exact threshold crossing (`hits === 5`, was `>= 5`) to avoid alert spam.
+  - Faza 5: fixed `ratelimit.ts`'s internal cached `getUserPlan()` to respect `GOD_MODE_EMAILS` (was
+    inconsistent with `plans.ts`'s version used for actual AI-gating — could show a wrong capped status in
+    the UI for up to 1h); deduplicated `parseAdminUserIds()` into `src/lib/security/admin.ts`; added
+    `env.upstash.isConfigured` to `src/lib/env.ts`.
+  - Verified: `tsc --noEmit` clean, `npm run lint` clean on all touched files (pre-existing ~1400
+    error/warning count in `npm run lint` output is from eslint scanning a stale `.next` build dir inside
+    `.claude/worktrees/gdpr-compliance/` — unrelated to this work, not fixed, flagged to user), full test
+    suite 110/110 passing (2 new test files: `tests/security/disposable-email.test.ts`,
+    `tests/api/signup-consent.test.ts`).
+  - [DONE] Clerk Dashboard Faza 0 toggles enabled by user.
+  - [DONE] Migration `20260813000000_add_signup_consent.sql` pushed to remote Supabase (project
+    `vdgjxejunpfxvnpxyazq`) via `npx supabase db push` (no Docker needed — CLI connects to remote directly);
+    `npx supabase migration list` confirms local/remote in sync for all 15 migrations.
+  - [ ] User needs to add two GitHub repo secrets (Settings → Secrets and variables → Actions) for the new
+    redis-health workflow to actually run: `PROD_APP_URL` (e.g. `https://joben.eu`) and `CRON_SECRET` (same
+    value as the app's env var).
 - [DONE] 2026-07-12 Analytics/observability setup: PostHog (fixed missing `.env.local` token — was silently
   a no-op), GA4 (`G-FBR6C4DH8B` via `@next/third-parties/google`, soft-nav pageviews are automatic per GA4
   Enhanced Measurement), Sentry (verified already fully wired: client/server/edge configs, tunnelRoute,
