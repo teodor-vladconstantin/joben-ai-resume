@@ -12,13 +12,13 @@ interface FeatureButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 function getNextMonthLabel(resetAt?: string): string {
-  if (!resetAt) return 'luna urmatoare'
+  if (!resetAt) return 'next month'
 
   try {
     const parsed = new Date(resetAt)
-    return parsed.toLocaleString('ro-RO', { month: 'long', timeZone: 'UTC' })
+    return parsed.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
   } catch {
-    return 'luna urmatoare'
+    return 'next month'
   }
 }
 
@@ -45,13 +45,19 @@ export function FeatureButton({
   const limited = blocked || exhausted || tokenExhausted
   const finalDisabled = disabled || limited
 
+  const featureStatus = status?.features?.[feature]
+  // null limit means unlimited on the user's plan; nothing to show.
+  const showRemainingCount = !limited && featureStatus && featureStatus.limit !== null
+
   let tooltip = title || ''
   if (blocked) {
-    tooltip = 'Acces suspendat. Contacteaza suportul.'
+    tooltip = 'Access suspended. Please contact support.'
   } else if (exhausted) {
-    tooltip = `Limita lunara atinsa. Resetare pe 1 ${getNextMonthLabel(status?.resetAt)}.`
+    tooltip = `Monthly limit reached. Resets on the 1st of ${getNextMonthLabel(status?.resetAt)}.`
   } else if (tokenExhausted) {
-    tooltip = 'Creditul AI lunar a fost epuizat.'
+    tooltip = 'Monthly AI credit has been used up.'
+  } else if (showRemainingCount) {
+    tooltip = title || `${featureStatus.remaining} of ${featureStatus.limit} left this month`
   }
 
   const handleClick = async () => {
@@ -73,6 +79,11 @@ export function FeatureButton({
     >
       {limited ? <Lock size={14} aria-hidden="true" /> : null}
       {children}
+      {showRemainingCount ? (
+        <span className="text-xs font-normal opacity-70">
+          ({featureStatus.remaining}/{featureStatus.limit})
+        </span>
+      ) : null}
     </button>
   )
 }
