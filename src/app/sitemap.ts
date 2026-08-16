@@ -1,8 +1,16 @@
 import { MetadataRoute } from 'next';
 import { siteConfig } from '@/lib/content';
+import { resumeRoles } from '@/data/resume-roles';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
+
+  const resumeExamplePages: MetadataRoute.Sitemap = resumeRoles.map((role) => ({
+    url: `${baseUrl}/resume-examples/${role.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
 
   return [
     {
@@ -41,5 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/resume-examples`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    ...resumeExamplePages,
   ];
 }

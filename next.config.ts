@@ -121,6 +121,42 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
+  // pdfjs-dist (used by /api/public/ats-check for local PDF text extraction)
+  // does a runtime `require("@napi-rs/canvas")` to polyfill DOMMatrix at
+  // module load. Neither package is in Next's default serverExternalPackages
+  // allowlist, so Turbopack bundles them instead of leaving them as native
+  // Node requires, the bundled require silently fails to resolve the native
+  // binary, and an unconditional `new DOMMatrix()` later in the same module
+  // then throws. Marking both external makes Next use plain `require()` from
+  // node_modules at runtime, the same way a non-bundled Node app would.
+  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas'],
+  // serverExternalPackages alone stops Turbopack bundling @napi-rs/canvas,
+  // but Vercel's output file tracer (@vercel/nft) still misses its
+  // platform-specific native binary package because @napi-rs/canvas
+  // resolves it via a runtime require() the static tracer can't follow.
+  // Confirmed live: after adding serverExternalPackages the error changed
+  // from a bundling failure to "Cannot find module '@napi-rs/canvas'" at
+  // /var/task/node_modules/pdfjs-dist/legacy/build/pdf.mjs, i.e. the
+  // package genuinely isn't in the deployed function's node_modules.
+  // Explicitly including it is the documented fix for this exact class of
+  // issue (native/runtime assets the tracer can't discover on its own).
+  //
+  // The canvas fix alone got past the DOMMatrix crash but surfaced the same
+  // class of problem one layer down: pdfjs-dist has no `Worker` global in
+  // Node, so it runs its parser in "fake worker" mode by dynamically
+  // importing pdf.worker.mjs from its own build directory, another require
+  // the tracer can't follow statically. Confirmed live via runtime logs:
+  // "Cannot find module '/var/task/node_modules/pdfjs-dist/legacy/build/
+  // pdf.worker.mjs'". Including the whole legacy/build directory covers
+  // that file (and its .map) without hardcoding filenames.
+  outputFileTracingIncludes: {
+    '/api/public/ats-check': [
+      './node_modules/@napi-rs/canvas/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-musl/**/*',
+      './node_modules/pdfjs-dist/legacy/build/**/*',
+    ],
+  },
   async headers() {
     return [
       {

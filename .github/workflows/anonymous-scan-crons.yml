@@ -1,0 +1,32 @@
+name: Anonymous Scan Email Nurture
+
+# Vercel Hobby caps cron jobs at 2 (already used by followup-7d/inactivity-3d
+# in vercel.json), so these run here instead, same pattern as
+# redis-health-cron.yml. Both routes are idempotent (email_events lock), so a
+# daily run just re-attempts anyone still eligible and no-ops on duplicates.
+on:
+  schedule:
+    - cron: '0 10 * * *'
+    - cron: '15 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  anonymous-scan-48h:
+    if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/anonymous-scan-48h
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/anonymous-scan-48h" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+
+  anonymous-scan-7d:
+    if: github.event.schedule == '15 10 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/anonymous-scan-7d
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/anonymous-scan-7d" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
