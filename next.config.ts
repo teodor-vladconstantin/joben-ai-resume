@@ -130,6 +130,23 @@ const nextConfig: NextConfig = {
   // then throws. Marking both external makes Next use plain `require()` from
   // node_modules at runtime, the same way a non-bundled Node app would.
   serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas'],
+  // serverExternalPackages alone stops Turbopack bundling @napi-rs/canvas,
+  // but Vercel's output file tracer (@vercel/nft) still misses its
+  // platform-specific native binary package because @napi-rs/canvas
+  // resolves it via a runtime require() the static tracer can't follow.
+  // Confirmed live: after adding serverExternalPackages the error changed
+  // from a bundling failure to "Cannot find module '@napi-rs/canvas'" at
+  // /var/task/node_modules/pdfjs-dist/legacy/build/pdf.mjs, i.e. the
+  // package genuinely isn't in the deployed function's node_modules.
+  // Explicitly including it is the documented fix for this exact class of
+  // issue (native/runtime assets the tracer can't discover on its own).
+  outputFileTracingIncludes: {
+    '/api/public/ats-check': [
+      './node_modules/@napi-rs/canvas/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
+      './node_modules/@napi-rs/canvas-linux-x64-musl/**/*',
+    ],
+  },
   async headers() {
     return [
       {
