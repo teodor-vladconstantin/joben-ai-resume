@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 import { Loader2 } from 'lucide-react'
 import { startCheckout, type PaidPlan } from '@/lib/client-billing'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
@@ -14,9 +16,26 @@ type PlanCtaProps = {
 export function PlanCta({ label, className, plan }: PlanCtaProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { isLoaded, isSignedIn } = useAuth()
 
   if (!plan) {
     return <AuthAwareSignupLink className={className}>{label}</AuthAwareSignupLink>
+  }
+
+  // Signed-out visitor: send them through sign-up first instead of a dead-end
+  // "Authentication required" error, then land them straight back here to
+  // resume checkout once they have an account.
+  if (!isLoaded || !isSignedIn) {
+    const resumeUrl = `/pricing?startCheckout=${plan}`
+    return (
+      <Link
+        href={`/sign-up?redirect_url=${encodeURIComponent(resumeUrl)}`}
+        className={className}
+        aria-disabled={!isLoaded}
+      >
+        {label}
+      </Link>
+    )
   }
 
   const handleClick = async () => {

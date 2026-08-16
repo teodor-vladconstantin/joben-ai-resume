@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { CheckCircle2, X } from 'lucide-react'
 import { Metadata } from 'next'
 import { Navbar } from '@/components/ui/Navbar'
@@ -5,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { PlanCta } from '@/components/pricing/PlanCta'
+import { AutoResumeCheckout } from '@/components/pricing/AutoResumeCheckout'
 import { pricingPlans } from '@/lib/content'
 
 export const metadata: Metadata = {
@@ -40,6 +42,9 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <Suspense fallback={null}>
+        <AutoResumeCheckout />
+      </Suspense>
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">
