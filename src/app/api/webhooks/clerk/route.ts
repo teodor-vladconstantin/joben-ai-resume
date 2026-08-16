@@ -7,6 +7,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
+import { OWNED_TABLES } from '@/app/api/account/delete/route'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -322,8 +323,27 @@ export async function POST(req: Request) {
     if (eventType === 'user.deleted') {
     const { id } = evt.data
     if (id) {
+      // Safety net for deletions that bypass /api/account/delete (e.g. done
+      // directly from the Clerk dashboard) — without this, resumes and other
+      // owned rows were left behind forever once the `users` row was gone.
+      for (const table of OWNED_TABLES) {
+        const { error: ownedRowsError } = await supabase.from(table).delete().eq('user_id', id)
+
+        if (ownedRowsError) {
+          logger.error('Supabase owned-rows delete failed for user.deleted', {
+            requestId,
+            route: '/api/webhooks/clerk',
+            eventId: svixId,
+            userId: id,
+            table,
+            error: ownedRowsError.message,
+          })
+          return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+        }
+      }
+
       const { error } = await supabase.from('users').delete().eq('clerk_id', id)
-    
+
       if (error) {
         logger.error('Supabase delete failed for user.deleted', {
           requestId,

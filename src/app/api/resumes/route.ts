@@ -4,9 +4,10 @@ import { trackProductEvent } from '@/lib/analytics'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { checkResumeCreationQuota, getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
+import { getEmailHintFromSessionClaims, getUserPlan, isGodModeUser } from '@/lib/plans'
+import { checkFeatureLimit, decrementFeatureCounter, getMonthlyResetAtIso, incrementFeatureCounter, recordLimitHit } from '@/lib/ratelimit'
 import { sendFirstResumeEmail } from '@/lib/resend'
-import { apiError, apiSuccess, deleteOwnedRow, fetchOwnedList, isMissingRelation } from '@/lib/api-response'
+import { apiError, apiSuccess, fetchOwnedList, isMissingRelation } from '@/lib/api-response'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { createResumeSchema, exceedsJsonBudget, uuidLike } from '@/lib/validation/schemas'
@@ -83,25 +84,42 @@ export async function POST(req: Request) {
       isGodModeUser(userId),
     ])
     if (!godMode) {
-      const quotaCheck = await checkResumeCreationQuota(userId, plan)
-      if (!quotaCheck.allowed) {
-        if (quotaCheck.status === 429) {
-          await sendRateLimitEmailIfEligible({
-            userId,
-            requestId,
-            route: '/api/resumes',
-            reason: 'resume_creation_limit',
-            plan,
-          })
+      const featureCheck = await checkFeatureLimit(userId, 'cvs', plan)
+      if (!featureCheck.allowed) {
+        await recordLimitHit(userId, 'cvs')
+        await sendRateLimitEmailIfEligible({
+          userId,
+          requestId,
+          route: '/api/resumes',
+          reason: featureCheck.blocked ? 'resume_creation_blocked' : 'resume_creation_limit',
+          plan,
+        })
+
+        if (featureCheck.blocked) {
+          return jsonWithRequestId(
+            {
+              error: 'Access to this feature has been temporarily suspended. Please contact support.',
+              limitType: 'blocked',
+              feature: 'cvs',
+              resetAt: getMonthlyResetAtIso(),
+              showUpgrade: false,
+            },
+            429,
+            requestId
+          )
         }
+
         return jsonWithRequestId(
           {
-            error: quotaCheck.error || 'Resume limit reached for your plan.',
-            showUpgrade: quotaCheck.showUpgrade ?? false,
-            limit: quotaCheck.limit,
-            used: quotaCheck.used,
+            error: `You have used all ${featureCheck.limit || 0} saved resumes available on your plan. Delete one or upgrade to save more.`,
+            limitType: 'feature',
+            feature: 'cvs',
+            used: featureCheck.used,
+            limit: featureCheck.limit ?? undefined,
+            resetAt: getMonthlyResetAtIso(),
+            showUpgrade: true,
           },
-          quotaCheck.status as 403 | 429 | 500,
+          429,
           requestId
         )
       }
@@ -148,6 +166,8 @@ export async function POST(req: Request) {
     if (!data?.id) {
       return jsonWithRequestId({ error: 'Failed to create resume.' }, 500, requestId)
     }
+
+    await incrementFeatureCounter(userId, 'cvs')
 
     await trackProductEvent({
       userId,
@@ -303,14 +323,31 @@ export async function DELETE(req: Request) {
       return apiError(clientErrorMessage('invalid_input', 'Missing or invalid resume id'), 400)
     }
 
-    return await deleteOwnedRow({
-      table: 'resumes',
-      id: parsedId.data,
-      userId,
-      missingRelationMessage: 'Resumes table is missing in Supabase.',
-      logLabel: 'resumes DELETE failed',
-      logContext: { userId, route: '/api/resumes' },
-    })
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('resumes')
+      .delete()
+      .eq('id', parsedId.data)
+      .eq('user_id', userId)
+      .select('id')
+
+    if (error) {
+      if (isMissingRelation(error)) {
+        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
+      }
+      logger.error('resumes DELETE failed', { userId, route: '/api/resumes', error: error.message })
+      return apiError(clientErrorMessage('server'), 500)
+    }
+
+    // Only free a 'cvs' slot when a row was actually removed — a delete-by-id
+    // that matches nothing (stale id, wrong owner, already deleted) is a
+    // silent no-op in Postgres, and decrementing on a no-op would let a
+    // client manufacture free slots without ever deleting a resume.
+    if (data && data.length > 0) {
+      await decrementFeatureCounter(userId, 'cvs')
+    }
+
+    return apiSuccess({ deleted: true }, 200)
   } catch (error) {
     logger.error('resumes DELETE top-level failure', {
       route: '/api/resumes',
