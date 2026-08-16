@@ -131,7 +131,7 @@ export const pricingPlans = [
   {
     name: "Free",
     description: "Best for building your first polished application.",
-    price: "€0",
+    price: "0 RON",
     price_period: "/forever",
     features: [
       "Manual resume builder",
@@ -148,12 +148,13 @@ export const pricingPlans = [
       "Full template library",
     ],
     cta: "Start Free",
+    planId: undefined,
     isPrimary: false,
   },
   {
     name: "Pro",
     description: "For active job seekers applying consistently.",
-    price: "€12",
+    price: "59 RON",
     price_period: "/month",
     features: [
       "Everything in Free, plus:",
@@ -166,13 +167,13 @@ export const pricingPlans = [
     ],
     excludedFeatures: [],
     cta: "Upgrade to Pro",
-    isComingSoon: true,
+    planId: "pro" as const,
     isPrimary: true,
   },
   {
     name: "Recruiting Plan",
     description: "6-month plan for high-volume applications.",
-    price: "€60",
+    price: "299 RON",
     price_period: "/6 months",
     features: [
       "Everything in Pro included",
@@ -186,7 +187,7 @@ export const pricingPlans = [
     ],
     excludedFeatures: [],
     cta: "Get Recruiting Plan",
-    isComingSoon: true,
+    planId: "recruiting" as const,
     isPrimary: false,
     isBestValue: true,
   },

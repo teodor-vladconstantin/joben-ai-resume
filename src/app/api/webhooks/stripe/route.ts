@@ -1,12 +1,10 @@
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
-})
+import { resolvePlanFromPriceId } from '@/lib/plans'
+import { getStripeClient } from '@/lib/stripe'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -15,9 +13,14 @@ function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
 
-function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' | 'pro' {
-  const proStatuses = new Set<Stripe.Subscription.Status>(['active', 'trialing', 'past_due'])
-  return proStatuses.has(subscription.status) ? 'pro' : 'free'
+function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' | 'pro' | 'recruiting' {
+  const activeStatuses = new Set<Stripe.Subscription.Status>(['active', 'trialing', 'past_due'])
+  if (!activeStatuses.has(subscription.status)) {
+    return 'free'
+  }
+
+  const priceId = subscription.items?.data?.[0]?.price?.id
+  return resolvePlanFromPriceId(priceId) ?? 'pro'
 }
 
 function isStaleEvent(lastProcessedAt: number | null | undefined, incomingEventCreated: number): boolean {
@@ -32,6 +35,17 @@ export async function POST(req: Request) {
       route: '/api/webhooks/stripe',
     })
     return jsonWithRequestId({ error: 'Webhook Error: STRIPE_WEBHOOK_SECRET is not set' }, 500, requestId)
+  }
+
+  let stripe: Stripe
+  try {
+    stripe = getStripeClient()
+  } catch {
+    logger.error('STRIPE_SECRET_KEY missing', {
+      requestId,
+      route: '/api/webhooks/stripe',
+    })
+    return jsonWithRequestId({ error: 'Webhook Error: STRIPE_SECRET_KEY is not set' }, 500, requestId)
   }
 
   const body = await req.text()
@@ -192,7 +206,7 @@ export async function POST(req: Request) {
     }
 
     const plan = resolvePlanFromSubscription(subscription)
-    const stripeSubscriptionId = plan === 'pro' ? subscription.id : null
+    const stripeSubscriptionId = plan === 'pro' || plan === 'recruiting' ? subscription.id : null
 
     const { error } = await supabase
       .from('users')

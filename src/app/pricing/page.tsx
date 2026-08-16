@@ -1,19 +1,22 @@
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { Metadata } from 'next'
-import { Check, FileText } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { UpgradeToProButton } from '@/components/pricing/UpgradeToProButton'
+import { CheckCircle2, FileText, X } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { buttonVariants } from '@/components/ui/Button'
+import { PlanCta } from '@/components/pricing/PlanCta'
+import { pricingPlans } from '@/lib/content'
 
 export const metadata: Metadata = {
   title: 'Pricing | Joben AI Resume Builder',
-  description: 'Free and Pro plans for AI-powered resume building. Start free, upgrade when you need AI features.',
+  description: 'Free, Pro, and Recruiting plans for AI-powered resume building. Start free, upgrade when you need AI features.',
   alternates: {
     canonical: '/pricing',
   },
   openGraph: {
     title: 'Pricing | Joben AI Resume Builder',
-    description: 'Free and Pro plans for AI-powered resume building. Start free, upgrade when you need AI features.',
+    description: 'Free, Pro, and Recruiting plans for AI-powered resume building. Start free, upgrade when you need AI features.',
     url: '/pricing',
     siteName: 'Joben',
     images: [
@@ -30,27 +33,10 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Pricing | Joben AI Resume Builder',
-    description: 'Free and Pro plans for AI-powered resume building. Start free, upgrade when you need AI features.',
+    description: 'Free, Pro, and Recruiting plans for AI-powered resume building. Start free, upgrade when you need AI features.',
     images: ['/og-image.png'],
   },
 }
-
-const freeFeatures = [
-  'ATS-optimized templates',
-  'Resume builder',
-  'PDF export',
-  'Cover letter builder',
-  'Unlimited resumes',
-]
-
-const proFeatures = [
-  'Everything in Free',
-  'AI resume review & scoring',
-  'AI content suggestions',
-  'AI-powered cover letters',
-  'LaTeX export',
-  'Priority support',
-]
 
 export default async function PricingPage() {
   const { userId } = await auth()
@@ -104,57 +90,48 @@ export default async function PricingPage() {
 
       {/* Plans */}
       <section className="pb-20">
-        <div className="max-w-3xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Free */}
-            <div className="bg-bg-surface border border-border-soft rounded-lg p-6">
-              <h3 className="text-heading font-medium text-text-primary">Free</h3>
-              <p className="text-text-muted text-xs mt-1">Get started with the basics</p>
-              <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">€0</span>
-                <span className="text-body text-text-muted"> /month</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                {freeFeatures.map(feature => (
-                  <li key={feature} className="flex items-start gap-2 text-body text-text-secondary">
-                    <Check size={14} className="text-success mt-0.5 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={userId ? '/resumes/new' : '/sign-up'}
-                className="block w-full text-center"
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pricingPlans.map((plan, index) => (
+              <Card
+                key={index}
+                elevated={plan.isBestValue}
+                radius="lg"
+                className={`p-6 flex flex-col relative ${plan.isBestValue ? 'border-(--accent)' : ''}`}
               >
-                <Button variant="secondary" className="w-full">
-                  Get started
-                </Button>
-              </Link>
-            </div>
+                {plan.isBestValue && (
+                  <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    Best Value
+                  </Badge>
+                )}
 
-            {/* Pro */}
-            <div className="bg-bg-surface border border-accent-border rounded-lg p-6 relative">
-              <span className="absolute -top-2.5 left-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-muted text-accent border border-accent-border">
-                Pro
-              </span>
-              <h3 className="text-heading font-medium text-text-primary">Pro</h3>
-              <p className="text-text-muted text-xs mt-1">Unlock AI-powered features</p>
-              <div className="mt-4 mb-6">
-                <span className="text-display text-text-primary font-semibold">€9</span>
-                <span className="text-body text-text-muted"> /month</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                {proFeatures.map(feature => (
-                  <li key={feature} className="flex items-start gap-2 text-body text-text-secondary">
-                    <Check size={14} className="text-success mt-0.5 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <div className="block w-full text-center">
-                <UpgradeToProButton />
-              </div>
-            </div>
+                <h3 className="text-heading font-medium text-text-primary">{plan.name}</h3>
+                <p className="text-text-muted text-xs mt-1">{plan.description}</p>
+                <div className="mt-4 mb-6">
+                  <span className="text-display text-text-primary font-semibold">{plan.price}</span>
+                  <span className="text-body text-text-muted"> {plan.price_period}</span>
+                </div>
+                <ul className="space-y-2 mb-6 grow">
+                  {plan.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="flex items-start gap-2 text-body text-text-secondary">
+                      <CheckCircle2 size={14} className="text-success mt-0.5 shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                  {plan.excludedFeatures.map((feature, fIndex) => (
+                    <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-body text-text-muted line-through">
+                      <X size={14} className="text-red-400 mt-0.5 shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <PlanCta
+                  label={plan.cta}
+                  plan={plan.planId}
+                  className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}
+                />
+              </Card>
+            ))}
           </div>
         </div>
       </section>

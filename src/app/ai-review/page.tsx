@@ -8,7 +8,7 @@ import { Navbar } from '@/components/ui/Navbar'
 import { buttonVariants } from '@/components/ui/Button'
 import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } from 'lucide-react'
 import { AILoadingState } from '@/components/ui/AILoadingState'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { importPdfClientSide } from '@/lib/pdf-import'
 
 type ResumeItem = {
@@ -439,10 +439,9 @@ export default function AIReviewPage() {
         </main>
       </div>
 
-      <UpgradeModal
+      <UpgradeBanner
         open={showUpgradeModal}
-        title="Upgrade to Pro Analyzer"
-        description={upgradeMessage}
+        message={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
       />
     </div>
