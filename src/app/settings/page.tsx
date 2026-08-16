@@ -5,9 +5,12 @@ import { Navbar } from '@/components/ui/Navbar'
 import { AccountUserButton } from '@/components/settings/AccountUserButton'
 import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
 import { ExportDataButton } from '@/components/settings/ExportDataButton'
+import { ManageBillingButton } from '@/components/settings/ManageBillingButton'
 import { Divider } from '@/components/ui/Divider'
 import { Badge } from '@/components/ui/Badge'
 import { Mail, CreditCard, Bell, Shield } from 'lucide-react'
+import { createServerClient } from '@/lib/supabase/server'
+import { getEmailHintFromSessionClaims, getUserPlan, PLAN_DEFINITIONS } from '@/lib/plans'
 
 export const metadata = {
   title: 'Settings | Joben',
@@ -15,8 +18,18 @@ export const metadata = {
 }
 
 export default async function SettingsPage() {
-  const { userId } = await auth()
+  const { userId, sessionClaims } = await auth()
   if (!userId) redirect('/sign-in')
+
+  const emailHint = getEmailHintFromSessionClaims(sessionClaims)
+  const plan = await getUserPlan(userId, emailHint)
+
+  const supabase = createServerClient()
+  const { data: profile } = await supabase
+    .from('users')
+    .select('stripe_customer_id')
+    .eq('clerk_id', userId)
+    .maybeSingle()
 
   return (
     <div className="min-h-screen flex">
@@ -63,12 +76,18 @@ export default async function SettingsPage() {
                 </p>
               </div>
               <Divider className="my-4" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-(--muted)">
-                  <CreditCard size={14} />
-                  Current plan
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-(--muted)">
+                    <CreditCard size={14} />
+                    Current plan
+                  </div>
+                  <Badge variant="solid">{PLAN_DEFINITIONS[plan].label}</Badge>
                 </div>
-                <Badge variant="solid">Free</Badge>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-(--muted)">Subscription</div>
+                  <ManageBillingButton hasStripeCustomer={Boolean(profile?.stripe_customer_id)} />
+                </div>
               </div>
             </div>
 

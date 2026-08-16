@@ -1,12 +1,8 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
-import Stripe from 'stripe'
 import { createServerClient } from '@/lib/supabase/server'
 import { apiError, apiSuccess } from '@/lib/api-response'
 import { logger } from '@/lib/logger'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
-})
+import { getStripeClient, isStripeConfigured } from '@/lib/stripe'
 
 export const OWNED_TABLES = ['resume_analyses', 'ai_reviews', 'resumes', 'cover_letters', 'feedback'] as const
 
@@ -29,9 +25,9 @@ export async function POST() {
     return apiError('Could not process account deletion.', 500)
   }
 
-  if (user?.stripe_subscription_id) {
+  if (user?.stripe_subscription_id && isStripeConfigured()) {
     try {
-      await stripe.subscriptions.cancel(user.stripe_subscription_id)
+      await getStripeClient().subscriptions.cancel(user.stripe_subscription_id)
     } catch (error) {
       // Already-canceled or missing subscriptions must not block deletion.
       logger.warn('Account deletion: Stripe subscription cancel failed', {

@@ -1,4 +1,55 @@
 ## Active
+- [IN PROGRESS] 2026-08-14 Stripe live payments (code-side work done; production cutover still needs manual
+  Stripe/Vercel Dashboard steps — see RUNBOOK.md "Local Stripe Testing" and the pre-launch checklist below):
+  - Re-enabled `/api/billing/checkout` (was hardcoded 403 since 2026-07-03) with rate limiting, recruiting-plan
+    guard, and a new `CHECKOUT_DISABLED` env kill switch checked first.
+  - Restored `src/lib/client-billing.ts` (`startProCheckout`, `startBillingPortal`).
+  - Removed `UpgradeModal` entirely; pricing buttons now start checkout directly on click; the 4 quota-limit
+    interstitial call sites (ResumeBuilder, CoverLetterBuilder, both ai-review pages) use a new
+    `UpgradeBanner` component instead of a blocking dialog.
+  - Added Stripe Billing Portal: `/api/billing/portal` + `ManageBillingButton` on the Settings page (which
+    also now shows the real plan badge instead of a hardcoded "Free").
+  - Added `src/lib/stripe.ts` shared client factory (de-duplicates the two inline `new Stripe(...)` calls).
+  - Added `validateStripeLocalConfig()` to `src/lib/env.ts` (mirrors the existing Clerk live-key-on-localhost
+    guard) — throws if `sk_live_...` is used with a localhost app URL, bypassable via
+    `ALLOW_STRIPE_LIVE_ON_LOCALHOST`.
+  - New test coverage: `tests/api/webhooks-stripe.test.ts` (22 cases — signature verification, idempotency,
+    stale-event ordering, all 7 event branches, lifetime-recruiting non-downgrade interaction), rewritten
+    `tests/api/billing-checkout.test.ts`, new `tests/api/billing-portal.test.ts`, new `tests/lib/env.test.ts`.
+    Full suite: 150/150 passing. `tsc --noEmit` and `npm run lint` clean on all touched files.
+  - Recreated `.env.prod.example`; fixed stale VPS-only deployment topology in CLAUDE.md/RUNBOOK.md (actual:
+    Next.js on Vercel, only latex-service/resume-parser on the VPS); added RUNBOOK.md "Local Stripe Testing"
+    section (`stripe listen`/`stripe trigger`).
+  - Deliberately deferred (per user decision): merging `feat/payment-lifecycle-emails` branch
+    (payment-failed/winback emails); `users_update_own` RLS `WITH CHECK` hardening (currently unreachable,
+    no anon-key Supabase client exists in the app — low-priority defense-in-depth, not a go-live blocker).
+  - Remaining before this can go fully live: the Phase 6 cutover checklist further down this file (Stripe
+    Dashboard live product/price/webhook/portal setup, Vercel live env vars, smoke test) — these require
+    account access this session doesn't have and must be done by the user.
+  - 2026-08-16 follow-up (deep analysis for the live-mode cutover plan): found and fixed a real pre-launch
+    bug — the pricing page's "Get Recruiting Plan" button silently started a **Pro** checkout (both cards
+    had `isComingSoon: true`, which `PlanCta` treated as a generic "paid" flag routing to the single
+    Pro-only `startProCheckout()`). Per user decision, made Recruiting Plan a real, separately-priced Stripe
+    subscription instead of just hiding the bug: `/api/billing/checkout` now accepts `{ plan: 'pro' |
+    'recruiting' }`; `src/lib/plans.ts` gained `resolvePlanFromPriceId`/`getPriceIdForPlan` as the shared
+    price↔plan mapping used by both the checkout route and the webhook's `resolvePlanFromSubscription`
+    (now price-ID-aware instead of hardcoded to `'pro'`); `PlanCta`/`content.ts`/`page.tsx` now pass an
+    explicit `plan` instead of the `isComingSoon` reuse hack. Also bumped the pinned Stripe API version
+    (`src/lib/stripe.ts`) to `2026-07-29.dahlia` and the `stripe` SDK to `22.5.0` (was `22.0.1`, whose types
+    didn't support the new version string) — this surfaced a second, previously-missed inline `new
+    Stripe(...)` in `src/app/api/account/delete/route.ts` still pinned to the old version, now switched to
+    the shared `getStripeClient()` factory. New `STRIPE_RECRUITING_PRICE_ID` env var (added to
+    `.env.prod.example`); `RUNBOOK.md`'s cutover checklist updated for the second live price + Customer
+    Portal "switchable products" config. Verified end-to-end in the browser against a real (test-mode)
+    Stripe session: "Upgrade to Pro" correctly opens a live test Checkout session; "Get Recruiting Plan"
+    correctly 503s with "Billing is temporarily unavailable" (no `STRIPE_RECRUITING_PRICE_ID` configured
+    locally yet) instead of silently charging the Pro price. Full suite: 164/165 passing — the one failure
+    (`tests/api/crud-smoke.test.ts` > "blocks resume creation when cv feature limit is reached", expects 403
+    gets 429) is pre-existing and unrelated to this work (a Supabase mock/rate-limit-vs-quota-check
+    ordering issue in that test, confirmed failing in isolation before any of today's edits touched it —
+    not fixed, flagged here for a separate pass). `tsc --noEmit` and `npm run lint` clean on all touched
+    files (lint's ~14k pre-existing problem count is 100% the already-documented stale
+    `.claude/worktrees/gdpr-compliance/.next` scan noise, confirmed none of it is in touched files).
 - [DONE] 2026-08-13 Free-trial abuse prevention + security fine-tuning (Stripe untouched, per user request):
   - Faza 1: disposable-email blocking in Clerk webhook (`src/lib/security/disposable-email.ts`, new dep
     `disposable-email-domains`) — blocked signups get their Clerk user deleted, no `users` row created, no
@@ -90,7 +141,7 @@
 - [DONE] Deep cleanup FAZA 3: API consistency audit (report only, findings below)
 - [DONE] Deep cleanup FAZA 3 fix: Zod validation + Upstash rate limiting (20/hour) on resumes/export-latex and resumes POST
 - [DONE] Deep cleanup FAZA 4: operational cleanup audit — console.log: none in src/ (already clean); console.error: 7 sites audited, none have Sentry.captureException at the same catch site, all kept (src/lib/logger.ts:46, src/lib/anthropic-with-limits.ts:236, src/lib/ratelimit.ts:497, src/app/api/health/route.ts:160, src/app/error.tsx:12, src/app/resumes/page.tsx:62/64); TODO/FIXME: none in src/; env vars: 32 referenced in code (5 hard-required via src/lib/env.ts, rest optional/feature-gated) - see chat history for full list to diff against Vercel
-- [ ] post-monetizare: CLAUDE.md references .env.prod.example as the canonical env var doc but the file does not exist in the repo (not tracked, not present locally) - recreate it or update CLAUDE.md
+- [DONE] 2026-08-14 post-monetizare: recreated .env.prod.example (was referenced by CLAUDE.md but missing from repo) as part of the Stripe live-payments work below.
 - [ ] post-monetizare: unify API error-response shapes (4 concurrent conventions found: jsonWithRequestId, apiError/apiSuccess, raw NextResponse on 429 branches in parse/cover-letter-pdf/redeem-code, health/route.ts manual reimplementation)
 - [ ] post-monetizare: add Zod validation for hand-parsed query params (admin/rate-limit GET, auto-fix dryRun, cron parseCronOptions)
 - [ ] post-monetizare: decide fate of pdfjs-dist dependency (still referenced by root Dockerfile:44 COPY for standard_fonts, but PDF parsing moved to external Hetzner service)

@@ -4,7 +4,7 @@ import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from '
 import { useParams, useRouter } from 'next/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { Modal } from '@/components/ui/Modal'
 import { FeatureButton } from '@/components/FeatureButton'
 import { buttonVariants } from '@/components/ui/Button'
@@ -605,10 +605,9 @@ export function CoverLetterBuilder() {
         </p>
       </Modal>
 
-      <UpgradeModal
+      <UpgradeBanner
         open={showUpgradeModal}
-        title="Upgrade to Continue AI Generation"
-        description={upgradeMessage}
+        message={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
       />
     </div>

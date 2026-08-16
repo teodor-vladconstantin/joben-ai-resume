@@ -57,6 +57,35 @@ export function validateClerkLocalConfig() {
   }
 }
 
+export function validateStripeLocalConfig() {
+  if (process.env.NODE_ENV === 'production') {
+    return
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const secretKey = process.env.STRIPE_SECRET_KEY || ''
+  const bypassGuard = process.env.ALLOW_STRIPE_LIVE_ON_LOCALHOST === 'true'
+
+  if (bypassGuard) {
+    return
+  }
+
+  const isLocal = isLocalAppUrl(appUrl)
+  const usesLiveKey = secretKey.startsWith('sk_live_')
+
+  if (isLocal && usesLiveKey) {
+    throw new Error(
+      [
+        'A live Stripe secret key is set with a localhost app URL.',
+        'This risks creating real charges against a live Stripe account from local dev.',
+        'Use a Stripe test-mode key for local dev:',
+        '  - STRIPE_SECRET_KEY=sk_test_... ',
+        'Or run the app on an allowed production domain/subdomain.',
+      ].join('\n')
+    )
+  }
+}
+
 export function validateEnv() {
   const missing = REQUIRED.filter((key) => !process.env[key])
   if (missing.length > 0) {
@@ -66,6 +95,7 @@ export function validateEnv() {
   }
 
   validateClerkLocalConfig()
+  validateStripeLocalConfig()
 }
 
 export function isEnvSet(key: string): boolean {
@@ -93,6 +123,7 @@ export const env = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     proPriceId: process.env.STRIPE_PRO_PRICE_ID,
+    recruitingPriceId: process.env.STRIPE_RECRUITING_PRICE_ID,
     isConfigured: isEnvSet('STRIPE_SECRET_KEY'),
   },
   resend: {
