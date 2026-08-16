@@ -14,6 +14,7 @@ export function Navbar() {
   const publicLinks = [
     { href: '/#builder', label: 'AI Resume Builder' },
     { href: '/free-ats-checker', label: 'ATS Analysis' },
+    { href: '/resume-examples', label: 'Examples' },
     { href: '/#pricing', label: 'Pricing' },
     { href: '/#faq', label: 'FAQ' },
   ]

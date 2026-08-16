@@ -134,6 +134,99 @@ export async function sendInactivityEmail(input: {
   })
 }
 
+export type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
+
+const CATEGORY_LABELS: Record<AtsCategoryKey, string> = {
+  ats_formatting: 'ATS Formatting',
+  structure: 'Structure',
+  keyword_impact: 'Keywords & Impact',
+  clarity: 'Clarity',
+}
+
+export async function sendAnonymousScanReportEmail(input: {
+  to: string
+  overallScore: number
+  grade: string
+  categories: Record<AtsCategoryKey, { score: number; max: number }>
+  issues: { issue: string; explanation: string }[]
+}): Promise<EmailResult> {
+  const categoryRows = (Object.keys(CATEGORY_LABELS) as AtsCategoryKey[])
+    .map((key) => `<li style="margin:0 0 4px 0;">${CATEGORY_LABELS[key]}: ${input.categories[key].score}/${input.categories[key].max}</li>`)
+    .join('')
+
+  const issueRows = input.issues
+    .slice(0, 3)
+    .map((item) => `<li style="margin:0 0 10px 0;"><strong>${item.issue}</strong><br/><span style="color:#6b7280;font-size:13px;">${item.explanation}</span></li>`)
+    .join('')
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: `Your resume scored ${input.overallScore}/100: here's what to fix`,
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">Your resume scored ${input.overallScore}/100 (${input.grade}).</h1>
+  <p style="margin:0 0 12px 0;">Here is the category breakdown from your free ATS scan:</p>
+  <ul style="margin:0 0 18px 18px;padding:0;">${categoryRows}</ul>
+  ${issueRows ? `<p style="margin:0 0 8px 0;">Top things to fix:</p><ul style="margin:0 0 18px 18px;padding:0;">${issueRows}</ul>` : ''}
+  <a href="${appUrl}/sign-up" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Fix It Free with Joben</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu.</p>
+</div>`,
+  })
+}
+
+const CATEGORY_48H_COPY: Record<AtsCategoryKey, { subject: string; body: string }> = {
+  keyword_impact: {
+    subject: 'Your resume is missing the numbers recruiters scan for',
+    body: 'Your ATS scan flagged Keywords & Impact as the weakest section: bullets without concrete numbers or outcomes read as junior, even when the work behind them was not.',
+  },
+  clarity: {
+    subject: 'Your resume bullets could be sharper',
+    body: 'Your ATS scan flagged Clarity as the weakest section: dense or vague bullets make recruiters skim past real accomplishments.',
+  },
+  structure: {
+    subject: "Your resume's structure is working against you",
+    body: 'Your ATS scan flagged Structure as the weakest section: missing or misordered sections make ATS software misread your experience.',
+  },
+  ats_formatting: {
+    subject: 'Your resume format may be tripping up ATS software',
+    body: 'Your ATS scan flagged ATS Formatting as the weakest section: layout choices like tables or graphics can cause parsers to drop content entirely.',
+  },
+}
+
+export async function sendAnonymousScan48hEmail(input: {
+  to: string
+  weakestCategory: AtsCategoryKey | null
+}): Promise<EmailResult> {
+  const copy = input.weakestCategory ? CATEGORY_48H_COPY[input.weakestCategory] : null
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: copy?.subject || 'Still want to fix what your resume scan found?',
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">A couple of days ago you scanned your resume on Joben.</h1>
+  <p style="margin:0 0 12px 0;">${copy?.body || 'Your ATS scan found a few things worth fixing before your next application.'}</p>
+  <p style="margin:0 0 18px 0;">A free Joben account gives you AI-guided rewrites and an ATS-optimized template to fix it in minutes.</p>
+  <a href="${appUrl}/sign-up" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Fix My Resume Free</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu.</p>
+</div>`,
+  })
+}
+
+export async function sendAnonymousScan7dEmail(input: { to: string }): Promise<EmailResult> {
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: 'Still on the job hunt?',
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">No pressure, just leaving this here.</h1>
+  <p style="margin:0 0 12px 0;">A week ago you ran a free ATS scan on Joben. If you are still applying, a free account gives you AI resume tailoring, bullet rewrites, and cover letters whenever you need them.</p>
+  <a href="${appUrl}/sign-up" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Create a Free Account</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu. This is the last reminder in this series.</p>
+</div>`,
+  })
+}
+
 export async function sendRateLimitEmail(input: {
   to: string
   firstName?: string | null

@@ -7,7 +7,7 @@ export type ResumeRole = {
   strongBullet: string
 }
 
-// Test set — 5 roles to validate design/copy quality before scaling to the
+// Test set - 5 roles to validate design/copy quality before scaling to the
 // full 30+ role catalog. Add more entries here once approved; the route at
 // src/app/resume-examples/[slug]/page.tsx and the sitemap both derive their
 // pages from this file automatically.
@@ -31,9 +31,9 @@ export const resumeRoles: ResumeRole[] = [
     ],
     commonMistakes: [
       'Listing "analyzed data" without naming the tools, datasets, or business decisions the analysis drove.',
-      'Omitting the scale of data worked with — row counts, data sources, refresh frequency.',
+      'Omitting the scale of data worked with: row counts, data sources, refresh frequency.',
       'No mention of how findings were communicated to non-technical stakeholders.',
-      'Confusing reporting (building dashboards) with analysis (deriving insights) — resumes that only show the former read as junior.',
+      'Confusing reporting (building dashboards) with analysis (deriving insights). Resumes that only show the former read as junior.',
     ],
     weakBullet: 'Analyzed sales data and created reports for management.',
     strongBullet:
@@ -57,10 +57,10 @@ export const resumeRoles: ResumeRole[] = [
       'A/B testing',
     ],
     commonMistakes: [
-      'Describing campaigns run without any performance metric — reach, CTR, conversion, ROI.',
+      'Describing campaigns run without any performance metric: reach, CTR, conversion, ROI.',
       'No mention of budget size managed, which is the first thing hiring managers scan for at the Manager level.',
       'Listing channels ("ran social media") instead of outcomes ("grew organic social following 3x").',
-      'Missing team or vendor leadership — Manager-level roles are expected to show people management, not just execution.',
+      'Missing team or vendor leadership. Manager-level roles are expected to show people management, not just execution.',
     ],
     weakBullet: 'Managed social media accounts and email campaigns for the company.',
     strongBullet:
@@ -85,7 +85,7 @@ export const resumeRoles: ResumeRole[] = [
     ],
     commonMistakes: [
       'Listing every language or framework ever touched instead of the 5-8 that match the job description.',
-      'Describing responsibilities ("worked on backend services") instead of impact — latency, uptime, scale, cost.',
+      'Describing responsibilities ("worked on backend services") instead of impact: latency, uptime, scale, cost.',
       'No mention of team size, codebase scale, or user-facing impact, which makes seniority impossible to judge.',
       'Missing evidence of ownership: shipped features, on-call rotation, mentoring, or architecture decisions.',
     ],
@@ -112,9 +112,9 @@ export const resumeRoles: ResumeRole[] = [
     ],
     commonMistakes: [
       'Describing what the team shipped without stating the business outcome the feature was meant to drive.',
-      'No metrics tied to product ownership — adoption rate, retention lift, revenue impact, NPS.',
+      'No metrics tied to product ownership: adoption rate, retention lift, revenue impact, NPS.',
       'Listing "worked with engineering and design" as an accomplishment instead of what that collaboration produced.',
-      'Missing evidence of prioritization — PM resumes should show trade-off decisions, not just feature delivery.',
+      'Missing evidence of prioritization. PM resumes should show trade-off decisions, not just feature delivery.',
     ],
     weakBullet: 'Worked with engineering and design teams to launch new features.',
     strongBullet:
@@ -138,10 +138,10 @@ export const resumeRoles: ResumeRole[] = [
       'cross-functional collaboration',
     ],
     commonMistakes: [
-      'Linking to a portfolio without describing any project in the resume itself — recruiters skim the resume first.',
+      'Linking to a portfolio without describing any project in the resume itself. Recruiters skim the resume first.',
       'Listing tools (Figma, Sketch) as the headline instead of the design process and outcomes.',
-      'No mention of the research methods used to validate design decisions — reads as visual design only.',
-      'Missing measurable impact — task completion rate, time-on-task, conversion, accessibility compliance.',
+      'No mention of the research methods used to validate design decisions; reads as visual design only.',
+      'Missing measurable impact: task completion rate, time-on-task, conversion, accessibility compliance.',
     ],
     weakBullet: 'Designed user interfaces for the mobile app using Figma.',
     strongBullet:
@@ -165,9 +165,9 @@ export const resumeRoles: ResumeRole[] = [
       'special education support',
     ],
     commonMistakes: [
-      'Listing duties ("taught 5th grade math") without student outcomes — test score gains, reading level growth, pass rates.',
+      'Listing duties ("taught 5th grade math") without student outcomes: test score gains, reading level growth, pass rates.',
       'Omitting class size and student population details (Title I, ELL, special education inclusion) that hiring committees use to judge relevant experience.',
-      'No mention of standards alignment (Common Core, state frameworks) — a specific term ATS screens for in education postings.',
+      'No mention of standards alignment (Common Core, state frameworks), a specific term ATS screens for in education postings.',
       'Treating parent and community engagement as a footnote when many districts screen for it as a core competency.',
     ],
     weakBullet: 'Taught 4th grade classes and graded assignments.',
@@ -192,9 +192,9 @@ export const resumeRoles: ResumeRole[] = [
       'change management',
     ],
     commonMistakes: [
-      'Listing certifications (PMP, CAPM) without evidence of applying them — projects actually delivered on time, on budget, in scope.',
-      'No mention of project size — budget, team headcount, duration — the first filter most hiring managers apply.',
-      'Confusing "coordinated" with "managed" — resumes should show ownership of schedule, budget, and risk, not just meeting facilitation.',
+      'Listing certifications (PMP, CAPM) without evidence of applying them: projects actually delivered on time, on budget, in scope.',
+      'No mention of project size (budget, team headcount, duration), the first filter most hiring managers apply.',
+      'Confusing "coordinated" with "managed." Resumes should show ownership of schedule, budget, and risk, not just meeting facilitation.',
       'Missing an aggregate delivery metric (on-time rate, budget variance) across multiple projects, which is what separates PM resumes from coordinator resumes.',
     ],
     weakBullet: 'Coordinated meetings between teams and tracked project timelines.',
@@ -219,9 +219,9 @@ export const resumeRoles: ResumeRole[] = [
       'cost-benefit analysis',
     ],
     commonMistakes: [
-      'Describing meetings attended ("gathered requirements from stakeholders") instead of what was delivered from them — a BRD, a redesigned process, a system spec.',
-      'No quantified process improvement — cycle time reduced, error rate cut, manual steps eliminated.',
-      'Blurring the line with Project Manager duties — a BA resume should show analysis and documentation, not just coordination.',
+      'Describing meetings attended ("gathered requirements from stakeholders") instead of what was delivered from them: a BRD, a redesigned process, a system spec.',
+      'No quantified process improvement: cycle time reduced, error rate cut, manual steps eliminated.',
+      'Blurring the line with Project Manager duties. A BA resume should show analysis and documentation, not just coordination.',
       'Missing evidence of technical fluency (SQL queries written, data models built) when the target role is a technical BA, not a purely process-focused one.',
     ],
     weakBullet: 'Gathered requirements from stakeholders and documented business processes.',
@@ -246,7 +246,7 @@ export const resumeRoles: ResumeRole[] = [
       'sales cycle optimization',
     ],
     commonMistakes: [
-      'Not stating quota attainment as a percentage — the single most-scanned metric for this role, and its absence reads as underperformance.',
+      "Not stating quota attainment as a percentage: it's the single most-scanned metric for this role, and its absence reads as underperformance.",
       'Listing "managed a sales team" without team size, territory, or revenue owned.',
       'No distinction between individual-contributor sales numbers and team-wide results after promotion into management.',
       'Missing sales methodology or CRM fluency (Salesforce, HubSpot) that ATS systems specifically filter for at this level.',
@@ -274,9 +274,9 @@ export const resumeRoles: ResumeRole[] = [
     ],
     commonMistakes: [
       'Listing "responsible for bookkeeping" without naming the close cycle time, transaction volume, or systems used.',
-      'No mention of accuracy or compliance outcomes — clean audits, error-free reconciliations, deadlines consistently met.',
-      'Omitting the accounting software or ERP actually used (QuickBooks, SAP, NetSuite) — a hard filter in many ATS screens for this role.',
-      'Vague language like "assisted with month-end close" instead of stating which parts were owned — accruals, reconciliations, reporting.',
+      'No mention of accuracy or compliance outcomes: clean audits, error-free reconciliations, deadlines consistently met.',
+      'Omitting the accounting software or ERP actually used (QuickBooks, SAP, NetSuite), a hard filter in many ATS screens for this role.',
+      'Vague language like "assisted with month-end close" instead of stating which parts were owned: accruals, reconciliations, reporting.',
     ],
     weakBullet: 'Responsible for accounts payable and month-end closing tasks.',
     strongBullet:
@@ -300,10 +300,10 @@ export const resumeRoles: ResumeRole[] = [
       'GPA (if 3.5 or higher)',
     ],
     commonMistakes: [
-      'Apologizing for a lack of experience in an objective statement instead of leading with what you do have — coursework, projects, internships.',
+      'Apologizing for a lack of experience in an objective statement instead of leading with what you do have: coursework, projects, internships.',
       'Listing duties from unrelated part-time work without translating them into transferable skills (customer service becomes communication, cash handling becomes attention to detail).',
-      'Treating the education section as an afterthought — at entry level it should be detailed: relevant coursework, GPA if strong, honors, capstone projects.',
-      'Leaving academic and project work unquantified — team size, project scope, results — even unpaid work can and should show a measurable outcome.',
+      'Treating the education section as an afterthought. At entry level it should be detailed: relevant coursework, GPA if strong, honors, capstone projects.',
+      'Leaving academic and project work unquantified (team size, project scope, results); even unpaid work can and should show a measurable outcome.',
     ],
     weakBullet: 'Completed coursework in marketing and worked part-time as a cashier.',
     strongBullet:
@@ -327,10 +327,10 @@ export const resumeRoles: ResumeRole[] = [
       'academic honors',
     ],
     commonMistakes: [
-      'Making the resume read like a class transcript — listing every course taken instead of the 3-4 most relevant to the internship\'s field.',
-      'Leaving out availability details (start date, duration, hours per week) — many internship ATS filters screen on this directly.',
+      'Making the resume read like a class transcript. Listing every course taken instead of the 3-4 most relevant to the internship\'s field.',
+      'Leaving out availability details (start date, duration, hours per week); many internship ATS filters screen on this directly.',
       'Underselling class projects and group work by describing them vaguely instead of naming the tools, role, and outcome.',
-      'Skipping a skills section entirely — for students with limited work history, a clear skills list is often the fastest way to pass an ATS keyword scan.',
+      'Skipping a skills section entirely. For students with limited work history, a clear skills list is often the fastest way to pass an ATS keyword scan.',
     ],
     weakBullet: 'Worked on a group project for a business class and gave a presentation.',
     strongBullet:
@@ -355,9 +355,9 @@ export const resumeRoles: ResumeRole[] = [
     ],
     commonMistakes: [
       'Listing "provided patient care" without the unit type or specialty (ICU, ER, Med-Surg) that hiring managers filter on first.',
-      'Omitting certifications and their currency (BLS, ACLS, PALS) — a common hard filter in nursing ATS screens, and an unclear expiration date reads as a red flag.',
-      'No mention of patient load or nurse-to-patient ratio — the scale signal recruiters use to judge unit acuity and experience level.',
-      'Describing tasks without safety or quality outcomes (falls prevented, infection rates, patient satisfaction scores) — task-only bullets read as junior regardless of years on the job.',
+      'Omitting certifications and their currency (BLS, ACLS, PALS), a common hard filter in nursing ATS screens; an unclear expiration date also reads as a red flag.',
+      'No mention of patient load or nurse-to-patient ratio. This is the scale signal recruiters use to judge unit acuity and experience level.',
+      'Describing tasks without safety or quality outcomes (falls prevented, infection rates, patient satisfaction scores). Task-only bullets read as junior regardless of years on the job.',
     ],
     weakBullet: 'Provided patient care and administered medications on a medical-surgical unit.',
     strongBullet:

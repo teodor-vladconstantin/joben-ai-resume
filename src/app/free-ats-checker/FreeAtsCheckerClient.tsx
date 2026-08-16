@@ -200,7 +200,7 @@ export function FreeAtsCheckerClient() {
           ) : (
             <>
               <p className="text-(--foreground) font-semibold">Strong score. This resume is in good shape.</p>
-              <p className="text-(--muted) text-sm mt-1">Save it and start tailoring it for real job postings — free.</p>
+              <p className="text-(--muted) text-sm mt-1">Save it and start tailoring it for real job postings, free.</p>
               <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
                 Create your free account
               </AuthAwareSignupLink>
@@ -226,7 +226,7 @@ export function FreeAtsCheckerClient() {
         <AlertTriangle className="mx-auto h-8 w-8 text-(--accent) mb-3" />
         <h2 className="text-(--foreground) font-bold text-lg">You&apos;ve used your 3 free scans today</h2>
         <p className="text-(--muted) text-sm mt-2 max-w-md mx-auto">
-          Come back tomorrow for 3 more free scans, or create a free account for unlimited access to AI resume tools —
+          Come back tomorrow for 3 more free scans, or create a free account for unlimited access to AI resume tools:
           scoring, tailoring, bullet rewrites, and cover letters.
         </p>
         <AuthAwareSignupLink className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
@@ -282,13 +282,13 @@ export function FreeAtsCheckerClient() {
           <>
             <FileText className="mx-auto h-7 w-7 text-(--accent) mb-3" />
             <p className="text-(--foreground) font-semibold">{file.name}</p>
-            <p className="text-xs text-(--muted) mt-1">Ready to scan — click to choose a different file</p>
+            <p className="text-xs text-(--muted) mt-1">Ready to scan, click to choose a different file</p>
           </>
         ) : (
           <>
             <Upload className="mx-auto h-7 w-7 text-(--muted) mb-3" />
             <p className="text-(--foreground) font-semibold">Drag & drop your resume, or click to browse</p>
-            <p className="text-xs text-(--muted) mt-1">.pdf or .docx — max 5 MB</p>
+            <p className="text-xs text-(--muted) mt-1">.pdf or .docx, max 5 MB</p>
           </>
         )}
       </div>
@@ -307,7 +307,7 @@ export function FreeAtsCheckerClient() {
           placeholder="you@email.com"
           className="w-full rounded-lg border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
         />
-        <p className="text-xs text-(--muted) mt-1.5">Never required — you&apos;ll see your score either way.</p>
+        <p className="text-xs text-(--muted) mt-1.5">Never required, you&apos;ll see your score either way.</p>
       </div>
 
       <button
@@ -321,7 +321,7 @@ export function FreeAtsCheckerClient() {
           </>
         ) : (
           <>
-            <CheckCircle2 className="h-5 w-5" /> Scan My Resume — Free
+            <CheckCircle2 className="h-5 w-5" /> Scan My Resume, Free
           </>
         )}
       </button>

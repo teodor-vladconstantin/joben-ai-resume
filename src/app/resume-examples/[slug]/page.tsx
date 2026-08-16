@@ -16,7 +16,7 @@ function articleFor(word: string): 'a' | 'an' {
   return /^[aeiou]/i.test(word) ? 'an' : 'a'
 }
 
-// Only the roles in resume-roles.ts are valid — an unlisted slug should 404,
+// Only the roles in resume-roles.ts are valid; an unlisted slug should 404,
 // not attempt an on-demand render with no matching content.
 export const dynamicParams = false
 
@@ -52,7 +52,7 @@ export async function generateMetadata({
           url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: `${role.title} Resume Examples — Joben`,
+          alt: `${role.title} Resume Examples, Joben`,
         },
       ],
       locale: 'en_US',
@@ -90,7 +90,7 @@ export default async function ResumeRolePage({
             {role.title} Resume Examples & ATS Keywords
           </h1>
           <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
-            What ATS software and recruiters look for on {article} {roleLower} resume — the exact keywords to
+            What ATS software and recruiters look for on {article} {roleLower} resume: the exact keywords to
             include, the mistakes that get resumes rejected, and a real bullet-point rewrite.
           </p>
         </div>
@@ -101,7 +101,7 @@ export default async function ResumeRolePage({
               Keywords ATS software scans for
             </h2>
             <p className="text-(--muted) text-sm mb-5">
-              Include the ones that genuinely match your background — don&apos;t keyword-stuff.
+              Include the ones that genuinely match your background, don&apos;t keyword-stuff.
             </p>
             <div className="flex flex-wrap gap-2">
               {role.keywords.map((keyword) => (
@@ -151,10 +151,10 @@ export default async function ResumeRolePage({
               How does your {role.title.toLowerCase()} resume actually score?
             </p>
             <p className="text-(--muted) text-sm mt-1.5 max-w-md mx-auto">
-              Upload it and get a free ATS score, a category breakdown, and specific fixes — in seconds, no signup.
+              Upload it and get a free ATS score, a category breakdown, and specific fixes, in seconds, no signup.
             </p>
             <Link href="/free-ats-checker" className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
-              Check My {role.title} Resume — Free
+              Check My {role.title} Resume, Free
             </Link>
           </Card>
         </div>

@@ -7,13 +7,13 @@ export interface ResumeScoreHeroProps {
 const GRADE_COPY: Record<string, string> = {
   Poor: 'Significant issues here are likely costing you interviews.',
   Fair: 'A few fixes below would meaningfully improve your chances.',
-  Good: 'Solid resume — a couple of tweaks would make it stronger.',
-  Excellent: 'Strong resume — ATS software and recruiters should have no trouble with it.',
+  Good: 'Solid resume. A couple of tweaks would make it stronger.',
+  Excellent: 'Strong resume. ATS software and recruiters should have no trouble with it.',
 }
 
 // Full-width, high-emphasis presentation of an ATS score for a result page
 // (as opposed to ResumeScoreCard, a small max-w-xs card built for the
-// homepage preview — kept separate and untouched, see the report on this
+// homepage preview, kept separate and untouched, see the report on this
 // change).
 export function ResumeScoreHero({ score, scoreLabel, categories }: ResumeScoreHeroProps) {
   return (
