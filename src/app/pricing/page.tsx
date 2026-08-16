@@ -1,7 +1,6 @@
-import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { CheckCircle2, X } from 'lucide-react'
 import { Metadata } from 'next'
-import { CheckCircle2, FileText, X } from 'lucide-react'
+import { Navbar } from '@/components/ui/Navbar'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
@@ -38,112 +37,64 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function PricingPage() {
-  const { userId } = await auth()
-
+export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary font-sans antialiased">
-      {/* Navbar */}
-      <nav className="h-14 border-b border-border-faint">
-        <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-text-primary hover:text-accent transition-colors">
-            <FileText size={18} />
-            <span className="font-semibold text-heading">Joben</span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Link
-              href="/"
-              className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-body rounded-md border border-transparent transition-colors"
-            >
-              Home
-            </Link>
-            {userId ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-body font-medium rounded-md border border-accent-border transition-colors"
-              >
-                Get Started
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <Navbar />
 
-      {/* Hero */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <h1 className="text-display font-semibold tracking-tight text-text-primary">
+      <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
             Simple, transparent pricing
           </h1>
-          <p className="mt-3 text-body text-text-secondary">
+          <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
             Start free. Upgrade when you need AI-powered features.
           </p>
         </div>
-      </section>
 
-      {/* Plans */}
-      <section className="pb-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pricingPlans.map((plan, index) => (
-              <Card
-                key={index}
-                elevated={plan.isBestValue}
-                radius="lg"
-                className={`p-6 flex flex-col relative ${plan.isBestValue ? 'border-(--accent)' : ''}`}
-              >
-                {plan.isBestValue && (
-                  <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    Best Value
-                  </Badge>
-                )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {pricingPlans.map((plan, index) => (
+            <Card
+              key={index}
+              elevated={plan.isBestValue}
+              radius="lg"
+              className={`p-6 flex flex-col relative ${plan.isBestValue ? 'border-(--accent)' : ''}`}
+            >
+              {plan.isBestValue && (
+                <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  Best Value
+                </Badge>
+              )}
 
-                <h3 className="text-heading font-medium text-text-primary">{plan.name}</h3>
-                <p className="text-text-muted text-xs mt-1">{plan.description}</p>
-                <div className="mt-4 mb-6">
-                  <span className="text-display text-text-primary font-semibold">{plan.price}</span>
-                  <span className="text-body text-text-muted"> {plan.price_period}</span>
-                </div>
-                <ul className="space-y-2 mb-6 grow">
-                  {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-body text-text-secondary">
-                      <CheckCircle2 size={14} className="text-success mt-0.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                  {plan.excludedFeatures.map((feature, fIndex) => (
-                    <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-body text-text-muted line-through">
-                      <X size={14} className="text-red-400 mt-0.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <PlanCta
-                  label={plan.cta}
-                  plan={plan.planId}
-                  className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}
-                />
-              </Card>
-            ))}
-          </div>
+              <h3 className="text-xl font-semibold text-(--foreground)">{plan.name}</h3>
+              <p className="text-(--muted) text-xs mt-1">{plan.description}</p>
+              <div className="mt-4 mb-6">
+                <span className="text-3xl text-(--foreground) font-bold">{plan.price}</span>
+                <span className="text-(--muted)"> {plan.price_period}</span>
+              </div>
+              <ul className="space-y-2 mb-6 grow">
+                {plan.features.map((feature, fIndex) => (
+                  <li key={fIndex} className="flex items-start gap-2 text-sm text-(--foreground)">
+                    <CheckCircle2 size={14} className="text-(--accent) mt-0.5 shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+                {plan.excludedFeatures.map((feature, fIndex) => (
+                  <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-(--muted) line-through">
+                    <X size={14} className="text-red-400 mt-0.5 shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <PlanCta
+                label={plan.cta}
+                plan={plan.planId}
+                className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}
+              />
+            </Card>
+          ))}
         </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border-faint py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-xs text-text-muted">
-            Questions? Contact us at <a href="mailto:duku@joben.eu" className="text-accent hover:underline">duku@joben.eu</a>
-          </p>
-        </div>
-      </footer>
+      </main>
     </div>
   )
 }
