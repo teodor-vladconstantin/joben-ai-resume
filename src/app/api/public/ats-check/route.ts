@@ -129,11 +129,17 @@ function getWeakestCategory(
   }, ATS_CATEGORY_KEYS[0])
 }
 
-async function storeOptionalEmail(input: {
-  email: string
+// Always called (whether or not the visitor gave an email up front) so a
+// scanId exists for the post-scan "email me this report" flow
+// (POST /api/public/ats-check/email) to look up later. report_json is the
+// single source of truth that endpoint sends from, so the client is never
+// trusted to supply report content for a scan it didn't just run.
+async function storeAnonymousScan(input: {
+  email: string | null
   overallScore: number | null
   ipHash: string | null
   weakestCategory: string | null
+  reportJson: unknown
 }): Promise<string | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -148,6 +154,7 @@ async function storeOptionalEmail(input: {
       overall_score: input.overallScore,
       ip_hash: input.ipHash,
       weakest_category: input.weakestCategory,
+      report_json: input.reportJson,
     })
     .select('id')
     .single()
@@ -365,40 +372,51 @@ export async function POST(req: Request) {
     const weakestCategory = typedResult.success ? getWeakestCategory(typedResult.data.categories) : null
 
     const emailRaw = formData.get('email')
+    let scanEmail: string | null = null
     if (typeof emailRaw === 'string' && emailRaw.trim().length > 0) {
       const parsedEmail = emailSchema.safeParse(emailRaw)
       if (parsedEmail.success && !isDisposableEmailDomain(parsedEmail.data)) {
-        try {
-          const scanId = await storeOptionalEmail({
-            email: parsedEmail.data,
-            overallScore,
-            ipHash,
-            weakestCategory,
-          })
+        scanEmail = parsedEmail.data
+      }
+    }
 
-          if (scanId && typedResult.success) {
-            // Awaited (not fire-and-forget): a serverless function is not
-            // guaranteed to keep running after it returns a response, so an
-            // un-awaited promise here could get killed mid-send. Failures
-            // inside are still non-blocking for the visitor, they're caught
-            // and logged, never thrown, matching storeOptionalEmail above.
-            await sendAnonymousScanReportEmailIfEligible({
-              scanId,
-              email: parsedEmail.data,
-              overallScore: typedResult.data.overall_score,
-              grade: typedResult.data.grade,
-              categories: typedResult.data.categories,
-              issues: typedResult.data.issues,
-            })
-          }
-        } catch (error) {
-          // Non-blocking, the visitor still gets their score even if this fails.
-          logger.warn('ATS check: failed to store optional email', {
-            requestId,
-            route: '/api/public/ats-check',
-            error: error instanceof Error ? error.message : 'Unknown error',
+    // Persisted unconditionally (not only when an email was given) so a
+    // scanId always exists for the post-scan "email me this report" flow.
+    // Only worth doing when the report actually parsed, that's the content
+    // the follow-up endpoint would send.
+    let scanId: string | null = null
+    if (typedResult.success) {
+      try {
+        scanId = await storeAnonymousScan({
+          email: scanEmail,
+          overallScore,
+          ipHash,
+          weakestCategory,
+          reportJson: typedResult.data,
+        })
+
+        if (scanId && scanEmail) {
+          // Awaited (not fire-and-forget): a serverless function is not
+          // guaranteed to keep running after it returns a response, so an
+          // un-awaited promise here could get killed mid-send. Failures
+          // inside are still non-blocking for the visitor, they're caught
+          // and logged, never thrown, matching storeAnonymousScan above.
+          await sendAnonymousScanReportEmailIfEligible({
+            scanId,
+            email: scanEmail,
+            overallScore: typedResult.data.overall_score,
+            grade: typedResult.data.grade,
+            categories: typedResult.data.categories,
+            issues: typedResult.data.issues,
           })
         }
+      } catch (error) {
+        // Non-blocking, the visitor still gets their score even if this fails.
+        logger.warn('ATS check: failed to store anonymous scan', {
+          requestId,
+          route: '/api/public/ats-check',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
       }
     }
 
@@ -406,12 +424,12 @@ export async function POST(req: Request) {
       distinctId: `anon:${ipHash || 'unknown'}`,
       event: 'anonymous_ats_check_completed',
       properties: {
-        hasEmail: typeof emailRaw === 'string' && emailRaw.trim().length > 0,
+        hasEmail: Boolean(scanEmail),
         overallScore,
       },
     })
 
-    return withDeviceCookie(jsonWithRequestId({ result }, 200, requestId))
+    return withDeviceCookie(jsonWithRequestId({ result, scanId, emailSent: Boolean(scanId && scanEmail) }, 200, requestId))
   } catch (error) {
     logger.error('Public ATS check top-level failure', {
       requestId,

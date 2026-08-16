@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
+import { PlanCta } from '@/components/pricing/PlanCta'
 
 type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 
@@ -78,6 +79,11 @@ export function FreeAtsCheckerClient() {
   const [error, setError] = useState<string | null>(null)
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [result, setResult] = useState<AtsResult | null>(null)
+  const [scanId, setScanId] = useState<string | null>(null)
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null)
+  const [postScanEmail, setPostScanEmail] = useState('')
+  const [isSendingReport, setIsSendingReport] = useState(false)
+  const [reportError, setReportError] = useState<string | null>(null)
 
   function handleFile(selected: File) {
     setError(null)
@@ -119,7 +125,7 @@ export function FreeAtsCheckerClient() {
       })
 
       const payload = (await response.json().catch(() => null)) as
-        | { result?: AtsResult; error?: string }
+        | { result?: AtsResult; scanId?: string | null; emailSent?: boolean; error?: string }
         | null
 
       if (!response.ok) {
@@ -139,11 +145,44 @@ export function FreeAtsCheckerClient() {
       }
 
       setResult(payload.result)
+      setScanId(payload.scanId ?? null)
+      setEmailSentTo(payload.emailSent ? email.trim() : null)
     } catch {
       setError('Could not reach the scanner. Check your connection and try again.')
     }
 
     setIsScanning(false)
+  }
+
+  async function handleSendReport() {
+    if (!scanId || !postScanEmail.trim()) return
+
+    setIsSendingReport(true)
+    setReportError(null)
+
+    try {
+      const response = await fetch('/api/public/ats-check/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scanId, email: postScanEmail.trim() }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | { success?: boolean; email?: string; error?: string }
+        | null
+
+      if (!response.ok || !payload?.success) {
+        setReportError(payload?.error || 'Could not send the report. Please try again.')
+        setIsSendingReport(false)
+        return
+      }
+
+      setEmailSentTo(payload.email || postScanEmail.trim())
+    } catch {
+      setReportError('Could not reach the server. Check your connection and try again.')
+    }
+
+    setIsSendingReport(false)
   }
 
   function handleReset() {
@@ -152,6 +191,10 @@ export function FreeAtsCheckerClient() {
     setError(null)
     setIsRateLimited(false)
     setEmail('')
+    setScanId(null)
+    setEmailSentTo(null)
+    setPostScanEmail('')
+    setReportError(null)
   }
 
   if (result) {
@@ -171,6 +214,15 @@ export function FreeAtsCheckerClient() {
           <ResumeScoreHero score={result.overall_score} scoreLabel={result.grade} categories={scoreCategories} />
         </Card>
 
+        <Card radius="lg" className="p-6 text-center">
+          <p className="text-(--foreground) font-semibold">Want automatic rewriting of your weak points?</p>
+          <p className="mt-2">
+            <span className="text-2xl text-(--foreground) font-bold">59 RON</span>
+            <span className="text-(--muted)"> /month</span>
+          </p>
+          <PlanCta plan="pro" label="Upgrade to Pro" className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`} />
+        </Card>
+
         {hasIssues && (
           <Card radius="lg" className="p-6">
             <h2 className="text-(--foreground) font-bold mb-4">What to fix</h2>
@@ -186,6 +238,44 @@ export function FreeAtsCheckerClient() {
               ))}
             </ul>
           </Card>
+        )}
+
+        {scanId && (
+          emailSentTo ? (
+            <Card radius="lg" className="p-6 text-center">
+              <p className="text-(--foreground) font-semibold text-sm">Report sent to {emailSentTo}.</p>
+              <button
+                onClick={() => setEmailSentTo(null)}
+                className="mt-2 text-xs text-(--muted) hover:text-(--foreground) underline"
+              >
+                Send to a different email
+              </button>
+            </Card>
+          ) : (
+            <Card radius="lg" className="p-6">
+              <h2 className="text-(--foreground) font-bold mb-1">Get this report by email</h2>
+              <p className="text-(--muted) text-sm mb-4">
+                We&apos;ll send your score, category breakdown, and issues to your inbox.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={postScanEmail}
+                  onChange={(e) => setPostScanEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+                />
+                <button
+                  onClick={() => void handleSendReport()}
+                  disabled={!postScanEmail.trim() || isSendingReport}
+                  className={`inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${buttonVariants('secondary', 'md')}`}
+                >
+                  {isSendingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Email me this report'}
+                </button>
+              </div>
+              {reportError && <p className="text-sm text-red-400 mt-2">{reportError}</p>}
+            </Card>
+          )
         )}
 
         <Card elevated radius="lg" className="p-6 text-center">
