@@ -140,11 +140,21 @@ const nextConfig: NextConfig = {
   // package genuinely isn't in the deployed function's node_modules.
   // Explicitly including it is the documented fix for this exact class of
   // issue (native/runtime assets the tracer can't discover on its own).
+  //
+  // The canvas fix alone got past the DOMMatrix crash but surfaced the same
+  // class of problem one layer down: pdfjs-dist has no `Worker` global in
+  // Node, so it runs its parser in "fake worker" mode by dynamically
+  // importing pdf.worker.mjs from its own build directory, another require
+  // the tracer can't follow statically. Confirmed live via runtime logs:
+  // "Cannot find module '/var/task/node_modules/pdfjs-dist/legacy/build/
+  // pdf.worker.mjs'". Including the whole legacy/build directory covers
+  // that file (and its .map) without hardcoding filenames.
   outputFileTracingIncludes: {
     '/api/public/ats-check': [
       './node_modules/@napi-rs/canvas/**/*',
       './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
       './node_modules/@napi-rs/canvas-linux-x64-musl/**/*',
+      './node_modules/pdfjs-dist/legacy/build/**/*',
     ],
   },
   async headers() {
