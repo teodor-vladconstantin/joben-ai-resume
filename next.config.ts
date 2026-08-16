@@ -121,6 +121,15 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
+  // pdfjs-dist (used by /api/public/ats-check for local PDF text extraction)
+  // does a runtime `require("@napi-rs/canvas")` to polyfill DOMMatrix at
+  // module load. Neither package is in Next's default serverExternalPackages
+  // allowlist, so Turbopack bundles them instead of leaving them as native
+  // Node requires, the bundled require silently fails to resolve the native
+  // binary, and an unconditional `new DOMMatrix()` later in the same module
+  // then throws. Marking both external makes Next use plain `require()` from
+  // node_modules at runtime, the same way a non-bundled Node app would.
+  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas'],
   async headers() {
     return [
       {
