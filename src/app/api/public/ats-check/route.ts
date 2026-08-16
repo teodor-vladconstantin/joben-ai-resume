@@ -40,7 +40,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ])
 
-const ATS_CHECK_RATE_LIMIT_PER_DAY = 3
+const ATS_CHECK_RATE_LIMIT_PER_DAY = 1
 const MAX_RESUME_CHARS = 8_000
 const MIN_RESUME_CHARS = 100
 const MAX_OUTPUT_TOKENS = 500
