@@ -31,7 +31,6 @@ type PlanDefinition = {
   resumeAnalysisAccess: boolean
   coverLetterGenerationAccess: boolean
   atsKeywordOptimization: boolean
-  maxResumes: number | null
   maxResumeExports: number | null
   priorityEmailSupport: boolean
   fullTemplateLibrary: boolean
@@ -46,7 +45,6 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     resumeAnalysisAccess: true,
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
-    maxResumes: 3,
     maxResumeExports: 5,
     priorityEmailSupport: false,
     fullTemplateLibrary: false,
@@ -59,7 +57,6 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     resumeAnalysisAccess: true,
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
-    maxResumes: null,
     maxResumeExports: null,
     priorityEmailSupport: true,
     fullTemplateLibrary: false,
@@ -72,7 +69,6 @@ export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
     resumeAnalysisAccess: true,
     coverLetterGenerationAccess: true,
     atsKeywordOptimization: true,
-    maxResumes: null,
     maxResumeExports: null,
     priorityEmailSupport: true,
     fullTemplateLibrary: true,
@@ -179,25 +175,6 @@ function deniedQuota(message: string, limit: number, used: number): PlanQuotaRes
   }
 }
 
-async function countUserResumes(userId: string): Promise<number | null> {
-  const supabase = createServerClient()
-  const { count, error } = await supabase
-    .from('resumes')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-
-  if (error) {
-    logger.error('Failed to count user resumes for plan quota', {
-      source: 'countUserResumes',
-      userId,
-      error: error.message,
-    })
-    return null
-  }
-
-  return count || 0
-}
-
 async function countUserResumeExports(userId: string): Promise<number | null> {
   const supabase = createServerClient()
   const { count, error } = await supabase
@@ -216,43 +193,6 @@ async function countUserResumeExports(userId: string): Promise<number | null> {
   }
 
   return count || 0
-}
-
-export async function checkResumeCreationQuota(
-  userId: string,
-  plan: UserPlan
-): Promise<PlanQuotaResult> {
-  const limit = PLAN_DEFINITIONS[plan].maxResumes
-  if (limit === null) {
-    return { allowed: true, status: 200 }
-  }
-
-  const used = await countUserResumes(userId)
-  if (used === null) {
-    return {
-      allowed: false,
-      status: 500,
-      error: 'Could not validate plan limits right now. Please try again.',
-    }
-  }
-
-  if (used >= limit) {
-    const nextPlan = plan === 'free' ? 'Pro' : 'Recruiting'
-    const resumeNoun = limit === 1 ? 'resume' : 'resumes'
-    return deniedQuota(
-      `Free plan allows up to ${limit} active ${resumeNoun}. Upgrade to ${nextPlan} for unlimited resumes.`,
-      limit,
-      used
-    )
-  }
-
-  return {
-    allowed: true,
-    status: 200,
-    limit,
-    used,
-    remaining: Math.max(limit - used, 0),
-  }
 }
 
 export async function checkResumeExportQuota(

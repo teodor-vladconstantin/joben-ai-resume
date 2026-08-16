@@ -1,8 +1,7 @@
 import type { Redis } from '@upstash/redis'
-import { createServerClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { getUpstashClient } from '@/lib/upstash'
-import { isGodModeEmailAddress } from '@/lib/plans'
+import { getUserPlan as resolveUserPlan } from '@/lib/plans'
 
 export type Plan = 'free' | 'pro' | 'recruiting'
 export type Feature = 'covers' | 'jds' | 'bullets' | 'reviews' | 'summaries' | 'cvs'
@@ -212,6 +211,10 @@ export function getRedisClient(): Redis | null {
   return redis
 }
 
+// Cached wrapper around @/lib/plans's getUserPlan(), which stays the single
+// source of truth for DB resolution + GOD_MODE_EMAILS + lifetime_recruiting
+// override. Previously this function duplicated that entire resolution body
+// independently, so the two could silently drift out of sync.
 export async function getUserPlan(userId: string): Promise<Plan> {
   const planCacheKey = `plan:${userId}`
 
@@ -231,31 +234,7 @@ export async function getUserPlan(userId: string): Promise<Plan> {
   }
 
   try {
-    const supabase = createServerClient()
-    const { data, error } = await supabase
-      .from('users')
-      .select('plan, email, lifetime_recruiting_unlocked')
-      .eq('clerk_id', userId)
-      .maybeSingle()
-
-    if (error) {
-      logger.warn('Could not read user plan from DB; defaulting to free', {
-        source: 'ratelimit.getUserPlan',
-        userId,
-        error: error.message,
-      })
-      return 'free'
-    }
-
-    // Keep this consistent with @/lib/plans's getUserPlan(), which callers
-    // use for actual AI-call gating — otherwise a god-mode account could get
-    // cached here as free/pro for up to PLAN_CACHE_TTL_SECONDS and see a
-    // wrong (capped) rate-limit status in the UI.
-    const resolvedPlan = isGodModeEmailAddress(data?.email as string | undefined)
-      ? 'recruiting'
-      : data?.lifetime_recruiting_unlocked
-        ? 'recruiting'
-        : normalizePlan((data?.plan as string | undefined) || null) || 'free'
+    const resolvedPlan = await resolveUserPlan(userId)
 
     if (redis) {
       try {
@@ -449,6 +428,28 @@ export async function incrementFeatureCounterBy(userId: string, feature: Feature
     await pipeline.exec()
   } catch (error) {
     logRedisFailure('Failed to increment feature counter (fail-open)', {
+      userId,
+      feature,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+}
+
+// Only meaningful for cumulative (non-monthly) counters like 'cvs' — frees a
+// slot when the underlying resource (a saved resume) is actually deleted.
+// No floor at 0: toCounter() already clamps any negative read back to 0, so
+// a stray extra decrement (e.g. a retried request) self-heals on next read
+// instead of needing a guard here.
+export async function decrementFeatureCounter(userId: string, feature: Feature): Promise<void> {
+  if (!redis) return
+
+  const month = currentMonthUtc()
+  const key = featureKey(userId, feature, month)
+
+  try {
+    await redis.decrby(key, 1)
+  } catch (error) {
+    logRedisFailure('Failed to decrement feature counter (fail-open)', {
       userId,
       feature,
       error: error instanceof Error ? error.message : 'Unknown error',
