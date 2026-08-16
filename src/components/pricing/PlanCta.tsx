@@ -1,31 +1,41 @@
 'use client'
 
 import { useState } from 'react'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { Loader2 } from 'lucide-react'
+import { startCheckout, type PaidPlan } from '@/lib/client-billing'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 
 type PlanCtaProps = {
   label: string
   className?: string
-  // Paid plans intercept the click and open the "payments not active yet"
-  // beta modal instead of routing anywhere. The free plan keeps its normal
-  // sign-up / dashboard link.
-  paid: boolean
+  plan?: PaidPlan
 }
 
-export function PlanCta({ label, className, paid }: PlanCtaProps) {
-  const [open, setOpen] = useState(false)
+export function PlanCta({ label, className, plan }: PlanCtaProps) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  if (!paid) {
+  if (!plan) {
     return <AuthAwareSignupLink className={className}>{label}</AuthAwareSignupLink>
   }
 
+  const handleClick = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      await startCheckout(plan)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start checkout.')
+      setLoading(false)
+    }
+  }
+
   return (
-    <>
-      <button type="button" className={className} onClick={() => setOpen(true)}>
-        {label}
+    <div>
+      <button type="button" className={className} onClick={handleClick} disabled={loading}>
+        {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : label}
       </button>
-      <UpgradeModal open={open} onClose={() => setOpen(false)} />
-    </>
+      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+    </div>
   )
 }

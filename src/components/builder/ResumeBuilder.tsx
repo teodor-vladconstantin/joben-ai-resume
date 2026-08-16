@@ -7,7 +7,7 @@ import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 import { MonthYearRangeField } from '@/components/ui/MonthYearRangeField'
@@ -2164,10 +2164,9 @@ export function ResumeBuilder() {
         </div>
       ) : null}
 
-      <UpgradeModal
+      <UpgradeBanner
         open={showUpgradeModal}
-        title="Pro Feature"
-        description={upgradeMessage}
+        message={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
       />
     </div>

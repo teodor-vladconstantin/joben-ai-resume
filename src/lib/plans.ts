@@ -83,6 +83,22 @@ export function normalizePlan(plan: string | null | undefined): UserPlan {
   return 'free'
 }
 
+export type PaidPlan = 'pro' | 'recruiting'
+
+// Single source of truth for mapping a Stripe price ID back to the plan it
+// sells, shared by the checkout route (choosing which price to charge) and
+// the webhook handler (resolving an existing subscription's plan).
+export function resolvePlanFromPriceId(priceId: string | null | undefined): PaidPlan | null {
+  if (!priceId) return null
+  if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro'
+  if (priceId === process.env.STRIPE_RECRUITING_PRICE_ID) return 'recruiting'
+  return null
+}
+
+export function getPriceIdForPlan(plan: PaidPlan): string | undefined {
+  return plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID
+}
+
 export async function getUserPlan(userId: string, userEmailHint?: string | null): Promise<UserPlan> {
   if (isGodModeEmailAddress(userEmailHint)) {
     return 'recruiting'

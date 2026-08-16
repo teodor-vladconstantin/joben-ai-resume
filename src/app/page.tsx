@@ -48,7 +48,7 @@ export default function Home() {
         offers: {
           '@type': 'Offer',
           price: '0',
-          priceCurrency: 'EUR',
+          priceCurrency: 'RON',
         },
       },
       {
@@ -261,7 +261,7 @@ export default function Home() {
                 </ul>
                 <PlanCta
                   label={plan.cta}
-                  paid={Boolean(plan.isComingSoon)}
+                  plan={plan.planId}
                   className={`w-full text-center ${buttonVariants(plan.isBestValue || plan.isPrimary ? 'primary' : 'secondary', 'md')}`}
                 />
               </Card>

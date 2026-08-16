@@ -93,8 +93,10 @@ curl -X POST "https://your-domain.com/api/cron/followup-7d?limit=100&retries=1" 
 
 ### Stripe Billing
 - Checkout: `/api/billing/checkout`
+- Billing portal (manage/cancel subscription): `/api/billing/portal`
 - Webhook: `/api/webhooks/stripe`
-- Requires valid `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
+- Requires valid `STRIPE_SECRET_KEY` (`sk_test_...` for dev, `sk_live_...` for prod), `STRIPE_PRO_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
+- See `.env.prod.example` for the full var list and `RUNBOOK.md`'s "Local Stripe Testing" section for `stripe listen`/`stripe trigger` usage
 
 ## Observability Data
 - `public.webhook_events`: idempotency claims for Clerk/Stripe webhook events
