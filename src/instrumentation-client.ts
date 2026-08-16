@@ -9,7 +9,10 @@ import { scrubSentryEvent } from '@/lib/security/sentry-scrub'
 
 const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 
-if (posthogProjectToken) {
+// Skip init entirely on localhost so local testing never pollutes production
+// analytics. `next build` (including Vercel preview builds) always sets
+// NODE_ENV=production, so this only excludes `next dev`.
+if (posthogProjectToken && process.env.NODE_ENV === 'production') {
   posthog.init(posthogProjectToken, {
     api_host: '/ingest',
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
