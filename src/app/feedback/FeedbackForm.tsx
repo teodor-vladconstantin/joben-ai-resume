@@ -21,7 +21,7 @@ export function FeedbackForm({ email }: { email: string }) {
     )
   }
   if (result === 'already') {
-    return <ConfirmationCard message="You've already left feedback — thank you!" />
+    return <ConfirmationCard message="You've already left feedback, thank you!" />
   }
 
   function handleSubmit(e: React.FormEvent) {

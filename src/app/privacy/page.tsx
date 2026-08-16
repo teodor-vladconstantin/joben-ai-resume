@@ -43,7 +43,7 @@ const sections = [
   {
     title: '2. Data We Collect',
     content:
-      'Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number — Stripe handles that directly). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses.',
+      'Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number (Stripe handles that directly)). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses.',
   },
   {
     title: '3. How We Use Data',
@@ -53,17 +53,17 @@ const sections = [
   {
     title: '4. AI Processing',
     content:
-      'When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic ("Claude"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic — only the document content needed for the specific request. Anthropic does not use API inputs to train its models by default.',
+      'When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic ("Claude"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic; we only send the document content needed for the specific request. Anthropic does not use API inputs to train its models by default.',
   },
   {
     title: '5. Sub-Processors',
     content:
-      'We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure — it is not a third-party sub-processor.',
+      'We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure, so it is not a third-party sub-processor.',
   },
   {
     title: '6. Legal Bases',
     content:
-      'Contract performance: account creation, resume/cover letter storage, AI features, and billing — necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law.',
+      'Contract performance: account creation, resume/cover letter storage, AI features, and billing, all necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law.',
   },
   {
     title: '7. Data Retention',

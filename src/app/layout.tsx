@@ -6,6 +6,7 @@ import { JetBrains_Mono } from 'next/font/google'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { validateEnv } from '@/lib/env'
 import { ClientProviders } from '@/components/ClientProviders'
+import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
 import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
@@ -160,6 +161,7 @@ export default function RootLayout({
           <ClientProviders>
             {children}
           </ClientProviders>
+          <ConditionalFooter />
           <CookieConsentBanner />
         </body>
       </html>

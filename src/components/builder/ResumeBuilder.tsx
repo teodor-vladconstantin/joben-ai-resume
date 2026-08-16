@@ -556,7 +556,7 @@ export function ResumeBuilder() {
       setFixBanner(
         count > 0
           ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
-          : 'Auto-fix complete — no changes needed.'
+          : 'Auto-fix complete, no changes needed.'
       )
     } else if (fixApplied === 'true') {
       setFixBanner('Fix applied successfully.')

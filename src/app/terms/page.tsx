@@ -73,7 +73,7 @@ const sections = [
   {
     title: '8. Your Content',
     content:
-      'You retain ownership of content you upload or create. You grant us a limited license to process that content — including sending it to our AI provider — only to provide, maintain, and improve the service.',
+      'You retain ownership of content you upload or create. You grant us a limited license to process that content (including sending it to our AI provider), only to provide, maintain, and improve the service.',
   },
   {
     title: '9. Intellectual Property',

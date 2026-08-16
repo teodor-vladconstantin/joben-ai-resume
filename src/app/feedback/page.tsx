@@ -62,7 +62,7 @@ export default async function FeedbackPage() {
           {existing ? (
             <div className="rounded-lg border border-(--accent-strong)/35 bg-(--accent-muted) px-6 py-8 text-center">
               <p className="text-base font-medium text-(--foreground)">
-                You&apos;ve already left feedback — thank you!
+                You&apos;ve already left feedback, thank you!
               </p>
             </div>
           ) : (
