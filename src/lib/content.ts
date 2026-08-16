@@ -257,11 +257,11 @@ export const siteFooterContent = {
   salBadge: {
     href: "https://reclamatiisal.anpc.ro",
     imageSrc: "/legal/anpc-sal-badge.png",
-    alt: "Soluționarea Alternativă a Litigiilor (SAL) - ANPC",
+    alt: "SAL (Alternative Dispute Resolution) - ANPC",
   },
   productHunt: {
     href: "https://www.producthunt.com/products/joben",
-    label: "Vezi-ne pe Product Hunt",
+    label: "Find us on Product Hunt",
   },
   creatorCredit: "Built by a software engineer who understands the job search struggle.",
 };
