@@ -4,10 +4,11 @@
 This runbook defines routine operations, incident response, and rollback procedures for Joben Resume production.
 
 ## System Topology
-- `next-app`: main Next.js application
-- `latex-service`: PDF compile microservice
-- `supabase`: Postgres + APIs
-- `traefik`: reverse proxy/TLS
+- `next-app`: main Next.js application — deploys to **Vercel**; env vars are set in the Vercel Dashboard, not in this repo
+- `supabase`: Postgres + APIs — Supabase Cloud (not self-hosted)
+- `latex-service`: PDF compile microservice — self-hosted on a VPS via `docker-compose.prod.yml`
+- `resume-parser`: PDF/DOCX parsing — also self-hosted on the VPS alongside `latex-service`
+- `traefik`: reverse proxy/TLS in front of the VPS services only (not in front of the Next.js app, which Vercel fronts itself)
 
 ## Critical Endpoints
 - Health: `/api/health`
@@ -15,6 +16,7 @@ This runbook defines routine operations, incident response, and rollback procedu
 - Stripe webhook: `/api/webhooks/stripe`
 - Follow-up cron: `/api/cron/followup-7d`
 - Stripe checkout: `/api/billing/checkout`
+- Stripe billing portal (manage/cancel subscription): `/api/billing/portal`
 
 ## Daily Checks
 1. Verify app health endpoint returns `200` and `status=ok`.
@@ -66,6 +68,90 @@ curl -X POST "https://<host>/api/cron/followup-7d?limit=100&retries=1" -H "Autho
 
 GitHub Actions `schedule` triggers are best-effort and can lag during high platform load, so treat this as "checked every ~30 min," not real-time. If the project later moves to Vercel Pro, this can be added back to `vercel.json` instead: `{"path": "/api/cron/redis-health", "schedule": "*/15 * * * *"}`, and the workflow file can be removed.
 
+## Local Stripe Testing
+Use the [Stripe CLI](https://docs.stripe.com/stripe-cli) to forward live test-mode
+webhook events to your local dev server instead of manually POSTing fixtures:
+
+```bash
+stripe login
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
+
+`stripe listen` prints a `whsec_...` signing secret — put that in your local
+`STRIPE_WEBHOOK_SECRET` (it's different from the Dashboard's registered
+endpoint secret). Then in a second terminal, trigger individual events:
+
+```bash
+stripe trigger checkout.session.completed
+stripe trigger customer.subscription.updated
+stripe trigger invoice.payment_failed
+stripe trigger charge.refunded
+```
+
+Use Stripe's [test card numbers](https://docs.stripe.com/testing) (e.g.
+`4242 4242 4242 4242`, any future expiry, any CVC) to drive a real checkout
+session end-to-end through `/api/billing/checkout` and confirm the webhook
+updates `users.plan` as expected.
+
+## Stripe Live Cutover Checklist
+One-time steps to take Stripe payments live. Steps 1-4 require access to the
+Stripe and Vercel Dashboards and must be done by a human with account access —
+they cannot be automated from this repo. Run step 5 (test-mode dry run)
+*before* step 6 (flipping to live keys) every time, even on repeat cutovers
+after a rollback.
+
+1. **Stripe Dashboard, live mode**: create two subscription prices — the live
+   `price_...` IDs differ from the test-mode price IDs already in use:
+   - **Pro**: recurring, `€12` every 1 month.
+   - **Recruiting Plan**: recurring, `€60` every 6 months (`interval: month,
+     interval_count: 6`).
+2. **Stripe Dashboard, live mode**: register the webhook endpoint
+   `https://<prod-domain>/api/webhooks/stripe`. Select exactly the 7 event
+   types the handler processes — not "all events" — to keep `webhook_events`
+   free of irrelevant rows:
+   `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted`,
+   `invoice.payment_failed`, `invoice.paid`, `charge.refunded`.
+   Copy the live `whsec_...` signing secret.
+3. **Stripe Dashboard, live mode**: activate the Customer Portal default
+   configuration (Settings → Billing → Customer portal). This is required for
+   `/api/billing/portal` to work in live mode and is a separate one-time
+   toggle from test mode. Add **both** the Pro and Recruiting Plan prices to
+   the portal's "products customers can switch to" list so an existing
+   subscriber can move between the two plans from the portal.
+4. **Vercel Dashboard**: set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+   `STRIPE_PRO_PRICE_ID`, `STRIPE_RECRUITING_PRICE_ID` (the live values from
+   steps 1-2) as Production environment variables. This is the only place
+   production secrets live — there is no env file in this repo with real
+   values.
+5. **Pre-flight in test mode first**, against the deployed app (Stripe still
+   in test mode): run the full smoke flow for **both** plans — sign in →
+   create resume → analyze → export → checkout with test card
+   `4242 4242 4242 4242` (once via "Upgrade to Pro", once via "Get Recruiting
+   Plan") → confirm the webhook updates `users.plan` to the correct plan for
+   each → open the billing portal → cancel → confirm the webhook downgrades
+   the plan. Also confirm a `lifetime_recruiting_unlocked` test user is never
+   downgraded by any of the above (see the `lifetime_recruiting_unlocked` test
+   cases in `tests/api/webhooks-stripe.test.ts` for the exact behavior being
+   verified manually here).
+6. **Flip Vercel env vars to the live values from steps 1-2 and redeploy.**
+7. **Live smoke test**: one real low-value charge per plan (cheapest
+   configured price, or a Dashboard-created $0/$1 coupon — Stripe test clocks
+   don't work against live keys). Confirm checkout → webhook → plan update →
+   portal cancel/refund → webhook downgrade, all in live mode, for both Pro
+   and Recruiting Plan. Refund/cancel immediately after confirming.
+8. **Confirm monitoring**: verify the webhook route's `logger.error` calls
+   (signature failures, DB update failures, claim failures) are visibly
+   flowing into Sentry, and that alert thresholds are sane for a burst of
+   webhook failures.
+9. **If anything breaks post-launch**: set `CHECKOUT_DISABLED=true` in Vercel
+   and redeploy — this pauses new checkouts instantly while leaving the
+   webhook handler running (existing subscribers' refunds/cancellations must
+   keep processing regardless). See "Checkout failures for Pro upgrades"
+   below for further diagnosis.
+10. Check off the two Stripe items in `TODO.md`'s pre-launch checklist once
+    this is genuinely done.
+
 ## Incident Playbooks
 
 ### 1) Health endpoint degraded
@@ -99,11 +185,22 @@ GitHub Actions `schedule` triggers are best-effort and can lag during high platf
 4. `/api/cron/redis-health` pushes a `logger.error` (→ Sentry) when Upstash is unreachable, so a Redis outage is now alerted instead of silently degrading quota enforcement — but it needs an external scheduler to actually fire on Vercel Hobby (see "Cron Operations" above). Check Sentry for `Upstash Redis health check failed` if you suspect an outage went unnoticed, and confirm the external scheduler is still active if alerts have gone quiet for a suspiciously long time.
 5. Restore Redis connectivity before reopening traffic; there is no need to change the fail-open code path to recover — it self-heals once Redis is reachable again.
 
-### 6) Checkout failures for Pro upgrades
-1. Verify `STRIPE_SECRET_KEY` and `STRIPE_PRO_PRICE_ID`.
-2. Verify app URL and allowed return URLs.
-3. Test `/api/billing/checkout` manually under authenticated user.
-4. Inspect product funnel event `checkout_started` for request-level visibility.
+### 6) Checkout failures for Pro/Recruiting Plan upgrades
+1. Verify `STRIPE_SECRET_KEY` and the price id for the plan being purchased
+   (`STRIPE_PRO_PRICE_ID` or `STRIPE_RECRUITING_PRICE_ID`) — the checkout
+   route accepts `{ "plan": "pro" | "recruiting" }` in the POST body
+   (defaults to `"pro"`) and returns 503 without leaking which var is missing
+   if the corresponding price id isn't configured.
+2. Confirm `CHECKOUT_DISABLED` is not set to `"true"` — this is the deliberate kill switch (see `src/app/api/billing/checkout/route.ts`); it returns 503 before any other check runs.
+3. Verify app URL and allowed return URLs.
+4. Test `/api/billing/checkout` manually under authenticated user, for both plans.
+5. Inspect product funnel event `checkout_started` for request-level visibility (includes the `plan` property).
+
+### 8) Billing portal failures ("Manage billing" button)
+1. Verify `STRIPE_SECRET_KEY` is set.
+2. Confirm the user has a `stripe_customer_id` in `public.users` — the portal route 404s with a clear message if not (they've never checked out).
+3. In Stripe Dashboard → Settings → Billing → Customer portal, confirm the default configuration is activated for the relevant mode (test/live) — the portal route errors if it isn't, since Stripe requires this one-time manual setup per mode.
+4. Test `/api/billing/portal` manually under an authenticated user with an active subscription.
 
 ### 7) PDF export service unauthorized/unavailable
 1. Verify `LATEX_SERVICE_SECRET` exists in both app and latex-service containers.

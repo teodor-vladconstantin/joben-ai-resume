@@ -187,6 +187,12 @@ export const redeemCodeSchema = z
   })
   .strict()
 
+export const checkoutRequestSchema = z
+  .object({
+    plan: z.enum(['pro', 'recruiting']).optional(),
+  })
+  .strict()
+
 // Mirrors `LatexResumeData` in src/app/api/resumes/export-latex/route.ts — the
 // shape consumed by generateLatex() before the .tex source is forwarded to
 // the external LaTeX compile microservice. Fields stay optional (drafts can

@@ -107,12 +107,14 @@ TODO.md must always be accurate so context can be reconstructed instantly
 
 
 Deployment Target
+Hybrid: the Next.js app deploys to Vercel (env vars set in the Vercel Dashboard,
+not in this repo). Only the LaTeX/resume-parser services run on a VPS via
+Docker Compose:
 VPS (Docker Compose)
-├── traefik         reverse proxy + TLS
-├── next-app        Next.js standalone
-├── latex-service   PDF generation
-└── supabase        self-hosted stack
-Config: docker-compose.prod.yml, CI/CD: .github/workflows/deploy.yml
+├── resume-parser   PDF/DOCX parsing
+└── latex-service   PDF generation
+Config: docker-compose.prod.yml (VPS services only). .github/workflows/deploy.yml
+currently runs CI (lint/tsc/test) only — it does not deploy.
 
 ## graphify
 

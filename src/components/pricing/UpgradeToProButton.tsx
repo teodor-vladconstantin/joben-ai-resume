@@ -1,21 +1,31 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { startProCheckout } from '@/lib/client-billing'
 
-// Payments are disabled during the beta, so the upgrade button always opens
-// the "payments not active yet" modal — regardless of auth state — instead of
-// starting checkout or routing to sign-up.
 export function UpgradeToProButton() {
-  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleClick = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      await startProCheckout()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start checkout.')
+      setLoading(false)
+    }
+  }
 
   return (
-    <>
-      <Button variant="primary" className="w-full" onClick={() => setOpen(true)}>
-        Upgrade to Pro
+    <div className="w-full">
+      <Button variant="primary" className="w-full" onClick={handleClick} disabled={loading}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upgrade to Pro'}
       </Button>
-      <UpgradeModal open={open} onClose={() => setOpen(false)} />
-    </>
+      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+    </div>
   )
 }

@@ -8,7 +8,7 @@ import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 
 const SESSION_KEY = 'ai-fix-patches'
 
@@ -282,10 +282,9 @@ export default function AIReviewEditorPage() {
         ) : null}
       </Modal>
 
-      <UpgradeModal
+      <UpgradeBanner
         open={showUpgradeModal}
-        title="Pro Feature"
-        description={upgradeMessage}
+        message={upgradeMessage}
         onClose={() => setShowUpgradeModal(false)}
       />
     </div>

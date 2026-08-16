@@ -6,7 +6,7 @@
  *      or internal infrastructure details to the client.
  *   2. Map known failure classes to short, branded, user-facing messages.
  *   3. Surface a boolean flag indicating whether the client should prompt the
- *      user to upgrade (so the UpgradeModal can open for quota-style failures).
+ *      user to upgrade (so the UpgradeBanner can open for quota-style failures).
  *   4. Always keep the original error available for server-side logging.
  */
 
@@ -19,7 +19,7 @@ const BAD_REQUEST_HINTS = /invalid[_\s-]*request|400|bad[_\s-]*request/i
 export type SanitizedAiError = {
   /** Safe, branded message to return to the client. */
   userMessage: string
-  /** Whether the UI should offer an upgrade path (opens UpgradeModal). */
+  /** Whether the UI should offer an upgrade path (opens UpgradeBanner). */
   showUpgrade: boolean
   /** Short category for logs/metrics (never shown to the user). */
   category: 'quota' | 'rate_limit' | 'auth' | 'bad_request' | 'transient' | 'unknown'
