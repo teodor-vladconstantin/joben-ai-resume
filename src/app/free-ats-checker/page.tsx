@@ -3,14 +3,14 @@ import { Navbar } from '@/components/ui/Navbar'
 import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
 
 export const metadata: Metadata = {
-  title: 'Free ATS Resume Checker — No Signup Required | Joben',
+  title: 'Free ATS Resume Checker: No Signup Required | Joben',
   description:
-    'Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes — no signup, no credit card, 3 free scans a day.',
+    'Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 3 free scans a day.',
   alternates: {
     canonical: '/free-ats-checker',
   },
   openGraph: {
-    title: 'Free ATS Resume Checker — No Signup Required',
+    title: 'Free ATS Resume Checker: No Signup Required',
     description: 'Scan your resume against real ATS software in seconds. Free score, free breakdown, no account needed.',
     url: '/free-ats-checker',
     siteName: 'Joben',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free ATS Resume Checker — No Signup Required',
+    title: 'Free ATS Resume Checker: No Signup Required',
     description: 'Scan your resume against real ATS software in seconds. Free score, free breakdown, no account needed.',
     images: ['/og-image.png'],
   },
@@ -45,10 +45,10 @@ export default function FreeAtsCheckerPage() {
             Free ATS Resume Checker
           </span>
           <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
-            Free ATS Resume Checker — No Signup Required
+            Free ATS Resume Checker: No Signup Required
           </h1>
           <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
-            Upload your resume and see exactly what ATS software and recruiters see — a score out of 100,
+            Upload your resume and see exactly what ATS software and recruiters see: a score out of 100,
             a category breakdown, and specific fixes. No account, no credit card, 3 free scans a day.
           </p>
         </div>
