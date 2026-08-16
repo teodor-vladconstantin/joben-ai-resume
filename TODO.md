@@ -1,4 +1,32 @@
 ## Active
+- [DONE] 2026-08-16 Global footer + ANPC SAL/Product Hunt badges + em-dash cleanup:
+  - New `src/components/layout/SiteFooter.tsx` (slim, sitewide) mounted via
+    `src/components/layout/ConditionalFooter.tsx` in `src/app/layout.tsx`; hidden on
+    `/resumes/new`, `/resumes/[id]`, `/cover-letters/new`, `/cover-letters/[id]` (full-screen
+    editor) via `usePathname()`, shown everywhere else.
+  - Homepage (`src/app/page.tsx`) keeps its CTA block as a standalone section above the
+    shared footer instead of duplicating footer content; `footerContent`/`siteFooterContent`
+    split in `src/lib/content.ts`.
+  - ANPC SAL badge: official pictogram (extracted from ANPC's `.docx` asset, no direct image
+    URL exists) in `public/legal/anpc-sal-badge.png`, linking to `reclamatiisal.anpc.ro` per
+    Ordin ANPC 449/2022 as updated by OPANPC 270/2026. Deliberately no SOL/EU ODR link (that
+    platform was retired by Reg. EU 2024/3228; ANPC removed the reference). Trader/company
+    identification (CUI, registered office) explicitly skipped per user decision (no
+    registered legal entity yet) — design doc flags this as a future gap.
+  - Product Hunt badge linking to `producthunt.com/products/joben` (simple icon+text link,
+    not the official PH widget — no `post_id` could be recovered from the client-rendered PH
+    page).
+  - Em-dash cleanup: replaced stray `—` in user-facing copy (legal pages, error/status
+    messages, landing content) with contextually appropriate punctuation; left untouched in
+    code comments and `resume-parser.ts` regexes (those match em dashes as literal date-range
+    separators in parsed resume text, not UI copy).
+  - Verified: `tsc --noEmit` clean, `npm run lint` clean on all touched files (pre-existing
+    ~14k problem count is the already-documented stale `.claude/worktrees/gdpr-compliance/.next`
+    scan noise). Browser verification attempted but the Chrome extension tooling was not
+    functional in this session (navigate reported success but tab state didn't stick after
+    3 attempts) — page title/content were confirmed present via tab context before giving up
+    on interactive screenshots; recommend a manual spot-check in a real browser.
+  - Design doc: `docs/superpowers/specs/2026-08-16-global-footer-legal-compliance-design.md`.
 - [IN PROGRESS] 2026-08-14 Stripe live payments (code-side work done; production cutover still needs manual
   Stripe/Vercel Dashboard steps — see RUNBOOK.md "Local Stripe Testing" and the pre-launch checklist below):
   - Re-enabled `/api/billing/checkout` (was hardcoded 403 since 2026-07-03) with rate limiting, recruiting-plan
