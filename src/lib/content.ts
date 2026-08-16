@@ -99,7 +99,7 @@ export const productLoopSteps = [
     description: "One-click AI rewrite for any bullet: adds metrics, strong verbs, and keeps your voice.",
     bullets: [
       "Weak verbs become strong, measurable outcomes",
-      "Keeps your voice — never reads like generic AI",
+      "Keeps your voice, never reads like generic AI",
       "Every rewrite tracked live against your monthly limit",
     ],
   },
@@ -240,5 +240,28 @@ export const footerContent = {
   heading: "Your career is your most valuable asset. Start building it today.",
   ctaPrimary: "Create Your Resume Now",
   ctaSecondary: "View Dashboard",
+};
+
+export const siteFooterContent = {
+  tagline: "Free AI resume builder that helps you pass ATS screens and get more interviews.",
+  productLinks: [
+    { href: "/pricing", label: "Pricing" },
+    { href: "/resume-examples", label: "Resume Examples" },
+    { href: "/free-ats-checker", label: "Free ATS Checker" },
+  ],
+  legalLinks: [
+    { href: "/terms", label: "Terms & Conditions" },
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/cookies", label: "Cookie Policy" },
+  ],
+  salBadge: {
+    href: "https://reclamatiisal.anpc.ro",
+    imageSrc: "/legal/anpc-sal-badge.png",
+    alt: "Soluționarea Alternativă a Litigiilor (SAL) - ANPC",
+  },
+  productHunt: {
+    href: "https://www.producthunt.com/products/joben",
+    label: "Vezi-ne pe Product Hunt",
+  },
   creatorCredit: "Built by a software engineer who understands the job search struggle.",
 };

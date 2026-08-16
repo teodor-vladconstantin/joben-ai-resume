@@ -298,24 +298,15 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-(--background) py-12 border-t border-(--border) text-center" suppressHydrationWarning>
+      <section className="bg-(--background) py-12 border-t border-(--border) text-center" suppressHydrationWarning>
         <div className="max-w-4xl mx-auto px-4" suppressHydrationWarning>
           <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footerContent.heading}</h2>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8" suppressHydrationWarning>
             <AuthAwareSignupLink className={buttonVariants('primary', 'md')}>{footerContent.ctaPrimary}</AuthAwareSignupLink>
             <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footerContent.ctaSecondary}</Link>
           </div>
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
-            <Link href="/terms" className="hover:text-(--accent)">Terms & Conditions</Link>
-            <Link href="/privacy" className="hover:text-(--accent)">Privacy Policy</Link>
-            <Link href="/cookies" className="hover:text-(--accent)">Cookie Policy</Link>
-          </div>
-          <p className="mt-4 text-xs text-(--muted)" suppressHydrationWarning>
-            <Link href="/privacy" className="hover:text-(--accent)">GDPR Compliant</Link> — your data, your control.
-          </p>
-          <p className="mt-8 text-xs text-(--muted)" suppressHydrationWarning>{footerContent.creatorCredit}</p>
         </div>
-      </footer>
+      </section>
     </div>
   )
 }

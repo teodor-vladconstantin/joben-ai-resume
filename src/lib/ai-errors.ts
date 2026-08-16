@@ -53,7 +53,7 @@ export function sanitizeAiError(error: unknown): SanitizedAiError {
   if (CREDIT_BALANCE_HINTS.test(raw)) {
     return {
       userMessage:
-        'AI features are temporarily unavailable. Please try again in a few minutes — or upgrade your plan for priority access.',
+        'AI features are temporarily unavailable. Please try again in a few minutes, or upgrade your plan for priority access.',
       showUpgrade: true,
       category: 'quota',
       raw,

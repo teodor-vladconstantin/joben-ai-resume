@@ -2,9 +2,9 @@ import { Card } from '@/components/ui/Card'
 import { Download } from 'lucide-react'
 
 const DOCUMENTS = [
-  { name: 'Resume — Stripe (v3)', format: 'PDF ready' },
-  { name: 'Resume — Vercel (v2)', format: 'PDF ready' },
-  { name: 'Cover Letter — Stripe', format: 'PDF ready' },
+  { name: 'Resume (Stripe v3)', format: 'PDF ready' },
+  { name: 'Resume (Vercel v2)', format: 'PDF ready' },
+  { name: 'Cover Letter (Stripe)', format: 'PDF ready' },
 ]
 
 export function ExportStepVisual() {

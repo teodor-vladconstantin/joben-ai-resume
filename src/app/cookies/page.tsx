@@ -99,7 +99,7 @@ export default function CookiesPage() {
           <section className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-6">
             <h2 className="text-lg font-semibold text-white">Strictly Necessary</h2>
             <p className="mt-2 text-sm leading-6 text-[#FFFFFF]/80">
-              These cookies are required for the site to function — primarily keeping you signed in. They cannot be
+              These cookies are required for the site to function, primarily keeping you signed in. They cannot be
               disabled and are not subject to consent under GDPR/ePrivacy.
             </p>
             <CookieTable rows={necessaryCookies} />
