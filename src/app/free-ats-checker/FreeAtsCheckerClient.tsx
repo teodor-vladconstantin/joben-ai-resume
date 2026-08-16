@@ -224,9 +224,9 @@ export function FreeAtsCheckerClient() {
     return (
       <Card radius="lg" className="p-8 text-center">
         <AlertTriangle className="mx-auto h-8 w-8 text-(--accent) mb-3" />
-        <h2 className="text-(--foreground) font-bold text-lg">You&apos;ve used your 3 free scans today</h2>
+        <h2 className="text-(--foreground) font-bold text-lg">You&apos;ve used your free scan for today</h2>
         <p className="text-(--muted) text-sm mt-2 max-w-md mx-auto">
-          Come back tomorrow for 3 more free scans, or create a free account for unlimited access to AI resume tools:
+          Come back tomorrow for another free scan, or create a free account for unlimited access to AI resume tools:
           scoring, tailoring, bullet rewrites, and cover letters.
         </p>
         <AuthAwareSignupLink className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
@@ -326,7 +326,7 @@ export function FreeAtsCheckerClient() {
         )}
       </button>
 
-      <p className="text-xs text-(--muted) text-center mt-3">3 free scans a day · no signup · nothing saved</p>
+      <p className="text-xs text-(--muted) text-center mt-3">1 free scan a day · no signup · nothing saved</p>
     </Card>
   )
 }

@@ -5,7 +5,7 @@ import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
 export const metadata: Metadata = {
   title: 'Free ATS Resume Checker: No Signup Required | Joben',
   description:
-    'Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 3 free scans a day.',
+    'Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 1 free scan a day.',
   alternates: {
     canonical: '/free-ats-checker',
   },
@@ -49,7 +49,7 @@ export default function FreeAtsCheckerPage() {
           </h1>
           <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
             Upload your resume and see exactly what ATS software and recruiters see: a score out of 100,
-            a category breakdown, and specific fixes. No account, no credit card, 3 free scans a day.
+            a category breakdown, and specific fixes. No account, no credit card, 1 free scan a day.
           </p>
         </div>
 
