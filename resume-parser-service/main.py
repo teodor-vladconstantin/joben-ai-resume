@@ -1179,8 +1179,8 @@ parser = LlamaParse(
 )
 
 anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=45.0)
-CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
-CLAUDE_FALLBACK_MODEL = "claude-3-haiku-20240307"
+CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-4-5-20251001"
+CLAUDE_FALLBACK_MODEL = "claude-sonnet-5"
 CLAUDE_MAX_OUTPUT_TOKENS = 8192
 
 # Structured-extraction instructions, applied once to the FULL resume text
