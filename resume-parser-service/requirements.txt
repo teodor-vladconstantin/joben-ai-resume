@@ -3,4 +3,5 @@ uvicorn[standard]==0.30.0
 pydantic==2.8.2
 python-multipart==0.0.9
 llama-parse==0.5.3
+anthropic==0.125.0
 python-dotenv==1.0.0

@@ -23,6 +23,8 @@ services:
     networks: [parser-net]
     environment:
       LLAMA_CLOUD_API_KEY: ${LLAMA_CLOUD_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
     ports:
       - "8000:8000"
     mem_limit: 512m
