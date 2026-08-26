@@ -10,6 +10,7 @@ from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from llama_parse import LlamaParse
+from anthropic import Anthropic
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1156,49 +1157,17 @@ api_key = os.getenv("LLAMA_CLOUD_API_KEY")
 if not api_key:
     raise ValueError("LLAMA_CLOUD_API_KEY environment variable not set")
 
-parser = LlamaParse(
-    api_key=api_key,
-    result_type="markdown",
-    parsing_instruction=(
-        "You are a resume parser. Extract all information from this CV/resume and return a valid JSON object with these fields:\n"
-        "- full_name (string)\n"
-        "- email (string)\n"
-        "- phone (string)\n"
-        "- location (string)\n"
-        "- linkedin (string, URL if present)\n"
-        "- github (string, URL if present)\n"
-        "- summary (string)\n"
-        "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date, start_month, start_year, end_month, end_year)\n"
-        "- work_experience (array of: company, role, start_date, end_date, start_month, start_year, end_month, end_year, is_current, description, bullets)\n"
-        "- education (array of: institution, degree, field, start_date, end_date, start_month, start_year, end_month, end_year)\n"
-        "- skills (array of strings)\n"
-        "- languages (array of: language, level)\n"
-        "- certifications (array of strings)\n"
-        "\n"
-        "DISTINCTION:\n"
-        "- PROJECTS: Stand-alone work items (personal, academic, side projects). Usually have: name/title, description, technologies list, optional URL/GitHub link. NO company name.\n"
-        "- WORK_EXPERIENCE: Employment at a company. Must have: company name, job title/role, dates, description of responsibilities/achievements.\n"
-        "\n"
-        "CRITICAL EXTRACTION RULES:\n"
-        "1. Look for 'Projects', 'Personal Projects', 'Side Projects', 'Academic Projects', 'Featured Projects', 'Project Work', 'Portfolio' sections - place these in projects array.\n"
-        "2. Each project MUST have: name (the project title only, e.g. 'Joben'), role (your role/title on the project, e.g. 'Solo Founder', 'Lead Developer' - distinct from name), description (full prose describing what was built/created), bullets (array of separate achievement points), technologies (list of tech stack used), url (if present, e.g., GitHub link), start_date and end_date.\n"
-        "3. NEVER concatenate role, dates, and description into a single 'description' string. Always populate role, start_date, end_date as their own fields and keep description focused on the work itself.\n"
-        "4. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
-        "5. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
-        "6. Extract linkedin and github URLs if found anywhere in the resume.\n"
-        "7. For work_experience, education AND projects dates, preserve month+year whenever present (do NOT reduce to year-only). Accept forms like 'Jan 2024', 'January 2024', '01/2024', '2024-01', Romanian month names, and 'Present/Current'. NEVER invent or default to 1950 or any other placeholder year - leave dates null when unknown.\n"
-        "8. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
-        "9. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
-        "10. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
-        "11. For work_experience and projects, output bullets as an array of separate achievement points. Preserve every source bullet verbatim and in original order (do NOT summarize, merge, rewrite, or drop bullets). EVERY achievement bullet from the source MUST appear in the bullets array, including the first one.\n"
-        "11a. The 'description' field is for a separate prose summary that introduces the role and is distinct from the bullet achievements. If the source only has achievement bullets and no separate prose intro, set description to null. NEVER copy a bullet (or any prefix of the bullet list) into description while leaving it out of the bullets array.\n"
-        "12. Always populate start_month/start_year/end_month/end_year for work_experience, projects, and education when inferable from source text. Use integers; use null when unknown.\n"
-        "13. Return only valid JSON, no markdown code blocks, no extra text.\n"
-    ),
-    cost_optimizer="true",
-)
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+if not anthropic_api_key:
+    raise ValueError("ANTHROPIC_API_KEY environment variable not set")
 
-text_parser = LlamaParse(
+# NOTE: LlamaParse splits multi-page documents into one Document per page by
+# default (split_by_page defaults to True). We used to read only
+# `documents[0].text`, which silently dropped every page after the first —
+# the root cause of resumes losing all but the first job entry on multi-page
+# imports. split_by_page=False makes aload_data() return a single Document
+# with the full, faithful text across every page.
+parser = LlamaParse(
     api_key=api_key,
     result_type="text",
     parsing_instruction=(
@@ -1206,7 +1175,100 @@ text_parser = LlamaParse(
         "Do not summarize or rewrite the content."
     ),
     cost_optimizer="true",
+    split_by_page=False,
 )
+
+anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=45.0)
+CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
+CLAUDE_FALLBACK_MODEL = "claude-3-haiku-20240307"
+CLAUDE_MAX_OUTPUT_TOKENS = 8192
+
+# Structured-extraction instructions, applied once to the FULL resume text
+# (all pages) so entries that span a page break (a very common case) are
+# extracted correctly instead of being split or lost.
+RESUME_EXTRACTION_SYSTEM_PROMPT = (
+    "You are a resume parser. Extract all information from the CV/resume text the user gives you "
+    "and return a single valid JSON object with these fields:\n"
+    "- full_name (string)\n"
+    "- email (string)\n"
+    "- phone (string)\n"
+    "- location (string)\n"
+    "- linkedin (string, URL if present)\n"
+    "- github (string, URL if present)\n"
+    "- summary (string)\n"
+    "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date, start_month, start_year, end_month, end_year)\n"
+    "- work_experience (array of: company, role, start_date, end_date, start_month, start_year, end_month, end_year, is_current, description, bullets)\n"
+    "- education (array of: institution, degree, field, start_date, end_date, start_month, start_year, end_month, end_year)\n"
+    "- skills (array of strings)\n"
+    "- languages (array of: language, level)\n"
+    "- certifications (array of strings)\n"
+    "\n"
+    "DISTINCTION:\n"
+    "- PROJECTS: Stand-alone work items (personal, academic, side projects). Usually have: name/title, description, technologies list, optional URL/GitHub link. NO company name.\n"
+    "- WORK_EXPERIENCE: Employment at a company. Must have: company name, job title/role, dates, description of responsibilities/achievements.\n"
+    "\n"
+    "CRITICAL EXTRACTION RULES:\n"
+    "1. Look for 'Projects', 'Personal Projects', 'Side Projects', 'Academic Projects', 'Featured Projects', 'Project Work', 'Portfolio' sections - place these in projects array.\n"
+    "2. Each project MUST have: name (the project title only, e.g. 'Joben'), role (your role/title on the project, e.g. 'Solo Founder', 'Lead Developer' - distinct from name), description (full prose describing what was built/created), bullets (array of separate achievement points), technologies (list of tech stack used), url (if present, e.g., GitHub link), start_date and end_date.\n"
+    "3. NEVER concatenate role, dates, and description into a single 'description' string. Always populate role, start_date, end_date as their own fields and keep description focused on the work itself.\n"
+    "4. Work experience entries must have a company name. If an entry only has a project title, description, and technologies without a company context, it is a project.\n"
+    "5. Extract FULL text - do not summarize, truncate, or abbreviate descriptions, summaries, or role descriptions.\n"
+    "6. Extract linkedin and github URLs if found anywhere in the resume.\n"
+    "7. For work_experience, education AND projects dates, preserve month+year whenever present (do NOT reduce to year-only). Accept forms like 'Jan 2024', 'January 2024', '01/2024', '2024-01', Romanian month names, and 'Present/Current'. NEVER invent or default to 1950 or any other placeholder year - leave dates null when unknown.\n"
+    "8. If a section title is in Romanian (e.g. 'Proiecte', 'Experienta', 'Experiență', 'Educatie', 'Educație'), map it to the correct JSON field.\n"
+    "9. Do not place project entries in work_experience when they come from Projects/Portfolio sections, even if they include date ranges.\n"
+    "10. For every work_experience item, capture role/company/date range exactly from source lines before writing description.\n"
+    "11. For work_experience and projects, output bullets as an array of separate achievement points. Preserve every source bullet verbatim and in original order (do NOT summarize, merge, rewrite, or drop bullets). EVERY achievement bullet from the source MUST appear in the bullets array, including the first one.\n"
+    "11a. The 'description' field is for a separate prose summary that introduces the role and is distinct from the bullet achievements. If the source only has achievement bullets and no separate prose intro, set description to null. NEVER copy a bullet (or any prefix of the bullet list) into description while leaving it out of the bullets array.\n"
+    "12. Always populate start_month/start_year/end_month/end_year for work_experience, projects, and education when inferable from source text. Use integers; use null when unknown.\n"
+    "13. The text below may include page-boundary artifacts (repeated headers/footers, 'Page X of Y' markers, a name or contact block that reappears at the top of a later page). Do not treat these as new entries or duplicate content.\n"
+    "14. A single work_experience or project entry may span what would have been a page break in the source document — its company/role/dates may appear separated from its bullets by unrelated text. Reassemble it into ONE entry rather than splitting it into two.\n"
+    "15. Return only valid JSON, no markdown code blocks, no extra text.\n"
+)
+
+
+def _strip_json_fences(text: str) -> str:
+    m = re.search(r"```json\s*(.*?)\s*```", text, re.DOTALL)
+    if m:
+        return m.group(1)
+    m = re.search(r"```\s*(.*?)\s*```", text, re.DOTALL)
+    if m:
+        return m.group(1)
+    return text
+
+
+def extract_resume_json_with_claude(raw_text: str) -> dict:
+    """Run the full, multi-page resume text through Claude in a single call
+    so structured extraction always has the whole document in context."""
+    user_message = f"Resume text:\n\n{raw_text}"
+
+    def _call(model: str):
+        return anthropic_client.messages.create(
+            model=model,
+            max_tokens=CLAUDE_MAX_OUTPUT_TOKENS,
+            temperature=0,
+            system=RESUME_EXTRACTION_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_message}],
+        )
+
+    try:
+        response = _call(CLAUDE_MODEL)
+    except Exception as e:
+        if CLAUDE_MODEL != CLAUDE_FALLBACK_MODEL and re.search(r"not_found_error|model:", str(e), re.IGNORECASE):
+            logger.warning(f"Claude model '{CLAUDE_MODEL}' unavailable, retrying with fallback: {e}")
+            response = _call(CLAUDE_FALLBACK_MODEL)
+        else:
+            logger.error(f"Claude extraction call failed: {e}")
+            raise HTTPException(status_code=502, detail="Resume extraction model is unavailable. Please try again.")
+
+    text_block = next((block.text for block in response.content if block.type == "text"), "")
+    cleaned = _strip_json_fences(text_block).strip()
+
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse Claude JSON response: {e}\nRaw text: {cleaned[:500]}")
+        raise HTTPException(status_code=500, detail="Failed to parse resume. Invalid response format.")
 
 
 @app.get("/health")
@@ -1235,25 +1297,20 @@ async def parse_resume(
             extra_info={"file_name": file.filename},
         )
 
+        # split_by_page=False on `parser` guarantees a single Document here
+        # containing the full text across every page.
         raw_text = documents[0].text if documents else ""
-        parsed_text = raw_text
+        if not raw_text.strip():
+            raise HTTPException(status_code=422, detail="Could not extract any text from the file.")
 
-        m = re.search(r"```json\s*(.*?)\s*```", parsed_text, re.DOTALL)
-        if m:
-            parsed_text = m.group(1)
-        else:
-            m = re.search(r"```\s*(.*?)\s*```", parsed_text, re.DOTALL)
-            if m:
-                parsed_text = m.group(1)
+        resume_data = extract_resume_json_with_claude(raw_text)
 
-        resume_data = json.loads(parsed_text.strip())
-
-        # DEBUG: Log what keys we got from LlamaParse
-        logger.info(f"LlamaParse returned keys: {list(resume_data.keys())}")
-        logger.info(f"Projects from LlamaParse: {resume_data.get('projects', [])}")
+        # DEBUG: Log what keys came back from extraction
+        logger.info(f"Extraction returned keys: {list(resume_data.keys())}")
+        logger.info(f"Projects from extraction: {resume_data.get('projects', [])}")
         logger.info(f"Work experience count: {len(resume_data.get('work_experience', []))}")
 
-        # try to extract LinkedIn/GitHub from explicit fields or from parser text outputs
+        # try to extract LinkedIn/GitHub from explicit fields or from the raw text
         linkedin_val = resume_data.get("linkedin") if isinstance(resume_data.get("linkedin"), str) else None
         github_val = resume_data.get("github") if isinstance(resume_data.get("github"), str) else None
 
@@ -1263,14 +1320,14 @@ async def parse_resume(
         if normalized_linkedin:
             linkedin_val = normalized_linkedin
         else:
-            discovered_linkedin = extract_linkedin(parsed_text) or extract_linkedin(raw_text)
+            discovered_linkedin = extract_linkedin(raw_text)
             if discovered_linkedin:
                 linkedin_val = discovered_linkedin
 
         if normalized_github:
             github_val = normalized_github
         else:
-            discovered_github = extract_github(parsed_text) or extract_github(raw_text)
+            discovered_github = extract_github(raw_text)
             if discovered_github:
                 github_val = discovered_github
 
@@ -1278,17 +1335,7 @@ async def parse_resume(
         explicit_projects = [p for p in (resume_data.get("projects") or []) if isinstance(p, dict)]
 
         fallback_project_entries = extract_projects_from_text(raw_text)
-        if not fallback_project_entries:
-            try:
-                fallback_documents = await text_parser.aload_data(
-                    io.BytesIO(content),
-                    extra_info={"file_name": file.filename, "mode": "text_fallback"},
-                )
-                fallback_text = fallback_documents[0].text if fallback_documents else ""
-                fallback_project_entries = extract_projects_from_text(fallback_text)
-            except Exception as fallback_error:
-                logger.warning(f"Text fallback parser failed: {fallback_error}")
-        
+
         fallback_project_names = {
             normalize_signature_value(project.get("name"))
             for project in fallback_project_entries
@@ -1410,9 +1457,8 @@ async def parse_resume(
         logger.info(f"Successfully parsed resume: {result.full_name}")
         return result.model_dump()
 
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse JSON response: {e}\nRaw text: {parsed_text[:500]}")
-        raise HTTPException(status_code=500, detail="Failed to parse resume. Invalid response format.")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
         raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")

@@ -3,6 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("LLAMA_CLOUD_API_KEY", "test")
+os.environ.setdefault("ANTHROPIC_API_KEY", "test")
 
 import main as parser_main
 

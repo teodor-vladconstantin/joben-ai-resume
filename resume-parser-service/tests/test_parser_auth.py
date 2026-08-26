@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 @pytest.fixture()
 def parser_with_secret(monkeypatch):
     monkeypatch.setenv("LLAMA_CLOUD_API_KEY", "test")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
     monkeypatch.setenv("RESUME_PARSER_SHARED_SECRET", "test-secret")
     # `main` caches the secret at import time so re-import for a fresh value.
     if "main" in sys.modules:
@@ -20,6 +21,7 @@ def parser_with_secret(monkeypatch):
 @pytest.fixture()
 def parser_without_secret(monkeypatch):
     monkeypatch.setenv("LLAMA_CLOUD_API_KEY", "test")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
     monkeypatch.delenv("RESUME_PARSER_SHARED_SECRET", raising=False)
     if "main" in sys.modules:
         del sys.modules["main"]

@@ -8,7 +8,11 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 export const maxDuration = 60
 
 const DEFAULT_PARSER_URL = 'http://resume-parser:8000'
-const REQUEST_TIMEOUT_MS = 45_000
+// The upstream parser now does two sequential calls per request (LlamaParse
+// OCR, then a Claude extraction pass over the full document) — give it more
+// headroom than a single-call proxy would need, while staying under
+// maxDuration above.
+const REQUEST_TIMEOUT_MS = 55_000
 
 // SECURITY: align with the in-builder upload guard (5 MB, .pdf/.docx only).
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
