@@ -30,10 +30,6 @@ import { generateSummarySchema } from '@/lib/validation/schemas'
 
 
 
-type SummaryMode = 'resume' | 'scratch'
-
-
-
 type ResumeSummaryInput = {
 
   personal?: {
@@ -73,18 +69,6 @@ type ResumeSummaryInput = {
     content?: string
 
   }>
-
-}
-
-
-
-type GenerateSummaryBody = {
-
-  mode?: SummaryMode
-
-  roleDescription?: string
-
-  resumeData?: ResumeSummaryInput
 
 }
 
