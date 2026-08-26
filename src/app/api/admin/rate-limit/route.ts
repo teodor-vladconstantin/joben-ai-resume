@@ -4,8 +4,6 @@ import {
 
   blockFeature,
 
-  Feature,
-
   FlagType,
 
   getRateLimitStatus,
@@ -25,8 +23,6 @@ import { parseAdminUserIds } from '@/lib/security/admin'
 import { adminRateLimitPostSchema } from '@/lib/validation/schemas'
 
 
-
-const FEATURE_SET = new Set<Feature>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs'])
 
 const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap'])
 
