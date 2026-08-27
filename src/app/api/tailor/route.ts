@@ -14,6 +14,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
 import { callResumeParserJson } from '@/lib/resume-parser-client'
 import { computeMissingSkills, extractSkillGapInputText } from '@/lib/skill-gap'
+import { findNewClaims } from '@/lib/claim-diff'
 import { tailorResponseSchema, tailorSchema } from '@/lib/validation/schemas'
 
 const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
@@ -57,6 +58,18 @@ async function extractSkillsSafely(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+// Per-experience bullets, used both as the "original" baseline for the
+// anti-hallucination check and as the "context" (sibling bullets of the same
+// job) so a number/tool that already exists elsewhere in that job isn't
+// flagged as a new claim.
+function getExperienceBulletLists(resumeData: Record<string, unknown>): string[][] {
+  if (!Array.isArray(resumeData.experience)) return []
+  return resumeData.experience.map((entry) => {
+    if (!isRecord(entry) || !Array.isArray(entry.bullets)) return []
+    return entry.bullets.filter((bullet): bullet is string => typeof bullet === 'string')
+  })
 }
 
 export async function POST(req: Request) {
@@ -120,7 +133,27 @@ export async function POST(req: Request) {
       })
 
       const rawResult = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
-      const candidateResult = { ...(isRecord(rawResult) ? rawResult : {}), missingSkills }
+      const rawUpdatedBullets = isRecord(rawResult) && Array.isArray(rawResult.updatedBullets)
+        ? rawResult.updatedBullets.filter((bullet): bullet is string => typeof bullet === 'string')
+        : []
+
+      // Anti-hallucination check: for each rewritten bullet, "original" is
+      // the bullet it's replacing (index 0 today — tailor doesn't offer
+      // multiple variants) and "context" is every other bullet of that same
+      // job, so a number/tool already present elsewhere in the role isn't
+      // flagged as a new claim.
+      const experienceBulletLists = getExperienceBulletLists(body.resumeData)
+      const bulletClaims = await Promise.all(
+        experienceBulletLists.map((bullets, index) => {
+          const rewritten = rawUpdatedBullets[index]
+          if (!rewritten) return Promise.resolve<string[]>([])
+          const original = bullets[0] || ''
+          const context = bullets.slice(1).join('\n')
+          return findNewClaims(original, context, rewritten)
+        })
+      )
+
+      const candidateResult = { ...(isRecord(rawResult) ? rawResult : {}), missingSkills, bulletClaims }
       const validated = tailorResponseSchema.safeParse(candidateResult)
       // Validation is best-effort: an unexpected Claude output shape should
       // not turn a working tailor response into a 500. Fall back to the raw
@@ -142,6 +175,7 @@ export async function POST(req: Request) {
         route: '/api/tailor',
         optimizationType: body.optimizationType || 'general',
         missingSkillsCount: missingSkills.length,
+        flaggedBulletsCount: bulletClaims.filter((claims) => claims.length > 0).length,
       })
       return jsonWithRequestId({ result }, 200, requestId)
     } catch (error) {
