@@ -1,4 +1,53 @@
 ## Active
+- [DONE] 2026-08-27 Fix suprascriere silențioasă în tailor (templates, gap ESCO,
+  anti-halucinație deja livrate — neatinse):
+  - Problemă: `handleTailorResume()` scria direct `bullets[0]` al fiecărui job în `resumeData`
+    fără preview/confirmare (bullet-urile fără `newClaims` ocoleau garda anti-halucinație
+    construită la pasul anterior, care ținea "pending" doar bullet-urile marcate).
+  - Fix: TOATE bullet-urile propuse de tailor (nu doar cele cu claim-uri noi) devin patch-uri
+    "pending" arătate în `BeforeAfterModal` existent (mod `onConfirm`, deja construit) — nimic nu
+    se scrie în `resumeData` fără accept explicit. Checkbox-ul obligatoriu de confirmare rămâne
+    doar pe bullet-urile cu `newClaims`, ca înainte.
+  - Decizie de scop: am extins gate-ul și la `personal.summary` (parte din același răspuns
+    tailor) — altfel summary s-ar aplica silențios chiar dacă bullet-urile așteaptă confirmare,
+    o stare inconsistentă. Ținut într-un state separat (`pendingTailorSummary`), aplicat doar la
+    confirmare, golit explicit și la discard (altfel ar putea "scăpa" aplicat la o confirmare
+    ulterioară neînrudită, ex. accept pe un improve-bullet separat).
+  - Nu am construit UI nouă — reutilizat `BeforeAfterModal` exact cum exista.
+  - Verificare: `npx tsc --noEmit` curat, `npm run lint` curat, `npm run test` 185/185 (fără
+    teste noi — schimbare de comportament în ResumeBuilder, deja acoperit indirect de
+    suita existentă; test manual descris de user rămâne de rulat de el).
+  - Autoverificare diff: fluxul discard curăță și `pendingTailorSummary` (altfel putea "scăpa"
+    aplicat la o confirmare ulterioară neînrudită) — nicio altă problemă găsită.
+- [DONE] 2026-08-27 Poarta anti-halucinație (Faza 1 pas 3; templates și variante
+  multiple per bullet rămân neatinse, per decizie user):
+  - `src/lib/claim-diff.ts` (nou): `findNewNumberClaims` (pur, sincron, compară cifra "goală"
+    fără % ca reformatarea 27→27% să nu fie marcată fals ca nouă) + `findNewClaims` (async —
+    trebuie să fie, cheamă `/extract-skills` pentru unelte/tehnologii noi via corpusul ESCO
+    deja expus la Tailor v2 pas 1; fail-open pe eroare de rețea, cifrele tot se detectează).
+  - `src/app/api/improve-bullet/route.ts`: rulează `findNewClaims` după răspunsul Claude,
+    output devine `{ bullet, newClaims }`.
+  - `src/app/api/tailor/route.ts`: `findNewClaims` per bullet rescris, `context` = celelalte
+    bullet-uri ale aceluiași job (nu doar title/company/period) — altfel o cifră mutată din alt
+    bullet e marcată fals ca nouă. `bulletClaims: string[][]` adăugat în `tailorResponseSchema`.
+  - `src/components/ui/BeforeAfterModal.tsx`: extins cu mod opțional de confirmare (`onConfirm`
+    prop) — highlight pe claim-urile noi + checkbox obligatoriu per patch, buton "Apply" activ
+    doar când toate checkbox-urile sunt bifate. Fără `onConfirm`, comportamentul vechi
+    (auto-fix/apply-fix, deja aplicat) rămâne 100% neschimbat.
+  - `src/components/builder/ResumeBuilder.tsx`: `handleGenerateBulletDraft` trimite acum toate
+    bullet-urile jobului ca `context`; `handleAcceptBulletDraft` și `handleTailorResume` țin
+    bullet-urile cu claim-uri noi în stare "pending" (nu se scriu în `resumeData`) până la
+    confirmare explicită prin noul modal; bullet-urile fără claim-uri noi se aplică direct, ca
+    înainte.
+  - Teste noi: `tests/lib/claim-diff.test.ts` (9 cazuri: cifră nouă, reformulată, mutată din alt
+    bullet al aceluiași job, dedup, fallback la eșec de rețea, unelte noi via ESCO).
+  - Verificare: `npx tsc --noEmit` curat, `npm run lint` curat, `npm run test` **185/185**
+    (176 anterioare + 9 noi).
+  - Autoverificare diff: nicio problemă găsită — logica e fail-open, bullet-urile fără claim-uri
+    noi continuă să se aplice direct ca înainte, fluxul auto-fix/apply-fix (fără `onConfirm`)
+    neatins.
+  - Rămâne: commit + push + deploy (Vercel auto-deploy pe push la `main`; nu ține de Hetzner,
+    `improve-bullet`/`tailor` sunt rute Next.js) — neexecutat, aștept decizia userului.
 - [DONE] 2026-08-27 Free ATS checker: eliminat warning-uri fals-pozitive despre cronologie
   (`src/app/api/public/ats-check/route.ts`, `ATS_CHECK_SYSTEM_PROMPT`). Root cause: prompt-ul
   ruta publică nu avea garda "concurrent roles are normal / past end date is not ambiguous"

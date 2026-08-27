@@ -13,6 +13,7 @@ import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { findNewClaims } from '@/lib/claim-diff'
 import { improveBulletSchema } from '@/lib/validation/schemas'
 
 const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
@@ -74,11 +75,14 @@ export async function POST(req: Request) {
         system: IMPROVE_BULLET_SYSTEM_PROMPT,
       })
 
-      const text = extractTextFromAnthropicMessage(aiResponse)
+      const rewrittenBullet = extractTextFromAnthropicMessage(aiResponse).trim()
+      const newClaims = await findNewClaims(safeBullet, safeContext || '', rewrittenBullet)
+
       logger.info('Bullet improved', {
         requestId,
         userId,
         route: '/api/improve-bullet',
+        newClaimsCount: newClaims.length,
       })
 
       await trackProductEvent({
@@ -96,7 +100,7 @@ export async function POST(req: Request) {
         properties: { feature: 'bullet_rewrite' },
       })
 
-      return jsonWithRequestId({ bullet: text.trim() }, 200, requestId)
+      return jsonWithRequestId({ bullet: rewrittenBullet, newClaims }, 200, requestId)
     } catch (error) {
       if (isRateLimitExceededError(error)) {
         if (error.status === 429) {

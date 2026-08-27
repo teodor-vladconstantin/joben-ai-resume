@@ -107,6 +107,7 @@ type BulletDraftState = {
   draft: string
   isLoading: boolean
   error: string | null
+  newClaims?: string[]
 }
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -408,6 +409,12 @@ export function ResumeBuilder() {
   const [fixBanner, setFixBanner] = useState<string | null>(null)
   const [fixPatches, setFixPatches] = useState<FixPatchWithContext[]>([])
   const [showBeforeAfterModal, setShowBeforeAfterModal] = useState(false)
+  const [pendingClaimPatches, setPendingClaimPatches] = useState<FixPatchWithContext[]>([])
+  const [showClaimConfirmModal, setShowClaimConfirmModal] = useState(false)
+  // Tailor's proposed summary rewrite — held alongside pendingClaimPatches so
+  // it applies atomically with the bullets on confirm, instead of being
+  // written to resumeData silently while the bullets still wait for accept.
+  const [pendingTailorSummary, setPendingTailorSummary] = useState<string | null>(null)
   const [isSummaryGeneratorOpen, setIsSummaryGeneratorOpen] = useState(false)
   const [summaryGenerationMode, setSummaryGenerationMode] = useState<SummaryGenerationMode>('resume')
   const [summaryRoleDescription, setSummaryRoleDescription] = useState('')
@@ -1177,6 +1184,7 @@ export function ResumeBuilder() {
           updatedBullets?: string[]
           summary?: string
           missingSkills?: string[]
+          bulletClaims?: string[][]
         }
         showUpgrade?: boolean
         error?: string
@@ -1195,28 +1203,38 @@ export function ResumeBuilder() {
       }
 
       const bullets = payload.result.updatedBullets || []
+      const bulletClaims = payload.result.bulletClaims || []
       setMissingSkills(payload.result.missingSkills || [])
 
-      setResumeData((prev) => ({
-        ...prev,
-        personal: {
-          ...prev.personal,
-          summary: payload.result?.summary || prev.personal.summary,
-        },
-        experience: prev.experience.map((exp, index) => {
+      // Every proposed bullet — not just ones flagged with newClaims — goes
+      // through BeforeAfterModal for explicit accept. Nothing is written to
+      // resumeData here; applyConfirmedClaimPatches does that once the user
+      // confirms (and, for flagged bullets, checks the required box).
+      const pending: FixPatchWithContext[] = resumeData.experience.reduce<FixPatchWithContext[]>(
+        (acc, exp, index) => {
           const optimized = bullets[index]
-          if (!optimized) return exp
+          if (!optimized) return acc
 
-          const nextBullets = [...getExperienceBullets(exp)]
-          nextBullets[0] = optimized
+          const existingBullets = getExperienceBullets(exp)
+          acc.push({
+            experienceId: exp.id,
+            bulletIndex: 0,
+            originalBullet: existingBullets[0] || '',
+            updatedBullet: optimized,
+            experienceTitle: exp.title,
+            company: exp.company,
+            newClaims: bulletClaims[index] || [],
+          })
+          return acc
+        },
+        []
+      )
 
-          return {
-            ...exp,
-            bullets: nextBullets,
-            description: optimized,
-          }
-        }),
-      }))
+      if (pending.length > 0) {
+        setPendingTailorSummary(payload.result.summary || null)
+        setPendingClaimPatches(pending)
+        setShowClaimConfirmModal(true)
+      }
 
       setIsTailorModalOpen(false)
     } catch (error) {
@@ -1263,12 +1281,20 @@ export function ResumeBuilder() {
         },
         body: JSON.stringify({
           bullet: targetBullet,
-          context: `${target.title} at ${target.company} (${target.period})`,
+          // Includes every other bullet in this role, not just title/company/
+          // period — the anti-hallucination check needs to see sibling
+          // bullets so a number/tool already present elsewhere in the same
+          // job isn't flagged as a new claim.
+          context: [
+            `${target.title} at ${target.company} (${target.period})`,
+            ...targetBullets.filter((_, index) => index !== bulletIndex),
+          ].join('\n'),
         }),
       })
 
       const payload = (await response.json()) as {
         bullet?: string
+        newClaims?: string[]
         showUpgrade?: boolean
         error?: string
         currentPlan?: 'free' | 'pro' | 'recruiting'
@@ -1320,6 +1346,7 @@ export function ResumeBuilder() {
           draft: payload.bullet?.trim() || '',
           isLoading: false,
           error: null,
+          newClaims: payload.newClaims || [],
         },
       }))
     } catch (error) {
@@ -1334,10 +1361,54 @@ export function ResumeBuilder() {
     }
   }
 
+  // Shared by both improve-bullet's inline accept and tailor's apply: writes
+  // confirmed patches into resumeData and clears any matching bulletDraftStates
+  // entries (a no-op for patches that didn't come from that flow).
+  const applyConfirmedClaimPatches = (patches: FixPatchWithContext[]) => {
+    patches.forEach((patch) => {
+      updateExperienceBulletField(patch.experienceId, patch.bulletIndex, patch.updatedBullet)
+    })
+    if (pendingTailorSummary) {
+      setResumeData((prev) => ({
+        ...prev,
+        personal: { ...prev.personal, summary: pendingTailorSummary },
+      }))
+    }
+    setBulletDraftStates((prev) => {
+      const next = { ...prev }
+      for (const patch of patches) {
+        delete next[getBulletFieldKey(patch.experienceId, patch.bulletIndex)]
+      }
+      return next
+    })
+    setPendingTailorSummary(null)
+    setPendingClaimPatches([])
+    setShowClaimConfirmModal(false)
+  }
+
   const handleAcceptBulletDraft = (experienceId: string, bulletIndex: number) => {
     const draftKey = getBulletFieldKey(experienceId, bulletIndex)
-    const draft = bulletDraftStates[draftKey]?.draft?.trim()
+    const draftState = bulletDraftStates[draftKey]
+    const draft = draftState?.draft?.trim()
     if (!draft) return
+
+    if (draftState?.newClaims && draftState.newClaims.length > 0) {
+      const target = resumeData.experience.find((item) => item.id === experienceId)
+      const originalBullet = target ? getExperienceBullets(target)[bulletIndex] || '' : ''
+      setPendingClaimPatches([
+        {
+          experienceId,
+          bulletIndex,
+          originalBullet,
+          updatedBullet: draft,
+          experienceTitle: target?.title,
+          company: target?.company,
+          newClaims: draftState.newClaims,
+        },
+      ])
+      setShowClaimConfirmModal(true)
+      return
+    }
 
     updateExperienceBulletField(experienceId, bulletIndex, draft)
 
@@ -2128,6 +2199,18 @@ export function ResumeBuilder() {
 
       {showBeforeAfterModal && fixPatches.length > 0 && (
         <BeforeAfterModal patches={fixPatches} onClose={() => setShowBeforeAfterModal(false)} />
+      )}
+
+      {showClaimConfirmModal && pendingClaimPatches.length > 0 && (
+        <BeforeAfterModal
+          patches={pendingClaimPatches}
+          onClose={() => {
+            setShowClaimConfirmModal(false)
+            setPendingClaimPatches([])
+            setPendingTailorSummary(null)
+          }}
+          onConfirm={applyConfirmedClaimPatches}
+        />
       )}
 
       <Modal

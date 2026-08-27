@@ -118,6 +118,10 @@ export const tailorResponseSchema = z
     updatedBullets: z.array(z.string()).default([]),
     summary: z.string().default(''),
     missingSkills: z.array(z.string()).default([]),
+    // Anti-hallucination flags, index-aligned with updatedBullets: claims
+    // (new numbers/tools) each rewritten bullet introduces that weren't in
+    // its original bullet + sibling context.
+    bulletClaims: z.array(z.array(z.string())).default([]),
   })
   .passthrough()
 
