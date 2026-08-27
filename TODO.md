@@ -1,4 +1,41 @@
 ## Active
+- [DONE] 2026-08-27 **HOTFIX CRITIC** descoperit manual de user în producție — Summary-ul
+  tailor scria o EVALUARE AI ("candidatul lipsește de stack ML/DL...") peste summary-ul
+  candidatului, în web preview ȘI în PDF-ul exportat:
+  - Root cause: `TAILOR_SYSTEM_PROMPT` cerea `"summary": "string"` fără nicio instrucțiune
+    despre conținut — modelul (Haiku) umplea câmpul cu o evaluare de fit pe job, nu cu un
+    summary de CV rescris. Fix: prompt explicit — summary trebuie să fie rescrierea
+    summary-ului candidatului (2-4 propoziții, niciodată evaluare/critică).
+  - Bug al doilea, introdus chiar de mine la fix-ul anterior de suprascriere silențioasă:
+    summary-ul propus se aplica ca EFECT SECUNDAR al confirmării bullet-urilor (sau deloc,
+    dacă niciun bullet nu era flagat) — nu era niciodată arătat userului. Fix: summary-ul e
+    acum un patch sintetic (`SUMMARY_PATCH_ID`) în ACELAȘI `BeforeAfterModal`, cu review
+    explicit obligatoriu, la fel ca bullet-urile.
+  - Commit `fb80aa4`, deployat live.
+- [DONE] 2026-08-27 **REVERT** — al doilea template (Modern) eliminat complet din producție,
+  la cererea explicită a userului, după ce a testat live și a găsit PDF-ul exportat rupt:
+  - Simptom: web preview arăta Modern corect (accent albastru, sans-serif), dar PDF-ul
+    exportat avea titluri de job suprapuse peste header-ele de secțiune și ZERO culoare
+    accent vizibilă — arăta complet altfel decât preview-ul.
+  - Root cause 1 (spațiere): am folosit constante `\vspace`/`\titlespacing*` inventate pentru
+    tema Modern, netestate prin compilare reală — se combinau greșit cu spațierea negativă
+    din `\resumeSubheading` (partajat cu Harvard) și cauzau suprapuneri.
+  - Root cause 2 (culoare): `\definecolor{accent}{HTML}{1D4ED8}` — documentul folosește
+    pachetul `color` (nu `xcolor`), iar `color` NU are modelul `HTML`; comanda eșua silențios,
+    fără nicio eroare vizibilă, motiv pentru care nicio culoare nu apărea în PDF.
+  - Am încercat un fix (spațiere identică cu Harvard + `RGB` în loc de `HTML`) dar userul a
+    cerut explicit eliminarea completă a feature-ului în loc să mai aștepte alt fix netestat —
+    decizie corectă: nu exist un mod local de a compila LaTeX și a verifica vizual înainte de
+    a trimite din nou în producție.
+  - Eliminat: `ModernTemplate.tsx`, gating din `TemplateSwitcher`, ramura de template din
+    `export-latex/route.ts` (revenit la un singur `generateLatex`), enum-ul `template` din
+    `exportLatexResumeDataSchema`. Păstrat: refactor-ul `templates/shared.tsx` (Harvard identic,
+    verificat) și split-ul `plan-definitions.ts` (nu mai expune nimic legat de template-uri,
+    inofensiv).
+  - Commit `b88e1d5`, deployat live. Verificare: `tsc`/`lint`/`test` curate, **189/189**.
+  - Lecție reținută: NU trimite modificări LaTeX în producție fără compilare + inspecție
+    vizuală reală a PDF-ului — testele automate (verificare de string-uri) nu detectează
+    suprapuneri de layout sau culori care eșuează silențios.
 - [DONE] 2026-08-27 Fix cronologie AI peste tot, nu doar free ATS checker: certificări/
   traininguri flagate greșit ca "future-dated" (ex. Mar 2026 marcat viitor deși azi era
   2026-08-27). Root cause: `withCurrentDateContext()` (`src/lib/ai-system-prompt.ts`) dădea
