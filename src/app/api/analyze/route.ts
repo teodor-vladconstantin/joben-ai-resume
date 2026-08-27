@@ -32,6 +32,7 @@ Note: scores are out of 20/40/10/25/5 (total 100).
 Be strict. 85+ should be rare.
 Important rules:
 - Concurrent/overlapping roles are NORMAL and must NOT be flagged as an issue.
+- A role, project, certification, or training with an explicit end date (anything other than "Present"/"Current") is completed. Do NOT flag it as ambiguous, inconsistent, or future-dated just because that end date is before today.
 - Missing graduation dates for education entries are minor cosmetic gaps — do NOT list them as priority improvements.
 Keep output compact:
 - strengths: exactly 3 short items

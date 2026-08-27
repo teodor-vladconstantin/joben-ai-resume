@@ -7,5 +7,5 @@
  */
 export function withCurrentDateContext(system: string): string {
   const today = new Date().toISOString().slice(0, 10)
-  return `Today's real-world date is ${today}. This is authoritative — your training data has an earlier knowledge cutoff, so do not assume the current year matches it. Use ${today} when judging whether dates in the resume or job description are in the future, ongoing ("Present"), or chronologically consistent.\n\n${system}`
+  return `Today's real-world date is ${today}. This is authoritative — your training data has an earlier knowledge cutoff, so do not assume the current year matches it. Before calling ANY date (a job, a project, a certification, a training, an education entry) "future-dated" or "inconsistent", explicitly compare it against ${today}: a date is only in the future if it is literally later than ${today}. A date earlier than or equal to ${today} — even one that falls in ${today.slice(0, 4)} or looks close to your training cutoff — already happened and is never a future-dating issue.\n\n${system}`
 }
