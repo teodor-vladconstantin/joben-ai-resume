@@ -1,8 +1,7 @@
-// Content-shaping logic shared by every resume template renderer
-// (HarvardTemplate, ModernTemplate, ...). Kept separate from any one
-// template's visual styling so a new template only has to write layout/CSS,
-// not re-derive bullet resolution, education parsing, or contact-link
-// handling from scratch.
+// Content-shaping logic shared by resume template renderers (currently just
+// HarvardTemplate). Kept separate from any one template's visual styling so
+// a future template only has to write layout/CSS, not re-derive bullet
+// resolution, education parsing, or contact-link handling from scratch.
 
 import { Fragment } from 'react'
 import type { ResumeEducation, ResumePersonal } from './types'

@@ -68,7 +68,6 @@ type LatexEducationEntry = {
 }
 
 type LatexResumeData = {
-  template?: string
   personal?: LatexPersonal
   experience?: LatexExperienceEntry[]
   projects?: LatexProjectEntry[]
@@ -288,18 +287,35 @@ function extractSafeBullets(exp: LatexExperienceEntry): string[] {
   return fallback ? [fallback] : []
 }
 
-type LatexTemplateId = 'harvard' | 'modern'
+function generateLatex(data: LatexResumeData): string {
+  const { personal, experience, dynamicSections = [] } = data
 
-// Same accent used by ModernTemplate.tsx's ACCENT constant — keep in sync so
-// the exported PDF matches the web preview.
-const MODERN_ACCENT_HEX = '1D4ED8'
+  const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
+  const linkedinUrl = looksLikeUrl(personal?.linkedin) ? normalizeHref(personal!.linkedin!) : null
+  const githubUrl = looksLikeUrl(personal?.github) ? normalizeHref(personal!.github!) : null
+  const websiteUrl = looksLikeUrl(personal?.website) ? normalizeHref(personal!.website!) : null
+  const titleText = clampLatexText(personal?.title, 90)
+  // Render the professional title on its own line (matches the Harvard web
+  // preview which stacks name, uppercase title, and contact line).
+  const titleBlock = titleText
+    ? String.raw`    {\scshape\large ${escapeLatex(titleText)}} \\ \vspace{2pt}
+`
+    : ''
+  const contactParts = [
+    personal?.phone ? escapeLatex(`Phone: ${clampLatexText(personal.phone, 40)}`) : '',
+    personal?.email ? escapeLatex(`Email: ${clampLatexText(personal.email, 120)}`) : '',
+    personal?.location ? escapeLatex(clampLatexText(personal.location, 80)) : '',
+    linkedinUrl ? `LinkedIn: ${makeLatexLink(linkedinUrl, normalizeContactText(linkedinUrl))}` : '',
+    githubUrl ? `GitHub: ${makeLatexLink(githubUrl, normalizeContactText(githubUrl))}` : '',
+    websiteUrl ? makeLatexLink(websiteUrl, normalizeContactText(websiteUrl)) : '',
+  ].filter(Boolean)
+  const contactLine = contactParts.join(' $|$ ')
+  const contactBlock = contactLine
+    ? String.raw`    \small ${contactLine}
+`
+    : ''
 
-// Packages/margins/macros shared by every template. Only titleformat and the
-// resumeItem/resumeSubheading macro bodies vary per theme — the section-by-
-// section content assembly below (Experience/Projects/Education/dynamic
-// sections) calls these macros generically and never changes.
-function buildLatexPreamble(templateId: LatexTemplateId): string {
-  const sharedPackages = String.raw`\documentclass[letterpaper,11pt]{article}
+  let tex = String.raw`\documentclass[letterpaper,11pt]{article}
 
 \usepackage{latexsym}
 \usepackage[empty]{fullpage}
@@ -334,38 +350,8 @@ function buildLatexPreamble(templateId: LatexTemplateId): string {
 \raggedright
 \setlength{\tabcolsep}{0in}
 \setlength{\emergencystretch}{3em}
-`
 
-  if (templateId === 'modern') {
-    return String.raw`${sharedPackages}
-% Modern theme: sans-serif body, accent-colored section headers, no rule.
-\usepackage{helvet}
-\renewcommand{\familydefault}{\sfdefault}
-\definecolor{accent}{HTML}{${MODERN_ACCENT_HEX}}
-
-\titleformat{\section}{
-  \vspace{2pt}\color{accent}\bfseries\Large\raggedright
-}{}{0em}{}[\vspace{-6pt}]
-\titlespacing*{\section}{0pt}{10pt}{2pt}
-
-\newcommand{\resumeItem}[1]{
-  \item\small{
-    {#1 \vspace{-2pt}}
-  }
-}
-
-\newcommand{\resumeSubheading}[4]{
-  \vspace{-2pt}\item
-    \begin{tabularx}{0.97\textwidth}[t]{@{}Xr@{}}
-      \textbf{#1} & \textcolor{accent}{\small #2} \\
-      \textit{\small#3} & \textit{\small #4} \\
-    \end{tabularx}\vspace{-7pt}
-}
-`
-  }
-
-  return String.raw`${sharedPackages}
-% Harvard theme: classic serif, small-caps section headers with a full rule.
+% Sections formatting
 \titleformat{\section}{
   \vspace{-4pt}\scshape\raggedright\large
 }{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
@@ -383,37 +369,8 @@ function buildLatexPreamble(templateId: LatexTemplateId): string {
       \textit{\small#3} & \textit{\small #4} \\
     \end{tabularx}\vspace{-7pt}
 }
-`
-}
 
-function buildLatexTitleBlock(templateId: LatexTemplateId, titleText: string): string {
-  if (!titleText) return ''
-  if (templateId === 'modern') {
-    return String.raw`    \textcolor{accent}{\large ${escapeLatex(titleText)}} \\ \vspace{2pt}
-`
-  }
-  return String.raw`    {\scshape\large ${escapeLatex(titleText)}} \\ \vspace{2pt}
-`
-}
-
-function buildLatexHeader(
-  templateId: LatexTemplateId,
-  fullName: string,
-  titleBlock: string,
-  contactBlock: string
-): string {
-  if (templateId === 'modern') {
-    return String.raw`\begin{document}
-
-%----------HEADING-----------------
-\noindent\textbf{\Huge ${escapeLatex(fullName)}} \\ \vspace{4pt}
-${titleBlock}${contactBlock}
-\textcolor{accent}{\rule{\linewidth}{1.2pt}}
-
-`
-  }
-
-  return String.raw`\begin{document}
+\begin{document}
 
 %----------HEADING-----------------
 \begin{center}
@@ -421,34 +378,6 @@ ${titleBlock}${contactBlock}
 ${titleBlock}${contactBlock}\end{center}
 
 `
-}
-
-function generateLatexBody(data: LatexResumeData, templateId: LatexTemplateId): string {
-  const { personal, experience, dynamicSections = [] } = data
-
-  const fullName = clampLatexText(`${personal?.firstName || ''} ${personal?.lastName || ''}`.trim(), 80)
-  const linkedinUrl = looksLikeUrl(personal?.linkedin) ? normalizeHref(personal!.linkedin!) : null
-  const githubUrl = looksLikeUrl(personal?.github) ? normalizeHref(personal!.github!) : null
-  const websiteUrl = looksLikeUrl(personal?.website) ? normalizeHref(personal!.website!) : null
-  const titleText = clampLatexText(personal?.title, 90)
-  // Render the professional title on its own line (matches the web preview
-  // which stacks name, title, and contact line).
-  const titleBlock = buildLatexTitleBlock(templateId, titleText)
-  const contactParts = [
-    personal?.phone ? escapeLatex(`Phone: ${clampLatexText(personal.phone, 40)}`) : '',
-    personal?.email ? escapeLatex(`Email: ${clampLatexText(personal.email, 120)}`) : '',
-    personal?.location ? escapeLatex(clampLatexText(personal.location, 80)) : '',
-    linkedinUrl ? `LinkedIn: ${makeLatexLink(linkedinUrl, normalizeContactText(linkedinUrl))}` : '',
-    githubUrl ? `GitHub: ${makeLatexLink(githubUrl, normalizeContactText(githubUrl))}` : '',
-    websiteUrl ? makeLatexLink(websiteUrl, normalizeContactText(websiteUrl)) : '',
-  ].filter(Boolean)
-  const contactLine = contactParts.join(' $|$ ')
-  const contactBlock = contactLine
-    ? String.raw`    \small ${contactLine}
-`
-    : ''
-
-  let tex = buildLatexPreamble(templateId) + buildLatexHeader(templateId, fullName, titleBlock, contactBlock)
 
   if (personal?.summary) {
     tex += String.raw`
@@ -628,18 +557,6 @@ ${projectItems}
   return tex
 }
 
-export function buildHarvardLatex(data: LatexResumeData): string {
-  return generateLatexBody(data, 'harvard')
-}
-
-export function buildModernLatex(data: LatexResumeData): string {
-  return generateLatexBody(data, 'modern')
-}
-
-function normalizeLatexTemplateId(value: unknown): LatexTemplateId {
-  return value === 'modern' ? 'modern' : 'harvard'
-}
-
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
   try {
@@ -709,8 +626,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const templateId = normalizeLatexTemplateId(data.template)
-    const texStr = templateId === 'modern' ? buildModernLatex(data) : buildHarvardLatex(data)
+    const texStr = generateLatex(data)
 
     const latexServiceUrl = process.env.LATEX_SERVICE_URL || 'http://localhost:3005/api/compile'
     const latexServiceSecret = process.env.LATEX_SERVICE_SECRET
@@ -819,10 +735,11 @@ export async function POST(req: Request) {
       },
     })
 
+    // Only one template exists today ('harvard'); hardcoded until the schema gains a template_id field.
     await capturePostHogEvent({
       distinctId: userId,
       event: 'pdf_exported',
-      properties: { template_id: templateId },
+      properties: { template_id: 'harvard' },
     })
 
     const pdfResponse = new NextResponse(pdfBuffer, {
