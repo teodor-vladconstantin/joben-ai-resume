@@ -1,4 +1,117 @@
 ## Active
+- [DONE] 2026-08-27 Free ATS checker: eliminat warning-uri fals-pozitive despre cronologie
+  (`src/app/api/public/ats-check/route.ts`, `ATS_CHECK_SYSTEM_PROMPT`). Root cause: prompt-ul
+  ruta publică nu avea garda "concurrent roles are normal / past end date is not ambiguous"
+  care exista deja în `src/app/api/analyze/route.ts` (adăugată acolo separat) — modelul
+  inventa probleme de genul "overlapping Present roles" (normal, founder + job) și "end date
+  în trecut e inconsistent" (fals, un rol fără "Present" e pur și simplu încheiat). Portat
+  aceleași 3 reguli explicite în prompt-ul rutei publice. `withCurrentDateContext` (fix-ul
+  anterior din f96f052) rămâne corect — problema nu era lipsa datei curente, ci lipsa
+  regulilor de interpretare a ei. Verificat: `tsc --noEmit` + `eslint` curate pe fișierul
+  modificat.
+- [DONE] 2026-08-27 Tailor v2 pas 1 — gap de skill-uri (doar gap-ul; template-uri, variante
+  multiple și anti-halucinație rămân neatinse, per decizie user):
+  - Context/descoperire: `resume-parser-service/app/main.py` + `app/services/skills_matcher.py`
+    (ESCO/seed skill matcher) NU erau desfășurate în producție — `Dockerfile` face `COPY main.py .`
+    doar pentru fișierul de la rădăcină (LlamaParse + Claude, cu `require_parser_secret`). Am mutat
+    `skills_matcher.py` la rădăcină (lângă `main.py` real) în loc de a adăuga endpoint-ul în codul
+    orfan din `app/`, ca să fie efectiv livrabil — deviere de la instrucțiunea inițială (care indica
+    `app/main.py`), semnalată userului înainte de a proceda.
+  - `resume-parser-service/skills_matcher.py`: copiat din `app/services/skills_matcher.py`, doar
+    `_BUNDLE_DIR` corectat pentru noua locație. Notă: bundle-urile ESCO reale
+    (`esco_skills_en.json`/`esco_skills_ro.json`) nu există în `data/` — matcher-ul rulează azi pe
+    seed list-ul hardcodat (~130 skill-uri tech EN + ~16 soft skills RO), nu pe corpusul ESCO complet
+    de 13.890 intrări. Funcțional pentru v1, dar de reținut ca limitare cunoscută.
+  - `resume-parser-service/main.py`: nou `POST /extract-skills` (body `{text, lang}`, cap 20.000
+    caractere), autentificare identică cu `/parse` (`require_parser_secret`), folosește
+    `SkillsMatcher().extract_from_text()` neschimbată.
+  - `resume-parser-service/requirements.txt` + `Dockerfile`: adăugat `rapidfuzz==3.9.7` și
+    `COPY skills_matcher.py .`.
+  - `src/lib/resume-parser-client.ts` (nou): helper de proxy către resume-parser-service,
+    generalizat din tiparul `fetchParser`/`RESUME_PARSER_URL`/shared secret din
+    `src/app/api/parse/route.ts` (`parse/route.ts` însuși neatins — risc minim, rută funcțională
+    neschimbată).
+  - `src/lib/skill-gap.ts` (nou): logică pură testabilă — `extractSkillGapInputText` (text din
+    resumeData: summary, dynamicSections tip skills, bullets/descrieri experience+projects,
+    technologies) + `computeMissingSkills` (diff case-insensitive JD vs. CV, dedup).
+  - `src/app/api/tailor/route.ts`: apelează `/extract-skills` de două ori (CV + JD) în paralel,
+    fail-open per apel (dacă parserul e jos, tailoring continuă cu gap gol în loc să pice cererea),
+    include gap-ul explicit în promptul Claude, validează output-ul final cu `tailorResponseSchema`.
+  - `src/lib/validation/schemas.ts`: `tailorResponseSchema` nou — prima validare Zod a output-ului
+    de tailor (înainte trecea negestionat direct din `parseClaudeJsonText`); extinsă cu
+    `missingSkills: string[]`.
+  - `src/components/builder/ResumeBuilder.tsx`: panou nou de chips cu `missingSkills`, poziționat
+    deasupra modalului de tailor (lângă `fixBanner`, cu dismiss). `handleTailorResume()` neatins
+    dincolo de a primi/afișa `missingSkills` — comportamentul de suprascriere silențioasă a
+    `bullets[0]` rămâne cum era.
+  - Teste noi: `tests/lib/skill-gap.test.ts` (12 cazuri: diff, case-insensitivity, dedup, extracție
+    text defensivă pe input malformat).
+  - Verificare: `npx tsc --noEmit` curat, `npm run lint` curat, `npm run test` 176/176 (prima
+    rulare a arătat 22 timeout-uri pe teste neatinse de acest task — confirmat flake de mediu prin
+    a doua rulare curată, nu regresie introdusă de această schimbare).
+  - Rămâne de făcut (necesită acces/decizie user): deploy real pe Hetzner (rebuild imagine Docker
+    resume-parser-service cu `docker compose -f docker-compose.prod.yml build resume-parser` +
+    restart) și setare `RESUME_PARSER_SHARED_SECRET` dacă diferă; verificare manuală end-to-end
+    (CV fără skill X + fișă de post cu skill X → apare în `missingSkills`).
+- [IN PROGRESS] 2026-08-26 Full codebase audit + E2E testing + cleanup (delta pass, per user
+  scoping decision — not a ground-up re-audit; prior FAZA 0-4/polish passes already covered
+  broad dead-code/lint/console.log/TODO sweeps and were confirmed still holding):
+  - [DONE] Confirmed baseline before touching anything: `npm test` 165/165 passing (the
+    previously-flagged `crud-smoke.test.ts` failure was already fixed by commit
+    `eb49e4b`), `npx tsc --noEmit` clean, real `npm run lint` clean on `src/`/`tests/`/`scripts/`
+    (the reported 14298-problem count was 100% stale build noise from the separate
+    `.claude/worktrees/gdpr-compliance` git worktree, not this working tree).
+  - [DONE] Fixed `.gitignore`: its last line (`cleanup-reports/`) had been appended as
+    UTF-16LE text into a UTF-8 file (literal null bytes between characters, likely from a
+    PowerShell `>>`/`Out-File` append), so git silently ignored the pattern — this is why
+    `cleanup-reports/` showed as untracked. Rewritten in plain UTF-8; added `/e2e/.auth/`,
+    `/e2e/.results/`, `/e2e/.report/`, `/test-results/`, `/playwright-report/`,
+    `/blob-report/` for the new Playwright suite.
+  - [DONE] `eslint.config.mjs`: added `.claude/worktrees/**` to `globalIgnores` so the
+    separate worktree's own `.next`/`node_modules` never get scanned again — permanently
+    fixes the false 14k-problem lint count instead of just re-documenting it as noise.
+  - [DONE] `package.json`: added `@sentry/core` as an explicit dependency (was unlisted —
+    `src/lib/security/sentry-scrub.ts` imports it directly but it was only ever present
+    transitively via `@sentry/nextjs`); added `test:e2e`/`test:e2e:ui` scripts.
+  - [DONE] `npx knip` re-run and every finding manually verified via grep before deciding:
+    - Confirmed genuinely dead (recommended for deletion, see below):
+      `src/components/layout/Sidebar.tsx` (a fully orphaned duplicate/superseded-by
+      `src/components/dashboard/Sidebar.tsx`, including its unused `DashboardShell` export)
+      and `src/components/pricing/UpgradeToProButton.tsx` (superseded by `PlanCta` per the
+      2026-08-14 Stripe live-payments entry below — zero remaining imports of either).
+    - Confirmed false positives, left alone: `@napi-rs/canvas` (real runtime `require()` +
+      `serverExternalPackages` usage in `next.config.ts`, knip can't see dynamic requires),
+      `supabase` devDependency (CLI-only, per README/CLAUDE.md commands, never imported),
+      `latex-service/index.js` (real Docker entrypoint for the separate microservice, knip
+      scanned it as if it were part of the main app).
+    - Deliberately NOT deleted: the ~45 "unused export" / 18 "unused exported type" findings
+      in `src/lib/validation/schemas.ts`, `src/lib/api-response.ts`, `src/lib/plans.ts`, etc.
+      These overlap directly with two *open* backlog items further down this file ("unify
+      API error-response shapes", "add Zod validation for hand-parsed query params") — they
+      read as prepared-but-not-yet-wired infrastructure for that work, not accidental dead
+      code, and this was scoped as a delta pass, not a redesign. Flagged here instead so
+      whoever picks up those backlog items knows the scaffolding already exists.
+  - [BLOCKED — needs user action] Deleting the two confirmed-dead files above and the stale
+    `cleanup-reports/` directory (leftover, garbled-UTF-16, untracked scratch output from an
+    earlier FAZA 1 knip/depcheck/jscpd run that was never cleaned up) — the sandbox's Bash
+    classifier blocks all file-deletion attempts (`rm`, `git rm`) in this session. Run
+    manually: `git rm src/components/layout/Sidebar.tsx src/components/pricing/UpgradeToProButton.tsx && rm -rf cleanup-reports`
+  - [DONE] Added Playwright E2E (`playwright.config.ts`, `e2e/`) — none existed before.
+    `e2e/public/**` (marketing/legal pages, sign-up legal-gate, protected-route redirect,
+    wrong-password sign-in) needs no secrets and is verified passing (8/8) against the
+    current `.env.local`. `e2e/authenticated/**` (dashboard nav, resume CRUD incl. a
+    not-found edge case, Stripe checkout boundary test) needs test-mode Clerk + Stripe
+    credentials the user must supply in a new `.env.test.local` (see
+    `.env.test.local.example` and the README's new "End-to-End Tests" section) — not run
+    yet, blocked on those credentials. `playwright.config.ts` hard-refuses to start if it
+    detects `_live_` in any Clerk/Stripe key, specifically to prevent this suite from ever
+    touching production. `e2e/global-setup.ts` creates/reuses a throwaway Clerk test user via
+    the Backend API and seeds the matching `users` row directly (mirrors the
+    `user.created` webhook handler) since local runs have no webhook forwarder.
+  - [ ] Once `.env.test.local` is filled in: run `npm run test:e2e` in full (authenticated
+    project currently unverified) and fix anything it surfaces.
+  - [ ] User to run the two blocked deletions above, or grant this session `rm`/`git rm`
+    permission to do it directly.
 - [DONE] 2026-08-16 Global footer + ANPC SAL/Product Hunt badges + em-dash cleanup:
   - New `src/components/layout/SiteFooter.tsx` (slim, sitewide) mounted via
     `src/components/layout/ConditionalFooter.tsx` in `src/app/layout.tsx`; hidden on
