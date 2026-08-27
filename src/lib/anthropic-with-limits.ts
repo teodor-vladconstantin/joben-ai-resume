@@ -12,6 +12,7 @@ import {
   Feature,
 } from '@/lib/ratelimit'
 import { sanitizeAiError } from '@/lib/ai-errors'
+import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 
 // SECURITY: CLAUDE.md High #6 — cap the provider call at 30 s so a slow
 // upstream cannot tie up Next.js request handlers indefinitely.
@@ -93,7 +94,13 @@ async function createMessage(
   }
 ): Promise<Message> {
   const system = input.system
-    ? [{ type: 'text' as const, text: input.system, cache_control: { type: 'ephemeral' as const } }]
+    ? [
+        {
+          type: 'text' as const,
+          text: withCurrentDateContext(input.system),
+          cache_control: { type: 'ephemeral' as const },
+        },
+      ]
     : undefined
 
   return anthropic.messages.create({
