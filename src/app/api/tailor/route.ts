@@ -17,11 +17,30 @@ import { computeMissingSkills, extractSkillGapInputText } from '@/lib/skill-gap'
 import { findNewClaims } from '@/lib/claim-diff'
 import { tailorResponseSchema, tailorSchema } from '@/lib/validation/schemas'
 
-const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
+// CRITICAL: jobIndex/bulletIndex must be explicit and echoed back by Claude.
+// A prior version asked for a flat `updatedBullets: string[]` and matched
+// result[i] back to experience[i] by array position — nothing constrained
+// Claude to return bullets in that order, so bullets from one job (e.g. an
+// AI-focused Founder role) came back rewritten as if they belonged to a
+// different job (e.g. a backend Tech Director role). Never go back to
+// positional matching here.
+const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job description.
+
+The user prompt lists existing bullets grouped by job, labeled "Job <jobIndex>" with each
+bullet prefixed "[<bulletIndex>]". Rewrite only the bullets most relevant to the job
+description — you do not need to rewrite every bullet, and never invent a bullet that
+wasn't given to you.
+
+Return ONLY JSON in this exact shape:
 {
-  "updatedBullets": ["string"],
+  "updatedBullets": [
+    { "jobIndex": number, "bulletIndex": number, "text": "string" }
+  ],
   "summary": "string"
-}`
+}
+
+jobIndex and bulletIndex must exactly match the numbers given in the input list — never
+guess, renumber, or reorder them.`
 
 // Skill-gap analysis rides on the same resume-parser-service used for PDF
 // import (see src/app/api/parse/route.ts). It is best-effort: if the parser
@@ -60,16 +79,51 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-// Per-experience bullets, used both as the "original" baseline for the
-// anti-hallucination check and as the "context" (sibling bullets of the same
-// job) so a number/tool that already exists elsewhere in that job isn't
-// flagged as a new claim.
-function getExperienceBulletLists(resumeData: Record<string, unknown>): string[][] {
+type ExperienceJob = { title: string; company: string; bullets: string[] }
+
+// Per-experience job/bullets, keyed by array index (jobIndex) — the same
+// index Claude is required to echo back. Called once on the raw resumeData
+// (anti-hallucination baseline: compare against what the user actually
+// wrote) and once on the sanitized copy (building the prompt listing).
+function getExperienceJobs(resumeData: Record<string, unknown>): ExperienceJob[] {
   if (!Array.isArray(resumeData.experience)) return []
   return resumeData.experience.map((entry) => {
-    if (!isRecord(entry) || !Array.isArray(entry.bullets)) return []
-    return entry.bullets.filter((bullet): bullet is string => typeof bullet === 'string')
+    if (!isRecord(entry)) return { title: '', company: '', bullets: [] }
+    return {
+      title: typeof entry.title === 'string' ? entry.title : '',
+      company: typeof entry.company === 'string' ? entry.company : '',
+      bullets: Array.isArray(entry.bullets)
+        ? entry.bullets.filter((bullet): bullet is string => typeof bullet === 'string')
+        : [],
+    }
   })
+}
+
+function buildBulletListingForPrompt(jobs: ExperienceJob[]): string {
+  return jobs
+    .map((job, jobIndex) => {
+      const header = `Job ${jobIndex}: ${[job.title, job.company].filter(Boolean).join(' @ ') || '(untitled role)'}`
+      const bulletLines = job.bullets.length
+        ? job.bullets.map((bullet, bulletIndex) => `[${bulletIndex}] ${bullet}`).join('\n')
+        : '(no bullets)'
+      return `${header}\n${bulletLines}`
+    })
+    .join('\n\n')
+}
+
+type ValidatedTailoredBullet = { jobIndex: number; bulletIndex: number; text: string }
+
+// Defensive: Claude is instructed to echo back real jobIndex/bulletIndex
+// values, but nothing stops it from hallucinating an out-of-range one. Drop
+// those rather than crash or silently write into the wrong bullet.
+function isValidTailoredBullet(value: unknown, jobs: ExperienceJob[]): value is ValidatedTailoredBullet {
+  if (!isRecord(value)) return false
+  const { jobIndex, bulletIndex, text } = value
+  if (typeof jobIndex !== 'number' || !Number.isInteger(jobIndex) || jobIndex < 0) return false
+  if (typeof bulletIndex !== 'number' || !Number.isInteger(bulletIndex) || bulletIndex < 0) return false
+  if (typeof text !== 'string' || !text.trim()) return false
+  const job = jobs[jobIndex]
+  return Boolean(job && bulletIndex < job.bullets.length)
 }
 
 export async function POST(req: Request) {
@@ -115,7 +169,9 @@ export async function POST(req: Request) {
           ? `\n\nSkills mentioned in the job description but not found in the resume: ${missingSkills.join(', ')}`
           : ''
 
-      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(safeResumeData)}\n\nJob description:\n${safeJobDescription}${skillGapLine}`
+      const bulletListing = buildBulletListingForPrompt(getExperienceJobs(safeResumeData))
+
+      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(safeResumeData)}\n\nBullets to rewrite (use these exact jobIndex/bulletIndex values):\n${bulletListing}\n\nJob description:\n${safeJobDescription}${skillGapLine}`
       const messages: MessageParam[] = [
         {
           role: 'user',
@@ -133,27 +189,36 @@ export async function POST(req: Request) {
       })
 
       const rawResult = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
-      const rawUpdatedBullets = isRecord(rawResult) && Array.isArray(rawResult.updatedBullets)
-        ? rawResult.updatedBullets.filter((bullet): bullet is string => typeof bullet === 'string')
+
+      // Raw resumeData (not the sanitized/prompt copy) is the anti-
+      // hallucination baseline — comparing against what the user actually
+      // wrote, not a sanitized approximation of it.
+      const jobs = getExperienceJobs(body.resumeData)
+      const validTailoredBullets = isRecord(rawResult) && Array.isArray(rawResult.updatedBullets)
+        ? rawResult.updatedBullets.filter((item): item is ValidatedTailoredBullet =>
+            isValidTailoredBullet(item, jobs)
+          )
         : []
 
-      // Anti-hallucination check: for each rewritten bullet, "original" is
-      // the bullet it's replacing (index 0 today — tailor doesn't offer
-      // multiple variants) and "context" is every other bullet of that same
-      // job, so a number/tool already present elsewhere in the role isn't
-      // flagged as a new claim.
-      const experienceBulletLists = getExperienceBulletLists(body.resumeData)
-      const bulletClaims = await Promise.all(
-        experienceBulletLists.map((bullets, index) => {
-          const rewritten = rawUpdatedBullets[index]
-          if (!rewritten) return Promise.resolve<string[]>([])
-          const original = bullets[0] || ''
-          const context = bullets.slice(1).join('\n')
-          return findNewClaims(original, context, rewritten)
+      // Each rewritten bullet is looked up by its own (jobIndex, bulletIndex)
+      // — never by its position in this array — so "original" and "context"
+      // (every other bullet of that same job) always belong to the job the
+      // bullet actually came from.
+      const updatedBullets = await Promise.all(
+        validTailoredBullets.map(async (item) => {
+          const job = jobs[item.jobIndex]
+          const original = job.bullets[item.bulletIndex] || ''
+          const context = job.bullets.filter((_, index) => index !== item.bulletIndex).join('\n')
+          const newClaims = await findNewClaims(original, context, item.text)
+          return { jobIndex: item.jobIndex, bulletIndex: item.bulletIndex, text: item.text, newClaims }
         })
       )
 
-      const candidateResult = { ...(isRecord(rawResult) ? rawResult : {}), missingSkills, bulletClaims }
+      const candidateResult = {
+        ...(isRecord(rawResult) ? rawResult : {}),
+        updatedBullets,
+        missingSkills,
+      }
       const validated = tailorResponseSchema.safeParse(candidateResult)
       // Validation is best-effort: an unexpected Claude output shape should
       // not turn a working tailor response into a 500. Fall back to the raw
@@ -175,7 +240,8 @@ export async function POST(req: Request) {
         route: '/api/tailor',
         optimizationType: body.optimizationType || 'general',
         missingSkillsCount: missingSkills.length,
-        flaggedBulletsCount: bulletClaims.filter((claims) => claims.length > 0).length,
+        updatedBulletsCount: updatedBullets.length,
+        flaggedBulletsCount: updatedBullets.filter((item) => item.newClaims.length > 0).length,
       })
       return jsonWithRequestId({ result }, 200, requestId)
     } catch (error) {

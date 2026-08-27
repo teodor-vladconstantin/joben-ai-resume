@@ -1181,10 +1181,14 @@ export function ResumeBuilder() {
 
       const payload = (await response.json()) as {
         result?: {
-          updatedBullets?: string[]
+          updatedBullets?: Array<{
+            jobIndex: number
+            bulletIndex: number
+            text: string
+            newClaims?: string[]
+          }>
           summary?: string
           missingSkills?: string[]
-          bulletClaims?: string[][]
         }
         showUpgrade?: boolean
         error?: string
@@ -1202,28 +1206,33 @@ export function ResumeBuilder() {
         return
       }
 
-      const bullets = payload.result.updatedBullets || []
-      const bulletClaims = payload.result.bulletClaims || []
+      const updatedBullets = payload.result.updatedBullets || []
       setMissingSkills(payload.result.missingSkills || [])
 
       // Every proposed bullet — not just ones flagged with newClaims — goes
       // through BeforeAfterModal for explicit accept. Nothing is written to
       // resumeData here; applyConfirmedClaimPatches does that once the user
       // confirms (and, for flagged bullets, checks the required box).
-      const pending: FixPatchWithContext[] = resumeData.experience.reduce<FixPatchWithContext[]>(
-        (acc, exp, index) => {
-          const optimized = bullets[index]
-          if (!optimized) return acc
+      //
+      // Each item is matched back to its job via the API's explicit
+      // jobIndex/bulletIndex (resumeData.experience[jobIndex]) — never by
+      // its position in this array. Positional matching is exactly what
+      // previously let a bullet from one job come back applied to a
+      // different job.
+      const pending: FixPatchWithContext[] = updatedBullets.reduce<FixPatchWithContext[]>(
+        (acc, item) => {
+          const exp = resumeData.experience[item.jobIndex]
+          if (!exp) return acc
 
           const existingBullets = getExperienceBullets(exp)
           acc.push({
             experienceId: exp.id,
-            bulletIndex: 0,
-            originalBullet: existingBullets[0] || '',
-            updatedBullet: optimized,
+            bulletIndex: item.bulletIndex,
+            originalBullet: existingBullets[item.bulletIndex] || '',
+            updatedBullet: item.text,
             experienceTitle: exp.title,
             company: exp.company,
-            newClaims: bulletClaims[index] || [],
+            newClaims: item.newClaims || [],
           })
           return acc
         },
