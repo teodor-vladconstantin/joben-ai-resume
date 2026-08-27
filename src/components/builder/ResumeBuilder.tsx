@@ -21,6 +21,12 @@ import { AILoadingState } from '@/components/ui/AILoadingState'
 
 type ResumeTemplate = TemplateValue
 
+// Sentinel experienceId marking the synthetic "professional summary" patch
+// inside a tailor confirm batch — never a real experience entry id — so
+// applyConfirmedClaimPatches knows to write it to personal.summary instead
+// of a bullet field.
+const SUMMARY_PATCH_ID = '__summary__'
+
 function normalizeTemplate(value: unknown): ResumeTemplate {
   return value === 'modern' ? 'modern' : 'harvard'
 }
@@ -411,10 +417,6 @@ export function ResumeBuilder() {
   const [showBeforeAfterModal, setShowBeforeAfterModal] = useState(false)
   const [pendingClaimPatches, setPendingClaimPatches] = useState<FixPatchWithContext[]>([])
   const [showClaimConfirmModal, setShowClaimConfirmModal] = useState(false)
-  // Tailor's proposed summary rewrite — held alongside pendingClaimPatches so
-  // it applies atomically with the bullets on confirm, instead of being
-  // written to resumeData silently while the bullets still wait for accept.
-  const [pendingTailorSummary, setPendingTailorSummary] = useState<string | null>(null)
   const [isSummaryGeneratorOpen, setIsSummaryGeneratorOpen] = useState(false)
   const [summaryGenerationMode, setSummaryGenerationMode] = useState<SummaryGenerationMode>('resume')
   const [summaryRoleDescription, setSummaryRoleDescription] = useState('')
@@ -1239,8 +1241,25 @@ export function ResumeBuilder() {
         []
       )
 
+      // The proposed summary goes through the exact same confirm modal as a
+      // synthetic patch — it must never be applied silently. A prior version
+      // wrote it straight into resumeData as a side effect of confirming
+      // bullets (or dropped it entirely if no bullets needed confirmation),
+      // so a user could accept a rewritten bullet and have the summary
+      // change underneath them unseen.
+      const proposedSummary = (payload.result.summary || '').trim()
+      const currentSummary = (resumeData.personal.summary || '').trim()
+      if (proposedSummary && proposedSummary !== currentSummary) {
+        pending.unshift({
+          experienceId: SUMMARY_PATCH_ID,
+          bulletIndex: -1,
+          originalBullet: currentSummary,
+          updatedBullet: proposedSummary,
+          experienceTitle: 'Professional Summary',
+        })
+      }
+
       if (pending.length > 0) {
-        setPendingTailorSummary(payload.result.summary || null)
         setPendingClaimPatches(pending)
         setShowClaimConfirmModal(true)
       }
@@ -1375,22 +1394,23 @@ export function ResumeBuilder() {
   // entries (a no-op for patches that didn't come from that flow).
   const applyConfirmedClaimPatches = (patches: FixPatchWithContext[]) => {
     patches.forEach((patch) => {
+      if (patch.experienceId === SUMMARY_PATCH_ID) {
+        setResumeData((prev) => ({
+          ...prev,
+          personal: { ...prev.personal, summary: patch.updatedBullet },
+        }))
+        return
+      }
       updateExperienceBulletField(patch.experienceId, patch.bulletIndex, patch.updatedBullet)
     })
-    if (pendingTailorSummary) {
-      setResumeData((prev) => ({
-        ...prev,
-        personal: { ...prev.personal, summary: pendingTailorSummary },
-      }))
-    }
     setBulletDraftStates((prev) => {
       const next = { ...prev }
       for (const patch of patches) {
+        if (patch.experienceId === SUMMARY_PATCH_ID) continue
         delete next[getBulletFieldKey(patch.experienceId, patch.bulletIndex)]
       }
       return next
     })
-    setPendingTailorSummary(null)
     setPendingClaimPatches([])
     setShowClaimConfirmModal(false)
   }
@@ -2224,7 +2244,6 @@ export function ResumeBuilder() {
           onClose={() => {
             setShowClaimConfirmModal(false)
             setPendingClaimPatches([])
-            setPendingTailorSummary(null)
           }}
           onConfirm={applyConfirmedClaimPatches}
         />
