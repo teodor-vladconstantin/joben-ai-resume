@@ -5,7 +5,6 @@ import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { TemplateSwitcher, type TemplateValue } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
-import { ModernTemplate } from '@/components/templates/ModernTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
@@ -27,8 +26,11 @@ type ResumeTemplate = TemplateValue
 // of a bullet field.
 const SUMMARY_PATCH_ID = '__summary__'
 
-function normalizeTemplate(value: unknown): ResumeTemplate {
-  return value === 'modern' ? 'modern' : 'harvard'
+function normalizeTemplate(): ResumeTemplate {
+  // Only Harvard exists today — Modern was removed after shipping with
+  // unfixed LaTeX export bugs. Migrate any stored value to Harvard rather
+  // than trusting it.
+  return 'harvard'
 }
 
 type DynamicSection = {
@@ -514,7 +516,7 @@ export function ResumeBuilder() {
             }
 
             return {
-              template: normalizeTemplate(loadedData.template),
+              template: normalizeTemplate(),
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
               projects: incomingProjects,
@@ -1542,10 +1544,6 @@ export function ResumeBuilder() {
                 template: value,
               }))
             }
-            onLockedTemplateSelect={() => {
-              setUpgradeMessage('Full template library is available on the Recruiting plan.')
-              setShowUpgradeModal(true)
-            }}
           />
           <div className="flex flex-wrap gap-2.5">
             <button
@@ -2182,11 +2180,7 @@ export function ResumeBuilder() {
       <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
         {/* Mock A4 Paper Preview */}
         <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
-          {resumeData.template === 'modern' ? (
-            <ModernTemplate data={resumeData} />
-          ) : (
-            <HarvardTemplate data={resumeData} />
-          )}
+          <HarvardTemplate data={resumeData} />
         </div>
         <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
