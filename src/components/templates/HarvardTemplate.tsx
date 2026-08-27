@@ -1,116 +1,17 @@
-import { Fragment } from 'react'
 import type { ResumeTemplateData, ResumeDynamicSection, ResumeEducation } from './types'
-import { tokenizeInline } from '@/lib/inline-format'
+import {
+  buildContactItems,
+  buildEducationDegreeLine,
+  formatEducationPeriod,
+  FormattedText,
+  normalizeContactText,
+  parseEducationEntries,
+  resolveBullets,
+  resolveProjectBullets,
+} from './shared'
 
 type HarvardTemplateProps = {
   data: ResumeTemplateData
-}
-
-function FormattedText({ value, idPrefix }: { value: string | null | undefined; idPrefix: string }) {
-  if (!value) return null
-  const tokens = tokenizeInline(value)
-  if (tokens.length === 0) return <>{value}</>
-  return (
-    <>
-      {tokens.map((token, index) => {
-        const key = `${idPrefix}-${index}`
-        if (token.kind === 'text') return <Fragment key={key}>{token.value}</Fragment>
-        if (token.format === 'bold') return <strong key={key}>{token.value}</strong>
-        if (token.format === 'italic') return <em key={key}>{token.value}</em>
-        return <u key={key}>{token.value}</u>
-      })}
-    </>
-  )
-}
-
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function formatEducationPeriod(entry: ResumeEducation): string {
-  const startLabel = entry.startYear
-    ? entry.startMonth
-      ? `${MONTH_LABELS[entry.startMonth - 1]} ${entry.startYear}`
-      : `${entry.startYear}`
-    : ''
-  const endLabel = entry.isCurrent
-    ? 'Present'
-    : entry.endYear
-      ? entry.endMonth
-        ? `${MONTH_LABELS[entry.endMonth - 1]} ${entry.endYear}`
-        : `${entry.endYear}`
-      : ''
-
-  if (startLabel && endLabel) return `${startLabel} – ${endLabel}`
-  if (startLabel) return startLabel
-  if (endLabel) return endLabel
-  return ''
-}
-
-function buildEducationDegreeLine(entry: ResumeEducation): string {
-  return [entry.degree, entry.field].map((part) => (part || '').trim()).filter(Boolean).join(', ')
-}
-
-function normalizeContactText(url: string): string {
-  return url.replace(/^https?:\/\/(www\.)?/i, '')
-}
-
-// LinkedIn / GitHub / website fields are free-text inputs in the builder, so
-// users frequently leave the placeholder copy in place ("LinkedIn Link",
-// "https://github.com/yourusername"). Render these as plain text — never as
-// hyperlinks — so the exported PDF never points at a broken URL.
-const PLACEHOLDER_TOKENS = /yourusername|placeholder|example\.com/i
-
-function looksLikeUrl(value: string | undefined | null): boolean {
-  if (!value) return false
-  const trimmed = value.trim()
-  if (!trimmed) return false
-  if (PLACEHOLDER_TOKENS.test(trimmed)) return false
-  // Accept both fully-qualified URLs and bare domains like "linkedin.com/in/foo".
-  if (/^https?:\/\//i.test(trimmed)) return true
-  return /^([\w-]+\.)+[a-z]{2,}(\/|$)/i.test(trimmed)
-}
-
-function normalizeHref(value: string): string {
-  const trimmed = value.trim()
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
-  return `https://${trimmed}`
-}
-
-function resolveBullets(exp: { bullets?: string[]; description: string }) {
-  const bullets = (exp.bullets || []).map((bullet) => bullet.trim()).filter(Boolean)
-  if (bullets.length > 0) return bullets
-  return exp.description?.trim() ? [exp.description.trim()] : []
-}
-
-function resolveProjectBullets(project: { bullets?: string[]; description?: string }): string[] {
-  // Prefer structured bullets, then fall back to splitting the description on newlines so
-  // imported descriptions render as discrete line items instead of one wall of text.
-  const bullets = (project.bullets || []).map((bullet) => bullet.trim()).filter(Boolean)
-  if (bullets.length > 0) return bullets
-
-  const description = (project.description || '').trim()
-  if (!description) return []
-
-  const byLine = description.split(/\r?\n+/).map((line) => line.trim()).filter(Boolean)
-  if (byLine.length > 0) return byLine
-
-  return [description]
-}
-
-type EduEntry = {
-  institution: string
-  degreeLines: string[]
-}
-
-function parseEducationEntries(content: string): EduEntry[] {
-  const blocks = content.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
-  return blocks.map((block) => {
-    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
-    if (lines.length === 0) return { institution: '', degreeLines: [] }
-
-    const institution = lines[0]
-    const degreeLines = lines.slice(1)
-    return { institution, degreeLines }
-  })
 }
 
 function EducationSection({ section }: { section: ResumeDynamicSection }) {
@@ -170,18 +71,7 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
     : []
   const nonEducationSections = (data.dynamicSections || []).filter((section) => section.type !== 'education')
 
-  const linkedinHref = looksLikeUrl(data.personal.linkedin) ? normalizeHref(data.personal.linkedin!) : null
-  const githubHref = looksLikeUrl(data.personal.github) ? normalizeHref(data.personal.github!) : null
-  const websiteHref = looksLikeUrl(data.personal.website) ? normalizeHref(data.personal.website!) : null
-
-  const contactItems = [
-    data.personal.email ? { label: 'Email', value: data.personal.email, href: `mailto:${data.personal.email}` } : null,
-    data.personal.phone ? { label: 'Phone', value: data.personal.phone, href: `tel:${data.personal.phone.replace(/[^+\d]/g, '')}` } : null,
-    data.personal.location ? { label: 'Location', value: data.personal.location, href: null } : null,
-    linkedinHref ? { label: 'LinkedIn', value: normalizeContactText(linkedinHref), href: linkedinHref } : null,
-    githubHref ? { label: 'GitHub', value: normalizeContactText(githubHref), href: githubHref } : null,
-    websiteHref ? { label: 'Website', value: normalizeContactText(websiteHref), href: websiteHref } : null,
-  ].filter(Boolean) as Array<{ label: string; value: string; href: string | null }>
+  const contactItems = buildContactItems(data.personal)
 
   return (
     <div className="p-12 text-black font-serif h-full">

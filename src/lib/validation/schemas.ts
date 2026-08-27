@@ -59,6 +59,12 @@ export const resumePersonalSchema = z
 // We allow the resume builder to evolve without rejecting unknown keys, but
 // we still enforce a hard byte budget on the serialized blob (see helpers
 // below) to prevent storage abuse.
+//
+// `template` (the builder's chosen resume template — 'harvard' | 'modern')
+// already round-trips fine through this generic record on save; the enum
+// enforcement + backward-compatible default lives at the one place that
+// actually needs to pick a renderer from it — exportLatexResumeDataSchema
+// below — rather than narrowing this shared, intentionally-open schema.
 export const resumeDataSchema = z.record(z.string(), z.unknown())
 
 // --- Per-route schemas ---
@@ -295,7 +301,10 @@ export const latexDynamicSectionSchema = z
 
 export const exportLatexResumeDataSchema = z
   .object({
-    template: optionalTrimmedString(SHORT_TEXT_MAX),
+    // Backward compatible: any missing/legacy/invalid value (old resumes
+    // predate this field) falls back to 'harvard' instead of failing
+    // validation — no data migration required.
+    template: z.enum(['harvard', 'modern']).catch('harvard'),
     personal: latexPersonalSchema.optional(),
     experience: z.array(latexExperienceEntrySchema).max(60).optional(),
     projects: z.array(latexProjectEntrySchema).max(60).optional(),

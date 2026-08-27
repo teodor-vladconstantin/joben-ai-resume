@@ -3,8 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { AnimatePresence, motion } from 'framer-motion'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { TemplateSwitcher } from '@/components/builder/TemplateSwitcher'
+import { TemplateSwitcher, type TemplateValue } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
+import { ModernTemplate } from '@/components/templates/ModernTemplate'
 import { AddContentModal, type AddableSection } from '@/components/builder/AddContentModal'
 import { SectionPanel } from '@/components/builder/SectionPanel'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
@@ -18,11 +19,10 @@ import { importPdfClientSide } from '@/lib/pdf-import'
 import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 
-type ResumeTemplate = 'harvard'
+type ResumeTemplate = TemplateValue
 
-function normalizeTemplate(): ResumeTemplate {
-  // Migrate all historical template ids to Harvard.
-  return 'harvard'
+function normalizeTemplate(value: unknown): ResumeTemplate {
+  return value === 'modern' ? 'modern' : 'harvard'
 }
 
 type DynamicSection = {
@@ -512,7 +512,7 @@ export function ResumeBuilder() {
             }
 
             return {
-              template: normalizeTemplate() || prev.template,
+              template: normalizeTemplate(loadedData.template),
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
               projects: incomingProjects,
@@ -1522,6 +1522,10 @@ export function ResumeBuilder() {
                 template: value,
               }))
             }
+            onLockedTemplateSelect={() => {
+              setUpgradeMessage('Full template library is available on the Recruiting plan.')
+              setShowUpgradeModal(true)
+            }}
           />
           <div className="flex flex-wrap gap-2.5">
             <button
@@ -2158,7 +2162,11 @@ export function ResumeBuilder() {
       <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
         {/* Mock A4 Paper Preview */}
         <div className="h-full w-full max-w-230 bg-white rounded-lg shadow-2xl mx-auto overflow-y-auto print:shadow-none print:w-full print:max-w-none print:overflow-visible print:h-auto">
-          <HarvardTemplate data={resumeData} />
+          {resumeData.template === 'modern' ? (
+            <ModernTemplate data={resumeData} />
+          ) : (
+            <HarvardTemplate data={resumeData} />
+          )}
         </div>
         <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
           {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
