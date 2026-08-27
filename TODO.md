@@ -1,4 +1,42 @@
 ## Active
+- [DONE] 2026-08-27 **HOTFIX CRITIC** (descoperit prin testare manuală în producție de user,
+  NU face parte din planul inițial de faze) — tailor amesteca bullet-uri între joburi diferite:
+  - Simptom raportat: pe un CV cu 3+ joburi, bullet-uri despre AI/prompt engineering de la
+    Founder apăreau rescrise ca și cum ar aparține de Tech Director, iar bullet-uri de backend
+    de la Tech Director apăreau la Tech Mentor. Reproductibil cu orice JD, pe orice CV cu mai
+    multe joburi.
+  - Root cause confirmat în `src/app/api/tailor/route.ts`: system prompt-ul cerea Claude să
+    întoarcă `updatedBullets: string[]` — un array plat, fără nicio ancorare la job. Serverul
+    presupunea poziția i din array corespunde jobului i din `resumeData.experience`
+    (`rawUpdatedBullets[index]`), dar nimic nu obliga Claude să respecte acea ordine — modelul
+    întorcea bullet-urile cele mai relevante tematic pentru JD, în orice ordine, iar mapping-ul
+    pozițional le asocia cu jobul greșit. Bug-ul afecta simultan mapping-ul de bullet-uri ȘI
+    calculul `bulletClaims` al porții anti-halucinație (calculat cu aceeași presupunere
+    pozițională) — inevitabil atins de fix, deși logica de detecție (`findNewClaims`) în sine
+    nu s-a schimbat.
+  - Fix: `TAILOR_SYSTEM_PROMPT` rescris să ceară explicit `{ jobIndex, bulletIndex, text }` per
+    bullet; promptul include acum o listă etichetată "Job 0: Founder @ Joben.eu\n[0] ...\n[1] ..."
+    per job (`buildBulletListingForPrompt`). Serverul validează defensiv fiecare
+    jobIndex/bulletIndex întors de Claude (`isValidTailoredBullet` — indici în afara intervalului
+    sunt eliminați, nu cauzează crash) și mapează `original`/`context` pentru anti-halucinație
+    strict din jobul indicat, nu din poziția în array. `tailorResponseSchema.updatedBullets`
+    devine array de obiecte (`jobIndex`, `bulletIndex`, `text`, `newClaims` inline) — câmpul
+    separat `bulletClaims` a dispărut, absorbit în fiecare item.
+  - `ResumeBuilder.tsx`: `handleTailorResume()` mapează fiecare bullet propus înapoi la
+    `resumeData.experience[item.jobIndex]`, folosind `item.bulletIndex` real (nu mai hardcodat
+    la 0 — efect secundar util al fix-ului: acum se poate rescrie orice bullet dintr-un job, nu
+    doar primul).
+  - Verificat: `src/components/ui/BeforeAfterModal.tsx` și `applyConfirmedClaimPatches` foloseau
+    deja `experienceId`+`bulletIndex` real pentru matching (nicio potrivire pe text/ordine
+    globală) — nicio schimbare necesară acolo.
+  - Teste noi: `tests/api/tailor.test.ts` (4 cazuri) — mapping corect chiar cu răspuns Claude în
+    ordine "amestecată"; indici invalizi eliminați defensiv; context anti-halucinație izolat per
+    job (un număr dintr-un alt job nu suprimă flag-ul; un număr dintr-un bullet-frate al
+    ACELUIAȘI job îl suprimă corect).
+  - Verificare: `npx tsc --noEmit` curat, `npm run lint` curat, `npm run test` **189/189**
+    (185 anterioare + 4 noi).
+  - Test manual (rămâne de rulat de user, per cerință): CV cu 3 joburi tematic distincte + orice
+    JD → verifică fiecare "After" e coerent cu "Before"-ul din același job.
 - [DONE] 2026-08-27 Fix suprascriere silențioasă în tailor (templates, gap ESCO,
   anti-halucinație deja livrate — neatinse):
   - Problemă: `handleTailorResume()` scria direct `bullets[0]` al fiecărui job în `resumeData`
