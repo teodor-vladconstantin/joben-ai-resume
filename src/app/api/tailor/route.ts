@@ -40,7 +40,15 @@ Return ONLY JSON in this exact shape:
 }
 
 jobIndex and bulletIndex must exactly match the numbers given in the input list — never
-guess, renumber, or reorder them.`
+guess, renumber, or reorder them.
+
+"summary" is a rewritten version of the candidate's own resume summary/profile paragraph
+(2-4 sentences, third person or implied subject — never "I"), tailored to this job
+description. It is content for the candidate's resume, written as if the candidate wrote
+it. It is NEVER an evaluation, critique, fit assessment, or gap analysis — never write
+sentences like "the candidate lacks..." or "to be competitive, the candidate should...".
+If the resume data has no existing summary to rewrite, return an empty string instead of
+inventing an assessment.`
 
 // Skill-gap analysis rides on the same resume-parser-service used for PDF
 // import (see src/app/api/parse/route.ts). It is best-effort: if the parser
