@@ -5,3 +5,4 @@ python-multipart==0.0.9
 llama-parse==0.5.3
 anthropic==0.125.0
 python-dotenv==1.0.0
+rapidfuzz==3.9.7

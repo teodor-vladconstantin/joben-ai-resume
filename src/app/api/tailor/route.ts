@@ -12,13 +12,52 @@ import { getEmailHintFromSessionClaims, getUserPlan } from '@/lib/plans'
 import { stripProviderMentions } from '@/lib/ai-errors'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-sanitizer'
-import { tailorSchema } from '@/lib/validation/schemas'
+import { callResumeParserJson } from '@/lib/resume-parser-client'
+import { computeMissingSkills, extractSkillGapInputText } from '@/lib/skill-gap'
+import { tailorResponseSchema, tailorSchema } from '@/lib/validation/schemas'
 
 const TAILOR_SYSTEM_PROMPT = `Optimize resume bullets for the target job. Return ONLY JSON:
 {
   "updatedBullets": ["string"],
   "summary": "string"
 }`
+
+// Skill-gap analysis rides on the same resume-parser-service used for PDF
+// import (see src/app/api/parse/route.ts). It is best-effort: if the parser
+// is unreachable, tailoring still proceeds with an empty gap instead of
+// failing the whole request.
+const MAX_SKILL_EXTRACTION_TEXT_LENGTH = 8_000
+
+type ExtractSkillsResponse = { skills?: string[] }
+
+async function extractSkillsSafely(
+  text: string,
+  requestId: string,
+  source: 'resume' | 'job_description'
+): Promise<string[]> {
+  const trimmed = text.trim()
+  if (!trimmed) return []
+
+  try {
+    const response = await callResumeParserJson<ExtractSkillsResponse>('/extract-skills', {
+      text: trimmed.slice(0, MAX_SKILL_EXTRACTION_TEXT_LENGTH),
+      lang: 'en',
+    })
+    return Array.isArray(response.skills) ? response.skills : []
+  } catch (error) {
+    logger.warn('Skill extraction failed, continuing without gap analysis for this source', {
+      requestId,
+      route: '/api/tailor',
+      source,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return []
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
@@ -51,7 +90,19 @@ export async function POST(req: Request) {
     const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })
 
     try {
-      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(safeResumeData)}\n\nJob description:\n${safeJobDescription}`
+      const resumeSkillsText = extractSkillGapInputText(body.resumeData)
+      const [resumeSkills, jobSkills] = await Promise.all([
+        extractSkillsSafely(resumeSkillsText, requestId, 'resume'),
+        extractSkillsSafely(body.jobDescription, requestId, 'job_description'),
+      ])
+      const missingSkills = computeMissingSkills(resumeSkills, jobSkills)
+
+      const skillGapLine =
+        missingSkills.length > 0
+          ? `\n\nSkills mentioned in the job description but not found in the resume: ${missingSkills.join(', ')}`
+          : ''
+
+      const prompt = `Optimization type: ${body.optimizationType || 'general'}\n\nResume data:\n${JSON.stringify(safeResumeData)}\n\nJob description:\n${safeJobDescription}${skillGapLine}`
       const messages: MessageParam[] = [
         {
           role: 'user',
@@ -68,12 +119,29 @@ export async function POST(req: Request) {
         system: TAILOR_SYSTEM_PROMPT,
       })
 
-      const result = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
+      const rawResult = parseClaudeJsonText(extractTextFromAnthropicMessage(aiResponse))
+      const candidateResult = { ...(isRecord(rawResult) ? rawResult : {}), missingSkills }
+      const validated = tailorResponseSchema.safeParse(candidateResult)
+      // Validation is best-effort: an unexpected Claude output shape should
+      // not turn a working tailor response into a 500. Fall back to the raw
+      // (pre-validation) shape plus missingSkills, matching the route's
+      // pre-existing behavior of passing Claude's JSON through as-is.
+      if (!validated.success) {
+        logger.warn('Tailor response failed schema validation, passing through unvalidated', {
+          requestId,
+          userId,
+          route: '/api/tailor',
+          issues: validated.error.issues.map((issue) => issue.path.join('.')),
+        })
+      }
+      const result = validated.success ? validated.data : candidateResult
+
       logger.info('Tailor request completed', {
         requestId,
         userId,
         route: '/api/tailor',
         optimizationType: body.optimizationType || 'general',
+        missingSkillsCount: missingSkills.length,
       })
       return jsonWithRequestId({ result }, 200, requestId)
     } catch (error) {

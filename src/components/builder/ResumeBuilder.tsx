@@ -394,6 +394,7 @@ export function ResumeBuilder() {
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false)
   const [tailorJobDescription, setTailorJobDescription] = useState('')
   const [isTailoring, setIsTailoring] = useState(false)
+  const [missingSkills, setMissingSkills] = useState<string[]>([])
   const [bulletDraftStates, setBulletDraftStates] = useState<Record<string, BulletDraftState>>({})
   const [isImportingPdf, setIsImportingPdf] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -1175,6 +1176,7 @@ export function ResumeBuilder() {
         result?: {
           updatedBullets?: string[]
           summary?: string
+          missingSkills?: string[]
         }
         showUpgrade?: boolean
         error?: string
@@ -1193,6 +1195,7 @@ export function ResumeBuilder() {
       }
 
       const bullets = payload.result.updatedBullets || []
+      setMissingSkills(payload.result.missingSkills || [])
 
       setResumeData((prev) => ({
         ...prev,
@@ -1471,6 +1474,32 @@ export function ResumeBuilder() {
             </FeatureButton>
           </div>
         </div>
+
+        {missingSkills.length > 0 ? (
+          <div className="shrink-0 mx-4 mt-3 rounded-xl border border-(--border) bg-(--surface) px-4 py-3">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <p className="text-sm font-semibold text-(--foreground)">
+                Skills in this job description not found in your resume
+              </p>
+              <button
+                onClick={() => setMissingSkills([])}
+                className="text-(--muted) hover:text-(--foreground) text-xs shrink-0"
+              >
+                x
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {missingSkills.map((skill) => (
+                <span
+                  key={skill}
+                  className="rounded-full border border-(--accent)/30 bg-(--accent-muted) px-2.5 py-1 text-xs font-medium text-(--accent-strong)"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {fixBanner ? (
           <div className="shrink-0 mx-4 mt-3 rounded-xl border border-(--accent)/40 bg-(--accent-muted) px-4 py-2.5 flex items-center justify-between gap-3">

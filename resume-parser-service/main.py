@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from llama_parse import LlamaParse
 from anthropic import Anthropic
+from skills_matcher import SkillsMatcher
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -109,6 +110,14 @@ class ResumeData(BaseModel):
     skills: list[str] = []
     languages: list[Language] = []
     certifications: list[str] = []
+
+
+class ExtractSkillsRequest(BaseModel):
+    text: str
+    lang: str = "en"
+
+
+MAX_EXTRACT_SKILLS_TEXT_LENGTH = 20_000
 
 
 PROJECT_SECTION_PATTERN = re.compile(
@@ -1462,6 +1471,31 @@ async def parse_resume(
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
         raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
+
+
+@app.post("/extract-skills")
+async def extract_skills(
+    payload: ExtractSkillsRequest,
+    _auth: None = Depends(require_parser_secret),
+):
+    if not payload.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty.")
+
+    if len(payload.text) > MAX_EXTRACT_SKILLS_TEXT_LENGTH:
+        raise HTTPException(
+            status_code=413,
+            detail=f"text exceeds the {MAX_EXTRACT_SKILLS_TEXT_LENGTH} character limit.",
+        )
+
+    lang = payload.lang if payload.lang in ("en", "ro") else "en"
+
+    try:
+        matcher = SkillsMatcher()
+        skills = matcher.extract_from_text(payload.text, lang=lang)
+        return {"skills": skills}
+    except Exception as e:
+        logger.error(f"Error extracting skills: {e}")
+        raise HTTPException(status_code=500, detail=f"Error extracting skills: {str(e)}")
 
 
 if __name__ == "__main__":
