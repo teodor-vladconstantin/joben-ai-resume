@@ -10,6 +10,7 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
+import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 import { sanitizeAiError } from '@/lib/ai-errors'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
@@ -333,7 +334,7 @@ export async function POST(req: Request) {
         model,
         max_tokens: MAX_OUTPUT_TOKENS,
         temperature: 0.2,
-        system: ATS_CHECK_SYSTEM_PROMPT,
+        system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT),
         messages: [{ role: 'user', content: `Resume:\n${safeResumeText}` }],
       })
 
