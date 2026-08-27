@@ -10,8 +10,39 @@ import {
   resolveProjectBullets,
 } from './shared'
 
-type HarvardTemplateProps = {
+// Same accent used by buildModernLatex() in
+// src/app/api/resumes/export-latex/route.ts — keep these in sync so the
+// exported PDF matches this preview.
+const ACCENT = '#1D4ED8'
+
+type ModernTemplateProps = {
   data: ResumeTemplateData
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3
+      className="text-xs font-bold uppercase tracking-[0.15em] pl-3 mb-3"
+      style={{ color: ACCENT, borderLeft: `3px solid ${ACCENT}` }}
+    >
+      {children}
+    </h3>
+  )
+}
+
+function AccentBulletList({ children }: { children: React.ReactNode }) {
+  return <ul className="space-y-1.5">{children}</ul>
+}
+
+function AccentBulletItem({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex gap-2 text-gray-800">
+      <span className="mt-[3px] shrink-0" style={{ color: ACCENT }}>
+        ▸
+      </span>
+      <span>{children}</span>
+    </li>
+  )
 }
 
 function EducationSection({ section }: { section: ResumeDynamicSection }) {
@@ -22,12 +53,10 @@ function EducationSection({ section }: { section: ResumeDynamicSection }) {
   return (
     <>
       {entries.map((entry, i) => (
-        <div key={i} className={i > 0 ? 'mt-4' : ''}>
-          <div className="flex justify-between items-baseline">
-            <p className="font-bold text-gray-900">{entry.institution}</p>
-          </div>
+        <div key={i} className={i > 0 ? 'mt-3' : ''}>
+          <p className="font-semibold text-gray-900">{entry.institution}</p>
           {entry.degreeLines.map((line, j) => (
-            <p key={j} className="text-gray-700 italic">{line}</p>
+            <p key={j} className="text-gray-600">{line}</p>
           ))}
         </div>
       ))}
@@ -43,13 +72,13 @@ function StructuredEducationSection({ entries }: { entries: ResumeEducation[] })
         const degreeLine = buildEducationDegreeLine(entry)
         const description = (entry.description || '').trim()
         return (
-          <div key={entry.id} className={i > 0 ? 'mt-4' : ''}>
-            <div className="flex justify-between items-baseline mb-1">
-              <p className="font-bold text-gray-900">{entry.institution}</p>
-              {period ? <span className="text-sm text-gray-600">{period}</span> : null}
+          <div key={entry.id} className={i > 0 ? 'mt-3' : ''}>
+            <div className="flex justify-between items-baseline">
+              <p className="font-semibold text-gray-900">{entry.institution}</p>
+              {period ? <span className="text-xs text-gray-500 font-medium">{period}</span> : null}
             </div>
-            {degreeLine ? <p className="text-gray-700 italic">{degreeLine}</p> : null}
-            {entry.location ? <p className="text-sm text-gray-600">{entry.location}</p> : null}
+            {degreeLine ? <p className="text-gray-600">{degreeLine}</p> : null}
+            {entry.location ? <p className="text-xs text-gray-500">{entry.location}</p> : null}
             {description ? (
               <p className="text-gray-800 leading-relaxed mt-1 whitespace-pre-wrap">
                 <FormattedText value={description} idPrefix={`edu-${entry.id}`} />
@@ -62,7 +91,7 @@ function StructuredEducationSection({ entries }: { entries: ResumeEducation[] })
   )
 }
 
-export function HarvardTemplate({ data }: HarvardTemplateProps) {
+export function ModernTemplate({ data }: ModernTemplateProps) {
   const structuredEducation = (data.education || []).filter((entry) => (entry.institution || '').trim())
   // Render legacy text-based education sections only when there is no structured data,
   // so re-imported CVs do not display Education twice.
@@ -74,14 +103,20 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
   const contactItems = buildContactItems(data.personal)
 
   return (
-    <div className="p-12 text-black font-serif h-full">
-      <div className="border-b-2 border-gray-300 pb-6 mb-6 text-center">
-        <h1 className="text-4xl font-bold uppercase tracking-[0.2em] mb-2">{data.personal.firstName} {data.personal.lastName}</h1>
-        <h2 className="text-xl text-gray-700 mb-4 uppercase tracking-wide">{data.personal.title}</h2>
-        <p className="text-sm text-gray-600">
+    <div className="p-12 text-gray-900 font-sans h-full">
+      <div className="pb-5 mb-7">
+        <h1 className="text-4xl font-bold tracking-tight mb-1">
+          {data.personal.firstName} {data.personal.lastName}
+        </h1>
+        {data.personal.title ? (
+          <h2 className="text-lg font-medium mb-3" style={{ color: ACCENT }}>
+            {data.personal.title}
+          </h2>
+        ) : null}
+        <p className="text-sm text-gray-600 flex flex-wrap gap-x-1">
           {contactItems.map((item, index) => (
-            <span key={item.label}>
-              {index > 0 ? ' • ' : ''}
+            <span key={item.label} className="flex items-center gap-1">
+              {index > 0 ? <span style={{ color: ACCENT }}>•</span> : null}
               {item.href ? (
                 <a className="hover:underline" href={item.href} target="_blank" rel="noreferrer">
                   {item.value}
@@ -92,11 +127,12 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
             </span>
           ))}
         </p>
+        <div className="mt-4 h-[3px] rounded-full" style={{ backgroundColor: ACCENT }} />
       </div>
 
       {data.personal.summary && (
         <section className="mb-6">
-          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Summary</h3>
+          <SectionHeading>Summary</SectionHeading>
           <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
             <FormattedText value={data.personal.summary} idPrefix="summary" />
           </p>
@@ -104,54 +140,54 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
       )}
 
       <section className="mb-6">
-        <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Experience</h3>
+        <SectionHeading>Experience</SectionHeading>
         {data.experience.map((exp) => (
           <div key={exp.id} className="mb-4">
-            <div className="flex justify-between items-baseline mb-1">
-              <h4 className="font-bold text-gray-900">{exp.title}</h4>
-              <span className="text-sm text-gray-600">{exp.period}</span>
+            <div className="flex justify-between items-baseline">
+              <h4 className="font-semibold text-gray-900">{exp.title}</h4>
+              <span className="text-xs text-gray-500 font-medium">{exp.period}</span>
             </div>
-            <p className="text-gray-700 italic mb-2">{exp.company}</p>
-            <ul className="list-disc pl-5 text-gray-800">
+            <p className="text-sm text-gray-600 mb-2">{exp.company}</p>
+            <AccentBulletList>
               {resolveBullets(exp).map((bullet, index) => (
-                <li key={`${exp.id}-bullet-${index}`}>
+                <AccentBulletItem key={`${exp.id}-bullet-${index}`}>
                   <FormattedText value={bullet} idPrefix={`exp-${exp.id}-${index}`} />
-                </li>
+                </AccentBulletItem>
               ))}
-            </ul>
+            </AccentBulletList>
           </div>
         ))}
       </section>
 
       {(data.projects && data.projects.length > 0) && (
         <section className="mb-6">
-          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Projects</h3>
+          <SectionHeading>Projects</SectionHeading>
           {data.projects.map((project) => {
             const bullets = resolveProjectBullets(project)
             return (
               <div key={project.id} className="mb-4">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h4 className="font-bold text-gray-900">{project.name}</h4>
-                  {project.period ? <span className="text-sm text-gray-600">{project.period}</span> : null}
+                <div className="flex justify-between items-baseline">
+                  <h4 className="font-semibold text-gray-900">{project.name}</h4>
+                  {project.period ? <span className="text-xs text-gray-500 font-medium">{project.period}</span> : null}
                 </div>
-                {project.role ? <p className="text-gray-700 italic mb-2">{project.role}</p> : null}
+                {project.role ? <p className="text-sm text-gray-600 mb-2">{project.role}</p> : null}
                 {bullets.length > 0 && (
-                  <ul className="list-disc pl-5 text-gray-800 mb-2">
+                  <AccentBulletList>
                     {bullets.map((line, i) => (
-                      <li key={`${project.id}-bullet-${i}`}>
+                      <AccentBulletItem key={`${project.id}-bullet-${i}`}>
                         <FormattedText value={line} idPrefix={`proj-${project.id}-${i}`} />
-                      </li>
+                      </AccentBulletItem>
                     ))}
-                  </ul>
+                  </AccentBulletList>
                 )}
                 {project.technologies && project.technologies.length > 0 && (
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-sm text-gray-600 mt-2">
                     <strong>Technologies:</strong> {project.technologies.join(', ')}
                   </p>
                 )}
                 {project.url ? (
-                  <p className="text-sm text-gray-600">
-                    <a href={project.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                  <p className="text-sm mt-1">
+                    <a href={project.url} target="_blank" rel="noreferrer" className="hover:underline" style={{ color: ACCENT }}>
                       {normalizeContactText(project.url)}
                     </a>
                   </p>
@@ -164,7 +200,7 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
 
       {(structuredEducation.length > 0 || educationSections.length > 0) && (
         <section className="mb-6">
-          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">Education</h3>
+          <SectionHeading>Education</SectionHeading>
           {structuredEducation.length > 0 ? (
             <StructuredEducationSection entries={structuredEducation} />
           ) : (
@@ -177,7 +213,7 @@ export function HarvardTemplate({ data }: HarvardTemplateProps) {
 
       {nonEducationSections.map((section) => (
         <section key={section.id} className="mb-6">
-          <h3 className="text-lg font-bold uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">{section.title}</h3>
+          <SectionHeading>{section.title}</SectionHeading>
           <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
             <FormattedText value={section.content} idPrefix={`section-${section.id}`} />
           </p>

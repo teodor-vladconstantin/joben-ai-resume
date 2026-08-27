@@ -1,7 +1,13 @@
 import { logger } from '@/lib/logger'
 import { createServerClient } from '@/lib/supabase/server'
+import { normalizePlan, PLAN_DEFINITIONS, type UserPlan } from '@/lib/plan-definitions'
 
-export type UserPlan = 'free' | 'pro' | 'recruiting'
+// Re-exports everything client-safe from plan-definitions.ts (UserPlan,
+// PLAN_DEFINITIONS, normalizePlan, the hasXAccess helpers) so every existing
+// `import { ... } from '@/lib/plans'` across the codebase keeps working
+// unchanged — this file adds only the server-only pieces (Supabase-backed
+// getUserPlan, quota checks, GOD MODE resolution).
+export * from '@/lib/plan-definitions'
 
 const GOD_MODE_EMAILS = new Set(['duku.constantin@gmail.com'])
 
@@ -21,66 +27,6 @@ export function getEmailHintFromSessionClaims(sessionClaims: unknown): string | 
   const claims = sessionClaims as Record<string, unknown>
   const candidate = claims.email
   return typeof candidate === 'string' ? candidate : undefined
-}
-
-type PlanDefinition = {
-  id: UserPlan
-  label: string
-  aiContentGeneration: boolean
-  bulletRewriteAccess: boolean
-  resumeAnalysisAccess: boolean
-  coverLetterGenerationAccess: boolean
-  atsKeywordOptimization: boolean
-  maxResumeExports: number | null
-  priorityEmailSupport: boolean
-  fullTemplateLibrary: boolean
-}
-
-export const PLAN_DEFINITIONS: Record<UserPlan, PlanDefinition> = {
-  free: {
-    id: 'free',
-    label: 'Free',
-    aiContentGeneration: true,
-    bulletRewriteAccess: true,
-    resumeAnalysisAccess: true,
-    coverLetterGenerationAccess: true,
-    atsKeywordOptimization: true,
-    maxResumeExports: 5,
-    priorityEmailSupport: false,
-    fullTemplateLibrary: false,
-  },
-  pro: {
-    id: 'pro',
-    label: 'Pro',
-    aiContentGeneration: true,
-    bulletRewriteAccess: true,
-    resumeAnalysisAccess: true,
-    coverLetterGenerationAccess: true,
-    atsKeywordOptimization: true,
-    maxResumeExports: null,
-    priorityEmailSupport: true,
-    fullTemplateLibrary: false,
-  },
-  recruiting: {
-    id: 'recruiting',
-    label: 'Recruiting Plan',
-    aiContentGeneration: true,
-    bulletRewriteAccess: true,
-    resumeAnalysisAccess: true,
-    coverLetterGenerationAccess: true,
-    atsKeywordOptimization: true,
-    maxResumeExports: null,
-    priorityEmailSupport: true,
-    fullTemplateLibrary: true,
-  },
-}
-
-export function normalizePlan(plan: string | null | undefined): UserPlan {
-  if (plan === 'pro' || plan === 'recruiting' || plan === 'free') {
-    return plan
-  }
-
-  return 'free'
 }
 
 export type PaidPlan = 'pro' | 'recruiting'
@@ -147,26 +93,6 @@ export async function isGodModeUser(userId: string): Promise<boolean> {
     .eq('clerk_id', userId)
     .maybeSingle()
   return isGodModeEmailAddress(data?.email as string | undefined)
-}
-
-export function hasAiContentGenerationAccess(plan: UserPlan): boolean {
-  return PLAN_DEFINITIONS[plan].aiContentGeneration
-}
-
-export function hasBulletRewriteAccess(plan: UserPlan): boolean {
-  return PLAN_DEFINITIONS[plan].bulletRewriteAccess
-}
-
-export function hasResumeAnalysisAccess(plan: UserPlan): boolean {
-  return PLAN_DEFINITIONS[plan].resumeAnalysisAccess
-}
-
-export function hasCoverLetterGenerationAccess(plan: UserPlan): boolean {
-  return PLAN_DEFINITIONS[plan].coverLetterGenerationAccess
-}
-
-export function hasAtsOptimizationAccess(plan: UserPlan): boolean {
-  return PLAN_DEFINITIONS[plan].atsKeywordOptimization
 }
 
 export type PlanQuotaResult = {
