@@ -1,4 +1,83 @@
 ## Active
+- [DONE] 2026-08-27 Fix cronologie AI peste tot, nu doar free ATS checker: certificări/
+  traininguri flagate greșit ca "future-dated" (ex. Mar 2026 marcat viitor deși azi era
+  2026-08-27). Root cause: `withCurrentDateContext()` (`src/lib/ai-system-prompt.ts`) dădea
+  modelului data reală, dar nu-i cerea explicit s-o compare înainte de a judeca o dată ca
+  viitoare — modelul cădea pe reflexul din training data (orice an ~2026 = suspect), iar
+  regulile per-prompt acopereau doar joburi/proiecte + absență diplomă, nu certificări/traininguri.
+  - `withCurrentDateContext()` întărit: cere explicit comparația "e după data de azi?" pentru
+    ORICE dată (job, proiect, certificare, training, educație) înainte de a o marca viitoare/
+    inconsistentă. Verificat: **toate** rutele AI plătite (`/api/analyze`, `/api/apply-fix`,
+    `/api/auto-fix`, `/api/cover-letter`, `/api/generate-summary`, `/api/improve-bullet`,
+    `/api/tailor`) trec prin `callAnthropicWithLimits()` → `src/lib/anthropic-with-limits.ts`
+    deja înfășoară orice `system` cu acest wrapper central, deci beneficiază automat, fără
+    schimbări per-rută.
+  - Singura rută cu client Anthropic propriu (bypass la wrapper-ul central) e ruta publică
+    `src/app/api/public/ats-check/route.ts` (fără auth Clerk, deci fără `callAnthropicWithLimits`)
+    — apelează `withCurrentDateContext` manual; adăugat acolo regulă explicită care extinde
+    "past date = ok" la certificări/cursuri/traininguri, nu doar la joburi.
+  - `src/app/api/analyze/route.ts` (`ANALYZE_SYSTEM_PROMPT`, ruta AI review principală/plătită):
+    avea reguli de cronologie mai sărace decât ats-check (fără regula "end date trecut ≠
+    ambiguu"). Adus la paritate + extins explicit la certificări/traininguri.
+  - Verificat și `resume-parser-service/main.py` (singurul apel Anthropic din serviciul Python):
+    e extracție structurată pură (copiază datele din text, nu judecă viitor/trecut) — nu are
+    nevoie de ancorare în dată, lăsat neschimbat.
+- [DONE] 2026-08-27 Al doilea template de CV (Modern) + gating pe plan — **ultimul item din
+  planul original de Faza 1** (templates, gap ESCO, anti-halucinație, fix mapping tailor —
+  toate livrate anterior):
+  - `src/lib/plan-definitions.ts` (nou): extras din `plans.ts` tot ce e pur/declarativ
+    (`UserPlan`, `PLAN_DEFINITIONS`, `normalizePlan`, `hasXAccess`, `hasFullTemplateLibraryAccess`
+    nou) — fără import de `@/lib/supabase/server` (service-role key), deci sigur de importat
+    direct într-o componentă client. `plans.ts` acum face `export *` din el — zero breaking
+    changes la restul codului care importă din `@/lib/plans`.
+  - `src/components/templates/shared.tsx` (nou): logica de conținut partajată între template-uri
+    (parsare educație, rezolvare bullet-uri, construcție contact-items) extrasă din
+    `HarvardTemplate.tsx` — evită duplicarea a ~100 de linii în `ModernTemplate.tsx`.
+    `HarvardTemplate.tsx` refactorizat să folosească acest modul; **zero schimbare de
+    comportament/vizual**, verificat cu test dedicat de non-regresie mai jos.
+  - `src/components/templates/ModernTemplate.tsx` (nou): sans-serif, header aliniat stânga,
+    accent albastru (`#1D4ED8`) pe titlu/section headers (border stânga în loc de linie
+    completă)/bullet-uri, aceleași secțiuni ca Harvard (experience, projects, education,
+    dynamic sections).
+  - `src/components/builder/TemplateSwitcher.tsx`: `TemplateValue` devine `'harvard'|'modern'`,
+    card Modern cu badge de lock — folosește `useRateLimitStatus()` (canal deja existent, expune
+    `status.plan`) + `hasFullTemplateLibraryAccess` — fără endpoint nou.
+  - **Deviere de la formularea literală a cerinței**: badge-ul de lock zice "Recruiting", nu
+    "Pro". Verificat `content.ts`: planul Pro nu menționează template-uri deloc în lista lui de
+    features ("Everything in Free, plus: [...]" fără template library), doar Recruiting are
+    explicit "Full template library access" — și `plans.ts` avea deja `fullTemplateLibrary:
+    false` pe Pro dinainte de acest task. Etichetarea "Pro" ar fi fost o promisiune falsă
+    (exact tipul de bug pe care l-am semnalat în dosarul de research inițial) — am păstrat
+    gating-ul pe planul real, nu pe formularea din cerință.
+  - `src/components/builder/ResumeBuilder.tsx`: `normalizeTemplate()` nu mai forțează
+    necondiționat `'harvard'` (relicvă dintr-o decizie anterioară de reducere la un singur
+    template) — acum validează valoarea încărcată. Preview alege `ModernTemplate`/
+    `HarvardTemplate` pe baza `resumeData.template`. Card-ul blocat deschide `UpgradeBanner`
+    existent (`setUpgradeMessage`+`setShowUpgradeModal`) — nicio UI nouă de upgrade.
+  - `src/lib/validation/schemas.ts`: `resumeDataSchema` (record generic, folosit și de tailor)
+    lăsat neschimbat — deja acceptă `template` permisiv; enum-ul + fallback-ul backward-compatible
+    (`z.enum(['harvard','modern']).catch('harvard')`) adăugat la `exportLatexResumeDataSchema`,
+    punctul real unde valoarea alege un renderer.
+  - `src/app/api/resumes/export-latex/route.ts`: în loc să duplic ~270 de linii de logică de
+    conținut LaTeX (escaping, bullet-uri, educație) într-un `buildModernLatex()` separat, am
+    extras DOAR partea vizuală (preambul, `\titleformat`, macro-urile `\resumeItem`/
+    `\resumeSubheading`) în funcții parametrizate pe temă (`buildLatexPreamble`,
+    `buildLatexHeader`, `buildLatexTitleBlock`); `generateLatexBody(data, templateId)` conține
+    fluxul de conținut, complet neschimbat, folosit de ambele. `buildHarvardLatex`/
+    `buildModernLatex` sunt wrappere subțiri, exportate pentru testabilitate. Fixat și linia
+    hardcodată `template_id: 'harvard'` din analytics.
+  - Risc cunoscut de flagat la deploy: `buildModernLatex` folosește `\usepackage{helvet}`
+    (sans-serif) — pachet standard psnfss, dar dacă imaginea Docker `latex-service` are o
+    instalare texlive minimală fără el, compilarea Modern ar putea eșua. Verificați la testul
+    manual.
+  - Teste noi: `tests/api/export-latex-templates.test.ts` (3 cazuri — Harvard păstrează
+    `\scshape`/`\titlerule`/fără culoare accent; Modern are culoarea accent + `helvet` + fără
+    `\scshape`; Modern randează aceleași secțiuni de conținut ca Harvard).
+  - Verificare: `npx tsc --noEmit` curat, `npm run lint` curat, `npm run test` **192/192**
+    (189 anterioare + 3 noi).
+  - Test manual (rămâne de rulat de user, per cerință): creează CV → schimbă pe Modern → exportă
+    PDF → verifică layout-ul LaTeX arată similar cu preview-ul web → verifică user Free/Pro vede
+    Modern blocat cu prompt de upgrade, user Recruiting îl selectează liber.
 - [DONE] 2026-08-27 **HOTFIX CRITIC** (descoperit prin testare manuală în producție de user,
   NU face parte din planul inițial de faze) — tailor amesteca bullet-uri între joburi diferite:
   - Simptom raportat: pe un CV cu 3+ joburi, bullet-uri despre AI/prompt engineering de la

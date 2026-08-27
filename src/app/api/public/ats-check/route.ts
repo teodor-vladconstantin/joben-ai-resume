@@ -86,6 +86,7 @@ Important rules:
 - Concurrent/overlapping roles are NORMAL (e.g. a founder role alongside a full-time job) and must NOT be flagged as an issue.
 - A role or project with an explicit end date (anything other than "Present"/"Current") is completed. Do NOT flag it as ambiguous, inconsistent, or "unclear if ongoing" just because that end date is before today.
 - Missing graduation dates for education entries are minor cosmetic gaps, do NOT list them as issues.
+- This rule applies to every dated item, not just jobs: certifications, courses, training, and side projects too. Before flagging any single date as a future date or an error, check it against today's date given above — a date on or before today is normal and correct, never an issue, regardless of what year it is.
 
 List at most 3 concrete issues, each with a ONE-sentence explanation (max ~20 words). If there are fewer than 3 real issues, return fewer items, do not pad with minor nitpicks.
 
