@@ -295,12 +295,29 @@ export async function importPdfClientSide(file: File): Promise<PdfImportResult> 
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch('/parse', {
-    method: 'POST',
-    body: formData,
-  })
+  const genericUnavailableMessage = 'Resume parsing service is unavailable right now. Please try again in a moment.'
 
-  const payload = (await response.json()) as ParseResumeResponse | { error?: string; detail?: string }
+  let response: Response
+  try {
+    response = await fetch('/parse', {
+      method: 'POST',
+      body: formData,
+    })
+  } catch {
+    // Network-level failure (upstream unreachable, connection reset, request
+    // aborted before a response arrived): surface one consistent message
+    // instead of the raw "Failed to fetch" / AbortError text.
+    throw new Error(genericUnavailableMessage)
+  }
+
+  let payload: ParseResumeResponse | { error?: string; detail?: string }
+  try {
+    payload = await response.json()
+  } catch {
+    // Non-JSON response (e.g. a platform-level gateway timeout page).
+    throw new Error(genericUnavailableMessage)
+  }
+
   if (!response.ok) {
     const message =
       (payload as { error?: string; detail?: string }).error ||
