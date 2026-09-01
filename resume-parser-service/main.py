@@ -1187,7 +1187,15 @@ parser = LlamaParse(
     split_by_page=False,
 )
 
-anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=45.0)
+# NOTE: Next.js aborts the /parse fetch after REQUEST_TIMEOUT_MS (55s), and
+# LlamaParse (upload+poll) already eats a chunk of that before we get here.
+# The SDK default (timeout=45s, max_retries=2) can burn up to 135s across
+# 3 attempts, which is already past the client's abort by attempt #2. The
+# 2026-09-01 incident showed exactly this: the client saw "fetch failed" at
+# the 55s mark while we kept retrying uselessly for another ~90s against a
+# hanging Anthropic API. Keep the same model, just fail fast enough that a
+# real 502 reaches the client instead of the connection getting aborted.
+anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=18.0, max_retries=1)
 CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-4-5-20251001"
 CLAUDE_FALLBACK_MODEL = "claude-sonnet-5"
 CLAUDE_MAX_OUTPUT_TOKENS = 8192
