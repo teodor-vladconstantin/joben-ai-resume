@@ -1146,8 +1146,10 @@ export function ResumeBuilder() {
       setActiveTab('personal')
       setPendingUploadFile(null)
     } catch (err) {
+      // Keep pendingUploadFile so the error banner's "Try again" can resubmit
+      // the same file directly, without sending the user back through the
+      // file picker for what's usually a transient upstream failure.
       setUploadError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-      setPendingUploadFile(null)
     } finally {
       setIsImportingPdf(false)
     }
@@ -1155,6 +1157,11 @@ export function ResumeBuilder() {
 
   const cancelUpload = () => {
     setShowUploadWarning(false)
+    setPendingUploadFile(null)
+  }
+
+  const dismissUploadError = () => {
+    setUploadError(null)
     setPendingUploadFile(null)
   }
 
@@ -1618,7 +1625,26 @@ export function ResumeBuilder() {
         {uploadError ? (
           <div className="shrink-0 mx-4 mt-3 flex gap-3 rounded-xl border border-red-800/60 bg-red-900/20 px-4 py-2.5">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
-            <p className="text-sm text-red-300">{uploadError}</p>
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+              <p className="text-sm text-red-300">{uploadError}</p>
+              <div className="flex shrink-0 items-center gap-2">
+                {pendingUploadFile ? (
+                  <button
+                    onClick={finalizeUpload}
+                    disabled={isImportingPdf}
+                    className="rounded-lg border border-red-800/60 px-2.5 py-1 text-xs font-semibold text-red-300 hover:bg-red-900/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isImportingPdf ? 'Retrying...' : 'Try again'}
+                  </button>
+                ) : null}
+                <button
+                  onClick={dismissUploadError}
+                  className="text-red-300/70 hover:text-red-300 text-xs shrink-0"
+                >
+                  x
+                </button>
+              </div>
+            </div>
           </div>
         ) : null}
 
