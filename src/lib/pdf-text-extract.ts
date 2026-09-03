@@ -22,10 +22,11 @@ function isTextItem(item: TextItem | TextMarkedContent): item is TextItem {
  * everything happens on the in-memory byte array the caller passes in.
  */
 export async function extractTextFromPdf(data: Uint8Array): Promise<string> {
+  // pdfjs-dist 6.x dropped `isEvalSupported` entirely (no more eval-based JS
+  // execution path in the worker), so there's nothing left to opt out of here.
   const loadingTask = getDocument({
     data,
     useWorkerFetch: false,
-    isEvalSupported: false,
     disableFontFace: true,
     verbosity: 0,
   })
@@ -53,6 +54,7 @@ export async function extractTextFromPdf(data: Uint8Array): Promise<string> {
 
     return chunks.join('\n').replace(/[ \t]{2,}/g, ' ').trim()
   } finally {
-    await doc.destroy()
+    // pdfjs-dist 6.x moved destroy() from PDFDocumentProxy to the loading task.
+    await loadingTask.destroy()
   }
 }

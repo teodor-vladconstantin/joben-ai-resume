@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Navbar } from '@/components/ui/Navbar'
 import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
 
 export const metadata: Metadata = {
   title: 'Free ATS Resume Checker: No Signup Required | Joben',
@@ -33,9 +34,36 @@ export const metadata: Metadata = {
   },
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    breadcrumbJsonLd([
+      { name: 'Home', path: '/' },
+      { name: 'Free ATS Resume Checker', path: '/free-ats-checker' },
+    ]),
+    {
+      '@type': 'WebApplication',
+      name: 'Joben Free ATS Resume Checker',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Any',
+      description:
+        'Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 1 free scan a day.',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'RON',
+      },
+    },
+  ],
+}
+
 export default function FreeAtsCheckerPage() {
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24">

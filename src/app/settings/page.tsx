@@ -15,6 +15,7 @@ import { getEmailHintFromSessionClaims, getUserPlan, PLAN_DEFINITIONS } from '@/
 export const metadata = {
   title: 'Settings | Joben',
   description: 'Manage your account settings.',
+  robots: { index: false, follow: false },
 }
 
 export default async function SettingsPage() {

@@ -5,6 +5,8 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 import { resumeRoles } from '@/data/resume-roles'
+import { siteConfig } from '@/lib/content'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
 
 export const metadata: Metadata = {
   title: 'Resume Examples & ATS Keywords by Role | Joben',
@@ -37,9 +39,32 @@ export const metadata: Metadata = {
   },
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    breadcrumbJsonLd([
+      { name: 'Home', path: '/' },
+      { name: 'Resume Examples', path: '/resume-examples' },
+    ]),
+    {
+      '@type': 'ItemList',
+      itemListElement: resumeRoles.map((role, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: `${role.title} Resume Examples`,
+        url: `${siteConfig.url}/resume-examples/${role.slug}`,
+      })),
+    },
+  ],
+}
+
 export default function ResumeExamplesIndexPage() {
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">

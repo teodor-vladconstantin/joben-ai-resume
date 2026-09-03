@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Navbar } from '@/components/ui/Navbar'
 import { ProfileCompletion } from '@/components/dashboard/ProfileCompletion'
@@ -20,6 +21,13 @@ const icons: { [key: string]: React.ElementType } = {
   FileSearch,
   Mail,
 };
+
+// Authenticated-only page: prevent indexing if a URL ever leaks (linked
+// externally, etc) since it otherwise inherits the homepage's title/OG data.
+export const metadata: Metadata = {
+  title: 'Dashboard | Joben',
+  robots: { index: false, follow: false },
+}
 
 export default async function DashboardPage() {
   const user = await currentUser()
