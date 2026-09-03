@@ -5,6 +5,8 @@
  * stays in each route because the cohorts and eligibility rules differ.
  */
 
+import { cronOptionsQuerySchema } from '@/lib/validation/schemas'
+
 export type CronCandidateUser = {
   clerk_id: string
   email: string | null
@@ -23,14 +25,16 @@ export type CronOptions = {
  */
 export function parseCronOptions(request: Request): CronOptions {
   const url = new URL(request.url)
-  const dryRunParam = url.searchParams.get('dryRun')
-  const limitParam = Number(url.searchParams.get('limit') || '100')
-  const retriesParam = Number(url.searchParams.get('retries') || '1')
+  const parsed = cronOptionsQuerySchema.parse({
+    dryRun: url.searchParams.get('dryRun'),
+    limit: url.searchParams.get('limit'),
+    retries: url.searchParams.get('retries'),
+  })
 
   return {
-    dryRun: dryRunParam === '1' || dryRunParam === 'true',
-    limit: Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 500) : 100,
-    maxRetries: Number.isFinite(retriesParam) ? Math.min(Math.max(retriesParam, 0), 3) : 1,
+    dryRun: parsed.dryRun,
+    limit: parsed.limit,
+    maxRetries: parsed.retries,
   }
 }
 

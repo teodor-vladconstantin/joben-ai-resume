@@ -20,19 +20,11 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 
 import { parseAdminUserIds } from '@/lib/security/admin'
 
-import { adminRateLimitPostSchema } from '@/lib/validation/schemas'
+import { adminRateLimitGetSchema, adminRateLimitPostSchema } from '@/lib/validation/schemas'
 
 
 
 const FLAG_SET = new Set<FlagType>(['covers', 'jds', 'bullets', 'reviews', 'summaries', 'cvs', 'tokens', 'hard_cap'])
-
-
-
-function isValidIsoDay(value: string): boolean {
-
-  return /^\d{4}-\d{2}-\d{2}$/.test(value)
-
-}
 
 
 
@@ -246,27 +238,27 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url)
 
-    const action = searchParams.get('action') || 'alerts'
+    const parsedQuery = adminRateLimitGetSchema.safeParse({
+      action: searchParams.get('action') || undefined,
+      date: searchParams.get('date') || undefined,
+      userId: searchParams.get('userId') || undefined,
+    })
 
+    if (!parsedQuery.success) {
+      return jsonWithRequestId(
+        { error: clientErrorMessage('invalid_input', parsedQuery.error.issues[0]?.message) },
+        400,
+        requestId
+      )
+    }
 
+    const query = parsedQuery.data
 
-    if (action === 'alerts') {
+    if (query.action === 'alerts') {
 
       const today = new Date().toISOString().slice(0, 10)
 
-      const date = searchParams.get('date') || today
-
-
-
-      if (!isValidIsoDay(date)) {
-
-        return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'date must use YYYY-MM-DD format') }, 400, requestId)
-
-      }
-
-
-
-      const alerts = await getAlertsForDate(date)
+      const alerts = await getAlertsForDate(query.date || today)
 
       return jsonWithRequestId(alerts, 200, requestId)
 
@@ -274,11 +266,9 @@ export async function GET(req: Request) {
 
 
 
-    if (action === 'user') {
+    if (query.action === 'user') {
 
-      const targetUserId = searchParams.get('userId')
-
-      if (!targetUserId) {
+      if (!query.userId) {
 
         return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'userId is required for action=user') }, 400, requestId)
 
@@ -286,7 +276,7 @@ export async function GET(req: Request) {
 
 
 
-      const status = await getRateLimitStatus(targetUserId)
+      const status = await getRateLimitStatus(query.userId)
 
       return jsonWithRequestId(status, 200, requestId)
 

@@ -210,6 +210,48 @@ export const adminRateLimitPostSchema = z
   })
   .strict()
 
+// GET's query params were previously hand-parsed with a bespoke
+// isValidIsoDay() regex check — folded into the schema so both the POST and
+// GET sides of this admin-only route validate the same way.
+export const adminRateLimitGetSchema = z.object({
+  action: z.enum(['alerts', 'user']).default('alerts'),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'date must use YYYY-MM-DD format')
+    .optional(),
+  userId: nonEmptyTrimmedString(SHORT_TEXT_MAX).optional(),
+})
+
+// Missing (null/undefined/empty) query params fall back to `fallback` before
+// coercion even runs — z.coerce.number() would otherwise turn a genuinely
+// absent param into 0 (Number(null) === 0), silently changing the default.
+// Present-but-invalid values (e.g. "abc") fall back via `.catch()`; present
+// and valid values are clamped to [min, max], matching parseCronOptions()'s
+// existing hand-written behavior exactly.
+function clampedCronNumber(fallback: number, min: number, max: number) {
+  return z
+    .preprocess(
+      (value) => (value === null || value === undefined || value === '' ? fallback : value),
+      z.coerce.number().catch(fallback)
+    )
+    .transform((value) => Math.min(Math.max(value, min), max))
+}
+
+// Shared query params for the lifecycle-email cron routes (followup-7d,
+// inactivity-3d, anonymous-scan-*). Mirrors the exact defaulting/clamping
+// parseCronOptions() (src/lib/cron-utils.ts) already enforced by hand —
+// lenient by design (fall back instead of rejecting) since these routes are
+// triggered by a scheduler, not a user, and a slightly-off config shouldn't
+// hard-fail the cron run.
+export const cronOptionsQuerySchema = z.object({
+  dryRun: z
+    .string()
+    .nullish()
+    .transform((value) => value === '1' || value === 'true'),
+  limit: clampedCronNumber(100, 1, 500),
+  retries: clampedCronNumber(1, 0, 3),
+})
+
 export const redeemCodeSchema = z
   .object({
     code: nonEmptyTrimmedString(SHORT_TEXT_MAX),
