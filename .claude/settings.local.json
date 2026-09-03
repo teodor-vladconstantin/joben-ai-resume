@@ -61,7 +61,13 @@
       "WebFetch(domain:robomarketing.ro)",
       "WebFetch(domain:www.feecalculator.io)",
       "WebFetch(domain:checkoutpage.com)",
-      "Bash(exit 0 *)"
+      "Bash(exit 0 *)",
+      "Bash(export PYTHONIOENCODING=utf-8)",
+      "Bash(/c/Python314/python.exe -)",
+      "Bash(/c/Python314/python.exe -c \"import reportlab; print\\('ok'\\)\")",
+      "Bash(/c/Python314/python.exe -c \"import fpdf; print\\('ok'\\)\")",
+      "Skill(claude-api)",
+      "Bash(npx eslint *)"
     ]
   }
 }

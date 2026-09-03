@@ -2,13 +2,12 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
-import { apiError } from '@/lib/api-response'
 import { trackProductEvent } from '@/lib/analytics'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { coverLetterPdfSchema } from '@/lib/validation/schemas'
-import { getRequestId, logger } from '@/lib/logger'
+import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 
 export const runtime = 'nodejs'
 
@@ -65,7 +64,7 @@ export async function POST(request: Request) {
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
+      return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
     const limit = await checkRouteRateLimit({
@@ -87,31 +86,23 @@ export async function POST(request: Request) {
         route: '/api/cover-letter/pdf',
         reason: 'route_rate_limit',
       })
-      return new NextResponse(
-        JSON.stringify({ error: clientErrorMessage('rate_limit') }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'Retry-After': String(limit.retryAfter),
-            'x-request-id': requestId,
-          },
-        }
-      )
+      const rateLimitResponse = jsonWithRequestId({ error: clientErrorMessage('rate_limit') }, 429, requestId)
+      rateLimitResponse.headers.set('Retry-After', String(limit.retryAfter))
+      return rateLimitResponse
     }
 
     let rawBody: unknown
     try {
       rawBody = await request.json()
     } catch {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
     // SECURITY: Zod enforces paragraph cap (<=30), per-paragraph length
     // cap, and overall payload shape. Prevents storage / CPU abuse.
     const parsed = coverLetterPdfSchema.safeParse(rawBody)
     if (!parsed.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
 
     const payload = parsed.data
@@ -186,7 +177,7 @@ export async function POST(request: Request) {
       route: '/api/cover-letter/pdf',
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
 }
 

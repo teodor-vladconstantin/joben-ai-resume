@@ -5,6 +5,7 @@ import { pingUpstash } from '@/lib/upstash'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { parseAdminUserIds } from '@/lib/security/admin'
 import { env } from '@/lib/env'
+import { getRequestId, jsonWithRequestId } from '@/lib/logger'
 
 export const runtime = 'nodejs'
 
@@ -55,7 +56,8 @@ function resolveLatexHealthUrl(): string | null {
   return `${compileUrl.replace(/\/$/, '')}/health`
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const requestId = getRequestId(req)
   try {
     const { userId } = await auth()
     const admins = parseAdminUserIds()
@@ -131,17 +133,29 @@ export async function GET() {
     }
 
     if (status === 'ok') {
-      const body = isAdmin ? { success: true, data: payload, ...payload } : { success: true, ...publicPayload }
-      return NextResponse.json(body, { status: 200 })
+      // jsonWithRequestId's normalizeApiPayload() only needs to add the
+      // {success, data} wrapper here (see src/lib/logger.ts) — safe for a
+      // 200, and it also sets the x-request-id header for free.
+      return jsonWithRequestId(isAdmin ? payload : publicPayload, 200, requestId)
     }
 
-    const body = isAdmin
+    // Degraded/error responses deliberately do NOT go through
+    // jsonWithRequestId: normalizeApiPayload() collapses any >=400 payload
+    // down to a bare {success, error} envelope, which would strip the
+    // admin diagnostic `checks` map this route exists to expose. Set the
+    // same x-request-id header manually instead, for header-level
+    // consistency without losing the diagnostic payload.
+    const degradedBody = isAdmin
       ? { success: false, error: 'Service degraded', data: payload, ...payload }
       : { success: false, error: 'Service degraded', ...publicPayload }
-    return NextResponse.json(body, { status: 503 })
+    const degradedResponse = NextResponse.json(degradedBody, { status: 503 })
+    degradedResponse.headers.set('x-request-id', requestId)
+    return degradedResponse
   } catch (error) {
     // SECURITY: never echo the underlying failure to the client.
     console.error('[api/health]', error)
-    return NextResponse.json({ success: false, error: clientErrorMessage('server') }, { status: 500 })
+    const errorResponse = NextResponse.json({ success: false, error: clientErrorMessage('server') }, { status: 500 })
+    errorResponse.headers.set('x-request-id', requestId)
+    return errorResponse
   }
 }

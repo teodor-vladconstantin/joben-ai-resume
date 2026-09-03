@@ -68,6 +68,36 @@ npm run test
 npm run build
 ```
 
+## End-to-End Tests (Playwright)
+
+`e2e/public/**` covers unauthenticated flows (marketing pages, legal pages,
+sign-up's legal gate, protected-route redirects, wrong-password sign-in) and
+needs no extra setup beyond local Supabase running.
+
+`e2e/authenticated/**` (dashboard, resume CRUD, Stripe checkout) needs a
+real signed-in session, which requires **test-mode** Clerk + Stripe
+credentials — see `.env.test.local.example`. Copy it to `.env.test.local`
+(gitignored) and fill in:
+- a Clerk **development** instance's `pk_test_`/`sk_test_` keys (a separate
+  Clerk app from whatever `.env.local` points at is safest, but a dev
+  instance is inherently test-safe)
+- a Stripe **test-mode** `sk_test_` secret key and test `price_...` id —
+  never reuse a live Stripe key here, `playwright.config.ts` refuses to
+  start if it detects `_live_` in any of these three keys
+- `E2E_TEST_USER_EMAIL` / `E2E_TEST_USER_PASSWORD` for a throwaway account
+  `e2e/global-setup.ts` creates (or reuses) via the Clerk Backend API and
+  seeds directly into the local `users` table (no webhook forwarder needed
+  locally); `e2e/global-teardown.ts` deletes it again after the run.
+
+```bash
+npm run test:e2e        # headless run
+npm run test:e2e:ui     # interactive UI mode
+```
+
+The Stripe checkout spec only asserts a real Checkout Session URL comes
+back — it never completes a purchase. The webhook-driven plan-upgrade
+lifecycle is covered separately by `tests/api/webhooks-stripe.test.ts`.
+
 ## Runtime Endpoints
 
 ### Healthcheck

@@ -154,17 +154,9 @@ export async function POST(req: NextRequest) {
       route: '/api/parse',
       reason: 'route_rate_limit',
     })
-    return new NextResponse(
-      JSON.stringify({ error: clientErrorMessage('rate_limit') }),
-      {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(limit.retryAfter),
-          'x-request-id': requestId,
-        },
-      }
-    )
+    const rateLimitResponse = jsonWithRequestId({ error: clientErrorMessage('rate_limit') }, 429, requestId)
+    rateLimitResponse.headers.set('Retry-After', String(limit.retryAfter))
+    return rateLimitResponse
   }
 
   let formData: FormData
