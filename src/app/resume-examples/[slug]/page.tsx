@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge, Eyebrow } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { getResumeRole, resumeRoles } from '@/data/resume-roles'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
 
 // A couple of role titles are generic categories (e.g. "Entry-Level",
 // "Internship") that start with a vowel sound, so "a {title} resume" reads
@@ -79,8 +80,46 @@ export default async function ResumeRolePage({
   const roleLower = role.title.toLowerCase()
   const article = articleFor(roleLower)
 
+  // AEO: re-expresses the keywords/mistakes content already visible below in
+  // Q&A form, plus a breadcrumb — no facts beyond what's already on the page.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Resume Examples', path: '/resume-examples' },
+        { name: `${role.title} Resume Examples`, path: `/resume-examples/${role.slug}` },
+      ]),
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `What keywords should ${article} ${roleLower} resume include for ATS?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Common ATS keywords for ${role.title} resumes include: ${role.keywords.join(', ')}.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `What are the most common ${role.title} resume mistakes?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: role.commonMistakes.join(' '),
+            },
+          },
+        ],
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24">

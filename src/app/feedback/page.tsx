@@ -24,6 +24,7 @@ import { FeedbackForm } from './FeedbackForm'
 export const metadata: Metadata = {
   title: 'Feedback | Joben',
   description: 'Share your feedback and help shape Joben during the beta.',
+  robots: { index: false, follow: false },
 }
 
 export default async function FeedbackPage() {
