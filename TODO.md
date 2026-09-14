@@ -1,4 +1,47 @@
 ## Active
+- [DONE] 2026-09-14 **Renunțare Hetzner → Oracle Cloud Always Free (VM, Amsterdam)** — pivot
+  dublu: Cloud Run (blocat de billing/card pe cont GCP nou) → Render (ales apoi respins de user
+  în favoarea unui VM real) → Oracle Always Free, ales explicit de user în locul Render după un
+  research live al alternativelor gratuite (vezi conversația — Render/Koyeb au cold-start,
+  Northflank nedocumentat, Oracle e singurul VM real gratuit):
+  - Decizie păstrată din toate pivoturile: NU s-a rescris `resume-parser-service` în TypeScript
+    (main.py are 1500+ linii de regex/normalizare non-trivială). Ambele servicii rulează din
+    Dockerfile-urile originale, neschimbate, via `docker-compose.prod.yml` (identic cu Hetzner —
+    Oracle fiind un VM real, nu serverless, e cea mai apropiată migrare 1:1). Zero cod Next.js
+    modificat.
+  - Infra creată (tenancy `dukuconstantin`, regiune `eu-amsterdam-1`): VCN + subnet public +
+    internet gateway + security list (porturi 22/3001/8000) + instanță `VM.Standard.A1.Flex`
+    (2 OCPU/12GB, Ubuntu 24.04 ARM) — **prinsă din prima încercare** (capacitatea A1.Flex e
+    notoriu instabilă, nu era garantat). IP public: `158.178.149.78`. SSH key dedicată:
+    `~/.ssh/id_joben_oracle` (nu cea de Hetzner).
+  - Ambele containere `docker compose -f docker-compose.prod.yml up -d` — **healthy**, verificate
+    extern (`curl` cu secretul corect → `{"status":"ok"}` pe ambele porturi).
+  - Secrete: `LATEX_SERVICE_SECRET`/`RESUME_PARSER_SHARED_SECRET` generate random de Claude;
+    `ANTHROPIC_API_KEY` reutilizată din `.env.local`; `LLAMA_CLOUD_API_KEY` dată de user
+    (`llx-...`).
+  - Vercel (proiect `joben-ai-resume-builder`) actualizat direct via API (user a dat un token
+    `vcp_...`): `RESUME_PARSER_URL`, `RESUME_PARSER_SHARED_SECRET`, `LATEX_SERVICE_URL`,
+    `LATEX_SERVICE_HEALTH_URL`, `LATEX_SERVICE_SECRET`, `LATEX_SERVICE_AUTH_REQUIRED=true` (toate
+    pe Production) + redeploy declanșat pe același commit (`506b2f0`) — **READY**.
+  - Verificare: `https://joben.eu/api/health` → `status: "ok"` (agregatul cere explicit
+    `latexService: ok` în producție, deci proba trece prin noul VM). Sentry (`joben` org,
+    `de.sentry.io`) — zero issue noi în ultima oră de la redeploy.
+  - [DONE] **HTTPS închis** — Caddy instalat pe VM, reverse-proxy automat cu certificate
+    Let's Encrypt pentru `resume-parser.joben.eu` (→ localhost:8000) și
+    `latex-service.joben.eu` (→ localhost:3001). DNS-ul (A records către `158.178.149.78`)
+    configurat de user. Firewall (OCI security list + iptables pe VM) extins cu porturile
+    80/443. Vercel actualizat (`RESUME_PARSER_URL`, `LATEX_SERVICE_URL`,
+    `LATEX_SERVICE_HEALTH_URL` → `https://...`) + redeploy — verificat cu curl (handshake TLS
+    valid, fără `-k`) și `joben.eu/api/health` → `status: ok`. Sentry curat.
+  - [DONE] Porturile HTTP brute (3001/8000 direct pe IP) închise complet — scoase din OCI
+    security list (firewall-ul real, policy-ul iptables al VM-ului era oricum ACCEPT by
+    default, deci nu bloca nimic singur) + curățate și regulile iptables redundante. Verificat:
+    `curl` direct pe IP:3001/8000 → timeout; `https://*.joben.eu` + `joben.eu/api/health` →
+    tot ok. Singurele porturi publice rămase pe VM: 22 (SSH), 80/443 (Caddy).
+  - [ ] User: verificare manuală o dată prin UI (import CV real + export PDF) înainte de oprit
+    Hetzner definitiv — Claude a verificat doar sănătatea serviciilor, nu fluxul complet prin
+    Clerk auth (fără sesiune de test disponibilă).
+  - [ ] Abia după acea verificare: user oprește manual Hetzner (neatinsă de Claude, cum a cerut).
 - [DONE] 2026-08-27 **HOTFIX CRITIC** descoperit manual de user în producție — Summary-ul
   tailor scria o EVALUARE AI ("candidatul lipsește de stack ML/DL...") peste summary-ul
   candidatului, în web preview ȘI în PDF-ul exportat:
