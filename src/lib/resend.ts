@@ -1,4 +1,7 @@
 ﻿import { Resend } from 'resend'
+import { isEmailSuppressed } from '@/lib/email-suppression'
+import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
+import { logger } from '@/lib/logger'
 
 const resendApiKey = process.env.RESEND_API_KEY
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'Joben <onboarding@resend.dev>'
@@ -25,6 +28,10 @@ type ResendResponse = {
   } | null
 }
 
+// Every automated email in this file funnels through here, so this is the
+// single place that (a) guarantees a working unsubscribe link is present and
+// (b) honors it. No individual template is responsible for remembering
+// either — see the src/lib/resend.ts entry in RUNBOOK.md.
 async function sendEmail(input: {
   from: string
   to: string
@@ -33,15 +40,48 @@ async function sendEmail(input: {
 }): Promise<EmailResult> {
   const client = getResendClient()
   if (!client) {
+    // Silent no-op, same as before: RESEND_API_KEY absent (local dev/CI) means
+    // sending was never going to happen, so this isn't a real misconfiguration.
     return { success: false, error: 'RESEND_API_KEY is not configured.' }
   }
+
+  // Fails closed: an automated email with no way to opt out is a compliance
+  // gap, not just a missing feature, so a deployment that's actually able to
+  // send (RESEND_API_KEY present) must not do so without this configured
+  // (unlike most of this codebase's fail-open checks). Checked after the
+  // RESEND_API_KEY check above so local dev/CI without either var stays a
+  // silent no-op instead of paging Sentry on every run.
+  if (!isUnsubscribeConfigured()) {
+    logger.error('Email send blocked: EMAIL_UNSUBSCRIBE_SECRET is not configured', {
+      source: 'sendEmail',
+    })
+    return { success: false, error: 'EMAIL_UNSUBSCRIBE_SECRET is not configured.' }
+  }
+
+  if (await isEmailSuppressed(input.to)) {
+    // Not a failure: the recipient opted out, so "not delivered" is the
+    // correct outcome, not something callers should retry or alert on.
+    return { success: true }
+  }
+
+  const token = signUnsubscribeToken(input.to)
+  if (!token) {
+    return { success: false, error: 'Could not build an unsubscribe link for this address.' }
+  }
+  const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?email=${encodeURIComponent(input.to)}&token=${token}`
+  const htmlWithFooter = `${input.html}
+<p style="margin-top:16px;text-align:center;"><a href="${unsubscribeUrl}" style="color:#9ca3af;font-size:12px;text-decoration:underline;">Unsubscribe from these emails</a></p>`
 
   try {
     const response = (await client.emails.send({
       from: input.from,
       to: input.to,
       subject: input.subject,
-      html: input.html,
+      html: htmlWithFooter,
+      headers: {
+        'List-Unsubscribe': `<${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
     })) as ResendResponse
 
     if (response.error) {
@@ -223,6 +263,26 @@ export async function sendAnonymousScan7dEmail(input: { to: string }): Promise<E
   <p style="margin:0 0 12px 0;">A week ago you ran a free ATS scan on Joben. If you are still applying, a free account gives you AI resume tailoring, bullet rewrites, and cover letters whenever you need them.</p>
   <a href="${appUrl}/sign-up" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Create a Free Account</a>
   <p style="margin-top:18px;color:#6b7280;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu. This is the last reminder in this series.</p>
+</div>`,
+  })
+}
+
+export async function sendExportFollowupEmail(input: {
+  to: string
+  firstName?: string | null
+}): Promise<EmailResult> {
+  const firstName = input.firstName?.trim() || 'there'
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: 'Applied with that resume? A few things worth checking',
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0D2818;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">A couple of weeks ago you exported a resume, ${firstName}.</h1>
+  <p style="margin:0 0 12px 0;">Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.</p>
+  <p style="margin:0 0 18px 0;">While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes.</p>
+  <a href="${appUrl}/dashboard" style="display:inline-block;background:#0A9548;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;">Tailor for Another Role</a>
+  <p style="margin-top:18px;color:#6b7280;font-size:13px;">If you already heard back either way, you can ignore this. This is the only email you'll get about this export.</p>
 </div>`,
   })
 }

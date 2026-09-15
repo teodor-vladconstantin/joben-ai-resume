@@ -9,7 +9,7 @@ const tips = [
   "Keep your resume to one page unless you have more than 10 years of highly relevant experience."
 ]
 
-export function QuickTip() {
+export function QuickTip({ isNewUser = false }: { isNewUser?: boolean }) {
   const [idx, setIdx] = useState(0)
 
   return (
@@ -26,7 +26,7 @@ export function QuickTip() {
         <p className="text-(--muted) text-sm leading-relaxed mb-6">{tips[idx]}</p>
       </div>
       <Link href="/resumes" className="text-(--accent) hover:text-(--accent-strong) text-sm font-medium flex items-center gap-1">
-        Edit resume <ArrowRight className="w-4 h-4" />
+        {isNewUser ? 'Create your first resume' : 'Edit resume'} <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
   )

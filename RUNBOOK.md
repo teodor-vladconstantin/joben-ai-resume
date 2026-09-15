@@ -68,6 +68,8 @@ curl -X POST "https://<host>/api/cron/followup-7d?limit=100&retries=1" -H "Autho
 
 GitHub Actions `schedule` triggers are best-effort and can lag during high platform load, so treat this as "checked every ~30 min," not real-time. If the project later moves to Vercel Pro, this can be added back to `vercel.json` instead: `{"path": "/api/cron/redis-health", "schedule": "*/15 * * * *"}`, and the workflow file can be removed.
 
+`/api/cron/export-followup-14d` sends a one-time nudge to a signed-in user 10-21 days after their first PDF export in that window, skipped if they've done anything else in the product in the last 9 days. It's an event-triggered follow-up (export ≈ "applied to a job"), not a calendar-based reminder, and runs via `.github/workflows/export-followup-cron.yml` for the same Vercel Hobby cron-slot reason as above, using the same `PROD_APP_URL`/`CRON_SECRET` repo secrets.
+
 ## Local Stripe Testing
 Use the [Stripe CLI](https://docs.stripe.com/stripe-cli) to forward live test-mode
 webhook events to your local dev server instead of manually POSTing fixtures:

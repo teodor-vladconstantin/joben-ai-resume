@@ -93,7 +93,7 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" suppressHydrationWarning>
-            <AuthAwareSignupLink className={`${buttonVariants('primary', 'lg')} shadow-lg shadow-(--accent)/30`}>
+            <AuthAwareSignupLink signedOutHref="/free-ats-checker" className={`${buttonVariants('primary', 'lg')} shadow-lg shadow-(--accent)/30`}>
               {heroContent.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
           </div>

@@ -43,6 +43,11 @@ export default async function DashboardPage() {
   const recentDocs = await getRecentDocuments(userId)
   const latestReview = await getLatestReviewSummary(userId)
 
+  // Drives the new-user empty state: hide modules that carry no signal at
+  // zero (stat cards, Weekly Goals' streak, Redeem Code) and promote Quick
+  // Actions to the single next step, instead of showing every module at once.
+  const isNewUser = stats.resumes === 0 && stats.coverLetters === 0 && stats.aiReviews === 0
+
   const scoreBreakdownData = latestReview?.breakdown || {
     ats: 0,
     content: 0,
@@ -54,6 +59,23 @@ export default async function DashboardPage() {
   const totalScore = latestReview?.totalScore || stats.averageScore || 0
   const hasReviewData = stats.aiReviews > 0 && totalScore > 0
   const latestReviewLabel = latestReview?.resumeTitle?.trim() || 'Latest Reviewed Resume'
+
+  const quickActions = (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      {dashboardContent.quickActions.map((action, index) => {
+        const Icon = icons[action.icon];
+        return (
+          <Link key={index} href={action.href} className={`${
+            action.isPrimary
+              ? 'bg-(--accent) text-(--background) hover:bg-(--accent-strong)'
+              : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)/60'
+          } p-6 rounded-2xl font-bold flex items-center justify-between transition-all`} suppressHydrationWarning>
+            <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-(--muted)'}`} />
+          </Link>
+        );
+      })}
+    </div>
+  )
 
   return (
     <div className="min-h-screen flex">
@@ -70,8 +92,9 @@ export default async function DashboardPage() {
           </div>
 
           <ProfileCompletion stats={stats} />
-          <RedeemCodeCard currentPlan={currentPlan} />
-          <StatCards stats={stats} />
+          {isNewUser && quickActions}
+          {!isNewUser && <RedeemCodeCard currentPlan={currentPlan} />}
+          {!isNewUser && <StatCards stats={stats} />}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Industry Benchmark */}
@@ -123,24 +146,11 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            {dashboardContent.quickActions.map((action, index) => {
-              const Icon = icons[action.icon];
-              return (
-                <Link key={index} href={action.href} className={`${
-                  action.isPrimary
-                    ? 'bg-(--accent) text-(--background) hover:bg-(--accent-strong)'
-                    : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)/60'
-                } p-6 rounded-2xl font-bold flex items-center justify-between transition-all`} suppressHydrationWarning>
-                  <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-(--muted)'}`} />
-                </Link>
-              );
-            })}
-          </div>
+          {/* Quick Actions (moved above, right after Profile Completion, for isNewUser) */}
+          {!isNewUser && quickActions}
 
-          {/* Bottom 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Bottom cards: 3-wide normally, 2-wide for isNewUser since Weekly Goals is hidden */}
+          <div className={`grid grid-cols-1 ${isNewUser ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
             {/* Your Score Circular Gauge */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-(--border) flex flex-col items-center justify-center text-center" suppressHydrationWarning>
               <h3 className="text-lg font-bold text-(--foreground) mb-6 w-full text-left">{dashboardContent.yourScore.title}</h3>
@@ -169,8 +179,8 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            <WeeklyGoals stats={stats} />
-            <QuickTip />
+            {!isNewUser && <WeeklyGoals stats={stats} />}
+            <QuickTip isNewUser={isNewUser} />
           </div>
 
           <RecentDocuments recentDocs={recentDocs} />
