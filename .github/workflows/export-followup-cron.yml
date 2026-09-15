@@ -1,0 +1,21 @@
+name: Export Followup Email
+
+# Vercel Hobby caps cron jobs at 2 (already used by followup-7d/inactivity-3d
+# in vercel.json), so this runs here instead, same pattern as
+# redis-health-cron.yml and anonymous-scan-crons.yml. The route is idempotent
+# (email_events lock), so a daily run just re-attempts anyone still eligible
+# and no-ops on duplicates.
+on:
+  schedule:
+    - cron: '30 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  export-followup-14d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/export-followup-14d
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/export-followup-14d" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
