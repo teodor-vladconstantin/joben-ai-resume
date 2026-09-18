@@ -28,7 +28,10 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
       className="relative inline-grid align-baseline text-(--accent)"
       style={{ minWidth: `${maxChars}ch` }}
     >
-      <AnimatePresence>
+      {/* initial={false}: skip the enter animation on first mount so the
+          server-rendered word starts at opacity 1, not 0 — a non-JS crawler
+          reading the raw HTML sees real text, not a faded-out placeholder. */}
+      <AnimatePresence initial={false}>
         <motion.span
           key={words[index]}
           initial={{ y: 12, opacity: 0 }}
