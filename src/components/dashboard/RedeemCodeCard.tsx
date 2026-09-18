@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { CheckCircle2, Gift, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { UserPlan } from '@/lib/plans'

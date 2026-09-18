@@ -261,6 +261,7 @@ export const redeemCodeSchema = z
 export const checkoutRequestSchema = z
   .object({
     plan: z.enum(['pro', 'recruiting']).optional(),
+    locale: z.enum(['ro', 'en']).optional(),
   })
   .strict()
 

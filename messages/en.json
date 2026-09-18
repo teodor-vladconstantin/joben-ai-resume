@@ -1,0 +1,288 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Joben | Best Free AI Resume Builder for ATS Optimization",
+      "description": "Joben is a free AI resume builder that helps you create ATS-optimized resumes and cover letters in minutes. Pass resume screeners and get more interviews with our proven templates."
+    },
+    "pricing": {
+      "title": "Pricing | Joben AI Resume Builder",
+      "description": "Free, Pro, and Recruiting plans for AI-powered resume building. Start free, upgrade when you need AI features."
+    },
+    "atsChecker": {
+      "title": "Free ATS Resume Checker: No Signup Required | Joben",
+      "description": "Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 1 free scan a day."
+    },
+    "resumeExamplesHub": {
+      "title": "Resume Examples & ATS Keywords by Role | Joben",
+      "description": "Role-specific ATS keywords, common resume mistakes, and weak-vs-strong bullet examples. Free resume examples for every career stage."
+    },
+    "resumeExampleRole": {
+      "title": "{role} Resume Examples & ATS Keywords | Joben",
+      "description": "ATS keywords, common mistakes, and a weak-vs-strong bullet rewrite for {role} resumes."
+    }
+  },
+  "Common": {
+    "home": "Home",
+    "bestValue": "Best Value",
+    "joben": "Joben"
+  },
+  "Nav": {
+    "aiResumeBuilder": "AI Resume Builder",
+    "atsAnalysis": "ATS Analysis",
+    "examples": "Examples",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "dashboard": "Dashboard",
+    "resumes": "Resumes",
+    "coverLetters": "Cover Letters",
+    "aiReview": "AI Review",
+    "logIn": "Log in",
+    "getStartedFree": "Get Started Free",
+    "createNew": "Create New"
+  },
+  "Home": {
+    "heroPrefix": "Your Resume Is Getting Rejected Before a ",
+    "heroRotatingWords": ["Recruiter", "Hiring Manager", "Bot"],
+    "heroSuffix": " Ever Reads It.",
+    "subheading": "Many applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
+    "cta": "Check My ATS Score. It's Free",
+    "features": ["No credit card required", "Free forever", "Setup in 2 minutes"],
+    "platformFeaturesHeading": "Platform Features",
+    "statCards": [
+      { "title": "AI Powered", "description": "Automatically generate professional bullet points tailored to your industry." },
+      { "title": "ATS-Optimized Format", "description": "Templates designed to format cleanly for applicant tracking systems." },
+      { "title": "Clearer, More Relevant CV", "description": "Highlight the experience recruiters want to see most." }
+    ],
+    "atsPreview": {
+      "heading": "See What Recruiters See In Your Resume",
+      "subheading": "Our AI reviews your resume against real job postings so you know where you stand.",
+      "scoreLabel": "Excellent",
+      "categories": ["ATS readability", "Content quality", "Writing quality", "Job optimization", "Application ready"],
+      "whatWeFoundLabel": "What we found",
+      "categoryBreakdownLabel": "Category breakdown",
+      "strengthsTitle": "Strengths identified",
+      "strengthsDescription": "Strong action verbs and quantified bullet points throughout your experience section.",
+      "improvementsTitle": "Improvement suggestions",
+      "improvementsDescription": "Add a technical skills summary near the top and tighten your most recent role's bullets.",
+      "strengths": ["Strong action verbs used throughout.", "Perfectly structured for ATS parsers."],
+      "improvementBefore": "Helped team increase sales",
+      "improvementAfter": "Spearheaded initiative driving a sales increase in Q3.",
+      "mockResume": {
+        "name": "John Doe",
+        "contact": "john.doe@email.com · (555) 123-4567 · San Francisco, CA",
+        "summaryHeading": "Professional Summary",
+        "summary": "Results-driven Software Engineer with 5+ years building scalable web applications. Proven track record of leading cross-functional teams and delivering measurable business impact.",
+        "experienceHeading": "Work Experience",
+        "job1Title": "Senior Software Engineer, Atlas Commerce",
+        "job1Dates": "2023 - Present",
+        "job1Bullet1": "Led migration to event-driven architecture, reducing checkout failures by 40%",
+        "job1Bullet2": "Mentored 4 junior engineers, improving team code review turnaround by 30%",
+        "job2Title": "Software Engineer, Cloudline Systems",
+        "job2Dates": "2021 - 2023",
+        "job2Bullet1": "Built internal observability platform, cutting incident response time by 50%",
+        "job2Bullet2": "Shipped 3 major features end-to-end, driving a 15% increase in user retention",
+        "educationHeading": "Education",
+        "education": "B.S. Computer Science, University of California, Berkeley",
+        "skillsHeading": "Technical Skills",
+        "skills": "JavaScript, TypeScript, React, Node.js, Python, AWS, Docker, PostgreSQL"
+      }
+    },
+    "productLoop": [
+      {
+        "category": "Score",
+        "heading": "See your score before you apply.",
+        "description": "Upload your resume and get a 0-100 ATS score across five categories, with the exact strengths and gaps recruiters and parsers will see.",
+        "bullets": ["Every resume scored 0-100 across 5 categories", "See exactly what recruiters and ATS parsers see", "Know what to fix before you apply, not after"]
+      },
+      {
+        "category": "Tailor",
+        "heading": "Tailor your resume to the job description.",
+        "description": "Paste a job description and Joben finds the missing keywords, then rewrites your bullets to fit that specific role.",
+        "bullets": ["Paste any job description, get instant keyword analysis", "Bullets rewritten to match the role, not generic AI filler", "One click, one tailored variant, one new draft"]
+      },
+      {
+        "category": "Rewrite",
+        "heading": "Turn weak bullets into quantified wins.",
+        "description": "One-click AI rewrite for any bullet: adds metrics, strong verbs, and keeps your voice.",
+        "bullets": ["Weak verbs become strong, measurable outcomes", "Keeps your voice, never reads like generic AI", "Every rewrite tracked live against your monthly limit"]
+      },
+      {
+        "category": "Cover Letter",
+        "heading": "A cover letter that matches your resume and the job.",
+        "description": "AI-generated, consistent tone with your resume, tailored to the same job description.",
+        "bullets": ["Matches the tone and facts of your tailored resume", "Written for the same job description, not a template", "Ready to send in the time it takes to read this"]
+      },
+      {
+        "category": "Export & Manage",
+        "heading": "Export clean, keep every version organized.",
+        "description": "Download a clean, ATS-ready PDF and keep multiple tailored resumes managed from one dashboard.",
+        "bullets": ["Clean, unwatermarked PDF exports", "Keep multiple tailored versions per role", "Manage everything from one dashboard"]
+      }
+    ],
+    "pricingTeaserHeading": "Simple, Transparent Pricing",
+    "pricingTeaserSubheading": "Start for free, upgrade when you need the competitive edge.",
+    "faqHeading": "Frequently Asked Questions",
+    "faqSubheading": "Everything you need to know before building your next resume.",
+    "faqOpen": "Open",
+    "faqClose": "Close"
+  },
+  "Pricing": {
+    "heading": "Simple, transparent pricing",
+    "subheading": "Start free. Upgrade when you need AI-powered features.",
+    "plans": [
+      {
+        "name": "Free",
+        "description": "Best for building your first polished application.",
+        "price": "0 RON",
+        "pricePeriod": "/forever",
+        "features": ["Manual resume builder", "Save 1 CV", "5 PDF exports", "3 AI cover letters / month", "3 resume-tailoring runs (CV vs JD) / month", "15 AI bullet rewrites / month", "1 basic ATS-optimized template"],
+        "excludedFeatures": ["Priority email support", "Unlimited saved CVs", "Full template library"],
+        "cta": "Start Free"
+      },
+      {
+        "name": "Pro",
+        "description": "For active job seekers applying consistently.",
+        "price": "59 RON",
+        "pricePeriod": "/month",
+        "features": ["Everything in Free, plus:", "Save up to 3 CVs", "Unlimited PDF exports", "60 AI cover letters / month", "60 resume-tailoring runs (CV vs JD) / month", "200 AI bullet rewrites / month", "Priority email support"],
+        "excludedFeatures": [],
+        "cta": "Upgrade to Pro"
+      },
+      {
+        "name": "Recruiting Plan",
+        "description": "6-month plan for high-volume applications.",
+        "price": "299 RON",
+        "pricePeriod": "/6 months",
+        "features": ["Everything in Pro included", "Save up to 15 CVs", "300 AI cover letters / month", "300 resume-tailoring runs (CV vs JD) / month", "1,000 AI bullet rewrites / month", "Unlimited PDF exports", "Full template library access", "Priority email support"],
+        "excludedFeatures": [],
+        "cta": "Get Recruiting Plan"
+      }
+    ]
+  },
+  "AtsChecker": {
+    "eyebrow": "Free ATS Resume Checker",
+    "heading": "Free ATS Resume Checker: No Signup Required",
+    "subheading": "Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes.",
+    "categoryLabels": { "formatting": "ATS Formatting", "structure": "Structure", "keywords": "Keywords & Impact", "clarity": "Clarity" },
+    "ctaByCategory": {
+      "formatting": { "headline": "Fix the formatting issues holding your score back.", "cta": "Fix My Formatting" },
+      "structure": { "headline": "Tighten the structure so parsers read every section.", "cta": "Fix My Structure" },
+      "keywords": { "headline": "Add the keywords your resume is missing.", "cta": "Fix My Keywords" },
+      "clarity": { "headline": "Turn vague bullets into measurable wins.", "cta": "Fix My Clarity" }
+    },
+    "errors": {
+      "fileType": "Only .pdf and .docx files are supported.",
+      "fileSize": "File exceeds the 5 MB limit.",
+      "generic": "Something went wrong. Please try again.",
+      "networkScan": "Could not reach the scanner. Check your connection and try again.",
+      "emailGeneric": "Could not send the report. Please try again.",
+      "emailNetwork": "Could not reach the server. Check your connection and try again."
+    },
+    "wantRewriting": "Want automatic rewriting of your weak points?",
+    "proPrice": "59 RON",
+    "proPricePeriod": "/month",
+    "whatToFix": "What to fix",
+    "reportSentTo": "Report sent to {email}.",
+    "sendDifferentEmail": "Send to a different email",
+    "getReportByEmail": "Get this report by email",
+    "emailExplainer": "We'll send your score, category breakdown, and issues to your inbox.",
+    "emailPlaceholder": "you@email.com",
+    "emailMeThisReport": "Email me this report",
+    "freeIncludes": "Free plan includes 15 AI bullet rewrites and an ATS-optimized template every month.",
+    "strongScore": "Strong score. This resume is in good shape.",
+    "strongScoreSubtext": "Save it and start tailoring it for real job postings, free.",
+    "createFreeAccount": "Create your free account",
+    "scanAnother": "Scan another resume",
+    "usedFreeScan": "You've used your free scan for today",
+    "usedFreeScanBody1": "Create a free account to get another scan right now, plus unlimited rewrites.",
+    "usedFreeScanBody2": "Or come back tomorrow for your next free scan.",
+    "createFreeAccountShort": "Create a free account",
+    "readyToScan": "Ready to scan, click to choose a different file",
+    "dragAndDrop": "Drag & drop your resume, or click to browse",
+    "fileHint": ".pdf or .docx, max 5 MB",
+    "optional": "(optional)",
+    "neverRequired": "Never required, you'll see your score either way.",
+    "scanning": "Scanning your resume...",
+    "scanButton": "Scan My Resume, Free",
+    "scanDisclaimer": "1 free scan a day · no signup · nothing saved"
+  },
+  "ResumeExamplesHub": {
+    "eyebrow": "Free Resume Examples",
+    "heading": "Resume Examples & ATS Keywords by Role",
+    "subheading": "Real ATS keywords, common mistakes, and weak-vs-strong bullet examples, for every role and career stage.",
+    "seeExamples": "See examples",
+    "itemListName": "{role} Resume Examples"
+  },
+  "ResumeExampleRole": {
+    "breadcrumbHub": "Resume Examples",
+    "heading": "{role} Resume Examples & ATS Keywords",
+    "subheading": "The exact keywords ATS software scans for in {roleLower} resumes, the mistakes that get them rejected, and a real bullet rewrite.",
+    "keywordsHeading": "Keywords ATS software scans for",
+    "keywordsHint": "Include the ones that genuinely match your background, don't keyword-stuff.",
+    "mistakesHeading": "Common {role} resume mistakes",
+    "bulletExampleHeading": "Weak vs. strong bullet example",
+    "weak": "Weak",
+    "strong": "Strong",
+    "scoreCtaHeading": "How does your {role} resume actually score?",
+    "scoreCtaSubheading": "Get a free 0-100 ATS score in seconds. No signup required.",
+    "scoreCtaButton": "Check My {role} Resume, Free",
+    "faqKeywordsQuestion": "What keywords should {roleLowerWithArticle} resume include for ATS?",
+    "faqMistakesQuestion": "What are common resume mistakes for {roleLower} candidates?"
+  },
+  "Faq": [
+    { "question": "Is Joben really free to start?", "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month." },
+    { "question": "What do I get with Pro?", "answer": "Pro gives you 3 saved CVs, unlimited exports, 60 cover letters/month, 60 CV-tailoring runs/month, and 200 bullet rewrites/month." },
+    { "question": "How do AI limits work?", "answer": "Each plan has clear monthly usage counters for cover letters, CV tailoring, and bullet rewrites. Counters reset at the start of each month." },
+    { "question": "Are the resumes ATS-friendly?", "answer": "Yes. Joben templates and formatting are built to work with applicant tracking systems and keep your content readable by recruiters." },
+    { "question": "Can I create multiple versions of my resume?", "answer": "Absolutely. You can create tailored versions for different roles, industries, or job descriptions and manage them from your dashboard." },
+    { "question": "Can I generate cover letters too?", "answer": "Yes. All plans can generate cover letters, with monthly limits based on your plan." },
+    { "question": "Can I cancel my paid plan anytime?", "answer": "Yes. You can manage billing from your account and cancel whenever you want. Your current period remains active until it ends." },
+    { "question": "Is my resume data secure?", "answer": "We use modern authentication and secure backend infrastructure. Your data is isolated per account and only used to power your experience." }
+  ],
+  "Footer": {
+    "heading": "Your career is your most valuable asset. Start building it today.",
+    "ctaPrimary": "Create Your Resume Now",
+    "ctaSecondary": "View Dashboard",
+    "tagline": "Free AI resume builder that helps you pass ATS screens and get more interviews.",
+    "productHeading": "Product",
+    "legalHeading": "Legal",
+    "productLinks": [
+      { "href": "/pricing", "label": "Pricing" },
+      { "href": "/resume-examples", "label": "Resume Examples" },
+      { "href": "/free-ats-checker", "label": "Free ATS Checker" }
+    ],
+    "legalLinks": [
+      { "href": "/terms", "label": "Terms & Conditions" },
+      { "href": "/privacy", "label": "Privacy Policy" },
+      { "href": "/cookies", "label": "Cookie Policy" }
+    ],
+    "salBadgeAlt": "SAL (Alternative Dispute Resolution) - ANPC",
+    "productHuntLabel": "Find us on Product Hunt",
+    "creatorCredit": "Built by a software engineer who understands the job search struggle."
+  },
+  "Grade": {
+    "labels": { "Poor": "Poor", "Fair": "Fair", "Good": "Good", "Excellent": "Excellent" },
+    "descriptions": {
+      "Poor": "Significant issues here are likely costing you interviews.",
+      "Fair": "A few fixes below would meaningfully improve your chances.",
+      "Good": "Solid resume. A couple of tweaks would make it stronger.",
+      "Excellent": "Strong resume. ATS software and recruiters should have no trouble with it."
+    },
+    "fallbackDescription": "Here is how your resume breaks down across the categories that matter most."
+  },
+  "Billing": {
+    "couldNotStartCheckout": "Could not start checkout.",
+    "couldNotOpenPortal": "Could not open billing portal.",
+    "redirectingToCheckout": "Redirecting you to secure checkout...",
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "manageBilling": "Manage Billing",
+    "upgradeToPro": "Upgrade to Pro"
+  },
+  "CookieConsent": {
+    "ariaLabel": "Cookie consent",
+    "messagePrefix": "We use strictly necessary cookies to run Joben, and optional analytics cookies to improve it. See our",
+    "cookiePolicyLinkText": "Cookie Policy",
+    "rejectNonEssential": "Reject non-essential",
+    "acceptAll": "Accept all"
+  }
+}

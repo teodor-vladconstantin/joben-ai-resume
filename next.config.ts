@@ -1,5 +1,8 @@
 import { withSentryConfig } from '@sentry/nextjs';
+import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next'
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const REQUIRED_ENV = [
   'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
@@ -184,7 +187,7 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
 }
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withNextIntl(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

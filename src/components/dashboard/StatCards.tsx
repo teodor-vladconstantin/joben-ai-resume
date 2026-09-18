@@ -1,6 +1,6 @@
 "use client"
 import { FileText, Mail, FileSearch, TrendingUp } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { motion } from 'framer-motion'
 
 const cardVariants = {

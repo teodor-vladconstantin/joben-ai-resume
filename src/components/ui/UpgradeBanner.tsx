@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { Sparkles, Loader2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { startProCheckout } from '@/lib/client-billing'
+import type { AppLocale } from '@/i18n/routing'
 
 type UpgradeBannerProps = {
   open: boolean
@@ -13,6 +15,8 @@ type UpgradeBannerProps = {
 export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const locale = useLocale() as AppLocale
+  const t = useTranslations('Billing')
 
   if (!open) return null
 
@@ -20,9 +24,9 @@ export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
     setLoading(true)
     setError(null)
     try {
-      await startProCheckout()
+      await startProCheckout(locale)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start checkout.')
+      setError(err instanceof Error ? err.message : t('couldNotStartCheckout'))
       setLoading(false)
     }
   }
@@ -38,7 +42,7 @@ export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
           disabled={loading}
           className="mt-2 inline-flex items-center gap-2 rounded-full bg-(--accent-strong) px-3 py-1.5 text-xs font-medium text-white disabled:opacity-70"
         >
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Upgrade to Pro'}
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('upgradeToPro')}
         </button>
       </div>
       <button

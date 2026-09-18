@@ -2,14 +2,15 @@ import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 
 export interface ResumeFindingsCardProps {
+  label: string
   strengths: { title: string; description: string }
   improvements: { title: string; description: string }
 }
 
-export function ResumeFindingsCard({ strengths, improvements }: ResumeFindingsCardProps) {
+export function ResumeFindingsCard({ label, strengths, improvements }: ResumeFindingsCardProps) {
   return (
     <Card elevated radius="lg" className="p-6 w-full max-w-xs space-y-6">
-      <Eyebrow>What we found</Eyebrow>
+      <Eyebrow>{label}</Eyebrow>
 
       <div>
         <h3 className="text-(--foreground) font-bold mb-1.5">{strengths.title}</h3>

@@ -1,7 +1,7 @@
 "use client"
 import { Lightbulb, RefreshCw, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 const tips = [
   "Use strong action verbs to start your bullet points. E.g., 'Spearheaded' instead of 'Responsible for'.",

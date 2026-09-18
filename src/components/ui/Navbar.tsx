@@ -1,29 +1,31 @@
 "use client"
 
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { motion } from 'framer-motion'
 import { buttonVariants } from '@/components/ui/Button'
 
 export function Navbar() {
   const { isLoaded, isSignedIn } = useAuth()
+  const t = useTranslations('Nav')
 
   const publicLinks = [
-    { href: '/#builder', label: 'AI Resume Builder' },
-    { href: '/free-ats-checker', label: 'ATS Analysis' },
-    { href: '/resume-examples', label: 'Examples' },
-    { href: '/#pricing', label: 'Pricing' },
-    { href: '/#faq', label: 'FAQ' },
+    { href: '/#builder', label: t('aiResumeBuilder') },
+    { href: '/free-ats-checker', label: t('atsAnalysis') },
+    { href: '/resume-examples', label: t('examples') },
+    { href: '/#pricing', label: t('pricing') },
+    { href: '/#faq', label: t('faq') },
   ]
 
   const appLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/resumes', label: 'Resumes' },
-    { href: '/cover-letters', label: 'Cover Letters' },
-    { href: '/ai-review', label: 'AI Review' },
+    { href: '/dashboard', label: t('dashboard') },
+    { href: '/resumes', label: t('resumes') },
+    { href: '/cover-letters', label: t('coverLetters') },
+    { href: '/ai-review', label: t('aiReview') },
   ]
 
   return (
@@ -72,7 +74,7 @@ export function Navbar() {
                 transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <Link href="/sign-in" className="text-sm font-medium text-(--muted) hover:text-(--foreground)">
-                  Log in
+                  {t('logIn')}
                 </Link>
               </motion.div>
               <motion.div
@@ -81,7 +83,7 @@ export function Navbar() {
                 transition={{ duration: 0.15, ease: "easeOut" }}
               >
                 <AuthAwareSignupLink className={buttonVariants('primary', 'sm')}>
-                  Get Started Free
+                  {t('getStartedFree')}
                 </AuthAwareSignupLink>
               </motion.div>
             </>
@@ -99,7 +101,7 @@ export function Navbar() {
                   className={`hidden sm:flex items-center gap-1.5 ${buttonVariants('primary', 'sm')}`}
                 >
                   <Plus className="h-4 w-4" />
-                  <span>Create New</span>
+                  <span>{t('createNew')}</span>
                 </Link>
               </motion.div>
               <UserButton

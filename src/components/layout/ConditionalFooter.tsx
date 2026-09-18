@@ -1,7 +1,6 @@
 "use client"
 
-import { usePathname } from 'next/navigation'
-import { SiteFooter } from '@/components/layout/SiteFooter'
+import { usePathname } from '@/i18n/navigation'
 
 const FULL_SCREEN_EDITOR_PATTERNS = [
   /^\/resumes\/new$/,
@@ -10,7 +9,11 @@ const FULL_SCREEN_EDITOR_PATTERNS = [
   /^\/cover-letters\/[^/]+$/,
 ]
 
-export function ConditionalFooter() {
+// SiteFooter is a Server Component (it reads translations server-side via
+// next-intl/server), so it's rendered by the parent layout and passed in
+// here rather than imported directly — a "use client" file can't import an
+// async server-only component and instantiate it itself.
+export function ConditionalFooter({ footer }: { footer: React.ReactNode }) {
   const pathname = usePathname()
 
   const isFullScreenEditor = FULL_SCREEN_EDITOR_PATTERNS.some((pattern) => pattern.test(pathname))
@@ -19,5 +22,5 @@ export function ConditionalFooter() {
     return null
   }
 
-  return <SiteFooter />
+  return footer
 }
