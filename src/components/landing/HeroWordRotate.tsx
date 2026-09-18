@@ -10,6 +10,11 @@ export interface HeroWordRotateProps {
 
 export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps) {
   const [index, setIndex] = useState(0)
+  // Reserve width via the longest word's character count instead of rendering
+  // every variant as hidden text: the server HTML then only ever contains the
+  // one active word, so a non-JS crawler reads a coherent phrase, and there's
+  // no post-hydration layout shift either.
+  const maxChars = Math.max(...words.map((word) => word.length))
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -19,16 +24,10 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
   }, [words.length, intervalMs])
 
   return (
-    <span className="relative inline-grid align-baseline text-(--accent)">
-      {words.map((word) => (
-        <span
-          key={word}
-          className="invisible col-start-1 row-start-1 inline-block"
-          aria-hidden="true"
-        >
-          {word}
-        </span>
-      ))}
+    <span
+      className="relative inline-grid align-baseline text-(--accent)"
+      style={{ minWidth: `${maxChars}ch` }}
+    >
       <AnimatePresence>
         <motion.span
           key={words[index]}
