@@ -1,0 +1,288 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Joben | Cel Mai Bun Constructor de CV cu AI, Gratuit, Optimizat ATS",
+      "description": "Joben e un constructor de CV cu AI, gratuit, care te ajută să creezi CV-uri și scrisori de intenție optimizate ATS în câteva minute. Treci de filtrele automate și primești mai multe interviuri cu șabloanele noastre testate."
+    },
+    "pricing": {
+      "title": "Prețuri | Joben, Constructor de CV cu AI",
+      "description": "Planuri Gratuit, Pro și Recrutare pentru construirea de CV-uri cu AI. Începi gratuit, faci upgrade când ai nevoie de funcții AI."
+    },
+    "atsChecker": {
+      "title": "Verificator CV ATS Gratuit: Fără Cont Necesar | Joben",
+      "description": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete: fără cont, fără card, 1 scanare gratuită pe zi."
+    },
+    "resumeExamplesHub": {
+      "title": "Exemple de CV și Cuvinte Cheie ATS pe Roluri | Joben",
+      "description": "Cuvinte cheie ATS pe roluri, greșeli frecvente de CV și exemple de puncte slabe vs. puternice. Exemple de CV gratuite pentru fiecare etapă de carieră."
+    },
+    "resumeExampleRole": {
+      "title": "Exemple de CV și Cuvinte Cheie ATS pentru {role} | Joben",
+      "description": "Cuvinte cheie ATS, greșeli frecvente și o rescriere de punct slab vs. puternic pentru CV-uri de {role}."
+    }
+  },
+  "Common": {
+    "home": "Acasă",
+    "bestValue": "Cea Mai Bună Ofertă",
+    "joben": "Joben"
+  },
+  "Nav": {
+    "aiResumeBuilder": "Constructor CV AI",
+    "atsAnalysis": "Analiză ATS",
+    "examples": "Exemple",
+    "pricing": "Prețuri",
+    "faq": "Întrebări",
+    "dashboard": "Dashboard",
+    "resumes": "CV-uri",
+    "coverLetters": "Scrisori de Intenție",
+    "aiReview": "Recenzie AI",
+    "logIn": "Autentificare",
+    "getStartedFree": "Începe Gratuit",
+    "createNew": "Creează Nou"
+  },
+  "Home": {
+    "heroPrefix": "CV-ul tău e respins înainte ca un ",
+    "heroRotatingWords": ["Recrutor", "Manager de Angajare", "Robot"],
+    "heroSuffix": " să apuce să-l citească.",
+    "subheading": "Multe aplicații sunt filtrate automat de softurile ATS, nu pentru că îți lipsește experiența, ci pentru că CV-ul tău nu e formatat pentru mașini. Joben îți scorează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
+    "cta": "Verifică-mi Scorul ATS. E Gratuit",
+    "features": ["Fără card bancar", "Gratuit pentru totdeauna", "Configurare în 2 minute"],
+    "platformFeaturesHeading": "Funcționalități",
+    "statCards": [
+      { "title": "Bazat pe AI", "description": "Generează automat puncte profesionale de CV, adaptate industriei tale." },
+      { "title": "Format Optimizat ATS", "description": "Șabloane gândite să treacă curat prin sistemele de urmărire a candidaților." },
+      { "title": "CV Mai Clar, Mai Relevant", "description": "Scoate în evidență exact experiența pe care recrutorii vor s-o vadă." }
+    ],
+    "atsPreview": {
+      "heading": "Vezi Ce Văd Recrutorii În CV-ul Tău",
+      "subheading": "AI-ul nostru îți analizează CV-ul comparativ cu joburi reale, ca să știi exact unde te afli.",
+      "scoreLabel": "Excelent",
+      "categories": ["Lizibilitate ATS", "Calitatea conținutului", "Calitatea redactării", "Optimizare pentru job", "Pregătit de aplicare"],
+      "whatWeFoundLabel": "Ce am găsit",
+      "categoryBreakdownLabel": "Detaliere pe categorii",
+      "strengthsTitle": "Puncte forte identificate",
+      "strengthsDescription": "Verbe de acțiune puternice și puncte cuantificate pe toată secțiunea de experiență.",
+      "improvementsTitle": "Sugestii de îmbunătățire",
+      "improvementsDescription": "Adaugă un sumar de competențe tehnice mai sus și condensează punctele de la ultimul job.",
+      "strengths": ["Verbe de acțiune puternice, folosite constant.", "Structurat perfect pentru parserele ATS."],
+      "improvementBefore": "A ajutat echipa să crească vânzările",
+      "improvementAfter": "A condus o inițiativă care a crescut vânzările în T3.",
+      "mockResume": {
+        "name": "Ion Popescu",
+        "contact": "ion.popescu@email.com · 0722 123 456 · București",
+        "summaryHeading": "Rezumat Profesional",
+        "summary": "Inginer software orientat spre rezultate, cu 5+ ani de experiență în construirea de aplicații web scalabile. Istoric dovedit de conducere a echipelor cross-funcționale și livrare de impact măsurabil în business.",
+        "experienceHeading": "Experiență Profesională",
+        "job1Title": "Inginer Software Senior, Atlas Commerce",
+        "job1Dates": "2023 - Prezent",
+        "job1Bullet1": "A condus migrarea către o arhitectură event-driven, reducând erorile la checkout cu 40%",
+        "job1Bullet2": "A mentorat 4 ingineri juniori, îmbunătățind timpul de code review al echipei cu 30%",
+        "job2Title": "Inginer Software, Cloudline Systems",
+        "job2Dates": "2021 - 2023",
+        "job2Bullet1": "A construit o platformă internă de observabilitate, reducând timpul de răspuns la incidente cu 50%",
+        "job2Bullet2": "A livrat 3 funcționalități majore end-to-end, crescând retenția utilizatorilor cu 15%",
+        "educationHeading": "Educație",
+        "education": "Licență în Informatică, Universitatea București",
+        "skillsHeading": "Competențe Tehnice",
+        "skills": "JavaScript, TypeScript, React, Node.js, Python, AWS, Docker, PostgreSQL"
+      }
+    },
+    "productLoop": [
+      {
+        "category": "Scor",
+        "heading": "Vezi-ți scorul înainte să aplici.",
+        "description": "Încarcă-ți CV-ul și primește un scor ATS de la 0 la 100 pe cinci categorii, cu exact punctele forte și lipsurile pe care le vor vedea recrutorii și parserele.",
+        "bullets": ["Fiecare CV primește un scor de la 0 la 100 pe 5 categorii", "Vezi exact ce văd recrutorii și parserele ATS", "Știi ce ai de reparat înainte să aplici, nu după"]
+      },
+      {
+        "category": "Adaptare",
+        "heading": "Adaptează-ți CV-ul la fișa postului.",
+        "description": "Lipește fișa postului și Joben găsește cuvintele cheie lipsă, apoi îți rescrie punctele ca să se potrivească exact cu rolul respectiv.",
+        "bullets": ["Lipești orice fișă de post, primești analiza cuvintelor cheie instant", "Puncte rescrise ca să se potrivească rolului, nu completare generică de AI", "Un click, o variantă adaptată, o ciornă nouă"]
+      },
+      {
+        "category": "Rescriere",
+        "heading": "Transformă punctele slabe în realizări cuantificate.",
+        "description": "Rescriere AI dintr-un click pentru orice punct: adaugă cifre, verbe puternice și îți păstrează vocea.",
+        "bullets": ["Verbele slabe devin rezultate puternice, măsurabile", "Îți păstrează vocea, nu sună niciodată ca AI generic", "Fiecare rescriere e urmărită live față de limita ta lunară"]
+      },
+      {
+        "category": "Scrisoare de Intenție",
+        "heading": "O scrisoare de intenție care se potrivește cu CV-ul și cu jobul.",
+        "description": "Generată de AI, cu ton consistent cu CV-ul tău, adaptată la aceeași fișă de post.",
+        "bullets": ["Se potrivește cu tonul și faptele din CV-ul tău adaptat", "Scrisă pentru aceeași fișă de post, nu dintr-un șablon", "Gata de trimis în timpul în care citești rândul ăsta"]
+      },
+      {
+        "category": "Export & Organizare",
+        "heading": "Exportă curat, ține fiecare variantă organizată.",
+        "description": "Descarcă un PDF curat, gata pentru ATS, și gestionează mai multe variante de CV dintr-un singur dashboard.",
+        "bullets": ["Export-uri PDF curate, fără watermark", "Păstrezi mai multe variante adaptate per rol", "Gestionezi tot dintr-un singur dashboard"]
+      }
+    ],
+    "pricingTeaserHeading": "Prețuri Simple, Transparente",
+    "pricingTeaserSubheading": "Începi gratuit, faci upgrade când ai nevoie de avantajul competitiv.",
+    "faqHeading": "Întrebări Frecvente",
+    "faqSubheading": "Tot ce trebuie să știi înainte să-ți construiești următorul CV.",
+    "faqOpen": "Deschide",
+    "faqClose": "Închide"
+  },
+  "Pricing": {
+    "heading": "Prețuri simple, transparente",
+    "subheading": "Începi gratuit. Faci upgrade când ai nevoie de funcții AI.",
+    "plans": [
+      {
+        "name": "Gratuit",
+        "description": "Ideal pentru prima ta aplicație lustruită.",
+        "price": "0 RON",
+        "pricePeriod": "/pe viață",
+        "features": ["Constructor de CV manual", "Salvezi 1 CV", "5 exporturi PDF", "3 scrisori de intenție AI / lună", "3 adaptări de CV (CV vs fișă de post) / lună", "15 rescrieri AI de puncte / lună", "1 șablon de bază optimizat ATS"],
+        "excludedFeatures": ["Suport prioritar prin email", "CV-uri salvate nelimitate", "Bibliotecă completă de șabloane"],
+        "cta": "Începe Gratuit"
+      },
+      {
+        "name": "Pro",
+        "description": "Pentru cei care caută activ un job și aplică constant.",
+        "price": "59 RON",
+        "pricePeriod": "/lună",
+        "features": ["Tot ce e în Gratuit, plus:", "Salvezi până la 3 CV-uri", "Exporturi PDF nelimitate", "60 scrisori de intenție AI / lună", "60 adaptări de CV (CV vs fișă de post) / lună", "200 rescrieri AI de puncte / lună", "Suport prioritar prin email"],
+        "excludedFeatures": [],
+        "cta": "Treci la Pro"
+      },
+      {
+        "name": "Plan Recrutare",
+        "description": "Plan pe 6 luni pentru aplicații în volum mare.",
+        "price": "299 RON",
+        "pricePeriod": "/6 luni",
+        "features": ["Tot ce e inclus în Pro", "Salvezi până la 15 CV-uri", "300 scrisori de intenție AI / lună", "300 adaptări de CV (CV vs fișă de post) / lună", "1.000 rescrieri AI de puncte / lună", "Exporturi PDF nelimitate", "Acces la biblioteca completă de șabloane", "Suport prioritar prin email"],
+        "excludedFeatures": [],
+        "cta": "Obține Planul Recrutare"
+      }
+    ]
+  },
+  "AtsChecker": {
+    "eyebrow": "Verificator CV ATS Gratuit",
+    "heading": "Verificator CV ATS Gratuit: Fără Cont Necesar",
+    "subheading": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete.",
+    "categoryLabels": { "formatting": "Formatare ATS", "structure": "Structură", "keywords": "Cuvinte Cheie & Impact", "clarity": "Claritate" },
+    "ctaByCategory": {
+      "formatting": { "headline": "Repară problemele de formatare care îți scad scorul.", "cta": "Repară-mi Formatarea" },
+      "structure": { "headline": "Strânge structura ca parserele să citească fiecare secțiune.", "cta": "Repară-mi Structura" },
+      "keywords": { "headline": "Adaugă cuvintele cheie care îți lipsesc din CV.", "cta": "Repară-mi Cuvintele Cheie" },
+      "clarity": { "headline": "Transformă punctele vagi în realizări măsurabile.", "cta": "Repară-mi Claritatea" }
+    },
+    "errors": {
+      "fileType": "Sunt acceptate doar fișiere .pdf și .docx.",
+      "fileSize": "Fișierul depășește limita de 5 MB.",
+      "generic": "Ceva n-a mers bine. Încearcă din nou.",
+      "networkScan": "Nu am putut contacta scanner-ul. Verifică-ți conexiunea și încearcă din nou.",
+      "emailGeneric": "Nu am putut trimite raportul. Încearcă din nou.",
+      "emailNetwork": "Nu am putut contacta serverul. Verifică-ți conexiunea și încearcă din nou."
+    },
+    "wantRewriting": "Vrei rescriere automată a punctelor slabe?",
+    "proPrice": "59 RON",
+    "proPricePeriod": "/lună",
+    "whatToFix": "Ce ai de reparat",
+    "reportSentTo": "Raport trimis la {email}.",
+    "sendDifferentEmail": "Trimite la alt email",
+    "getReportByEmail": "Primește raportul pe email",
+    "emailExplainer": "Îți trimitem scorul, analiza pe categorii și problemele găsite direct în inbox.",
+    "emailPlaceholder": "tu@email.com",
+    "emailMeThisReport": "Trimite-mi raportul pe email",
+    "freeIncludes": "Planul Gratuit include 15 rescrieri AI de puncte și un șablon optimizat ATS în fiecare lună.",
+    "strongScore": "Scor bun. CV-ul ăsta stă solid.",
+    "strongScoreSubtext": "Salvează-l și începe să-l adaptezi pentru joburi reale, gratuit.",
+    "createFreeAccount": "Creează-ți contul gratuit",
+    "scanAnother": "Scanează alt CV",
+    "usedFreeScan": "Ți-ai folosit scanarea gratuită de azi",
+    "usedFreeScanBody1": "Creează-ți un cont gratuit ca să primești încă o scanare chiar acum, plus rescrieri nelimitate.",
+    "usedFreeScanBody2": "Sau revii mâine pentru următoarea scanare gratuită.",
+    "createFreeAccountShort": "Creează un cont gratuit",
+    "readyToScan": "Gata de scanare, dă click ca să alegi alt fișier",
+    "dragAndDrop": "Trage și lasă CV-ul aici, sau dă click pentru a-l alege",
+    "fileHint": ".pdf sau .docx, maxim 5 MB",
+    "optional": "(opțional)",
+    "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
+    "scanning": "Îți scanăm CV-ul...",
+    "scanButton": "Scanează-mi CV-ul, Gratuit",
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · nimic salvat"
+  },
+  "ResumeExamplesHub": {
+    "eyebrow": "Exemple de CV Gratuite",
+    "heading": "Exemple de CV și Cuvinte Cheie ATS pe Roluri",
+    "subheading": "Cuvinte cheie ATS reale, greșeli frecvente și exemple de puncte slabe vs. puternice, pentru fiecare rol și etapă de carieră.",
+    "seeExamples": "Vezi exemple",
+    "itemListName": "Exemple de CV pentru {role}"
+  },
+  "ResumeExampleRole": {
+    "breadcrumbHub": "Exemple de CV",
+    "heading": "Exemple de CV și Cuvinte Cheie ATS pentru {role}",
+    "subheading": "Cuvintele cheie exacte pe care softurile ATS le caută în CV-urile de {roleLower}, greșelile care le resping și o rescriere reală de punct.",
+    "keywordsHeading": "Cuvinte cheie căutate de softurile ATS",
+    "keywordsHint": "Include-le doar pe cele care se potrivesc real cu experiența ta, nu îndesa cuvinte cheie.",
+    "mistakesHeading": "Greșeli frecvente în CV-urile de {role}",
+    "bulletExampleHeading": "Exemplu de punct slab vs. puternic",
+    "weak": "Slab",
+    "strong": "Puternic",
+    "scoreCtaHeading": "Ce scor are, de fapt, CV-ul tău de {role}?",
+    "scoreCtaSubheading": "Primești un scor ATS gratuit de la 0 la 100 în câteva secunde. Fără cont.",
+    "scoreCtaButton": "Verifică-mi CV-ul de {role}, Gratuit",
+    "faqKeywordsQuestion": "Ce cuvinte cheie ar trebui să conțină un CV de {roleLower} pentru ATS?",
+    "faqMistakesQuestion": "Care sunt greșelile frecvente în CV-urile candidaților de {roleLower}?"
+  },
+  "Faq": [
+    { "question": "Joben e chiar gratuit la început?", "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună și 15 rescrieri de puncte/lună." },
+    { "question": "Ce primesc cu Pro?", "answer": "Pro îți oferă 3 CV-uri salvate, exporturi nelimitate, 60 scrisori de intenție/lună, 60 adaptări de CV/lună și 200 rescrieri de puncte/lună." },
+    { "question": "Cum funcționează limitele AI?", "answer": "Fiecare plan are contoare lunare clare pentru scrisori de intenție, adaptare de CV și rescrieri de puncte. Contoarele se resetează la începutul fiecărei luni." },
+    { "question": "CV-urile sunt compatibile cu ATS?", "answer": "Da. Șabloanele și formatarea Joben sunt construite să funcționeze cu sistemele de urmărire a candidaților și să păstreze conținutul lizibil pentru recrutori." },
+    { "question": "Pot crea mai multe variante ale CV-ului meu?", "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau fișe de post diferite și le gestionezi din dashboard." },
+    { "question": "Pot genera și scrisori de intenție?", "answer": "Da. Toate planurile pot genera scrisori de intenție, cu limite lunare în funcție de planul tău." },
+    { "question": "Pot anula planul plătit oricând?", "answer": "Da. Îți poți gestiona facturarea din cont și anula oricând vrei. Perioada curentă rămâne activă până la final." },
+    { "question": "Datele CV-ului meu sunt în siguranță?", "answer": "Folosim autentificare modernă și o infrastructură backend securizată. Datele tale sunt izolate per cont și folosite doar pentru experiența ta în aplicație." }
+  ],
+  "Footer": {
+    "heading": "Cariera ta e cel mai valoros activ pe care îl ai. Începe s-o construiești azi.",
+    "ctaPrimary": "Creează-ți CV-ul Acum",
+    "ctaSecondary": "Vezi Dashboard-ul",
+    "tagline": "Constructor de CV AI gratuit care te ajută să treci de filtrele ATS și să primești mai multe interviuri.",
+    "productHeading": "Produs",
+    "legalHeading": "Legal",
+    "productLinks": [
+      { "href": "/pricing", "label": "Prețuri" },
+      { "href": "/resume-examples", "label": "Exemple de CV" },
+      { "href": "/free-ats-checker", "label": "Verificator ATS Gratuit" }
+    ],
+    "legalLinks": [
+      { "href": "/terms", "label": "Termeni și Condiții" },
+      { "href": "/privacy", "label": "Politica de Confidențialitate" },
+      { "href": "/cookies", "label": "Politica de Cookie-uri" }
+    ],
+    "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
+    "productHuntLabel": "Găsește-ne pe Product Hunt",
+    "creatorCredit": "Construit de un inginer software care înțelege lupta căutării unui job."
+  },
+  "Grade": {
+    "labels": { "Poor": "Slab", "Fair": "Acceptabil", "Good": "Bun", "Excellent": "Excelent" },
+    "descriptions": {
+      "Poor": "Probleme semnificative aici îți reduc șansele la interviuri.",
+      "Fair": "Câteva reparații de mai jos ți-ar îmbunătăți semnificativ șansele.",
+      "Good": "CV solid. Câteva ajustări l-ar face și mai puternic.",
+      "Excellent": "CV puternic. Softurile ATS și recrutorii nu ar trebui să aibă probleme cu el."
+    },
+    "fallbackDescription": "Iată cum arată CV-ul tău pe categoriile care contează cel mai mult."
+  },
+  "Billing": {
+    "couldNotStartCheckout": "Nu am putut porni plata.",
+    "couldNotOpenPortal": "Nu am putut deschide portalul de facturare.",
+    "redirectingToCheckout": "Te redirecționăm către plata securizată...",
+    "somethingWentWrong": "Ceva n-a mers bine. Încearcă din nou.",
+    "manageBilling": "Gestionează Facturarea",
+    "upgradeToPro": "Treci la Pro"
+  },
+  "CookieConsent": {
+    "ariaLabel": "Consimțământ cookie-uri",
+    "messagePrefix": "Folosim cookie-uri strict necesare pentru funcționarea Joben și cookie-uri opționale de analiză pentru a-l îmbunătăți. Vezi",
+    "cookiePolicyLinkText": "Politica de Cookie-uri",
+    "rejectNonEssential": "Refuză cele neesențiale",
+    "acceptAll": "Acceptă tot"
+  }
+}

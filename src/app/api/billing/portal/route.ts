@@ -21,6 +21,19 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: clientErrorMessage('auth') }, 401, requestId)
     }
 
+    let locale: 'ro' | 'en' = 'ro'
+    const bodyText = await req.text()
+    if (bodyText) {
+      try {
+        const parsed = JSON.parse(bodyText) as { locale?: unknown }
+        if (parsed.locale === 'ro' || parsed.locale === 'en') {
+          locale = parsed.locale
+        }
+      } catch {
+        // Malformed body: fall back to default locale rather than failing the request.
+      }
+    }
+
     const limit = await checkRouteRateLimit({
       name: 'billing-portal',
       identifier: resolveRateLimitIdentity(req, userId),
@@ -94,7 +107,7 @@ export async function POST(req: Request) {
       const stripe = getStripeClient()
       const session = await stripe.billingPortal.sessions.create({
         customer: profile.stripe_customer_id,
-        return_url: `${appUrl}/settings`,
+        return_url: `${appUrl}/${locale}/settings`,
       })
 
       return jsonWithRequestId({ url: session.url }, 200, requestId)

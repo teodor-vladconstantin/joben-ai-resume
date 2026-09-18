@@ -86,6 +86,7 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
     }
     const requestedPlan: PaidPlan = parsedBody.data.plan ?? 'pro'
+    const locale = parsedBody.data.locale ?? 'ro'
 
     const emailHint = getEmailHintFromSessionClaims(sessionClaims)
     const plan = await getUserPlan(userId, emailHint)
@@ -140,8 +141,8 @@ export async function POST(req: Request) {
             quantity: 1,
           },
         ],
-        success_url: `${appUrl}/dashboard?upgrade=success`,
-        cancel_url: `${appUrl}/dashboard?upgrade=cancelled`,
+        success_url: `${appUrl}/${locale}/dashboard?upgrade=success`,
+        cancel_url: `${appUrl}/${locale}/dashboard?upgrade=cancelled`,
         metadata: {
           userId,
           planId: requestedPlan,

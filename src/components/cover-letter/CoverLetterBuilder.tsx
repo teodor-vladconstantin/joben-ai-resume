@@ -1,7 +1,8 @@
 "use client"
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'

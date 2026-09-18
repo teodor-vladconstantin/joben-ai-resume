@@ -1,8 +1,7 @@
 "use client"
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'

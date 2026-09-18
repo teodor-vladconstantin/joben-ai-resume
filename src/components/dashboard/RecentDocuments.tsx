@@ -1,5 +1,5 @@
 "use client"
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { FileText, ArrowRight } from 'lucide-react'
 import type { RecentDocument } from '@/lib/actions/db'
 

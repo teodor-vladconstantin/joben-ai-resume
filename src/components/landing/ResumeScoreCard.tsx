@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/Card'
 export interface ResumeScoreCardProps {
   score: number
   scoreLabel: string
+  categoryBreakdownLabel: string
   categories: { label: string; value: number; max: number }[]
 }
 
-export function ResumeScoreCard({ score, scoreLabel, categories }: ResumeScoreCardProps) {
+export function ResumeScoreCard({ score, scoreLabel, categoryBreakdownLabel, categories }: ResumeScoreCardProps) {
   return (
     <Card elevated radius="lg" className="p-6 w-full max-w-xs">
       <div className="flex flex-col items-center text-center mb-6">
@@ -26,7 +27,7 @@ export function ResumeScoreCard({ score, scoreLabel, categories }: ResumeScoreCa
       </div>
 
       <div className="space-y-4">
-        <p className="text-xs font-mono uppercase tracking-wide text-(--muted)">Category breakdown</p>
+        <p className="text-xs font-mono uppercase tracking-wide text-(--muted)">{categoryBreakdownLabel}</p>
         {categories.map((category) => (
           <div key={category.label}>
             <div className="flex items-center justify-between text-sm mb-1.5">

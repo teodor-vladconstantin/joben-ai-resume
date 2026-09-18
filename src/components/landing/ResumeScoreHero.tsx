@@ -1,21 +1,17 @@
 export interface ResumeScoreHeroProps {
   score: number
-  scoreLabel: string
+  gradeLabel: string
+  gradeDescription: string
   categories: { label: string; value: number; max: number }[]
-}
-
-const GRADE_COPY: Record<string, string> = {
-  Poor: 'Significant issues here are likely costing you interviews.',
-  Fair: 'A few fixes below would meaningfully improve your chances.',
-  Good: 'Solid resume. A couple of tweaks would make it stronger.',
-  Excellent: 'Strong resume. ATS software and recruiters should have no trouble with it.',
 }
 
 // Full-width, high-emphasis presentation of an ATS score for a result page
 // (as opposed to ResumeScoreCard, a small max-w-xs card built for the
 // homepage preview, kept separate and untouched, see the report on this
-// change).
-export function ResumeScoreHero({ score, scoreLabel, categories }: ResumeScoreHeroProps) {
+// change). gradeLabel/gradeDescription are pre-translated by the caller —
+// the raw grade key from the API ('Poor'/'Fair'/'Good'/'Excellent') never
+// reaches this component, so there's no locale-dependent lookup here.
+export function ResumeScoreHero({ score, gradeLabel, gradeDescription, categories }: ResumeScoreHeroProps) {
   return (
     <div className="w-full">
       <div className="flex flex-col sm:flex-row items-center gap-8 sm:gap-12 mb-10">
@@ -28,15 +24,13 @@ export function ResumeScoreHero({ score, scoreLabel, categories }: ResumeScoreHe
           <div className="absolute inset-3 rounded-full bg-(--surface-elevated)" />
           <div className="relative text-center">
             <p className="text-6xl sm:text-7xl leading-none font-black text-(--foreground)">{score}</p>
-            <p className="mt-1.5 text-xs uppercase tracking-wider text-(--accent)">out of 100</p>
+            <p className="mt-1.5 text-xs uppercase tracking-wider text-(--accent)">/ 100</p>
           </div>
         </div>
 
         <div className="text-center sm:text-left">
-          <p className="text-2xl sm:text-3xl font-bold text-(--accent)">{scoreLabel}</p>
-          <p className="mt-2 text-(--muted) max-w-md">
-            {GRADE_COPY[scoreLabel] || 'Here is how your resume breaks down across the categories that matter most.'}
-          </p>
+          <p className="text-2xl sm:text-3xl font-bold text-(--accent)">{gradeLabel}</p>
+          <p className="mt-2 text-(--muted) max-w-md">{gradeDescription}</p>
         </div>
       </div>
 

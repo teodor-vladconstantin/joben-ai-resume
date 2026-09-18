@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useAuth } from '@clerk/nextjs'
+import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { startCheckout, type PaidPlan } from '@/lib/client-billing'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
+import type { AppLocale } from '@/i18n/routing'
 
 type PlanCtaProps = {
   label: string
@@ -17,6 +19,8 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { isLoaded, isSignedIn } = useAuth()
+  const locale = useLocale() as AppLocale
+  const t = useTranslations('Billing')
 
   if (!plan) {
     return <AuthAwareSignupLink className={className}>{label}</AuthAwareSignupLink>
@@ -26,7 +30,7 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
   // "Authentication required" error, then land them straight back here to
   // resume checkout once they have an account.
   if (!isLoaded || !isSignedIn) {
-    const resumeUrl = `/pricing?startCheckout=${plan}`
+    const resumeUrl = `/${locale}/pricing?startCheckout=${plan}`
     return (
       <Link
         href={`/sign-up?redirect_url=${encodeURIComponent(resumeUrl)}`}
@@ -42,9 +46,9 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
     setLoading(true)
     setError(null)
     try {
-      await startCheckout(plan)
+      await startCheckout(plan, locale)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start checkout.')
+      setError(err instanceof Error ? err.message : t('couldNotStartCheckout'))
       setLoading(false)
     }
   }
