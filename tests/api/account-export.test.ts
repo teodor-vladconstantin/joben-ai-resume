@@ -79,7 +79,7 @@ describe('GET /api/account/export', () => {
     authMock.mockResolvedValue({ userId: null })
     const { GET } = await import('@/app/api/account/export/route')
 
-    const response = await GET()
+    const response = await GET(new Request('http://localhost/api/account/export'))
     expect(response.status).toBe(401)
   })
 
@@ -90,7 +90,7 @@ describe('GET /api/account/export', () => {
     })
 
     const { GET } = await import('@/app/api/account/export/route')
-    const response = await GET()
+    const response = await GET(new Request('http://localhost/api/account/export'))
 
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('application/json')
@@ -113,7 +113,7 @@ describe('GET /api/account/export', () => {
     })
 
     const { GET } = await import('@/app/api/account/export/route')
-    await GET()
+    await GET(new Request('http://localhost/api/account/export'))
 
     expect(eqCalls).toHaveLength(EXPECTED_SCOPING.length)
     for (const expected of EXPECTED_SCOPING) {
@@ -133,7 +133,7 @@ describe('GET /api/account/export', () => {
     })
 
     const { GET } = await import('@/app/api/account/export/route')
-    const response = await GET()
+    const response = await GET(new Request('http://localhost/api/account/export'))
 
     expect(response.status).toBe(500)
     const body = await response.json()

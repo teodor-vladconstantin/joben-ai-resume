@@ -1,15 +1,15 @@
 {
   "Metadata": {
     "home": {
-      "title": "Joben | Cel Mai Bun Constructor de CV cu AI, Gratuit, Optimizat ATS",
-      "description": "Joben e un constructor de CV cu AI, gratuit, care te ajută să creezi CV-uri și scrisori de intenție optimizate ATS în câteva minute. Treci de filtrele automate și primești mai multe interviuri cu șabloanele noastre testate."
+      "title": "Joben | Cel Mai Bun Editor de CV cu AI, Gratuit, Optimizat ATS",
+      "description": "Joben e un editor de CV cu AI, gratuit, care te ajută să creezi CV-uri și scrisori de intenție optimizate ATS în câteva minute. Treci de filtrele automate și primești mai multe interviuri cu șabloanele noastre testate."
     },
     "pricing": {
-      "title": "Prețuri | Joben, Constructor de CV cu AI",
+      "title": "Prețuri | Joben, Editor de CV cu AI",
       "description": "Planuri Gratuit, Pro și Recrutare pentru construirea de CV-uri cu AI. Începi gratuit, faci upgrade când ai nevoie de funcții AI."
     },
     "atsChecker": {
-      "title": "Verificator CV ATS Gratuit: Fără Cont Necesar | Joben",
+      "title": "Evaluator CV ATS Gratuit: Fără Cont Necesar | Joben",
       "description": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete: fără cont, fără card, 1 scanare gratuită pe zi."
     },
     "resumeExamplesHub": {
@@ -27,7 +27,7 @@
     "joben": "Joben"
   },
   "Nav": {
-    "aiResumeBuilder": "Constructor CV AI",
+    "aiResumeBuilder": "Editor CV AI",
     "atsAnalysis": "Analiză ATS",
     "examples": "Exemple",
     "pricing": "Prețuri",
@@ -42,29 +42,55 @@
   },
   "Home": {
     "heroPrefix": "CV-ul tău e respins înainte ca un ",
-    "heroRotatingWords": ["Recrutor", "Manager de Angajare", "Robot"],
-    "heroSuffix": " să apuce să-l citească.",
-    "subheading": "Multe aplicații sunt filtrate automat de softurile ATS, nu pentru că îți lipsește experiența, ci pentru că CV-ul tău nu e formatat pentru mașini. Joben îți scorează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
+    "heroRotatingWords": [
+      "Recrutor",
+      "Manager de Angajare",
+      "Robot"
+    ],
+    "heroSuffix": " să apuce să îl citească.",
+    "subheading": "Multe aplicații sunt filtrate automat de softurile ATS, nu pentru că îți lipsește experiența, ci pentru că CV-ul tău nu e formatat pentru mașini. Joben îți evaluează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
     "cta": "Verifică-mi Scorul ATS. E Gratuit",
-    "features": ["Fără card bancar", "Gratuit pentru totdeauna", "Configurare în 2 minute"],
+    "features": [
+      "Fără card bancar",
+      "Gratuit pentru totdeauna",
+      "Configurare în 2 minute"
+    ],
     "platformFeaturesHeading": "Funcționalități",
     "statCards": [
-      { "title": "Bazat pe AI", "description": "Generează automat puncte profesionale de CV, adaptate industriei tale." },
-      { "title": "Format Optimizat ATS", "description": "Șabloane gândite să treacă curat prin sistemele de urmărire a candidaților." },
-      { "title": "CV Mai Clar, Mai Relevant", "description": "Scoate în evidență exact experiența pe care recrutorii vor s-o vadă." }
+      {
+        "title": "Bazat pe AI",
+        "description": "Generează automat puncte profesionale de CV, adaptate industriei tale."
+      },
+      {
+        "title": "Format Optimizat ATS",
+        "description": "Șabloane gândite să treacă curat prin sistemele de urmărire a candidaților."
+      },
+      {
+        "title": "CV Mai Clar, Mai Relevant",
+        "description": "Scoate în evidență exact experiența pe care recrutorii vor să o vadă."
+      }
     ],
     "atsPreview": {
       "heading": "Vezi Ce Văd Recrutorii În CV-ul Tău",
       "subheading": "AI-ul nostru îți analizează CV-ul comparativ cu joburi reale, ca să știi exact unde te afli.",
       "scoreLabel": "Excelent",
-      "categories": ["Lizibilitate ATS", "Calitatea conținutului", "Calitatea redactării", "Optimizare pentru job", "Pregătit de aplicare"],
+      "categories": [
+        "Lizibilitate ATS",
+        "Calitatea conținutului",
+        "Calitatea redactării",
+        "Optimizare pentru job",
+        "Pregătit de aplicare"
+      ],
       "whatWeFoundLabel": "Ce am găsit",
       "categoryBreakdownLabel": "Detaliere pe categorii",
       "strengthsTitle": "Puncte forte identificate",
       "strengthsDescription": "Verbe de acțiune puternice și puncte cuantificate pe toată secțiunea de experiență.",
       "improvementsTitle": "Sugestii de îmbunătățire",
       "improvementsDescription": "Adaugă un sumar de competențe tehnice mai sus și condensează punctele de la ultimul job.",
-      "strengths": ["Verbe de acțiune puternice, folosite constant.", "Structurat perfect pentru parserele ATS."],
+      "strengths": [
+        "Verbe de acțiune puternice, folosite constant.",
+        "Structurat perfect pentru parserele ATS."
+      ],
       "improvementBefore": "A ajutat echipa să crească vânzările",
       "improvementAfter": "A condus o inițiativă care a crescut vânzările în T3.",
       "mockResume": {
@@ -92,37 +118,57 @@
         "category": "Scor",
         "heading": "Vezi-ți scorul înainte să aplici.",
         "description": "Încarcă-ți CV-ul și primește un scor ATS de la 0 la 100 pe cinci categorii, cu exact punctele forte și lipsurile pe care le vor vedea recrutorii și parserele.",
-        "bullets": ["Fiecare CV primește un scor de la 0 la 100 pe 5 categorii", "Vezi exact ce văd recrutorii și parserele ATS", "Știi ce ai de reparat înainte să aplici, nu după"]
+        "bullets": [
+          "Fiecare CV primește un scor de la 0 la 100 pe 5 categorii",
+          "Vezi exact ce văd recrutorii și parserele ATS",
+          "Știi ce ai de reparat înainte să aplici, nu după"
+        ]
       },
       {
         "category": "Adaptare",
         "heading": "Adaptează-ți CV-ul la job description.",
         "description": "Lipește job description-ul și Joben găsește cuvintele cheie lipsă, apoi îți rescrie punctele ca să se potrivească exact cu rolul respectiv.",
-        "bullets": ["Lipești orice job description, primești analiza cuvintelor cheie instant", "Puncte rescrise ca să se potrivească rolului, nu completare generică de AI", "Un click, o variantă adaptată, o ciornă nouă"]
+        "bullets": [
+          "Lipești orice job description, primești analiza cuvintelor cheie instant",
+          "Puncte rescrise ca să se potrivească rolului, nu completare generică de AI",
+          "Un click, o variantă adaptată, o ciornă nouă"
+        ]
       },
       {
         "category": "Rescriere",
         "heading": "Transformă punctele slabe în realizări cuantificate.",
         "description": "Rescriere AI dintr-un click pentru orice punct: adaugă cifre, verbe puternice și îți păstrează vocea.",
-        "bullets": ["Verbele slabe devin rezultate puternice, măsurabile", "Îți păstrează vocea, nu sună niciodată ca AI generic", "Fiecare rescriere e urmărită live față de limita ta lunară"]
+        "bullets": [
+          "Verbele slabe devin rezultate puternice, măsurabile",
+          "Îți păstrează vocea, nu sună niciodată ca AI generic",
+          "Fiecare rescriere e urmărită live față de limita ta lunară"
+        ]
       },
       {
         "category": "Scrisoare de Intenție",
         "heading": "O scrisoare de intenție care se potrivește cu CV-ul și cu jobul.",
         "description": "Generată de AI, cu ton consistent cu CV-ul tău, adaptată la același job description.",
-        "bullets": ["Se potrivește cu tonul și faptele din CV-ul tău adaptat", "Scrisă pentru același job description, nu dintr-un șablon", "Gata de trimis în timpul în care citești rândul ăsta"]
+        "bullets": [
+          "Se potrivește cu tonul și faptele din CV-ul tău adaptat",
+          "Scrisă pentru același job description, nu dintr-un șablon",
+          "Gata de trimis în timpul în care citești rândul ăsta"
+        ]
       },
       {
         "category": "Export & Organizare",
         "heading": "Exportă curat, ține fiecare variantă organizată.",
         "description": "Descarcă un PDF curat, gata pentru ATS, și gestionează mai multe variante de CV dintr-un singur dashboard.",
-        "bullets": ["Export-uri PDF curate, fără watermark", "Păstrezi mai multe variante adaptate per rol", "Gestionezi tot dintr-un singur dashboard"]
+        "bullets": [
+          "Export-uri PDF curate, fără watermark",
+          "Păstrezi mai multe variante adaptate per rol",
+          "Gestionezi tot dintr-un singur dashboard"
+        ]
       }
     ],
     "pricingTeaserHeading": "Prețuri Simple, Transparente",
     "pricingTeaserSubheading": "Începi gratuit, faci upgrade când ai nevoie de avantajul competitiv.",
     "faqHeading": "Întrebări Frecvente",
-    "faqSubheading": "Tot ce trebuie să știi înainte să-ți construiești următorul CV.",
+    "faqSubheading": "Tot ce trebuie să știi înainte să îți construiești următorul CV.",
     "faqOpen": "Deschide",
     "faqClose": "Închide"
   },
@@ -135,8 +181,20 @@
         "description": "Ideal pentru prima ta aplicație lustruită.",
         "price": "0 RON",
         "pricePeriod": "/pe viață",
-        "features": ["Constructor de CV manual", "Salvezi 1 CV", "5 exporturi PDF", "3 scrisori de intenție AI / lună", "3 adaptări de CV (CV vs job description) / lună", "15 rescrieri AI de puncte / lună", "1 șablon de bază optimizat ATS"],
-        "excludedFeatures": ["Suport prioritar prin email", "CV-uri salvate nelimitate", "Bibliotecă completă de șabloane"],
+        "features": [
+          "Editor de CV manual",
+          "Salvezi 1 CV",
+          "5 exporturi PDF",
+          "3 scrisori de intenție AI / lună",
+          "3 adaptări de CV (CV vs job description) / lună",
+          "15 rescrieri AI de puncte / lună",
+          "1 șablon de bază optimizat ATS"
+        ],
+        "excludedFeatures": [
+          "Suport prioritar prin email",
+          "CV-uri salvate nelimitate",
+          "Bibliotecă completă de șabloane"
+        ],
         "cta": "Începe Gratuit"
       },
       {
@@ -144,7 +202,15 @@
         "description": "Pentru cei care caută activ un job și aplică constant.",
         "price": "59 RON",
         "pricePeriod": "/lună",
-        "features": ["Tot ce e în Gratuit, plus:", "Salvezi până la 3 CV-uri", "Exporturi PDF nelimitate", "60 scrisori de intenție AI / lună", "60 adaptări de CV (CV vs job description) / lună", "200 rescrieri AI de puncte / lună", "Suport prioritar prin email"],
+        "features": [
+          "Tot ce e în Gratuit, plus:",
+          "Salvezi până la 3 CV-uri",
+          "Exporturi PDF nelimitate",
+          "60 scrisori de intenție AI / lună",
+          "60 adaptări de CV (CV vs job description) / lună",
+          "200 rescrieri AI de puncte / lună",
+          "Suport prioritar prin email"
+        ],
         "excludedFeatures": [],
         "cta": "Treci la Pro"
       },
@@ -153,27 +219,53 @@
         "description": "Plan pe 6 luni pentru aplicații în volum mare.",
         "price": "299 RON",
         "pricePeriod": "/6 luni",
-        "features": ["Tot ce e inclus în Pro", "Salvezi până la 15 CV-uri", "300 scrisori de intenție AI / lună", "300 adaptări de CV (CV vs job description) / lună", "1.000 rescrieri AI de puncte / lună", "Exporturi PDF nelimitate", "Acces la biblioteca completă de șabloane", "Suport prioritar prin email"],
+        "features": [
+          "Tot ce e inclus în Pro",
+          "Salvezi până la 15 CV-uri",
+          "300 scrisori de intenție AI / lună",
+          "300 adaptări de CV (CV vs job description) / lună",
+          "1.000 rescrieri AI de puncte / lună",
+          "Exporturi PDF nelimitate",
+          "Acces la biblioteca completă de șabloane",
+          "Suport prioritar prin email"
+        ],
         "excludedFeatures": [],
         "cta": "Obține Planul Recrutare"
       }
     ]
   },
   "AtsChecker": {
-    "eyebrow": "Verificator CV ATS Gratuit",
-    "heading": "Verificator CV ATS Gratuit: Fără Cont Necesar",
+    "eyebrow": "Evaluator CV ATS Gratuit",
+    "heading": "Evaluator CV ATS Gratuit: Fără Cont Necesar",
     "subheading": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete.",
-    "categoryLabels": { "formatting": "Formatare ATS", "structure": "Structură", "keywords": "Cuvinte Cheie & Impact", "clarity": "Claritate" },
+    "categoryLabels": {
+      "formatting": "Formatare ATS",
+      "structure": "Structură",
+      "keywords": "Cuvinte Cheie & Impact",
+      "clarity": "Claritate"
+    },
     "ctaByCategory": {
-      "formatting": { "headline": "Repară problemele de formatare care îți scad scorul.", "cta": "Repară-mi Formatarea" },
-      "structure": { "headline": "Strânge structura ca parserele să citească fiecare secțiune.", "cta": "Repară-mi Structura" },
-      "keywords": { "headline": "Adaugă cuvintele cheie care îți lipsesc din CV.", "cta": "Repară-mi Cuvintele Cheie" },
-      "clarity": { "headline": "Transformă punctele vagi în realizări măsurabile.", "cta": "Repară-mi Claritatea" }
+      "formatting": {
+        "headline": "Repară problemele de formatare care îți scad scorul.",
+        "cta": "Repară-mi Formatarea"
+      },
+      "structure": {
+        "headline": "Strânge structura ca parserele să citească fiecare secțiune.",
+        "cta": "Repară-mi Structura"
+      },
+      "keywords": {
+        "headline": "Adaugă cuvintele cheie care îți lipsesc din CV.",
+        "cta": "Repară-mi Cuvintele Cheie"
+      },
+      "clarity": {
+        "headline": "Transformă punctele vagi în realizări măsurabile.",
+        "cta": "Repară-mi Claritatea"
+      }
     },
     "errors": {
       "fileType": "Sunt acceptate doar fișiere .pdf și .docx.",
       "fileSize": "Fișierul depășește limita de 5 MB.",
-      "generic": "Ceva n-a mers bine. Încearcă din nou.",
+      "generic": "Ceva nu a mers bine. Încearcă din nou.",
       "networkScan": "Nu am putut contacta scanner-ul. Verifică-ți conexiunea și încearcă din nou.",
       "emailGeneric": "Nu am putut trimite raportul. Încearcă din nou.",
       "emailNetwork": "Nu am putut contacta serverul. Verifică-ți conexiunea și încearcă din nou."
@@ -190,7 +282,7 @@
     "emailMeThisReport": "Trimite-mi raportul pe email",
     "freeIncludes": "Planul Gratuit include 15 rescrieri AI de puncte și un șablon optimizat ATS în fiecare lună.",
     "strongScore": "Scor bun. CV-ul ăsta stă solid.",
-    "strongScoreSubtext": "Salvează-l și începe să-l adaptezi pentru joburi reale, gratuit.",
+    "strongScoreSubtext": "Salvează-l și începe să îl adaptezi pentru joburi reale, gratuit.",
     "createFreeAccount": "Creează-ți contul gratuit",
     "scanAnother": "Scanează alt CV",
     "usedFreeScan": "Ți-ai folosit scanarea gratuită de azi",
@@ -230,32 +322,77 @@
     "faqMistakesQuestion": "Care sunt greșelile frecvente în CV-urile candidaților de {roleLower}?"
   },
   "Faq": [
-    { "question": "Joben e chiar gratuit la început?", "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună și 15 rescrieri de puncte/lună." },
-    { "question": "Ce primesc cu Pro?", "answer": "Pro îți oferă 3 CV-uri salvate, exporturi nelimitate, 60 scrisori de intenție/lună, 60 adaptări de CV/lună și 200 rescrieri de puncte/lună." },
-    { "question": "Cum funcționează limitele AI?", "answer": "Fiecare plan are contoare lunare clare pentru scrisori de intenție, adaptare de CV și rescrieri de puncte. Contoarele se resetează la începutul fiecărei luni." },
-    { "question": "CV-urile sunt compatibile cu ATS?", "answer": "Da. Șabloanele și formatarea Joben sunt construite să funcționeze cu sistemele de urmărire a candidaților și să păstreze conținutul lizibil pentru recrutori." },
-    { "question": "Pot crea mai multe variante ale CV-ului meu?", "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau job description-uri diferite și le gestionezi din dashboard." },
-    { "question": "Pot genera și scrisori de intenție?", "answer": "Da. Toate planurile pot genera scrisori de intenție, cu limite lunare în funcție de planul tău." },
-    { "question": "Pot anula planul plătit oricând?", "answer": "Da. Îți poți gestiona facturarea din cont și anula oricând vrei. Perioada curentă rămâne activă până la final." },
-    { "question": "Datele CV-ului meu sunt în siguranță?", "answer": "Folosim autentificare modernă și o infrastructură backend securizată. Datele tale sunt izolate per cont și folosite doar pentru experiența ta în aplicație." }
+    {
+      "question": "Joben e chiar gratuit la început?",
+      "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună și 15 rescrieri de puncte/lună."
+    },
+    {
+      "question": "Ce primesc cu Pro?",
+      "answer": "Pro îți oferă 3 CV-uri salvate, exporturi nelimitate, 60 scrisori de intenție/lună, 60 adaptări de CV/lună și 200 rescrieri de puncte/lună."
+    },
+    {
+      "question": "Cum funcționează limitele AI?",
+      "answer": "Fiecare plan are contoare lunare clare pentru scrisori de intenție, adaptare de CV și rescrieri de puncte. Contoarele se resetează la începutul fiecărei luni."
+    },
+    {
+      "question": "CV-urile sunt compatibile cu ATS?",
+      "answer": "Da. Șabloanele și formatarea Joben sunt construite să funcționeze cu sistemele de urmărire a candidaților și să păstreze conținutul lizibil pentru recrutori."
+    },
+    {
+      "question": "Pot crea mai multe variante ale CV-ului meu?",
+      "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau job description-uri diferite și le gestionezi din dashboard."
+    },
+    {
+      "question": "Pot genera și scrisori de intenție?",
+      "answer": "Da. Toate planurile pot genera scrisori de intenție, cu limite lunare în funcție de planul tău."
+    },
+    {
+      "question": "Pot anula planul plătit oricând?",
+      "answer": "Da. Îți poți gestiona facturarea din cont și anula oricând vrei. Perioada curentă rămâne activă până la final."
+    },
+    {
+      "question": "Datele CV-ului meu sunt în siguranță?",
+      "answer": "Folosim autentificare modernă și o infrastructură backend securizată. Datele tale sunt izolate per cont și folosite doar pentru experiența ta în aplicație."
+    }
   ],
   "Footer": {
-    "heading": "Cariera ta e cel mai valoros activ pe care îl ai. Începe s-o construiești azi.",
+    "heading": "Cariera ta e cel mai valoros activ pe care îl ai. Începe să o construiești azi.",
     "ctaPrimary": "Creează-ți CV-ul Acum",
     "ctaSecondary": "Vezi Dashboard-ul",
-    "tagline": "Constructor de CV AI gratuit care te ajută să treci de filtrele ATS și să primești mai multe interviuri.",
+    "tagline": "Editor de CV AI gratuit care te ajută să treci de filtrele ATS și să primești mai multe interviuri.",
     "productHeading": "Produs",
     "legalHeading": "Legal",
     "productLinks": [
-      { "href": "/about", "label": "Despre" },
-      { "href": "/pricing", "label": "Prețuri" },
-      { "href": "/resume-examples", "label": "Exemple de CV" },
-      { "href": "/free-ats-checker", "label": "Verificator ATS Gratuit" }
+      {
+        "href": "/about",
+        "label": "Despre"
+      },
+      {
+        "href": "/pricing",
+        "label": "Prețuri"
+      },
+      {
+        "href": "/resume-examples",
+        "label": "Exemple de CV"
+      },
+      {
+        "href": "/free-ats-checker",
+        "label": "Evaluator ATS Gratuit"
+      }
     ],
     "legalLinks": [
-      { "href": "/terms", "label": "Termeni și Condiții" },
-      { "href": "/privacy", "label": "Politica de Confidențialitate" },
-      { "href": "/cookies", "label": "Politica de Cookie-uri" }
+      {
+        "href": "/terms",
+        "label": "Termeni și Condiții"
+      },
+      {
+        "href": "/privacy",
+        "label": "Politica de Confidențialitate"
+      },
+      {
+        "href": "/cookies",
+        "label": "Politica de Cookie-uri"
+      }
     ],
     "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
     "productHuntLabel": "Găsește-ne pe Product Hunt",
@@ -265,12 +402,17 @@
     "metaTitle": "Despre Joben | Joben",
     "metaDescription": "Ce e Joben și cum ne poți contacta.",
     "heading": "Despre Joben",
-    "intro": "Joben e un constructor de CV cu inteligență artificială, construit pentru candidații care vor să treacă de filtrele ATS și să ajungă la interviu. Scorăm CV-uri, rescriem punctele slabe și generăm scrisori de intenție adaptate fiecărei aplicații.",
+    "intro": "Joben e un editor de CV cu inteligență artificială, construit pentru candidații care vor să treacă de filtrele ATS și să ajungă la interviu. Evaluăm CV-uri, rescriem punctele slabe și generăm scrisori de intenție adaptate fiecărei aplicații.",
     "contactHeading": "Contact",
     "contactBody": "Întrebări, feedback sau o solicitare legată de datele tale? Ne găsești la {email}."
   },
   "Grade": {
-    "labels": { "Poor": "Slab", "Fair": "Acceptabil", "Good": "Bun", "Excellent": "Excelent" },
+    "labels": {
+      "Poor": "Slab",
+      "Fair": "Acceptabil",
+      "Good": "Bun",
+      "Excellent": "Excelent"
+    },
     "descriptions": {
       "Poor": "Probleme semnificative aici îți reduc șansele la interviuri.",
       "Fair": "Câteva reparații de mai jos ți-ar îmbunătăți semnificativ șansele.",
@@ -283,9 +425,19 @@
     "couldNotStartCheckout": "Nu am putut porni plata.",
     "couldNotOpenPortal": "Nu am putut deschide portalul de facturare.",
     "redirectingToCheckout": "Te redirecționăm către plata securizată...",
-    "somethingWentWrong": "Ceva n-a mers bine. Încearcă din nou.",
+    "somethingWentWrong": "Ceva nu a mers bine. Încearcă din nou.",
     "manageBilling": "Gestionează Facturarea",
     "upgradeToPro": "Treci la Pro"
+  },
+  "Shared": {
+    "close": "Închide",
+    "featureButton": {
+      "accessSuspended": "Acces suspendat. Contactează-ne pentru asistență.",
+      "monthlyLimitReached": "Ai atins limita lunară. Se resetează pe 1 {month}.",
+      "creditUsedUp": "Creditul AI lunar s-a epuizat.",
+      "remainingThisMonth": "{remaining} din {limit} rămase luna asta",
+      "nextMonth": "luna viitoare"
+    }
   },
   "Dashboard": {
     "greetingMorning": "Bună dimineața",
@@ -293,7 +445,12 @@
     "guestFallbackName": "acolo",
     "subGreeting": "Iată o privire de ansamblu asupra CV-ului tău și a progresului în carieră.",
     "sidebarSettings": "Setări",
-    "statCards": { "resumes": "CV-uri", "coverLetters": "Scrisori de Intenție", "reviews": "Evaluări", "avgScore": "Scor Mediu" },
+    "statCards": {
+      "resumes": "CV-uri",
+      "coverLetters": "Scrisori de Intenție",
+      "reviews": "Evaluări",
+      "avgScore": "Scor Mediu"
+    },
     "industryBenchmark": {
       "title": "Benchmark de Industrie",
       "description": "Vezi cum se compară CV-urile tale cu cele ale candidaților de succes.",
@@ -307,17 +464,52 @@
       "latestGradePrefix": "Ultimul grad: ",
       "unknownGrade": "Necunoscut",
       "categories": [
-        { "label": "ATS & Structură", "max": 20, "key": "ats" },
-        { "label": "Calitatea Conținutului", "max": 40, "key": "content" },
-        { "label": "Calitatea Scrierii", "max": 10, "key": "writing" },
-        { "label": "Potrivire cu Jobul", "max": 25, "key": "match" },
-        { "label": "Pregătit pentru Aplicare", "max": 5, "key": "ready" }
+        {
+          "label": "ATS & Structură",
+          "max": 20,
+          "key": "ats"
+        },
+        {
+          "label": "Calitatea Conținutului",
+          "max": 40,
+          "key": "content"
+        },
+        {
+          "label": "Calitatea Scrierii",
+          "max": 10,
+          "key": "writing"
+        },
+        {
+          "label": "Potrivire cu Jobul",
+          "max": 25,
+          "key": "match"
+        },
+        {
+          "label": "Pregătit pentru Aplicare",
+          "max": 5,
+          "key": "ready"
+        }
       ]
     },
     "quickActions": [
-      { "label": "CV Nou", "href": "/resumes", "icon": "Plus", "isPrimary": true },
-      { "label": "Scrisoare de Intenție", "href": "/cover-letters", "icon": "Mail", "isPrimary": false },
-      { "label": "Evaluare AI", "href": "/ai-review", "icon": "FileSearch", "isPrimary": false }
+      {
+        "label": "CV Nou",
+        "href": "/resumes",
+        "icon": "Plus",
+        "isPrimary": true
+      },
+      {
+        "label": "Scrisoare de Intenție",
+        "href": "/cover-letters",
+        "icon": "Mail",
+        "isPrimary": false
+      },
+      {
+        "label": "Evaluare AI",
+        "href": "/ai-review",
+        "icon": "FileSearch",
+        "isPrimary": false
+      }
     ],
     "yourScore": {
       "title": "Scorul Tău",
@@ -408,20 +600,62 @@
       "footerLinkLabel": "Termenii și Condițiile",
       "footerSuffix": " noastre pentru termenii legali ai serviciului.",
       "sections": [
-        { "title": "1. Domeniul de aplicare", "content": "Această Politică de Confidențialitate explică modul în care Joben (\"noi\") colectează, utilizează, stochează și partajează datele tale cu caracter personal atunci când folosești joben.eu și serviciile noastre de creare a CV-urilor asistate de inteligență artificială, în conformitate cu Regulamentul General privind Protecția Datelor al Uniunii Europene (RGPD)." },
-        { "title": "2. Datele pe care le colectăm", "content": "Date de cont: adresa de e-mail și prenumele/numele, colectate prin Clerk la înregistrare. Conținutul CV-ului și scrisorii de intenție: textul integral și datele structurate pe care le introduci în editor (experiență profesională, educație, competențe). Rezultatele analizei AI: scoruri și feedback generate când rulezi o analiză AI. Metadate de facturare: ID-ul tău de client Stripe și ID-ul abonamentului (nu vedem și nu stocăm niciodată numărul cardului, acesta fiind gestionat direct de Stripe). Analize de utilizare: evenimente pseudonime privind utilizarea produsului (ex. funcție folosită, plan de abonament), asociate contului tău, colectate doar după ce accepți cookie-urile de analiză. Jurnale tehnice/de erori: identificatori de cerere, mesaje de eroare și, în cazul unei erori netratate, adresa IP (prin furnizorul nostru de monitorizare a erorilor). Feedback: dacă trimiți formularul nostru de feedback din aplicație, adresa de e-mail și răspunsurile în text liber." },
-        { "title": "3. Cum folosim datele", "content": "Pentru a furniza serviciul de bază de creare a CV-urilor și analiză AI la care te-ai înscris; pentru a procesa plățile; pentru a detecta și preveni abuzurile (limitarea ratei de cereri); pentru a trimite e-mailuri de serviciu (bun venit, memento de inactivitate, cereri de feedback); pentru a remedia erori prin monitorizarea lor; și, doar cu acordul tău, pentru a înțelege utilizarea produsului prin analize." },
-        { "title": "4. Procesarea prin AI", "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la job, generarea scrisorii de intenție, rescrierea punctelor bullet), textul relevant din CV sau din descrierea jobului pe care îl furnizezi este trimis către Anthropic (\"Claude\"), furnizorul nostru de AI, exclusiv pentru a genera acel rezultat. Nu trimitem numele sau adresa ta de e-mail către Anthropic; trimitem doar conținutul documentului necesar pentru cererea specifică. În mod implicit, Anthropic nu folosește datele din API pentru antrenarea modelelor sale." },
-        { "title": "5. Subprocesatori", "content": "Partajăm date cu următorii furnizori, fiecare acționând ca persoană împuternicită de operator conform propriului acord de procesare a datelor: Anthropic (procesare AI a textului din CV, SUA), Stripe (procesarea plăților, global/SUA), Resend (livrarea e-mailurilor tranzacționale, SUA), PostHog (analiză de produs, instanță găzduită în UE, doar cu consimțământ), Upstash (cache pentru limitarea ratei de cereri, SUA), Vercel (găzduirea aplicației, global/SUA), Sentry (monitorizarea erorilor, instanță găzduită în UE). Baza noastră de date principală (Supabase/Postgres) este găzduită pe propria infrastructură, deci nu este un subprocesator terț." },
-        { "title": "6. Temeiuri legale", "content": "Executarea contractului: crearea contului, stocarea CV-ului și scrisorii de intenție, funcțiile AI și facturarea, toate necesare pentru a furniza serviciul la care te-ai înscris. Interes legitim: prevenirea fraudei/abuzului (limitarea ratei), monitorizarea erorilor și e-mailurile de serviciu legate direct de contul tău. Consimțământ: cookie-urile de analiză (PostHog), care se încarcă doar după ce le accepți în bannerul de cookie-uri. Obligație legală: păstrarea evidențelor de facturare acolo unde este cerut de legislația fiscală." },
-        { "title": "7. Retenția datelor", "content": "Date de cont, CV, scrisoare de intenție și analiză AI: păstrate cât timp contul este activ și șterse imediat la ștergerea contului. Evidențe de facturare: păstrate de Stripe conform propriilor cerințe de conformitate. Formulare de feedback: păstrate 24 de luni. Jurnale de webhook și evenimente de analiză: păstrate până la 12 luni pentru securitate și depanare, apoi șterse. Jurnale de monitorizare a erorilor (Sentry): păstrate conform ferestrei implicite de 90 de zile a furnizorului. Date de limitare a ratei (Redis): expiră automat, de la câteva ore până la o lună, în funcție de fereastra limitei." },
-        { "title": "8. Securitate", "content": "Folosim criptare în tranzit (TLS) pentru tot traficul, restricționăm accesul la baza de date doar la credențialele serviciilor server-side și aplicăm politici de securitate la nivel de rând (row-level security) pe fiecare tabel care conține date cu caracter personal. Nicio metodă de transmitere sau stocare nu este complet sigură, așa că nu putem garanta securitatea absolută." },
-        { "title": "9. Drepturile tale", "content": "Conform RGPD ai dreptul de a: accesa datele cu caracter personal pe care le deținem despre tine (folosește \"Exportă datele mele\" din Setări pentru un export JSON instant); solicita ștergerea contului și a tuturor datelor asociate (folosește \"Șterge contul\" din Setări, procesat imediat); rectifica datele inexacte (actualizează-le direct în aplicație sau contactează-ne); te opune sau restricționa anumite prelucrări, precum analizele (folosește bannerul de cookie-uri sau contactează-ne); și portabilitatea datelor (exportul de mai sus este furnizat într-un format structurat, care poate fi citit automat, JSON). Pentru a exercita orice drept care nu este disponibil direct în aplicație, scrie-ne la privacy@joben.eu. Ai, de asemenea, dreptul de a depune o plângere la autoritatea de supraveghere pentru protecția datelor din țara ta (în România, ANSPDCP — Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal)." },
-        { "title": "10. Cookie-uri și tehnologii similare", "content": "Folosim cookie-uri strict necesare pentru a te menține autentificat și pentru a securiza serviciul și, doar dacă le accepți prin bannerul nostru de cookie-uri, cookie-uri de analiză pentru a înțelege utilizarea produsului. Consultă Politica noastră completă de Cookie-uri pentru lista completă a cookie-urilor, scopul lor și cum îți poți schimba alegerea oricând." },
-        { "title": "11. Transferuri internaționale de date", "content": "Unii dintre subprocesatorii noștri (Anthropic, Stripe, Resend, Upstash, Vercel) sunt localizați sau procesează date în Statele Unite. Atunci când transferăm date cu caracter personal în afara Spațiului Economic European, ne bazăm pe Clauzele Contractuale Standard (SCC) ale Comisiei Europene sau pe o garanție de adecvare echivalentă oferită de furnizorul respectiv." },
-        { "title": "12. Confidențialitatea minorilor", "content": "Joben nu se adresează și nu colectează cu bună știință date de la persoane sub 16 ani, vârsta minimă necesară pentru a utiliza serviciile noastre conform acestor termeni. Dacă ai motive să crezi că un minor ne-a furnizat date cu caracter personal, contactează-ne și le vom șterge." },
-        { "title": "13. Modificări ale acestei politici", "content": "Putem actualiza periodic această politică. Modificările semnificative vor fi reflectate printr-o dată actualizată \"Ultima actualizare\" de mai sus; utilizarea continuă după o actualizare înseamnă că accepți versiunea revizuită." },
-        { "title": "14. Contact", "content": "Pentru cereri sau întrebări privind confidențialitatea, scrie-ne la privacy@joben.eu." }
+        {
+          "title": "1. Domeniul de aplicare",
+          "content": "Această Politică de Confidențialitate explică modul în care Joben (\"noi\") colectează, utilizează, stochează și partajează datele tale cu caracter personal atunci când folosești joben.eu și serviciile noastre de creare a CV-urilor asistate de inteligență artificială, în conformitate cu Regulamentul General privind Protecția Datelor al Uniunii Europene (RGPD)."
+        },
+        {
+          "title": "2. Datele pe care le colectăm",
+          "content": "Date de cont: adresa de e-mail și prenumele/numele, colectate prin Clerk la înregistrare. Conținutul CV-ului și scrisorii de intenție: textul integral și datele structurate pe care le introduci în editor (experiență profesională, educație, competențe). Rezultatele analizei AI: scoruri și feedback generate când rulezi o analiză AI. Metadate de facturare: ID-ul tău de client Stripe și ID-ul abonamentului (nu vedem și nu stocăm niciodată numărul cardului, acesta fiind gestionat direct de Stripe). Analize de utilizare: evenimente pseudonime privind utilizarea produsului (ex. funcție folosită, plan de abonament), asociate contului tău, colectate doar după ce accepți cookie-urile de analiză. Jurnale tehnice/de erori: identificatori de cerere, mesaje de eroare și, în cazul unei erori netratate, adresa IP (prin furnizorul nostru de monitorizare a erorilor). Feedback: dacă trimiți formularul nostru de feedback din aplicație, adresa de e-mail și răspunsurile în text liber."
+        },
+        {
+          "title": "3. Cum folosim datele",
+          "content": "Pentru a furniza serviciul de bază de creare a CV-urilor și analiză AI la care te-ai înscris; pentru a procesa plățile; pentru a detecta și preveni abuzurile (limitarea ratei de cereri); pentru a trimite e-mailuri de serviciu (bun venit, memento de inactivitate, cereri de feedback); pentru a remedia erori prin monitorizarea lor; și, doar cu acordul tău, pentru a înțelege utilizarea produsului prin analize."
+        },
+        {
+          "title": "4. Procesarea prin AI",
+          "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la job, generarea scrisorii de intenție, rescrierea punctelor bullet), textul relevant din CV sau din descrierea jobului pe care îl furnizezi este trimis către Anthropic (\"Claude\"), furnizorul nostru de AI, exclusiv pentru a genera acel rezultat. Nu trimitem numele sau adresa ta de e-mail către Anthropic; trimitem doar conținutul documentului necesar pentru cererea specifică. În mod implicit, Anthropic nu folosește datele din API pentru antrenarea modelelor sale."
+        },
+        {
+          "title": "5. Subprocesatori",
+          "content": "Partajăm date cu următorii furnizori, fiecare acționând ca persoană împuternicită de operator conform propriului acord de procesare a datelor: Anthropic (procesare AI a textului din CV, SUA), Stripe (procesarea plăților, global/SUA), Resend (livrarea e-mailurilor tranzacționale, SUA), PostHog (analiză de produs, instanță găzduită în UE, doar cu consimțământ), Upstash (cache pentru limitarea ratei de cereri, SUA), Vercel (găzduirea aplicației, global/SUA), Sentry (monitorizarea erorilor, instanță găzduită în UE). Baza noastră de date principală (Supabase/Postgres) este găzduită pe propria infrastructură, deci nu este un subprocesator terț."
+        },
+        {
+          "title": "6. Temeiuri legale",
+          "content": "Executarea contractului: crearea contului, stocarea CV-ului și scrisorii de intenție, funcțiile AI și facturarea, toate necesare pentru a furniza serviciul la care te-ai înscris. Interes legitim: prevenirea fraudei/abuzului (limitarea ratei), monitorizarea erorilor și e-mailurile de serviciu legate direct de contul tău. Consimțământ: cookie-urile de analiză (PostHog), care se încarcă doar după ce le accepți în bannerul de cookie-uri. Obligație legală: păstrarea evidențelor de facturare acolo unde este cerut de legislația fiscală."
+        },
+        {
+          "title": "7. Retenția datelor",
+          "content": "Date de cont, CV, scrisoare de intenție și analiză AI: păstrate cât timp contul este activ și șterse imediat la ștergerea contului. Evidențe de facturare: păstrate de Stripe conform propriilor cerințe de conformitate. Formulare de feedback: păstrate 24 de luni. Jurnale de webhook și evenimente de analiză: păstrate până la 12 luni pentru securitate și depanare, apoi șterse. Jurnale de monitorizare a erorilor (Sentry): păstrate conform ferestrei implicite de 90 de zile a furnizorului. Date de limitare a ratei (Redis): expiră automat, de la câteva ore până la o lună, în funcție de fereastra limitei."
+        },
+        {
+          "title": "8. Securitate",
+          "content": "Folosim criptare în tranzit (TLS) pentru tot traficul, restricționăm accesul la baza de date doar la credențialele serviciilor server-side și aplicăm politici de securitate la nivel de rând (row-level security) pe fiecare tabel care conține date cu caracter personal. Nicio metodă de transmitere sau stocare nu este complet sigură, așa că nu putem garanta securitatea absolută."
+        },
+        {
+          "title": "9. Drepturile tale",
+          "content": "Conform RGPD ai dreptul de a: accesa datele cu caracter personal pe care le deținem despre tine (folosește \"Exportă datele mele\" din Setări pentru un export JSON instant); solicita ștergerea contului și a tuturor datelor asociate (folosește \"Șterge contul\" din Setări, procesat imediat); rectifica datele inexacte (actualizează-le direct în aplicație sau contactează-ne); te opune sau restricționa anumite prelucrări, precum analizele (folosește bannerul de cookie-uri sau contactează-ne); și portabilitatea datelor (exportul de mai sus este furnizat într-un format structurat, care poate fi citit automat, JSON). Pentru a exercita orice drept care nu este disponibil direct în aplicație, scrie-ne la privacy@joben.eu. Ai, de asemenea, dreptul de a depune o plângere la autoritatea de supraveghere pentru protecția datelor din țara ta (în România, ANSPDCP — Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal)."
+        },
+        {
+          "title": "10. Cookie-uri și tehnologii similare",
+          "content": "Folosim cookie-uri strict necesare pentru a te menține autentificat și pentru a securiza serviciul și, doar dacă le accepți prin bannerul nostru de cookie-uri, cookie-uri de analiză pentru a înțelege utilizarea produsului. Consultă Politica noastră completă de Cookie-uri pentru lista completă a cookie-urilor, scopul lor și cum îți poți schimba alegerea oricând."
+        },
+        {
+          "title": "11. Transferuri internaționale de date",
+          "content": "Unii dintre subprocesatorii noștri (Anthropic, Stripe, Resend, Upstash, Vercel) sunt localizați sau procesează date în Statele Unite. Atunci când transferăm date cu caracter personal în afara Spațiului Economic European, ne bazăm pe Clauzele Contractuale Standard (SCC) ale Comisiei Europene sau pe o garanție de adecvare echivalentă oferită de furnizorul respectiv."
+        },
+        {
+          "title": "12. Confidențialitatea minorilor",
+          "content": "Joben nu se adresează și nu colectează cu bună știință date de la persoane sub 16 ani, vârsta minimă necesară pentru a utiliza serviciile noastre conform acestor termeni. Dacă ai motive să crezi că un minor ne-a furnizat date cu caracter personal, contactează-ne și le vom șterge."
+        },
+        {
+          "title": "13. Modificări ale acestei politici",
+          "content": "Putem actualiza periodic această politică. Modificările semnificative vor fi reflectate printr-o dată actualizată \"Ultima actualizare\" de mai sus; utilizarea continuă după o actualizare înseamnă că accepți versiunea revizuită."
+        },
+        {
+          "title": "14. Contact",
+          "content": "Pentru cereri sau întrebări privind confidențialitatea, scrie-ne la privacy@joben.eu."
+        }
       ]
     },
     "terms": {
@@ -435,20 +669,62 @@
       "footerLinkLabel": "Politica noastră de Confidențialitate",
       "footerSuffix": " pentru detalii despre cum colectăm și procesăm datele.",
       "sections": [
-        { "title": "1. Acceptarea acestor termeni", "content": "Prin accesarea sau utilizarea Joben, ești de acord cu acești Termeni și Condiții. Dacă nu ești de acord, nu folosi serviciul." },
-        { "title": "2. Eligibilitate și conturi", "content": "Trebuie să ai cel puțin 16 ani pentru a folosi Joben. Trebuie să furnizezi informații de cont corecte și să îți păstrezi credențialele de autentificare în siguranță. Ești responsabil pentru activitatea desfășurată din contul tău." },
-        { "title": "3. Descrierea serviciilor", "content": "Joben oferă unelte pentru CV-uri și scrisori de intenție, analiză asistată de AI și funcții de export. Funcțiile și limitele pot depinde de planul tău." },
-        { "title": "4. Fără garanția rezultatelor de angajare", "content": "Joben este o unealtă de redactare și optimizare a CV-urilor. Nu garantăm interviuri, oferte de muncă sau vreun rezultat specific de angajare. Scorurile și sugestiile generate de AI sunt ajutoare informative, nu o promisiune de rezultate." },
-        { "title": "5. Facturare, upgrade-uri și rambursări", "content": "Planurile plătite sunt facturate conform prețurilor afișate la finalizarea comenzii. Se pot aplica taxe. Cu excepția cazurilor prevăzute de lege, sumele plătite nu sunt rambursabile." },
-        { "title": "6. Utilizare acceptabilă", "content": "Ești de acord să nu folosești Joben pentru activități ilegale, abuzive sau frauduloase și să nu încerci accesul neautorizat, întreruperea sau utilizarea abuzivă a platformei." },
-        { "title": "7. Declinarea răspunderii privind rezultatele AI", "content": "Sugestiile generate de AI sunt produse prin procesarea textului CV-ului tău și al descrierii jobului printr-un furnizor terț de AI (Anthropic). Rezultatele sunt furnizate doar în scop informativ. Ești responsabil pentru verificarea, editarea și validarea întregului conținut generat înainte de utilizare, inclusiv pentru acuratețe." },
-        { "title": "8. Conținutul tău", "content": "Păstrezi dreptul de proprietate asupra conținutului pe care îl încarci sau îl creezi. Ne acorzi o licență limitată pentru a procesa acel conținut (inclusiv trimiterea lui către furnizorul nostru de AI), doar pentru a furniza, menține și îmbunătăți serviciul." },
-        { "title": "9. Proprietate intelectuală", "content": "Platforma Joben, brandingul, software-ul și materialele conexe sunt protejate de legile privind proprietatea intelectuală și rămân proprietatea Joben și a licențiatorilor săi." },
-        { "title": "10. Suspendare și încetare", "content": "Putem suspenda sau înceta accesul pentru încălcarea acestor termeni, riscuri de securitate, neplată sau cerințe legale. Îți poți șterge contul oricând din Setări." },
-        { "title": "11. Declinări de responsabilitate și limitarea răspunderii", "content": "Serviciul este furnizat \"ca atare\" și \"în funcție de disponibilitate\". În limita maximă permisă de lege, Joben nu este răspunzător pentru daune indirecte, incidentale sau subsecvente, inclusiv pierderea unei oportunități de angajare." },
-        { "title": "12. Legea aplicabilă", "content": "Acești termeni sunt guvernați de legile Uniunii Europene și de jurisdicția în care Joben este înființată, fără a ține cont de principiile privind conflictul de legi, fără a aduce atingere drepturilor obligatorii de protecție a consumatorului de care beneficiezi conform legii țării tale de reședință." },
-        { "title": "13. Modificări ale termenilor", "content": "Putem actualiza acești termeni periodic. Utilizarea continuă după actualizări înseamnă că accepți termenii revizuiți." },
-        { "title": "14. Contact", "content": "Pentru întrebări legale sau privind confidențialitatea, scrie-ne la privacy@joben.eu." }
+        {
+          "title": "1. Acceptarea acestor termeni",
+          "content": "Prin accesarea sau utilizarea Joben, ești de acord cu acești Termeni și Condiții. Dacă nu ești de acord, nu folosi serviciul."
+        },
+        {
+          "title": "2. Eligibilitate și conturi",
+          "content": "Trebuie să ai cel puțin 16 ani pentru a folosi Joben. Trebuie să furnizezi informații de cont corecte și să îți păstrezi credențialele de autentificare în siguranță. Ești responsabil pentru activitatea desfășurată din contul tău."
+        },
+        {
+          "title": "3. Descrierea serviciilor",
+          "content": "Joben oferă unelte pentru CV-uri și scrisori de intenție, analiză asistată de AI și funcții de export. Funcțiile și limitele pot depinde de planul tău."
+        },
+        {
+          "title": "4. Fără garanția rezultatelor de angajare",
+          "content": "Joben este o unealtă de redactare și optimizare a CV-urilor. Nu garantăm interviuri, oferte de muncă sau vreun rezultat specific de angajare. Scorurile și sugestiile generate de AI sunt ajutoare informative, nu o promisiune de rezultate."
+        },
+        {
+          "title": "5. Facturare, upgrade-uri și rambursări",
+          "content": "Planurile plătite sunt facturate conform prețurilor afișate la finalizarea comenzii. Se pot aplica taxe. Cu excepția cazurilor prevăzute de lege, sumele plătite nu sunt rambursabile."
+        },
+        {
+          "title": "6. Utilizare acceptabilă",
+          "content": "Ești de acord să nu folosești Joben pentru activități ilegale, abuzive sau frauduloase și să nu încerci accesul neautorizat, întreruperea sau utilizarea abuzivă a platformei."
+        },
+        {
+          "title": "7. Declinarea răspunderii privind rezultatele AI",
+          "content": "Sugestiile generate de AI sunt produse prin procesarea textului CV-ului tău și al descrierii jobului printr-un furnizor terț de AI (Anthropic). Rezultatele sunt furnizate doar în scop informativ. Ești responsabil pentru verificarea, editarea și validarea întregului conținut generat înainte de utilizare, inclusiv pentru acuratețe."
+        },
+        {
+          "title": "8. Conținutul tău",
+          "content": "Păstrezi dreptul de proprietate asupra conținutului pe care îl încarci sau îl creezi. Ne acorzi o licență limitată pentru a procesa acel conținut (inclusiv trimiterea lui către furnizorul nostru de AI), doar pentru a furniza, menține și îmbunătăți serviciul."
+        },
+        {
+          "title": "9. Proprietate intelectuală",
+          "content": "Platforma Joben, brandingul, software-ul și materialele conexe sunt protejate de legile privind proprietatea intelectuală și rămân proprietatea Joben și a licențiatorilor săi."
+        },
+        {
+          "title": "10. Suspendare și încetare",
+          "content": "Putem suspenda sau înceta accesul pentru încălcarea acestor termeni, riscuri de securitate, neplată sau cerințe legale. Îți poți șterge contul oricând din Setări."
+        },
+        {
+          "title": "11. Declinări de responsabilitate și limitarea răspunderii",
+          "content": "Serviciul este furnizat \"ca atare\" și \"în funcție de disponibilitate\". În limita maximă permisă de lege, Joben nu este răspunzător pentru daune indirecte, incidentale sau subsecvente, inclusiv pierderea unei oportunități de angajare."
+        },
+        {
+          "title": "12. Legea aplicabilă",
+          "content": "Acești termeni sunt guvernați de legile Uniunii Europene și de jurisdicția în care Joben este înființată, fără a ține cont de principiile privind conflictul de legi, fără a aduce atingere drepturilor obligatorii de protecție a consumatorului de care beneficiezi conform legii țării tale de reședință."
+        },
+        {
+          "title": "13. Modificări ale termenilor",
+          "content": "Putem actualiza acești termeni periodic. Utilizarea continuă după actualizări înseamnă că accepți termenii revizuiți."
+        },
+        {
+          "title": "14. Contact",
+          "content": "Pentru întrebări legale sau privind confidențialitatea, scrie-ne la privacy@joben.eu."
+        }
       ]
     },
     "cookies": {
@@ -467,16 +743,514 @@
       "analyticsBody": "Aceste cookie-uri ne ajută să înțelegem cum este folosit produsul, ca să îl putem îmbunătăți. Sunt setate doar după ce apeși \"Acceptă tot\" în bannerul de cookie-uri, niciodată înainte.",
       "marketingHeading": "Marketing",
       "marketingBody": "Nu folosim cookie-uri de marketing sau publicitate.",
-      "tableHeaders": { "name": "Nume", "provider": "Furnizor", "purpose": "Scop", "duration": "Durată" },
+      "tableHeaders": {
+        "name": "Nume",
+        "provider": "Furnizor",
+        "purpose": "Scop",
+        "duration": "Durată"
+      },
       "necessaryCookies": [
-        { "name": "__session", "provider": "Clerk", "purpose": "Te menține autentificat.", "duration": "Sesiune" },
-        { "name": "__client_uat", "provider": "Clerk", "purpose": "Sincronizează starea de autentificare între file.", "duration": "1 an" },
-        { "name": "__clerk_db_jwt", "provider": "Clerk", "purpose": "Token de autentificare folosit pentru securizarea sesiunii.", "duration": "Sesiune" }
+        {
+          "name": "__session",
+          "provider": "Clerk",
+          "purpose": "Te menține autentificat.",
+          "duration": "Sesiune"
+        },
+        {
+          "name": "__client_uat",
+          "provider": "Clerk",
+          "purpose": "Sincronizează starea de autentificare între file.",
+          "duration": "1 an"
+        },
+        {
+          "name": "__clerk_db_jwt",
+          "provider": "Clerk",
+          "purpose": "Token de autentificare folosit pentru securizarea sesiunii.",
+          "duration": "Sesiune"
+        }
       ],
       "analyticsCookies": [
-        { "name": "ph_*", "provider": "PostHog", "purpose": "Analiză pseudonimă a produsului (utilizarea funcțiilor, vizualizări de pagini). Setat doar după ce accepți cookie-urile de analiză.", "duration": "Până la 1 an" },
-        { "name": "_vercel_*", "provider": "Vercel Analytics", "purpose": "Analiză agregată, privacy-friendly, a vizualizărilor de pagini. Setat doar după ce accepți cookie-urile de analiză.", "duration": "Până la 1 an" }
+        {
+          "name": "ph_*",
+          "provider": "PostHog",
+          "purpose": "Analiză pseudonimă a produsului (utilizarea funcțiilor, vizualizări de pagini). Setat doar după ce accepți cookie-urile de analiză.",
+          "duration": "Până la 1 an"
+        },
+        {
+          "name": "_vercel_*",
+          "provider": "Vercel Analytics",
+          "purpose": "Analiză agregată, privacy-friendly, a vizualizărilor de pagini. Setat doar după ce accepți cookie-urile de analiză.",
+          "duration": "Până la 1 an"
+        }
       ]
+    }
+  },
+  "Builder": {
+    "tabs": {
+      "personal": "Informații Personale",
+      "experience": "Experiență",
+      "education": "Educație",
+      "skills": "Competențe",
+      "projects": "Proiecte",
+      "certifications": "Certificări",
+      "sections": "Mai Multe Secțiuni"
+    },
+    "personal": {
+      "heading": "Detalii personale",
+      "firstNameLabel": "Prenume",
+      "firstNamePlaceholder": "Ion",
+      "lastNameLabel": "Nume",
+      "lastNamePlaceholder": "Popescu",
+      "jobTitleLabel": "Titlul Jobului",
+      "jobTitlePlaceholder": "Inginer Software",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ion@exemplu.com",
+      "phoneLabel": "Telefon",
+      "phonePlaceholder": "07XX XXX XXX",
+      "locationLabel": "Locație",
+      "locationPlaceholder": "Cluj-Napoca, România",
+      "summaryLabel": "Rezumat Profesional",
+      "generateWithAi": "Generează cu AI",
+      "summaryPlaceholder": "Rezumat profesional",
+      "summaryToolbarLabel": "Formatare rezumat",
+      "linkedinLabel": "URL LinkedIn",
+      "linkedinPlaceholder": "https://linkedin.com/in/numele-tau",
+      "githubLabel": "URL GitHub",
+      "githubPlaceholder": "https://github.com/utilizatorul-tau",
+      "websiteLabel": "Website / Portofoliu",
+      "websitePlaceholder": "https://domeniultau.com",
+      "summaryModeResume": "Pe baza CV-ului meu",
+      "summaryModeScratch": "Scrie de la zero",
+      "summaryRolePlaceholder": "Descrie rolul țintă, nivelul și ariile de focus...",
+      "summaryGenClose": "Închide",
+      "generateSummaryButton": "Generează rezumat",
+      "acceptSummaryButton": "Acceptă rezumatul"
+    },
+    "experience": {
+      "heading": "Experiență Profesională",
+      "addRole": "+ Adaugă Rol",
+      "entryLabel": "Intrare Experiență",
+      "titlePlaceholder": "Titlul rolului",
+      "companyPlaceholder": "Companie",
+      "impactBulletsLabel": "Puncte de Impact",
+      "addBullet": "+ Adaugă Punct",
+      "bulletPlaceholder": "Descrie impactul măsurabil",
+      "bulletToolbarLabel": "Formatare punct",
+      "deleteBulletButton": "Șterge",
+      "confirmDelete": "Sigur vrei să ștergi această intrare de experiență?",
+      "newRoleTitle": "Rol Nou",
+      "newRoleCompany": "Numele Companiei",
+      "newRoleDescription": "Descrie impactul și realizările tale."
+    },
+    "ai": {
+      "aiDraft": "Ciornă AI",
+      "aiDraftLoading": "AI...",
+      "creditHint": "Ciornă AI și Regenerare consumă fiecare 1 credit de rescriere a punctului.",
+      "generatingDraft": "Se generează ciorna AI...",
+      "regenerate": "Regenerează",
+      "regenerateUsesCredit": "Regenerarea folosește 1 credit",
+      "accept": "Acceptă"
+    },
+    "projects": {
+      "heading": "Proiecte",
+      "description": "Gestionează aici proiectele importate și cele adăugate manual. Sunt afișate separat de secțiunile personalizate.",
+      "addProject": "+ Adaugă Proiect",
+      "emptyState": "Niciun proiect încă. Adaugă unul ca să rămână separat de secțiunile personalizate.",
+      "entryLabel": "Proiect {index}",
+      "namePlaceholder": "Numele proiectului",
+      "rolePlaceholder": "Rol / Titlu (ex. Fondator Solo, Lead Developer)",
+      "descriptionPlaceholder": "Descrie ce ai construit, lansat sau învățat. Sfat: fiecare linie devine un punct separat, ex.:\n• Am construit X\n• Am lansat Y\n• Am redus costurile cu 40%",
+      "descriptionToolbarLabel": "Formatare descriere proiect",
+      "technologiesPlaceholder": "Tehnologii separate prin virgulă (React, Node.js, AWS)",
+      "urlPlaceholder": "URL-ul proiectului sau link GitHub"
+    },
+    "education": {
+      "heading": "Educație",
+      "description": "Adaugă fiecare instituție ca o intrare separată. Folosește selectoarele de dată pentru perioadele de studiu.",
+      "addInstitution": "+ Adaugă Instituție",
+      "emptyState": "Nicio intrare de educație încă. Dă click pe + Adaugă Instituție pentru prima ta intrare.",
+      "entryLabel": "Instituție {index}",
+      "deleteAriaLabel": "Șterge intrarea de educație",
+      "institutionPlaceholder": "Instituție (ex. Universitatea Stanford)",
+      "degreePlaceholder": "Diplomă (ex. Licență în Informatică)",
+      "fieldPlaceholder": "Domeniul de studiu (opțional)",
+      "locationPlaceholder": "Locație (opțional, ex. Cluj-Napoca)",
+      "detailsPlaceholder": "Detalii opționale (medie, distincții, cursuri relevante, teză de licență, ...)",
+      "descriptionToolbarLabel": "Formatare descriere educație"
+    },
+    "sections": {
+      "addSection": "+ Adaugă Secțiune",
+      "emptyState": "Nicio secțiune încă pentru această categorie. Folosește Adaugă Secțiune ca să creezi una."
+    },
+    "imports": {
+      "importing": "Se importă...",
+      "importButton": "Importă PDF/DOCX ({count}/{max})",
+      "tryAgain": "Încearcă din nou",
+      "retrying": "Se reîncearcă..."
+    },
+    "tailor": {
+      "aiTailorButton": "Adaptare AI",
+      "missingSkillsHeading": "Competențe din această descriere a jobului care nu apar în CV-ul tău",
+      "missingJobDescription": "Adaugă o descriere a jobului înainte de adaptare.",
+      "failed": "Adaptarea a eșuat: {message}",
+      "genericError": "Nu am putut adapta CV-ul.",
+      "upgradeMessage": "Adaptarea e disponibilă pe Pro.",
+      "modalTitle": "Adaptare CV cu AI",
+      "tailoringInProgress": "Se adaptează...",
+      "applyTailoring": "Aplică Adaptarea",
+      "modalDescription": "Lipește o descriere a jobului și adaptează punctele din CV pentru acest rol.",
+      "jobDescriptionPlaceholder": "Lipește aici descrierea jobului...",
+      "summaryPatchLabel": "Rezumat Profesional"
+    },
+    "bulletDraft": {
+      "emptyBulletError": "Adaugă textul punctului înainte de a genera o ciornă AI.",
+      "genericError": "Nu am putut genera ciorna punctului.",
+      "dailyLimitReached": "Ai atins limita zilnică. Încearcă din nou mai târziu.",
+      "remainingInWindow": "Rămase în fereastra curentă: {remaining}/{limit}",
+      "resetsAt": "Se resetează la: {time}",
+      "upgradeMessage": "Rescrierea punctelor e disponibilă pe Pro.",
+      "draftFailed": "Generarea ciornei a eșuat: {message}"
+    },
+    "summary": {
+      "missingRoleDescription": "Descrie rolul țintă înainte de a genera de la zero.",
+      "genericError": "Nu am putut genera rezumatul. Încearcă din nou.",
+      "generationFailed": "Generarea rezumatului a eșuat: {message}"
+    },
+    "fixBanner": {
+      "applied": "AI a aplicat {count, plural, one {# îmbunătățire} few {# îmbunătățiri} other {# de îmbunătățiri}} CV-ului tău.",
+      "autoFixComplete": "Reparare automată completă, nicio schimbare necesară.",
+      "fixApplied": "Reparare aplicată cu succes."
+    },
+    "actions": {
+      "save": "Salvează",
+      "exporting": "Se exportă...",
+      "exportPdf": "Exportă PDF",
+      "cancel": "Anulează"
+    },
+    "status": {
+      "saving": "Se salvează...",
+      "saved": "Salvat",
+      "saveFailed": "Salvarea a eșuat"
+    },
+    "upload": {
+      "invalidFileType": "Sunt acceptate doar fișiere .pdf și .docx.",
+      "fileTooLarge": "Fișierul trebuie să fie sub 5 MB.",
+      "limitReachedBody": "Poți încărca maximum 3 importuri PDF/DOCX per CV.",
+      "limitReachedTitle": "Limita de import a fost atinsă",
+      "limitReachedGotIt": "Am înțeles",
+      "warningTitle": "Înainte să încarci",
+      "warningBody": "Pentru rezultate optime, încarcă un fișier PDF sau DOCX generat digital. Documentele scanate sau pozele CV-urilor pot produce rezultate incomplete.",
+      "uploading": "Se încarcă...",
+      "gotItContinue": "Am înțeles, continuă",
+      "importingOverlayTitle": "Se importă PDF/DOCX",
+      "importingOverlayBody": "Îți analizăm CV-ul. Poate dura câteva momente."
+    },
+    "export": {
+      "genericError": "Exportul PDF LaTeX a eșuat",
+      "upgradeMessage": "Acest export necesită acces Pro.",
+      "networkError": "Eroare de rețea la exportul PDF-ului"
+    },
+    "save": {
+      "upgradeMessage": "Această acțiune necesită acces Pro."
+    },
+    "untitledResumeFallback": "CV Fără Titlu",
+    "exportFilenameFallback": "cv",
+    "upgradeDefaultMessage": "Treci la Pro ca să deblochezi această funcție AI.",
+    "templateSwitcher": {
+      "heading": "Șablon",
+      "harvardName": "Harvard",
+      "harvardDescription": "Format academic clasic"
+    },
+    "addContentModal": {
+      "title": "Adaugă Secțiune de Conținut",
+      "options": {
+        "professionalSummary": {
+          "title": "Rezumat Profesional",
+          "description": "Privire de ansamblu concisă asupra profilului tău"
+        },
+        "careerObjective": {
+          "title": "Obiectiv de Carieră",
+          "description": "Declarație de poziționare axată pe rol"
+        },
+        "education": {
+          "title": "Educație",
+          "description": "Diplome și pregătire academică"
+        },
+        "leadership": {
+          "title": "Leadership",
+          "description": "Exemple de leadership și asumare a responsabilității"
+        },
+        "projects": {
+          "title": "Proiecte",
+          "description": "Proiecte notabile și rezultate"
+        },
+        "research": {
+          "title": "Cercetare",
+          "description": "Activitate și descoperiri de cercetare"
+        },
+        "certifications": {
+          "title": "Certificări",
+          "description": "Certificări profesionale"
+        },
+        "awards": {
+          "title": "Premii & Distincții",
+          "description": "Premii, burse, distincții"
+        },
+        "publications": {
+          "title": "Publicații",
+          "description": "Articole și publicații"
+        },
+        "skills": {
+          "title": "Competențe",
+          "description": "Competențe tehnice și profesionale"
+        }
+      }
+    },
+    "sectionPanel": {
+      "educationFallback": "Educație",
+      "deleteAriaLabel": "Șterge secțiunea",
+      "contentPlaceholder": "Scrie conținutul secțiunii..."
+    },
+    "beforeAfterModal": {
+      "reviewTitle": "Revizuiește {count, plural, one {# Modificare} few {# Modificări} other {# de Modificări}} Înainte de Aplicare",
+      "appliedTitle": "AI a Aplicat {count, plural, one {# Îmbunătățire} few {# Îmbunătățiri} other {# de Îmbunătățiri}}",
+      "discard": "Renunță",
+      "applyChanges": "Aplică Modificările",
+      "viewInEditor": "Vezi în Editor",
+      "beforeLabel": "Înainte",
+      "afterLabel": "După",
+      "emptyPlaceholder": "(gol)",
+      "claimsWarning": "Această rescriere a adăugat detalii care nu erau în textul tău original ({claims}). Confirmă că sunt reale înainte de a aplica."
+    },
+    "aiLoadingState": {
+      "analyzing": "Îți analizăm CV-ul...",
+      "generating": "Se generează sugestii...",
+      "saving": "Se salvează analiza..."
+    },
+    "monthYearField": {
+      "periodLabel": "Perioadă",
+      "monthPlaceholder": "Lună",
+      "yearPlaceholder": "An",
+      "present": "Prezent"
+    },
+    "richTextarea": {
+      "toolbarLabelDefault": "Formatare text",
+      "bold": "Aldin",
+      "italic": "Cursiv",
+      "underline": "Subliniat",
+      "boldPlaceholder": "text aldin",
+      "italicPlaceholder": "text cursiv",
+      "underlinePlaceholder": "text subliniat"
+    }
+  },
+  "CoverLetterBuilder": {
+    "heading": "Secțiunile Scrisorii de Intenție",
+    "progress": "Progres {completed}/{total} finalizat",
+    "companyLabel": "Numele Companiei",
+    "companyPlaceholder": "ex. Google",
+    "positionLabel": "Titlul Postului",
+    "positionPlaceholder": "ex. Inginer Frontend Senior",
+    "jobDescriptionLabel": "Job Description",
+    "jobDescriptionPlaceholder": "Lipește aici textul complet al job description-ului...",
+    "toneLabel": "Ton",
+    "toneOptions": {
+      "formal": "Formal",
+      "professional": "Profesional",
+      "conversational": "Conversațional"
+    },
+    "generateDraftButton": "Generează Ciornă",
+    "saveButton": "Salvează",
+    "exportPdfButton": "Exportă PDF",
+    "saveStatus": {
+      "saving": "Se salvează...",
+      "saved": "Salvat",
+      "error": "Salvarea a eșuat",
+      "idle": "Inactiv"
+    },
+    "untitledTitle": "Scrisoare de Intenție Fără Titlu",
+    "sections": {
+      "header": "Informații Antet",
+      "date": "Dată",
+      "recipient": "Destinatar",
+      "position": "Post",
+      "salutation": "Formulă de Adresare",
+      "introduction": "Introducere",
+      "bodyParagraphs": "Paragrafe de Conținut ({count})",
+      "conclusion": "Concluzie",
+      "closing": "Încheiere și Semnătură"
+    },
+    "editSectionModal": {
+      "title": "Editează Secțiunea",
+      "helperText": "Folosește linii noi pentru secțiunile cu mai multe câmpuri, precum Antet, Destinatar și Post."
+    },
+    "cancelButton": "Anulează",
+    "saveChangesButton": "Salvează Modificările",
+    "upgradeDefaultMessage": "Deblochează generare AI nelimitată de scrisori de intenție cu Pro.",
+    "errors": {
+      "generateDraft": "Ciorna nu a putut fi generată.",
+      "generateDraftAiUpgrade": "Această acțiune AI este disponibilă cu Pro.",
+      "generateDraftFailed": "Generarea ciornei a eșuat: {message}",
+      "exportPdf": "PDF-ul nu a putut fi exportat.",
+      "exportFailed": "Exportul a eșuat: {message}"
+    },
+    "paragraphModal": {
+      "title": "Paragrafe de Conținut",
+      "addParagraphButton": "+ Adaugă Paragraf",
+      "saveChangesButton": "Salvează Modificările",
+      "paragraphLabel": "Paragraful {number}"
+    }
+  },
+  "SettingsPage": {
+    "title": "Setări",
+    "managedByClerk": "Gestionat de Clerk",
+    "account": {
+      "title": "Cont",
+      "description": "Gestionează-ți profilul și detaliile contului.",
+      "emailSettings": "Setări email",
+      "exportData": "Exportă-ți datele",
+      "exportDataButton": "Exportă Datele"
+    },
+    "billing": {
+      "title": "Facturare",
+      "description": "Gestionează-ți abonamentul și metodele de plată.",
+      "currentPlan": "Plan curent",
+      "subscription": "Abonament"
+    },
+    "notifications": {
+      "title": "Notificări",
+      "description": "Controlează notificările prin email și din aplicație.",
+      "emailNotifications": "Notificări prin email",
+      "enabled": "Activate"
+    },
+    "security": {
+      "title": "Securitate",
+      "description": "Parolă, autentificare în doi pași și gestionarea sesiunilor.",
+      "twoFactor": "Autentificare în doi pași"
+    },
+    "dangerZone": {
+      "title": "Zonă Periculoasă",
+      "description": "Odată ce îți ștergi contul, nu mai există cale de întoarcere.",
+      "deleteAccountLabel": "Șterge contul",
+      "deleteAccountButton": "Șterge Contul",
+      "modalTitle": "Șterge-ți contul",
+      "modalBody": "Această acțiune îți șterge permanent contul, toate CV-urile, scrisorile de intenție, evaluările AI și anulează orice abonament activ. Nu poate fi anulată.",
+      "errorMessage": "Ceva nu a mers bine la ștergerea contului. Încearcă din nou sau contactează privacy@joben.eu.",
+      "cancel": "Anulează",
+      "deleting": "Se șterge…",
+      "confirmDelete": "Da, șterge-mi contul"
+    }
+  },
+  "ResumesPage": {
+    "title": "CV-uri",
+    "resumeCount": "{count} CV-uri",
+    "createResume": "Creează CV",
+    "searchPlaceholder": "Caută CV-uri...",
+    "sortNewest": "Cele mai noi",
+    "sortOldest": "Cele mai vechi",
+    "sortAZ": "A-Z",
+    "noResumesFound": "Niciun CV găsit.",
+    "untitledSearchFallback": "CV Fără Titlu",
+    "untitled": "Fără titlu",
+    "updatedPrefix": "Actualizat ",
+    "deleteConfirm": "Sigur vrei să ștergi acest CV?",
+    "deleteFailedAlert": "Ștergerea CV-ului a eșuat. Vezi consola pentru detalii."
+  },
+  "CoverLettersPage": {
+    "title": "Scrisori de Intenție",
+    "letterCount": "{count} scrisori de intenție",
+    "createCoverLetter": "Creează Scrisoare de Intenție",
+    "searchPlaceholder": "Caută scrisori de intenție...",
+    "sortNewest": "Cele mai noi",
+    "sortOldest": "Cele mai vechi",
+    "sortAZ": "A-Z",
+    "noCoverLettersFound": "Nicio scrisoare de intenție găsită.",
+    "untitledCoverLetter": "Scrisoare de Intenție Fără Titlu",
+    "updatedPrefix": "Actualizat ",
+    "badgeLabel": "SI",
+    "deleteConfirm": "Ștergi această scrisoare de intenție?"
+  },
+  "AiReviewPage": {
+    "list": {
+      "pageTitle": "Evaluare AI a CV-ului",
+      "pageSubtitle": "Primești feedback AI instant pe 5 categorii cheie.",
+      "targetScoreLabel": "Scor Țintă",
+      "hireZoneSuffix": "Zonă de Angajare",
+      "yourBestLabel": "Cel Mai Bun al Tău",
+      "reviewsLabel": "Evaluări",
+      "avgScoreLabel": "Scor Mediu",
+      "outOf100": "/100",
+      "uploadNewResume": "Încarcă un CV Nou",
+      "dropzoneText": "Trage și lasă sau apasă pentru a răsfoi",
+      "dropzoneHint": "Doar PDF. Maxim 10MB.",
+      "readingPdf": "Se citește PDF-ul...",
+      "readyFile": "Gata: {fileName}",
+      "jobDescriptionPlaceholder": "Descrierea jobului, opțional, pentru o analiză mai precisă",
+      "reviewUploadedPdf": "Evaluează PDF-ul Încărcat",
+      "startReview": "Începe Evaluarea",
+      "industryBenchmark": "Reper din Industrie",
+      "benchmarkStat": "CV-urile cu scor 92+ primesc de 3 ori mai multe apeluri",
+      "seeHowToImprove": "Vezi cum să te îmbunătățești",
+      "reviewExistingResume": "Evaluează un CV Existent",
+      "searchPlaceholder": "Caută CV-uri...",
+      "noResumesFound": "Niciun CV găsit.",
+      "untitledResume": "CV Fără Titlu",
+      "untitled": "Fără titlu",
+      "scoreValue": "Scor {score}",
+      "notReviewedYet": "Neevaluat încă",
+      "viewLatest": "Vezi Ultima Evaluare",
+      "reReview": "Reevaluează",
+      "defaultUpgradeMessage": "Treci la Pro pentru analiză AI nelimitată.",
+      "errorPdfOnly": "Momentan sunt acceptate doar fișiere PDF.",
+      "errorPdfTooLarge": "PDF-ul trebuie să aibă sub 10 MB.",
+      "errorCouldNotExtractText": "Nu am putut extrage text din acest PDF.",
+      "errorFailedToParsePdf": "Procesarea PDF-ului încărcat a eșuat.",
+      "errorUploadOrSelect": "Încarcă un CV în format PDF sau selectează un CV existent.",
+      "errorCouldNotLoadResume": "Nu am putut încărca CV-ul selectat.",
+      "errorNoExtractableContent": "Acest CV nu are conținut care poate fi analizat.",
+      "errorProRequired": "Această acțiune necesită acces Pro.",
+      "errorAnalyzeFailed": "Analiza a eșuat.",
+      "errorMissingResultId": "Analiza s-a finalizat, dar lipsește identificatorul rezultatului."
+    },
+    "detail": {
+      "defaultUpgradeMessage": "Treci la Pro ca să continui să aplici reparări AI.",
+      "errorMissingReviewId": "Lipsește identificatorul evaluării",
+      "errorFailedToLoad": "Încărcarea evaluării a eșuat",
+      "errorFixProOnly": "Această reparare AI e disponibilă pe Pro.",
+      "errorCouldNotApplyFix": "Nu am putut aplica această reparare. Încearcă din nou.",
+      "errorNetworkRetry": "Eroare de rețea. Încearcă din nou.",
+      "errorAutoFixTokenLimit": "Reparare automată indisponibilă din cauza limitei de token-uri.",
+      "errorAutoFixProOnly": "Repararea automată e disponibilă pe Pro.",
+      "errorAutoFixFailed": "Repararea automată a eșuat. Încearcă din nou.",
+      "autoFixUnavailableTitle": "Reparare automată indisponibilă",
+      "gotIt": "Am înțeles",
+      "estimatedInputTokens": "Token-uri de intrare estimate: {tokens}",
+      "remainingMonthlyTokens": "Token-uri lunare rămase: {tokens}",
+      "resetsAt": "Se resetează la: {date}"
+    },
+    "analyzer": {
+      "noReviewData": "Nu există date de evaluare disponibile.",
+      "unknownGrade": "Necunoscut",
+      "resumeFallback": "CV",
+      "overallMatchScore": "Scor General de Potrivire",
+      "reviewFor": "Evaluare pentru {title}.",
+      "vsPreviousReview": "față de evaluarea anterioară",
+      "firstReviewForResume": "Prima evaluare pentru acest CV.",
+      "pts": "puncte",
+      "prevScore": "anterior: {score}",
+      "autoFixAll": "Repară Automat Tot",
+      "categoryFallback": "Categorie",
+      "actionableFeedback": "Feedback Concret",
+      "priorityImprovements": "Îmbunătățiri Prioritare",
+      "noImprovementSuggestions": "Nu au fost returnate sugestii de îmbunătățire.",
+      "defaultIssue": "Îmbunătățește claritatea și impactul.",
+      "current": "Actual:",
+      "suggested": "Sugerat:",
+      "notAvailable": "N/A",
+      "applyingFix": "Se aplică repararea...",
+      "applyThisFix": "Aplică această reparare",
+      "strengths": "Puncte Forte",
+      "noStrengthsReturned": "Nu au fost returnate puncte forte.",
+      "categoryInsights": "Detalii pe Categorii"
     }
   }
 }

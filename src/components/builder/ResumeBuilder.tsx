@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useRouter } from '@/i18n/navigation'
 import { TemplateSwitcher, type TemplateValue } from '@/components/builder/TemplateSwitcher'
@@ -367,8 +368,6 @@ const tabSectionMap: Record<string, AddableSection['type'][]> = {
 
 const MAX_PDF_IMPORTS_PER_RESUME = 3
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
-const MAX_FILES_ERROR_MESSAGE = 'You can upload a maximum of 3 PDF/DOCX imports per CV slot.'
-const INVALID_FILE_ERROR_MESSAGE = 'Only .pdf and .docx files are allowed.'
 const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
 
@@ -392,6 +391,7 @@ function getPdfImportCount(data: ResumeData): number {
 
 
 export function ResumeBuilder() {
+  const t = useTranslations('Builder')
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
@@ -413,7 +413,7 @@ export function ResumeBuilder() {
   const [pendingUploadFile, setPendingUploadFile] = useState<File | null>(null)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to unlock this AI feature.')
+  const [upgradeMessage, setUpgradeMessage] = useState(t('upgradeDefaultMessage'))
   const [highlightedBulletIndex, setHighlightedBulletIndex] = useState<number | null>(null)
   const [fixBanner, setFixBanner] = useState<string | null>(null)
   const [fixPatches, setFixPatches] = useState<FixPatchWithContext[]>([])
@@ -435,17 +435,17 @@ export function ResumeBuilder() {
   const isCreateMode = routeResumeId === 'new' || !routeResumeId
 
   const derivedTitle = useMemo(() => {
-    return `${resumeData.personal.firstName} ${resumeData.personal.lastName}`.trim() || 'Untitled Resume'
-  }, [resumeData.personal.firstName, resumeData.personal.lastName])
-  
+    return `${resumeData.personal.firstName} ${resumeData.personal.lastName}`.trim() || t('untitledResumeFallback')
+  }, [resumeData.personal.firstName, resumeData.personal.lastName, t])
+
   const tabs = [
-    { id: 'personal', label: 'Personal Info', icon: User },
-    { id: 'experience', label: 'Experience', icon: Briefcase },
-    { id: 'education', label: 'Education', icon: GraduationCap },
-    { id: 'skills', label: 'Skills', icon: Code },
-    { id: 'projects', label: 'Projects', icon: Cpu },
-    { id: 'certifications', label: 'Certifications', icon: Award },
-    { id: 'sections', label: 'More Sections', icon: FileText },
+    { id: 'personal', label: t('tabs.personal'), icon: User },
+    { id: 'experience', label: t('tabs.experience'), icon: Briefcase },
+    { id: 'education', label: t('tabs.education'), icon: GraduationCap },
+    { id: 'skills', label: t('tabs.skills'), icon: Code },
+    { id: 'projects', label: t('tabs.projects'), icon: Cpu },
+    { id: 'certifications', label: t('tabs.certifications'), icon: Award },
+    { id: 'sections', label: t('tabs.sections'), icon: FileText },
   ]
 
   useEffect(() => {
@@ -568,11 +568,11 @@ export function ResumeBuilder() {
       const count = parseInt(fixesApplied, 10)
       setFixBanner(
         count > 0
-          ? `AI applied ${count} improvement${count === 1 ? '' : 's'} to your resume.`
-          : 'Auto-fix complete, no changes needed.'
+          ? t('fixBanner.applied', { count })
+          : t('fixBanner.autoFixComplete')
       )
     } else if (fixApplied === 'true') {
-      setFixBanner('Fix applied successfully.')
+      setFixBanner(t('fixBanner.fixApplied'))
     }
 
     // Switch to correct tab
@@ -607,7 +607,7 @@ export function ResumeBuilder() {
         return () => clearTimeout(clearTimer)
       }
     }
-  }, [isLoading, searchParams, resumeData.experience])
+  }, [isLoading, searchParams, resumeData.experience, t])
 
   useEffect(() => {
     if (!pendingBulletScrollKey) return
@@ -633,7 +633,7 @@ export function ResumeBuilder() {
     // it's a real, name-derived value -- otherwise omit it from the PATCH body
     // so the existing DB title (curated or imported) is left untouched instead
     // of being silently overwritten back to 'Untitled Resume' on every autosave.
-    const hasDerivedName = derivedTitle !== 'Untitled Resume'
+    const hasDerivedName = derivedTitle !== t('untitledResumeFallback')
     const payload = {
       title: derivedTitle,
       data: resumeData,
@@ -654,7 +654,7 @@ export function ResumeBuilder() {
           }
 
           if (errorPayload.showUpgrade) {
-            setUpgradeMessage(errorPayload.error || 'This action requires Pro access.')
+            setUpgradeMessage(errorPayload.error || t('save.upgradeMessage'))
             setShowUpgradeModal(true)
           }
         } catch {
@@ -688,7 +688,7 @@ export function ResumeBuilder() {
     })
 
     setSaveStatus(updateRes.ok ? 'saved' : 'error')
-  }, [derivedTitle, isCreateMode, resumeData, resumeId, routeResumeId, router])
+  }, [derivedTitle, isCreateMode, resumeData, resumeId, routeResumeId, router, t])
 
   useEffect(() => {
     if (isLoading || isImportingPdf || isExportingPdf) return
@@ -778,13 +778,13 @@ export function ResumeBuilder() {
         }
 
         if (err.showUpgrade) {
-          setUpgradeMessage(err.error || 'This export action requires Pro access.')
+          setUpgradeMessage(err.error || t('export.upgradeMessage'))
           setShowUpgradeModal(true)
           setSaveStatus('error')
           return
         }
 
-        alert(err.error || 'Failed to export LaTeX PDF')
+        alert(err.error || t('export.genericError'))
         setSaveStatus('error')
         return
       }
@@ -792,14 +792,14 @@ export function ResumeBuilder() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${derivedTitle || 'resume'}.pdf`
+      a.download = `${derivedTitle || t('exportFilenameFallback')}.pdf`
       document.body.appendChild(a)
       a.click()
       URL.revokeObjectURL(url)
       document.body.removeChild(a)
       setSaveStatus('saved')
     } catch {
-      alert('Network error while exporting PDF')
+      alert(t('export.networkError'))
       setSaveStatus('error')
     } finally {
       setIsExportingPdf(false)
@@ -944,7 +944,7 @@ export function ResumeBuilder() {
   }
 
   const handleDeleteExperience = (experienceId: string) => {
-    if (confirm('Are you sure you want to delete this experience entry?')) {
+    if (confirm(t('experience.confirmDelete'))) {
       setResumeData(prevData => ({
         ...prevData,
         experience: prevData.experience.filter(exp => exp.id !== experienceId),
@@ -956,11 +956,11 @@ export function ResumeBuilder() {
   const handleAddRole = () => {
     const newRole = {
       id: `exp_${Date.now()}`,
-      title: 'New Role',
-      company: 'Company Name',
+      title: t('experience.newRoleTitle'),
+      company: t('experience.newRoleCompany'),
       period: 'Start - End',
-      description: 'Describe your impact and achievements.',
-      bullets: ['Describe your impact and achievements.'],
+      description: t('experience.newRoleDescription'),
+      bullets: [t('experience.newRoleDescription')],
     }
 
     setResumeData((prevData) => ({
@@ -1107,12 +1107,12 @@ export function ResumeBuilder() {
 
   const validateUploadFile = (file: File) => {
     if (!isValidResumeFile(file)) {
-      setUploadError(INVALID_FILE_ERROR_MESSAGE)
+      setUploadError(t('upload.invalidFileType'))
       return false
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      setUploadError('File must be under 5 MB.')
+      setUploadError(t('upload.fileTooLarge'))
       return false
     }
 
@@ -1172,7 +1172,7 @@ export function ResumeBuilder() {
 
   const handleTailorResume = async () => {
     if (!tailorJobDescription.trim()) {
-      alert('Add a job description before tailoring.')
+      alert(t('tailor.missingJobDescription'))
       return
     }
 
@@ -1208,12 +1208,12 @@ export function ResumeBuilder() {
 
       if (!response.ok || !payload.result) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || 'Tailor is available on Pro.')
+          setUpgradeMessage(payload.error || t('tailor.upgradeMessage'))
           setShowUpgradeModal(true)
           setIsTailoring(false)
           return
         }
-        alert(payload.error || 'Could not tailor resume.')
+        alert(payload.error || t('tailor.genericError'))
         setIsTailoring(false)
         return
       }
@@ -1265,7 +1265,7 @@ export function ResumeBuilder() {
           bulletIndex: -1,
           originalBullet: currentSummary,
           updatedBullet: proposedSummary,
-          experienceTitle: 'Professional Summary',
+          experienceTitle: t('tailor.summaryPatchLabel'),
         })
       }
 
@@ -1276,7 +1276,7 @@ export function ResumeBuilder() {
 
       setIsTailorModalOpen(false)
     } catch (error) {
-      alert(`Tailor failed: ${(error as Error).message}`)
+      alert(t('tailor.failed', { message: (error as Error).message }))
     }
 
     setIsTailoring(false)
@@ -1296,7 +1296,7 @@ export function ResumeBuilder() {
         [draftKey]: {
           draft: prev[draftKey]?.draft || '',
           isLoading: false,
-          error: 'Add bullet text before generating an AI draft.',
+          error: t('bulletDraft.emptyBulletError'),
         },
       }))
       return
@@ -1342,17 +1342,17 @@ export function ResumeBuilder() {
       }
 
       if (!response.ok || !payload.bullet) {
-        let errorMessage = payload.error || 'Could not generate bullet draft.'
+        let errorMessage = payload.error || t('bulletDraft.genericError')
 
         if (response.status === 429) {
-          const details: string[] = [payload.error || 'Daily limit reached. Try again later.']
+          const details: string[] = [payload.error || t('bulletDraft.dailyLimitReached')]
 
           if (typeof payload.remaining === 'number' && typeof payload.limit === 'number') {
-            details.push(`Remaining in current window: ${payload.remaining}/${payload.limit}`)
+            details.push(t('bulletDraft.remainingInWindow', { remaining: payload.remaining, limit: payload.limit }))
           }
 
           if (typeof payload.resetAt === 'number') {
-            details.push(`Resets at: ${new Date(payload.resetAt).toLocaleString()}`)
+            details.push(t('bulletDraft.resetsAt', { time: new Date(payload.resetAt).toLocaleString() }))
           }
 
           errorMessage = details.join('\n')
@@ -1362,7 +1362,7 @@ export function ResumeBuilder() {
             setShowUpgradeModal(true)
           }
         } else if (payload.showUpgrade) {
-          errorMessage = payload.error || 'Bullet rewrite is available on Pro.'
+          errorMessage = payload.error || t('bulletDraft.upgradeMessage')
           setUpgradeMessage(errorMessage)
           setShowUpgradeModal(true)
         }
@@ -1393,7 +1393,7 @@ export function ResumeBuilder() {
         [draftKey]: {
           draft: prev[draftKey]?.draft || '',
           isLoading: false,
-          error: `Draft generation failed: ${(error as Error).message}`,
+          error: t('bulletDraft.draftFailed', { message: (error as Error).message }),
         },
       }))
     }
@@ -1463,7 +1463,7 @@ export function ResumeBuilder() {
     setSummaryGenerationError(null)
 
     if (mode === 'scratch' && !summaryRoleDescription.trim()) {
-      setSummaryGenerationError('Please describe the target role before generating from scratch.')
+      setSummaryGenerationError(t('summary.missingRoleDescription'))
       return
     }
 
@@ -1489,14 +1489,14 @@ export function ResumeBuilder() {
       }
 
       if (!response.ok || !payload.summary) {
-        setSummaryGenerationError(payload.error || 'Could not generate summary. Please retry.')
+        setSummaryGenerationError(payload.error || t('summary.genericError'))
         setIsGeneratingSummary(false)
         return
       }
 
       setGeneratedSummaryDraft(payload.summary)
     } catch (error) {
-      setSummaryGenerationError(`Summary generation failed: ${(error as Error).message}`)
+      setSummaryGenerationError(t('summary.generationFailed', { message: (error as Error).message }))
     }
 
     setIsGeneratingSummary(false)
@@ -1558,7 +1558,7 @@ export function ResumeBuilder() {
               onClick={() => setIsAddModalOpen(true)}
               className="flex-1 rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--accent)/20"
             >
-              + Add Section
+              {t('sections.addSection')}
             </button>
             <button
               onClick={() => {
@@ -1572,15 +1572,15 @@ export function ResumeBuilder() {
               className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--foreground) hover:bg-(--surface-elevated) disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isImportingPdf
-                ? 'Importing...'
-                : `Import PDF/DOCX (${getPdfImportCount(resumeData)}/${MAX_PDF_IMPORTS_PER_RESUME})`}
+                ? t('imports.importing')
+                : t('imports.importButton', { count: getPdfImportCount(resumeData), max: MAX_PDF_IMPORTS_PER_RESUME })}
             </button>
             <FeatureButton
               feature="jds"
               onClick={() => setIsTailorModalOpen(true)}
               className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--surface-elevated)"
             >
-              AI Tailor
+              {t('tailor.aiTailorButton')}
             </FeatureButton>
           </div>
         </div>
@@ -1589,7 +1589,7 @@ export function ResumeBuilder() {
           <div className="shrink-0 mx-4 mt-3 rounded-xl border border-(--border) bg-(--surface) px-4 py-3">
             <div className="flex items-center justify-between gap-3 mb-2">
               <p className="text-sm font-semibold text-(--foreground)">
-                Skills in this job description not found in your resume
+                {t('tailor.missingSkillsHeading')}
               </p>
               <button
                 onClick={() => setMissingSkills([])}
@@ -1635,7 +1635,7 @@ export function ResumeBuilder() {
                     disabled={isImportingPdf}
                     className="rounded-lg border border-red-800/60 px-2.5 py-1 text-xs font-semibold text-red-300 hover:bg-red-900/30 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isImportingPdf ? 'Retrying...' : 'Try again'}
+                    {isImportingPdf ? t('imports.retrying') : t('imports.tryAgain')}
                   </button>
                 ) : null}
                 <button
@@ -1656,45 +1656,45 @@ export function ResumeBuilder() {
         >
           {activeTab === 'personal' && (
             <div className="space-y-4" suppressHydrationWarning>
-              <h2 className="text-xl font-bold text-(--foreground) mb-6">Personal details</h2>
+              <h2 className="text-xl font-bold text-(--foreground) mb-6">{t('personal.heading')}</h2>
               {/* Form fields would be controlled components, omitted for brevity */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">First Name</label>
-                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="John" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.firstNameLabel')}</label>
+                  <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.firstNamePlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">Last Name</label>
-                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Doe" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.lastNameLabel')}</label>
+                  <input type="text" value={resumeData.personal.lastName} onChange={(e) => updatePersonalField('lastName', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.lastNamePlaceholder')} />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-(--muted)">Job Title</label>
-                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Software Engineer" />
+                <label className="text-sm font-medium text-(--muted)">{t('personal.jobTitleLabel')}</label>
+                <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.jobTitlePlaceholder')} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">Email</label>
-                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="john@example.com" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.emailLabel')}</label>
+                  <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.emailPlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">Phone</label>
-                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="+1 (555) 000-0000" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.phoneLabel')}</label>
+                  <input type="text" value={resumeData.personal.phone} onChange={(e) => updatePersonalField('phone', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.phonePlaceholder')} />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-(--muted)">Location</label>
-                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="Cluj-Napoca, Romania" />
+                <label className="text-sm font-medium text-(--muted)">{t('personal.locationLabel')}</label>
+                <input type="text" value={resumeData.personal.location || ''} onChange={(e) => updatePersonalField('location', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.locationPlaceholder')} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <label className="text-sm font-medium text-(--muted)">Professional Summary</label>
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.summaryLabel')}</label>
                   <button
                     onClick={() => setIsSummaryGeneratorOpen((prev) => !prev)}
                     className="inline-flex items-center gap-1.5 rounded-md border border-(--accent)/40 bg-(--accent-muted) px-2.5 py-1 text-xs font-semibold text-(--accent-strong) hover:bg-(--accent)/20"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Generate with AI
+                    {t('personal.generateWithAi')}
                   </button>
                 </div>
 
@@ -1702,21 +1702,21 @@ export function ResumeBuilder() {
                   value={resumeData.personal.summary}
                   onValueChange={(value) => updatePersonalField('summary', value)}
                   className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors h-28 resize-none"
-                  placeholder="Professional summary"
-                  toolbarLabel="Summary formatting"
+                  placeholder={t('personal.summaryPlaceholder')}
+                  toolbarLabel={t('personal.summaryToolbarLabel')}
                 />
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">LinkedIn URL</label>
-                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://linkedin.com/in/yourname" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.linkedinLabel')}</label>
+                  <input type="text" value={resumeData.personal.linkedin || ''} onChange={(e) => updatePersonalField('linkedin', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.linkedinPlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">GitHub URL</label>
-                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://github.com/yourusername" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.githubLabel')}</label>
+                  <input type="text" value={resumeData.personal.github || ''} onChange={(e) => updatePersonalField('github', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.githubPlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-(--muted)">Website / Portfolio</label>
-                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder="https://yourdomain.com" />
+                  <label className="text-sm font-medium text-(--muted)">{t('personal.websiteLabel')}</label>
+                  <input type="text" value={resumeData.personal.website || ''} onChange={(e) => updatePersonalField('website', e.target.value)} className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) transition-colors" placeholder={t('personal.websitePlaceholder')} />
                 </div>
 
                 {isSummaryGeneratorOpen ? (
@@ -1730,7 +1730,7 @@ export function ResumeBuilder() {
                             : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
                         }`}
                       >
-                        Based on my resume
+                        {t('personal.summaryModeResume')}
                       </button>
                       <button
                         onClick={() => setSummaryGenerationMode('scratch')}
@@ -1740,7 +1740,7 @@ export function ResumeBuilder() {
                             : 'border border-(--border) bg-(--surface) text-(--muted) hover:text-(--foreground)'
                         }`}
                       >
-                        Write from scratch
+                        {t('personal.summaryModeScratch')}
                       </button>
                     </div>
 
@@ -1749,7 +1749,7 @@ export function ResumeBuilder() {
                         value={summaryRoleDescription}
                         onChange={(e) => setSummaryRoleDescription(e.target.value)}
                         className="h-24 w-full resize-none rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Describe your target role, level, and focus areas..."
+                        placeholder={t('personal.summaryRolePlaceholder')}
                       />
                     ) : null}
 
@@ -1763,13 +1763,13 @@ export function ResumeBuilder() {
                           onClick={() => setIsSummaryGeneratorOpen(false)}
                           className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground)"
                         >
-                          Close
+                          {t('personal.summaryGenClose')}
                         </button>
                         <button
                           onClick={() => void handleGenerateSummary(summaryGenerationMode)}
                           className={`rounded-md text-xs ${buttonVariants('primary', 'sm')}`}
                         >
-                          Generate summary
+                          {t('personal.generateSummaryButton')}
                         </button>
                       </div>
                     )}
@@ -1787,7 +1787,7 @@ export function ResumeBuilder() {
                           transition={{ duration: 0.22, ease: 'easeOut' }}
                           className="rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                         >
-                          <p className="text-xs font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-(--accent-strong)">{t('ai.aiDraft')}</p>
                           <p className="text-sm text-(--foreground)/95 leading-relaxed">{generatedSummaryDraft}</p>
                           <div className="flex items-center justify-end gap-2 pt-1">
                             <button
@@ -1795,13 +1795,13 @@ export function ResumeBuilder() {
                               disabled={isGeneratingSummary}
                               className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              Regenerate
+                              {t('ai.regenerate')}
                             </button>
                             <button
                               onClick={() => updatePersonalField('summary', generatedSummaryDraft)}
                               className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                             >
-                              Accept summary
+                              {t('personal.acceptSummaryButton')}
                             </button>
                           </div>
                         </motion.div>
@@ -1816,8 +1816,8 @@ export function ResumeBuilder() {
           {activeTab === 'experience' && (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-(--foreground)">Work Experience</h2>
-                <button onClick={handleAddRole} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Role</button>
+                <h2 className="text-xl font-bold text-(--foreground)">{t('experience.heading')}</h2>
+                <button onClick={handleAddRole} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">{t('experience.addRole')}</button>
               </div>
 
               {resumeData.experience.map((exp, expIndex) => {
@@ -1829,7 +1829,7 @@ export function ResumeBuilder() {
                 return (
                  <div key={exp.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                     <p className="text-xs uppercase tracking-wide text-(--muted)">Experience Entry</p>
+                     <p className="text-xs uppercase tracking-wide text-(--muted)">{t('experience.entryLabel')}</p>
                      <div className="flex gap-2" suppressHydrationWarning>
                        <button
                          onClick={() => handleDeleteExperience(exp.id)}
@@ -1846,13 +1846,13 @@ export function ResumeBuilder() {
                        value={exp.title}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'title', e.target.value)}
                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                       placeholder="Role title"
+                       placeholder={t('experience.titlePlaceholder')}
                      />
                      <input
                        value={exp.company}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'company', e.target.value)}
                        className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                       placeholder="Company"
+                       placeholder={t('experience.companyPlaceholder')}
                      />
                      <MonthYearRangeField
                        monthLabels={MONTH_LABELS}
@@ -1870,12 +1870,12 @@ export function ResumeBuilder() {
 
                      <div className="space-y-2">
                        <div className="flex items-center justify-between">
-                         <p className="text-xs uppercase tracking-wide text-(--muted)">Impact Bullets</p>
+                         <p className="text-xs uppercase tracking-wide text-(--muted)">{t('experience.impactBulletsLabel')}</p>
                          <button
                            onClick={() => addExperienceBullet(exp.id)}
                            className="text-xs font-medium text-(--accent) hover:text-(--accent-strong)"
                          >
-                           + Add Bullet
+                           {t('experience.addBullet')}
                          </button>
                        </div>
 
@@ -1906,8 +1906,8 @@ export function ResumeBuilder() {
                                    ? 'border-(--accent-strong) ring-2 ring-(--accent-strong)/40 focus:border-(--accent-strong)'
                                    : 'border-(--border) focus:border-(--accent-strong)'
                                }`}
-                               placeholder="Describe measurable impact"
-                               toolbarLabel="Bullet formatting"
+                               placeholder={t('experience.bulletPlaceholder')}
+                               toolbarLabel={t('experience.bulletToolbarLabel')}
                              />
                              <div className="flex flex-col gap-1 pt-7">
                                <button
@@ -1915,25 +1915,25 @@ export function ResumeBuilder() {
                                  disabled={Boolean(draftState?.isLoading)}
                                  className="rounded-md border border-(--accent)/40 px-2 py-1 text-[11px] text-(--accent) hover:bg-(--accent-muted) disabled:cursor-not-allowed disabled:opacity-70"
                                >
-                                 {draftState?.isLoading ? 'AI...' : 'AI Draft'}
+                                 {draftState?.isLoading ? t('ai.aiDraftLoading') : t('ai.aiDraft')}
                                </button>
                                <button
                                  onClick={() => removeExperienceBullet(exp.id, bulletIndex)}
                                  disabled={experienceBullets.length === 1}
                                  className="rounded-md border border-(--accent-strong)/35 px-2 py-1 text-[11px] text-(--accent-strong) hover:bg-(--accent)/12 disabled:cursor-not-allowed disabled:opacity-40"
                                >
-                                 Del
+                                 {t('experience.deleteBulletButton')}
                                </button>
                              </div>
                            </motion.div>
 
                            <p className="pl-5 text-[11px] text-amber-300/90">
-                             AI Draft and Regenerate each consume 1 bullet rewrite credit.
+                             {t('ai.creditHint')}
                            </p>
 
                            {draftState?.isLoading ? (
                              <div className="ml-5 rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-xs text-(--muted)">
-                               Generating AI draft...
+                               {t('ai.generatingDraft')}
                              </div>
                            ) : null}
 
@@ -1951,8 +1951,8 @@ export function ResumeBuilder() {
                                  className="ml-5 rounded-lg border border-(--accent)/30 bg-(--accent)/8 p-3 space-y-2"
                                >
                                  <div className="flex items-center justify-between gap-2">
-                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-strong)">AI Draft</p>
-                                   <p className="text-[11px] text-amber-300/90">Regenerate uses 1 credit</p>
+                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-strong)">{t('ai.aiDraft')}</p>
+                                   <p className="text-[11px] text-amber-300/90">{t('ai.regenerateUsesCredit')}</p>
                                  </div>
                                  <p className="text-sm text-(--foreground)/95 leading-relaxed">{draftState?.draft}</p>
                                  <div className="flex items-center justify-end gap-2 pt-1">
@@ -1961,13 +1961,13 @@ export function ResumeBuilder() {
                                     disabled={Boolean(draftState?.isLoading)}
                                     className="rounded-md border border-(--border) bg-(--surface) px-3 py-1.5 text-xs font-medium text-(--muted) hover:text-(--foreground) disabled:cursor-not-allowed disabled:opacity-60"
                                   >
-                                     Regenerate
+                                     {t('ai.regenerate')}
                                    </button>
                                    <button
                                      onClick={() => handleAcceptBulletDraft(exp.id, bulletIndex)}
                                      className="rounded-md bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--background) hover:bg-(--accent)"
                                    >
-                                     Accept
+                                     {t('ai.accept')}
                                    </button>
                                  </div>
                                </motion.div>
@@ -1988,21 +1988,21 @@ export function ResumeBuilder() {
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-(--foreground)">Projects</h2>
-                  <p className="mt-1 text-sm text-(--muted)">Manage your imported and manual projects here. These are rendered separately from custom sections.</p>
+                  <h2 className="text-xl font-bold text-(--foreground)">{t('projects.heading')}</h2>
+                  <p className="mt-1 text-sm text-(--muted)">{t('projects.description')}</p>
                 </div>
-                <button onClick={handleAddProject} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Project</button>
+                <button onClick={handleAddProject} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">{t('projects.addProject')}</button>
               </div>
 
               {resumeData.projects.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
-                  No projects yet. Add one to keep it separate from custom sections.
+                  {t('projects.emptyState')}
                 </div>
               ) : (
                 resumeData.projects.map((project, index) => (
                   <div key={project.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                     <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                      <p className="text-xs uppercase tracking-wide text-(--muted)">Project {index + 1}</p>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">{t('projects.entryLabel', { index: index + 1 })}</p>
                       <div className="flex gap-2" suppressHydrationWarning>
                         <button
                           onClick={() => deleteProject(project.id)}
@@ -2018,14 +2018,14 @@ export function ResumeBuilder() {
                         value={project.name}
                         onChange={(e) => updateProjectField(project.id, { name: e.target.value })}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Project name"
+                        placeholder={t('projects.namePlaceholder')}
                       />
 
                       <input
                         value={project.role || ''}
                         onChange={(e) => updateProjectField(project.id, { role: e.target.value })}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Role / Title (e.g. Solo Founder, Lead Developer)"
+                        placeholder={t('projects.rolePlaceholder')}
                       />
 
                       <MonthYearRangeField
@@ -2046,22 +2046,22 @@ export function ResumeBuilder() {
                         value={project.description}
                         onValueChange={(value) => updateProjectField(project.id, { description: value })}
                         className="h-32 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder={`Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%`}
-                        toolbarLabel="Project description formatting"
+                        placeholder={t('projects.descriptionPlaceholder')}
+                        toolbarLabel={t('projects.descriptionToolbarLabel')}
                       />
 
                       <input
                         value={getProjectTechnologies(project).join(', ')}
                         onChange={(e) => updateProjectTechnologies(project.id, e.target.value)}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Technologies separated by commas (React, Node.js, AWS)"
+                        placeholder={t('projects.technologiesPlaceholder')}
                       />
 
                       <input
                         value={project.url || ''}
                         onChange={(e) => updateProjectField(project.id, { url: e.target.value })}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Project URL or GitHub link"
+                        placeholder={t('projects.urlPlaceholder')}
                       />
                     </div>
                   </div>
@@ -2074,26 +2074,26 @@ export function ResumeBuilder() {
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-(--foreground)">Education</h2>
-                  <p className="mt-1 text-sm text-(--muted)">Add each institution as a separate entry. Use the date pickers for graduation timelines.</p>
+                  <h2 className="text-xl font-bold text-(--foreground)">{t('education.heading')}</h2>
+                  <p className="mt-1 text-sm text-(--muted)">{t('education.description')}</p>
                 </div>
-                <button onClick={handleAddEducation} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Institution</button>
+                <button onClick={handleAddEducation} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">{t('education.addInstitution')}</button>
               </div>
 
               {resumeData.education.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
-                  No education entries yet. Click + Add Institution to add your first one.
+                  {t('education.emptyState')}
                 </div>
               ) : (
                 resumeData.education.map((entry, index) => (
                   <div key={entry.id} className="bg-(--surface) border border-(--border) rounded-xl p-4 hover:border-(--accent-strong)/60 transition-colors" suppressHydrationWarning>
                     <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
-                      <p className="text-xs uppercase tracking-wide text-(--muted)">Institution {index + 1}</p>
+                      <p className="text-xs uppercase tracking-wide text-(--muted)">{t('education.entryLabel', { index: index + 1 })}</p>
                       <div className="flex gap-2" suppressHydrationWarning>
                         <button
                           onClick={() => deleteEducation(entry.id)}
                           className="text-(--accent-strong) hover:text-(--accent) p-1"
-                          aria-label="Delete education entry"
+                          aria-label={t('education.deleteAriaLabel')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2105,7 +2105,7 @@ export function ResumeBuilder() {
                         value={entry.institution}
                         onChange={(e) => updateEducationField(entry.id, 'institution', e.target.value)}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Institution (e.g. Stanford University)"
+                        placeholder={t('education.institutionPlaceholder')}
                       />
 
                       <div className="grid gap-2 sm:grid-cols-2">
@@ -2113,13 +2113,13 @@ export function ResumeBuilder() {
                           value={entry.degree || ''}
                           onChange={(e) => updateEducationField(entry.id, 'degree', e.target.value)}
                           className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                          placeholder="Degree (e.g. B.Sc. in Computer Science)"
+                          placeholder={t('education.degreePlaceholder')}
                         />
                         <input
                           value={entry.field || ''}
                           onChange={(e) => updateEducationField(entry.id, 'field', e.target.value)}
                           className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                          placeholder="Field of study (optional)"
+                          placeholder={t('education.fieldPlaceholder')}
                         />
                       </div>
 
@@ -2127,7 +2127,7 @@ export function ResumeBuilder() {
                         value={entry.location || ''}
                         onChange={(e) => updateEducationField(entry.id, 'location', e.target.value)}
                         className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Location (optional, e.g. Stanford, CA)"
+                        placeholder={t('education.locationPlaceholder')}
                       />
 
                       <MonthYearRangeField
@@ -2148,8 +2148,8 @@ export function ResumeBuilder() {
                         value={entry.description || ''}
                         onValueChange={(value) => updateEducationField(entry.id, 'description', value)}
                         className="h-24 w-full resize-y rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-                        placeholder="Optional details (GPA, honors, relevant coursework, thesis, ...)"
-                        toolbarLabel="Education description formatting"
+                        placeholder={t('education.detailsPlaceholder')}
+                        toolbarLabel={t('education.descriptionToolbarLabel')}
                       />
                     </div>
                   </div>
@@ -2161,13 +2161,13 @@ export function ResumeBuilder() {
           {['skills', 'certifications', 'sections'].includes(activeTab) ? (
             <div className="space-y-4" suppressHydrationWarning>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold text-(--foreground)">{tabs.find((t) => t.id === activeTab)?.label}</h2>
-                <button onClick={() => setIsAddModalOpen(true)} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">+ Add Section</button>
+                <h2 className="text-xl font-bold text-(--foreground)">{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
+                <button onClick={() => setIsAddModalOpen(true)} className="text-(--accent) text-sm font-medium hover:text-(--accent-strong)">{t('sections.addSection')}</button>
               </div>
 
               {visibleDynamicSections.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-(--border) p-5 text-sm text-(--muted)">
-                  No sections yet for this category. Use Add Section to create one.
+                  {t('sections.emptyState')}
                 </div>
               ) : (
                 visibleDynamicSections.map((section) => (
@@ -2191,14 +2191,14 @@ export function ResumeBuilder() {
             disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
             className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Save className="w-4 h-4" /> Save
+            <Save className="w-4 h-4" /> {t('actions.save')}
           </button>
           <button
             onClick={exportAsLatexPdf}
             disabled={isExportingPdf || isImportingPdf}
             className={`flex-1 shadow-lg shadow-(--accent)/20 disabled:cursor-not-allowed disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
           >
-            <Download className="w-4 h-4" /> {isExportingPdf ? 'Exporting...' : 'Export PDF'}
+            <Download className="w-4 h-4" /> {isExportingPdf ? t('actions.exporting') : t('actions.exportPdf')}
           </button>
         </div>
       </div>
@@ -2210,7 +2210,7 @@ export function ResumeBuilder() {
           <HarvardTemplate data={resumeData} />
         </div>
         <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded print:hidden" suppressHydrationWarning>
-          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : ''}
+          {saveStatus === 'saving' ? t('status.saving') : saveStatus === 'saved' ? t('status.saved') : saveStatus === 'error' ? t('status.saveFailed') : ''}
         </div>
       </div>
 
@@ -2223,7 +2223,7 @@ export function ResumeBuilder() {
       <Modal
         open={isTailorModalOpen}
         onClose={() => setIsTailorModalOpen(false)}
-        title="AI Resume Tailor"
+        title={t('tailor.modalTitle')}
         maxWidth="xl"
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -2231,7 +2231,7 @@ export function ResumeBuilder() {
               onClick={() => setIsTailorModalOpen(false)}
               className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
             >
-              Cancel
+              {t('actions.cancel')}
             </button>
             <FeatureButton
               feature="jds"
@@ -2240,18 +2240,18 @@ export function ResumeBuilder() {
               className={`inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 ${buttonVariants('primary', 'md')}`}
             >
               <Sparkles className="h-4 w-4" />
-              {isTailoring ? 'Tailoring...' : 'Apply Tailoring'}
+              {isTailoring ? t('tailor.tailoringInProgress') : t('tailor.applyTailoring')}
             </FeatureButton>
           </div>
         }
       >
-        <p className="text-sm text-(--muted)">Paste a job description and tailor your resume bullets for this role.</p>
+        <p className="text-sm text-(--muted)">{t('tailor.modalDescription')}</p>
 
         <textarea
           value={tailorJobDescription}
           onChange={(e) => setTailorJobDescription(e.target.value)}
           className="mt-4 h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
-          placeholder="Paste job description here..."
+          placeholder={t('tailor.jobDescriptionPlaceholder')}
         />
       </Modal>
 
@@ -2273,7 +2273,7 @@ export function ResumeBuilder() {
       <Modal
         open={showUploadWarning}
         onClose={cancelUpload}
-        title="Before you upload"
+        title={t('upload.warningTitle')}
         maxWidth="md"
         footer={
           <div className="flex items-center justify-end gap-3">
@@ -2281,7 +2281,7 @@ export function ResumeBuilder() {
               onClick={cancelUpload}
               className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
             >
-              Cancel
+              {t('actions.cancel')}
             </button>
             <button
               onClick={finalizeUpload}
@@ -2290,32 +2290,32 @@ export function ResumeBuilder() {
             >
               {isImportingPdf ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t('upload.uploading')}
                 </>
               ) : (
-                'Got it, continue'
+                t('upload.gotItContinue')
               )}
             </button>
           </div>
         }
       >
         <p className="text-sm text-(--muted)">
-          For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.
+          {t('upload.warningBody')}
         </p>
       </Modal>
 
       <Modal
         open={showImportLimitModal}
         onClose={closeImportLimitModal}
-        title="Import limit reached"
+        title={t('upload.limitReachedTitle')}
         maxWidth="md"
         footer={
           <button onClick={closeImportLimitModal} className={buttonVariants('primary', 'md')}>
-            Got it
+            {t('upload.limitReachedGotIt')}
           </button>
         }
       >
-        <p className="text-sm text-(--muted)">{MAX_FILES_ERROR_MESSAGE}</p>
+        <p className="text-sm text-(--muted)">{t('upload.limitReachedBody')}</p>
       </Modal>
 
       {isImportingPdf ? (
@@ -2325,8 +2325,8 @@ export function ResumeBuilder() {
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-(--accent-strong)" />
               <div>
-                <p className="text-sm font-semibold text-(--foreground)">Importing PDF/DOCX</p>
-                <p className="text-xs text-(--muted)">Parsing your resume. This can take a moment.</p>
+                <p className="text-sm font-semibold text-(--foreground)">{t('upload.importingOverlayTitle')}</p>
+                <p className="text-xs text-(--muted)">{t('upload.importingOverlayBody')}</p>
               </div>
             </div>
           </div>

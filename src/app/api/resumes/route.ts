@@ -23,11 +23,12 @@ function isDuplicateError(error: { code?: string } | null): boolean {
 
 type ResumeListItem = { id: string; title: string | null; updated_at: string; score: number | null }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const requestId = getRequestId(req)
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
+      return apiError(clientErrorMessage('auth'), 401, requestId)
     }
 
     const result = await fetchOwnedList<ResumeListItem>({
@@ -36,17 +37,19 @@ export async function GET() {
       userId,
       logLabel: 'resumes GET failed',
       logContext: { route: '/api/resumes' },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ resumes: result.data }, 200)
+    return apiSuccess({ resumes: result.data }, 200, requestId)
   } catch (error) {
     logger.error('resumes GET top-level failure', {
+      requestId,
       route: '/api/resumes',
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }
 
@@ -309,10 +312,11 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const requestId = getRequestId(req)
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
+      return apiError(clientErrorMessage('auth'), 401, requestId)
     }
 
     const { searchParams } = new URL(req.url)
@@ -320,7 +324,7 @@ export async function DELETE(req: Request) {
 
     const parsedId = uuidLike.safeParse(resumeId)
     if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input', 'Missing or invalid resume id'), 400)
+      return apiError(clientErrorMessage('invalid_input', 'Missing or invalid resume id'), 400, requestId)
     }
 
     const supabase = createServerClient()
@@ -333,10 +337,10 @@ export async function DELETE(req: Request) {
 
     if (error) {
       if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500)
+        return apiError(clientErrorMessage('server', 'Resumes table is missing in Supabase.'), 500, requestId)
       }
-      logger.error('resumes DELETE failed', { userId, route: '/api/resumes', error: error.message })
-      return apiError(clientErrorMessage('server'), 500)
+      logger.error('resumes DELETE failed', { requestId, userId, route: '/api/resumes', error: error.message })
+      return apiError(clientErrorMessage('server'), 500, requestId)
     }
 
     // Only free a 'cvs' slot when a row was actually removed — a delete-by-id
@@ -347,12 +351,13 @@ export async function DELETE(req: Request) {
       await decrementFeatureCounter(userId, 'cvs')
     }
 
-    return apiSuccess({ deleted: true }, 200)
+    return apiSuccess({ deleted: true }, 200, requestId)
   } catch (error) {
     logger.error('resumes DELETE top-level failure', {
+      requestId,
       route: '/api/resumes',
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }

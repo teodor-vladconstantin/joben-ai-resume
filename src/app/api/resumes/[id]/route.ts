@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { getRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { exceedsJsonBudget, updateResumeSchema } from '@/lib/validation/schemas'
 import {
@@ -17,9 +17,10 @@ type ResumeRow = {
   data: unknown
 }
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
-    const authResult = await requireAuthenticatedResourceId(params)
+    const authResult = await requireAuthenticatedResourceId(params, requestId)
     if (!authResult.ok) return authResult.response
     const { userId, id } = authResult.value
 
@@ -33,22 +34,25 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       // PGRST116 when no row matches which maps cleanly to 404.
       logLabel: 'resumes [id] GET failed',
       logContext: { userId, resumeId: id },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ resume: result.data }, 200)
+    return apiSuccess({ resume: result.data }, 200, requestId)
   } catch (error) {
     logger.error('resumes [id] GET top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
-    const authResult = await requireAuthenticatedResourceId(params)
+    const authResult = await requireAuthenticatedResourceId(params, requestId)
     if (!authResult.ok) return authResult.response
     const { userId, id } = authResult.value
 
@@ -56,18 +60,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     try {
       rawBody = await req.json()
     } catch {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return apiError(clientErrorMessage('invalid_input'), 400, requestId)
     }
 
     const parsed = updateResumeSchema.safeParse(rawBody)
     if (!parsed.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return apiError(clientErrorMessage('invalid_input'), 400, requestId)
     }
 
     const body = parsed.data
     // SECURITY: cap resume JSON payload (anti storage abuse).
     if (body.data && exceedsJsonBudget(body.data)) {
-      return apiError(clientErrorMessage('invalid_input', 'Resume payload is too large.'), 413)
+      return apiError(clientErrorMessage('invalid_input', 'Resume payload is too large.'), 413, requestId)
     }
 
     const result = await updateOwnedRow<ResumeRow>({
@@ -82,15 +86,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       missingRelationMessage: 'Resumes table is missing in Supabase.',
       logLabel: 'resumes [id] PATCH failed',
       logContext: { userId, resumeId: id },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ resume: result.data }, 200)
+    return apiSuccess({ resume: result.data }, 200, requestId)
   } catch (error) {
     logger.error('resumes [id] PATCH top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }

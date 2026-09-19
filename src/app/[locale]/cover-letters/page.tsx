@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { timeAgo } from '@/lib/time-ago'
 
 type CoverLetterItem = {
@@ -15,6 +16,7 @@ type CoverLetterItem = {
 }
 
 export default function CoverLettersPage() {
+  const t = useTranslations('CoverLettersPage')
   const [letters, setLetters] = useState<CoverLetterItem[]>([])
   const [isPending, startTransition] = useTransition()
   const [query, setQuery] = useState('')
@@ -42,7 +44,7 @@ export default function CoverLettersPage() {
   }, [])
 
   const handleDelete = (id: string) => {
-    if (!confirm('Delete this cover letter?')) return
+    if (!confirm(t('deleteConfirm'))) return
 
     startTransition(async () => {
       const response = await fetch(`/api/cover-letters/${id}`, { method: 'DELETE' })
@@ -53,7 +55,7 @@ export default function CoverLettersPage() {
 
   const visibleLetters = useMemo(() => {
     const filtered = letters.filter((letter) =>
-      (letter.title || 'Untitled Cover Letter').toLowerCase().includes(query.toLowerCase())
+      (letter.title || t('untitledCoverLetter')).toLowerCase().includes(query.toLowerCase())
     )
 
     if (sortMode === 'az') {
@@ -69,7 +71,7 @@ export default function CoverLettersPage() {
     return [...filtered].sort(
       (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     )
-  }, [letters, query, sortMode])
+  }, [letters, query, sortMode, t])
 
   return (
     <div className="min-h-screen flex">
@@ -82,11 +84,11 @@ export default function CoverLettersPage() {
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
-              <h1 className="text-3xl font-bold text-(--foreground) mb-2">Cover Letters</h1>
-              <p className="text-(--muted)">{letters.length} cover letters</p>
+              <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
+              <p className="text-(--muted)">{t('letterCount', { count: letters.length })}</p>
             </div>
             <Link href="/cover-letters/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
-              <Plus className="w-5 h-5" /> Create Cover Letter
+              <Plus className="w-5 h-5" /> {t('createCoverLetter')}
             </Link>
           </div>
 
@@ -96,32 +98,32 @@ export default function CoverLettersPage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search cover letters..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full rounded-lg border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Newest</button>
-              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Oldest</button>
-              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>A-Z</button>
+              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortNewest')}</button>
+              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortOldest')}</button>
+              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortAZ')}</button>
             </div>
           </div>
 
           <div className="rounded-2xl border border-(--border) bg-(--surface) overflow-hidden">
             {visibleLetters.length === 0 ? (
               <div className="p-10 text-center text-(--muted)">
-                <p>No cover letters found.</p>
+                <p>{t('noCoverLettersFound')}</p>
               </div>
             ) : (
               <div className="divide-y divide-(--border)">
                 {visibleLetters.map((letter) => (
                   <div key={letter.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-(--surface-elevated) transition-colors">
                     <div className="min-w-0">
-                      <p className="text-(--foreground) font-semibold truncate">{letter.title || 'Untitled Cover Letter'}</p>
-                      <p className="text-xs text-(--muted)">Updated {new Date(letter.updated_at).toLocaleDateString()}</p>
+                      <p className="text-(--foreground) font-semibold truncate">{letter.title || t('untitledCoverLetter')}</p>
+                      <p className="text-xs text-(--muted)">{t('updatedPrefix')}{new Date(letter.updated_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-bold px-2 py-1 rounded bg-(--accent-muted) text-(--accent)">CL</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-(--accent-muted) text-(--accent)">{t('badgeLabel')}</span>
                       <span className="text-xs text-(--muted) hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(letter.updated_at)}</span>
                       <Link href={`/cover-letters/${letter.id}`} className="text-(--muted) hover:text-(--foreground)"><Eye className="w-4 h-4" /></Link>
                       <Link href={`/cover-letters/${letter.id}`} className="text-(--muted) hover:text-(--foreground)"><Edit className="w-4 h-4" /></Link>

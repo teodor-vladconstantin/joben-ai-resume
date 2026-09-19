@@ -1,14 +1,9 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 type AILoadingStage = 'analyzing' | 'generating' | 'saving'
-
-const STAGE_MESSAGES: Record<AILoadingStage, string> = {
-  analyzing: 'Analyzing your resume...',
-  generating: 'Generating suggestions...',
-  saving: 'Saving analysis...',
-}
 
 interface AILoadingStateProps {
   stage: AILoadingStage
@@ -16,6 +11,7 @@ interface AILoadingStateProps {
 }
 
 export function AILoadingState({ stage, done = false }: AILoadingStateProps) {
+  const t = useTranslations('Builder.aiLoadingState')
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
@@ -52,7 +48,7 @@ export function AILoadingState({ stage, done = false }: AILoadingStateProps) {
   return (
     <div className="flex flex-col items-center gap-4 py-10">
       <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-[#0A9548] animate-spin" />
-      <p className="text-white font-semibold">{STAGE_MESSAGES[stage]}</p>
+      <p className="text-white font-semibold">{t(stage)}</p>
       <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
           className="h-full bg-linear-to-r from-[#0A9548] to-[#16DB65] rounded-full transition-[width] duration-300"

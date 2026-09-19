@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { apiError } from '@/lib/api-response'
-import { logger } from '@/lib/logger'
+import { getRequestId, logger } from '@/lib/logger'
 
-export async function GET() {
+export async function GET(req: Request) {
+  const requestId = getRequestId(req)
   const { userId } = await auth()
   if (!userId) {
-    return apiError('You must be signed in.', 401)
+    return apiError('You must be signed in.', 401, requestId)
   }
 
   const supabase = createServerClient()
@@ -27,8 +28,8 @@ export async function GET() {
     .find(Boolean)
 
   if (firstError) {
-    logger.error('Data export failed', { userId, error: firstError.message })
-    return apiError('Could not generate your data export.', 500)
+    logger.error('Data export failed', { requestId, userId, error: firstError.message })
+    return apiError('Could not generate your data export.', 500, requestId)
   }
 
   const exportPayload = {

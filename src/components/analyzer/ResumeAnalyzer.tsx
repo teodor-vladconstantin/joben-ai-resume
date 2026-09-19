@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
 import { CheckCircle2, AlertTriangle, XCircle, ArrowRight, Zap, Loader2 } from 'lucide-react'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { buttonVariants } from '@/components/ui/Button'
@@ -40,10 +41,10 @@ export type AnalyzerReview = {
   resumes?: { title?: string } | Array<{ title?: string }> | null
 }
 
-function getResumeTitle(value: AnalyzerReview['resumes']) {
-  if (!value) return 'Resume'
-  if (Array.isArray(value)) return value[0]?.title || 'Resume'
-  return value.title || 'Resume'
+function getResumeTitle(value: AnalyzerReview['resumes'], fallback: string) {
+  if (!value) return fallback
+  if (Array.isArray(value)) return value[0]?.title || fallback
+  return value.title || fallback
 }
 
 /** Hex color keyed to 0-100 score — used for ring, text, borders. A genuine
@@ -93,6 +94,9 @@ export function ResumeAnalyzer({
   loadingImprovementIndex = null,
   fixErrors = {},
 }: ResumeAnalyzerProps) {
+  const t = useTranslations('AiReviewPage.analyzer')
+  const tScore = useTranslations('Dashboard.scoreBreakdown')
+
   if (isLoading) {
     return (
       <div className="bg-(--surface) rounded-2xl border border-(--border) p-10 text-center">
@@ -112,14 +116,14 @@ export function ResumeAnalyzer({
   if (!review) {
     return (
       <div className="bg-(--surface) rounded-2xl border border-(--border) p-10 text-center text-(--muted)">
-        No review data available.
+        {t('noReviewData')}
       </div>
     )
   }
 
   const feedback = review.feedback || {}
   const overallScore = Number(feedback.overall_score ?? review.score ?? 0)
-  const grade = feedback.grade || 'Unknown'
+  const grade = feedback.grade || t('unknownGrade')
   const categories = [
     feedback.categories?.ats_structure,
     feedback.categories?.content_quality,
@@ -140,7 +144,7 @@ export function ResumeAnalyzer({
       <div className="lg:col-span-1 space-y-6">
         <div className="bg-(--surface) rounded-3xl border border-(--border) p-8 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-(--accent-muted) rounded-bl-[100px] pointer-events-none" />
-          <h3 className="text-(--muted) font-medium mb-4 uppercase tracking-wider text-sm">Overall Match Score</h3>
+          <h3 className="text-(--muted) font-medium mb-4 uppercase tracking-wider text-sm">{t('overallMatchScore')}</h3>
 
           <div className="relative w-40 h-40 mx-auto flex items-center justify-center rounded-full border-12 border-(--border) mb-6">
             <div
@@ -154,18 +158,18 @@ export function ResumeAnalyzer({
           </div>
 
           <p className="text-(--foreground) font-bold text-xl mb-2">{grade}</p>
-          <p className="text-sm text-(--muted)">Review for {getResumeTitle(review.resumes)}.</p>
+          <p className="text-sm text-(--muted)">{t('reviewFor', { title: getResumeTitle(review.resumes, t('resumeFallback')) })}</p>
 
           {comparison ? (
             <div className="mt-4 rounded-xl border border-(--border) bg-(--background) px-4 py-3 text-left">
-              <p className="text-xs uppercase tracking-wide text-(--muted)">vs previous review</p>
+              <p className="text-xs uppercase tracking-wide text-(--muted)">{t('vsPreviousReview')}</p>
               {comparison.delta === null ? (
-                <p className="mt-1 text-sm text-(--muted)">First review for this resume.</p>
+                <p className="mt-1 text-sm text-(--muted)">{t('firstReviewForResume')}</p>
               ) : (
                 <p className={`mt-1 text-sm font-semibold ${comparison.delta >= 0 ? 'text-(--accent-strong)' : 'text-red-400'}`}>
-                  {comparison.delta >= 0 ? '+' : ''}{comparison.delta} pts
+                  {comparison.delta >= 0 ? '+' : ''}{comparison.delta} {t('pts')}
                   <span className="ml-2 text-xs font-normal text-(--muted)">
-                    (prev: {comparison.previousScore ?? 0})
+                    ({t('prevScore', { score: comparison.previousScore ?? 0 })})
                   </span>
                 </p>
               )}
@@ -182,7 +186,7 @@ export function ResumeAnalyzer({
                 disabled={!canApplyFixes || anyFixLoading}
                 className={`w-full flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 ${buttonVariants('primary', 'md')}`}
               >
-                <Zap className="w-5 h-5 fill-current" /> Auto-Fix All
+                <Zap className="w-5 h-5 fill-current" /> {t('autoFixAll')}
               </button>
             )}
             {autoFixError ? (
@@ -193,7 +197,7 @@ export function ResumeAnalyzer({
 
         {/* Score breakdown */}
         <div className="bg-(--surface) rounded-2xl border border-(--border) p-6">
-          <h3 className="text-(--foreground) font-bold mb-4">Score Breakdown</h3>
+          <h3 className="text-(--foreground) font-bold mb-4">{tScore('title')}</h3>
           <div className="space-y-4">
             {categories.map((item, idx) => {
               const score = Number(item.score || 0)
@@ -202,7 +206,7 @@ export function ResumeAnalyzer({
               return (
                 <div key={`${item.label || 'cat'}-${idx}`}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-(--muted)">{item.label || 'Category'}</span>
+                    <span className="text-(--muted)">{item.label || t('categoryFallback')}</span>
                     <span className="text-(--foreground) font-bold">{score}/{max}</span>
                   </div>
                   <div className="w-full h-1.5 bg-(--background) rounded-full">
@@ -221,17 +225,17 @@ export function ResumeAnalyzer({
       {/* Right panel */}
       <div className="lg:col-span-2 space-y-6">
         <div className="bg-(--surface) rounded-3xl border border-(--border) p-8">
-          <h2 className="text-2xl font-bold text-(--foreground) mb-6 border-b border-(--border) pb-4">Actionable Feedback</h2>
+          <h2 className="text-2xl font-bold text-(--foreground) mb-6 border-b border-(--border) pb-4">{t('actionableFeedback')}</h2>
 
           {/* Priority Improvements */}
           <div className="mb-8">
             <h3 className="text-red-400 font-bold flex items-center gap-2 mb-4">
-              <XCircle className="w-5 h-5" /> Priority Improvements
+              <XCircle className="w-5 h-5" /> {t('priorityImprovements')}
             </h3>
             <div className="space-y-4">
               {improvements.length === 0 ? (
                 <div className="bg-(--surface) rounded-xl border border-(--accent-strong)/20 p-4 text-sm text-(--muted)">
-                  No improvement suggestions were returned.
+                  {t('noImprovementSuggestions')}
                 </div>
               ) : (
                 improvements.map((imp, idx) => {
@@ -245,24 +249,24 @@ export function ResumeAnalyzer({
                         isThisLoading ? 'border-(--accent)/40' : 'border-(--accent-strong)/20'
                       }`}
                     >
-                      <p className="text-sm text-(--muted)">{imp.issue || 'Improve clarity and impact.'}</p>
+                      <p className="text-sm text-(--muted)">{imp.issue || t('defaultIssue')}</p>
                       <div>
-                        <p className="text-sm text-(--muted) mb-2">Current:</p>
+                        <p className="text-sm text-(--muted) mb-2">{t('current')}</p>
                         <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--accent-strong) px-3 py-2">
-                          {imp.weak_example || 'N/A'}
+                          {imp.weak_example || t('notAvailable')}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-(--muted) mb-2">Suggested:</p>
+                        <p className="text-sm text-(--muted) mb-2">{t('suggested')}</p>
                         <p className="text-sm bg-(--accent-muted) text-(--accent) border-l-2 border-(--border) px-3 py-2">
-                          {imp.strong_example || 'N/A'}
+                          {imp.strong_example || t('notAvailable')}
                         </p>
                       </div>
 
                       <div className="pt-1">
                         {isThisLoading ? (
                           <span className="inline-flex items-center gap-2 text-sm text-(--accent)">
-                            <Loader2 className="w-4 h-4 animate-spin" /> Applying fix...
+                            <Loader2 className="w-4 h-4 animate-spin" /> {t('applyingFix')}
                           </span>
                         ) : (
                           <>
@@ -275,7 +279,7 @@ export function ResumeAnalyzer({
                                 disabled={anyFixLoading}
                                 className="text-(--accent) text-sm font-medium hover:text-(--accent-strong) flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                Apply this fix <ArrowRight className="w-4 h-4" />
+                                {t('applyThisFix')} <ArrowRight className="w-4 h-4" />
                               </button>
                             ) : null}
                           </>
@@ -291,11 +295,11 @@ export function ResumeAnalyzer({
           {/* Strengths */}
           <div>
             <h3 className="text-(--accent) font-bold flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-5 h-5" /> Strengths
+              <CheckCircle2 className="w-5 h-5" /> {t('strengths')}
             </h3>
             <div className="bg-(--surface) rounded-xl border border-(--accent)/20 p-4">
               {strengths.length === 0 ? (
-                <p className="text-sm text-(--muted)">No strengths returned.</p>
+                <p className="text-sm text-(--muted)">{t('noStrengthsReturned')}</p>
               ) : (
                 <ul className="space-y-3 text-sm text-(--muted)">
                   {strengths.map((s, idx) => (
@@ -312,13 +316,13 @@ export function ResumeAnalyzer({
           {categories.some((c) => c.feedback) ? (
             <div className="mt-8">
               <h3 className="text-(--accent-strong) font-bold flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-5 h-5" /> Category Insights
+                <AlertTriangle className="w-5 h-5" /> {t('categoryInsights')}
               </h3>
               <div className="space-y-3">
                 {categories.map((c, idx) =>
                   c.feedback ? (
                     <div key={`${c.label || 'insight'}-${idx}`} className="bg-(--surface) rounded-xl border border-(--accent-strong)/25 p-4">
-                      <p className="text-(--foreground) font-medium mb-1">{c.label || 'Category'}</p>
+                      <p className="text-(--foreground) font-medium mb-1">{c.label || t('categoryFallback')}</p>
                       <p className="text-sm text-(--muted)">{c.feedback}</p>
                     </div>
                   ) : null

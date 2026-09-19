@@ -90,7 +90,7 @@ describe('POST /api/account/delete', () => {
     authMock.mockResolvedValue({ userId: null })
     const { POST } = await import('@/app/api/account/delete/route')
 
-    const response = await POST()
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
     expect(response.status).toBe(401)
   })
 
@@ -101,7 +101,7 @@ describe('POST /api/account/delete', () => {
     clerkClientMock.mockResolvedValue({ users: { deleteUser: deleteUserMock } })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST()
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
     const payload = (await response.json()) as { success: boolean; data?: { deleted: boolean } }
 
     expect(response.status).toBe(200)
@@ -127,7 +127,7 @@ describe('POST /api/account/delete', () => {
     })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST()
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
     const payload = (await response.json()) as { success: boolean }
 
     expect(response.status).toBe(200)
@@ -141,7 +141,7 @@ describe('POST /api/account/delete', () => {
     stripeCancelMock.mockResolvedValue({})
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST()
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
     const payload = (await response.json()) as { success: boolean }
 
     expect(response.status).toBe(200)
@@ -155,7 +155,7 @@ describe('POST /api/account/delete', () => {
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    await POST()
+    await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
 
     expect(stripeCancelMock).not.toHaveBeenCalled()
   })
@@ -167,7 +167,7 @@ describe('POST /api/account/delete', () => {
     stripeCancelMock.mockRejectedValue(new Error('No such subscription'))
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST()
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
     const payload = (await response.json()) as { success: boolean; data?: { deleted: boolean } }
 
     expect(stripeCancelMock).toHaveBeenCalledWith('sub_abc123')

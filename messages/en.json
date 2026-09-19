@@ -42,29 +42,55 @@
   },
   "Home": {
     "heroPrefix": "Your Resume Is Getting Rejected Before a ",
-    "heroRotatingWords": ["Recruiter", "Hiring Manager", "Bot"],
+    "heroRotatingWords": [
+      "Recruiter",
+      "Hiring Manager",
+      "Bot"
+    ],
     "heroSuffix": " Ever Reads It.",
     "subheading": "Many applications are filtered out automatically by ATS software, not because you lack experience, but because your resume is not formatted for machines. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
     "cta": "Check My ATS Score. It's Free",
-    "features": ["No credit card required", "Free forever", "Setup in 2 minutes"],
+    "features": [
+      "No credit card required",
+      "Free forever",
+      "Setup in 2 minutes"
+    ],
     "platformFeaturesHeading": "Platform Features",
     "statCards": [
-      { "title": "AI Powered", "description": "Automatically generate professional bullet points tailored to your industry." },
-      { "title": "ATS-Optimized Format", "description": "Templates designed to format cleanly for applicant tracking systems." },
-      { "title": "Clearer, More Relevant CV", "description": "Highlight the experience recruiters want to see most." }
+      {
+        "title": "AI Powered",
+        "description": "Automatically generate professional bullet points tailored to your industry."
+      },
+      {
+        "title": "ATS-Optimized Format",
+        "description": "Templates designed to format cleanly for applicant tracking systems."
+      },
+      {
+        "title": "Clearer, More Relevant CV",
+        "description": "Highlight the experience recruiters want to see most."
+      }
     ],
     "atsPreview": {
       "heading": "See What Recruiters See In Your Resume",
       "subheading": "Our AI reviews your resume against real job postings so you know where you stand.",
       "scoreLabel": "Excellent",
-      "categories": ["ATS readability", "Content quality", "Writing quality", "Job optimization", "Application ready"],
+      "categories": [
+        "ATS readability",
+        "Content quality",
+        "Writing quality",
+        "Job optimization",
+        "Application ready"
+      ],
       "whatWeFoundLabel": "What we found",
       "categoryBreakdownLabel": "Category breakdown",
       "strengthsTitle": "Strengths identified",
       "strengthsDescription": "Strong action verbs and quantified bullet points throughout your experience section.",
       "improvementsTitle": "Improvement suggestions",
       "improvementsDescription": "Add a technical skills summary near the top and tighten your most recent role's bullets.",
-      "strengths": ["Strong action verbs used throughout.", "Perfectly structured for ATS parsers."],
+      "strengths": [
+        "Strong action verbs used throughout.",
+        "Perfectly structured for ATS parsers."
+      ],
       "improvementBefore": "Helped team increase sales",
       "improvementAfter": "Spearheaded initiative driving a sales increase in Q3.",
       "mockResume": {
@@ -92,31 +118,51 @@
         "category": "Score",
         "heading": "See your score before you apply.",
         "description": "Upload your resume and get a 0-100 ATS score across five categories, with the exact strengths and gaps recruiters and parsers will see.",
-        "bullets": ["Every resume scored 0-100 across 5 categories", "See exactly what recruiters and ATS parsers see", "Know what to fix before you apply, not after"]
+        "bullets": [
+          "Every resume scored 0-100 across 5 categories",
+          "See exactly what recruiters and ATS parsers see",
+          "Know what to fix before you apply, not after"
+        ]
       },
       {
         "category": "Tailor",
         "heading": "Tailor your resume to the job description.",
         "description": "Paste a job description and Joben finds the missing keywords, then rewrites your bullets to fit that specific role.",
-        "bullets": ["Paste any job description, get instant keyword analysis", "Bullets rewritten to match the role, not generic AI filler", "One click, one tailored variant, one new draft"]
+        "bullets": [
+          "Paste any job description, get instant keyword analysis",
+          "Bullets rewritten to match the role, not generic AI filler",
+          "One click, one tailored variant, one new draft"
+        ]
       },
       {
         "category": "Rewrite",
         "heading": "Turn weak bullets into quantified wins.",
         "description": "One-click AI rewrite for any bullet: adds metrics, strong verbs, and keeps your voice.",
-        "bullets": ["Weak verbs become strong, measurable outcomes", "Keeps your voice, never reads like generic AI", "Every rewrite tracked live against your monthly limit"]
+        "bullets": [
+          "Weak verbs become strong, measurable outcomes",
+          "Keeps your voice, never reads like generic AI",
+          "Every rewrite tracked live against your monthly limit"
+        ]
       },
       {
         "category": "Cover Letter",
         "heading": "A cover letter that matches your resume and the job.",
         "description": "AI-generated, consistent tone with your resume, tailored to the same job description.",
-        "bullets": ["Matches the tone and facts of your tailored resume", "Written for the same job description, not a template", "Ready to send in the time it takes to read this"]
+        "bullets": [
+          "Matches the tone and facts of your tailored resume",
+          "Written for the same job description, not a template",
+          "Ready to send in the time it takes to read this"
+        ]
       },
       {
         "category": "Export & Manage",
         "heading": "Export clean, keep every version organized.",
         "description": "Download a clean, ATS-ready PDF and keep multiple tailored resumes managed from one dashboard.",
-        "bullets": ["Clean, unwatermarked PDF exports", "Keep multiple tailored versions per role", "Manage everything from one dashboard"]
+        "bullets": [
+          "Clean, unwatermarked PDF exports",
+          "Keep multiple tailored versions per role",
+          "Manage everything from one dashboard"
+        ]
       }
     ],
     "pricingTeaserHeading": "Simple, Transparent Pricing",
@@ -135,8 +181,20 @@
         "description": "Best for building your first polished application.",
         "price": "0 RON",
         "pricePeriod": "/forever",
-        "features": ["Manual resume builder", "Save 1 CV", "5 PDF exports", "3 AI cover letters / month", "3 resume-tailoring runs (CV vs JD) / month", "15 AI bullet rewrites / month", "1 basic ATS-optimized template"],
-        "excludedFeatures": ["Priority email support", "Unlimited saved CVs", "Full template library"],
+        "features": [
+          "Manual resume builder",
+          "Save 1 CV",
+          "5 PDF exports",
+          "3 AI cover letters / month",
+          "3 resume-tailoring runs (CV vs JD) / month",
+          "15 AI bullet rewrites / month",
+          "1 basic ATS-optimized template"
+        ],
+        "excludedFeatures": [
+          "Priority email support",
+          "Unlimited saved CVs",
+          "Full template library"
+        ],
         "cta": "Start Free"
       },
       {
@@ -144,7 +202,15 @@
         "description": "For active job seekers applying consistently.",
         "price": "59 RON",
         "pricePeriod": "/month",
-        "features": ["Everything in Free, plus:", "Save up to 3 CVs", "Unlimited PDF exports", "60 AI cover letters / month", "60 resume-tailoring runs (CV vs JD) / month", "200 AI bullet rewrites / month", "Priority email support"],
+        "features": [
+          "Everything in Free, plus:",
+          "Save up to 3 CVs",
+          "Unlimited PDF exports",
+          "60 AI cover letters / month",
+          "60 resume-tailoring runs (CV vs JD) / month",
+          "200 AI bullet rewrites / month",
+          "Priority email support"
+        ],
         "excludedFeatures": [],
         "cta": "Upgrade to Pro"
       },
@@ -153,7 +219,16 @@
         "description": "6-month plan for high-volume applications.",
         "price": "299 RON",
         "pricePeriod": "/6 months",
-        "features": ["Everything in Pro included", "Save up to 15 CVs", "300 AI cover letters / month", "300 resume-tailoring runs (CV vs JD) / month", "1,000 AI bullet rewrites / month", "Unlimited PDF exports", "Full template library access", "Priority email support"],
+        "features": [
+          "Everything in Pro included",
+          "Save up to 15 CVs",
+          "300 AI cover letters / month",
+          "300 resume-tailoring runs (CV vs JD) / month",
+          "1,000 AI bullet rewrites / month",
+          "Unlimited PDF exports",
+          "Full template library access",
+          "Priority email support"
+        ],
         "excludedFeatures": [],
         "cta": "Get Recruiting Plan"
       }
@@ -163,12 +238,29 @@
     "eyebrow": "Free ATS Resume Checker",
     "heading": "Free ATS Resume Checker: No Signup Required",
     "subheading": "Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes.",
-    "categoryLabels": { "formatting": "ATS Formatting", "structure": "Structure", "keywords": "Keywords & Impact", "clarity": "Clarity" },
+    "categoryLabels": {
+      "formatting": "ATS Formatting",
+      "structure": "Structure",
+      "keywords": "Keywords & Impact",
+      "clarity": "Clarity"
+    },
     "ctaByCategory": {
-      "formatting": { "headline": "Fix the formatting issues holding your score back.", "cta": "Fix My Formatting" },
-      "structure": { "headline": "Tighten the structure so parsers read every section.", "cta": "Fix My Structure" },
-      "keywords": { "headline": "Add the keywords your resume is missing.", "cta": "Fix My Keywords" },
-      "clarity": { "headline": "Turn vague bullets into measurable wins.", "cta": "Fix My Clarity" }
+      "formatting": {
+        "headline": "Fix the formatting issues holding your score back.",
+        "cta": "Fix My Formatting"
+      },
+      "structure": {
+        "headline": "Tighten the structure so parsers read every section.",
+        "cta": "Fix My Structure"
+      },
+      "keywords": {
+        "headline": "Add the keywords your resume is missing.",
+        "cta": "Fix My Keywords"
+      },
+      "clarity": {
+        "headline": "Turn vague bullets into measurable wins.",
+        "cta": "Fix My Clarity"
+      }
     },
     "errors": {
       "fileType": "Only .pdf and .docx files are supported.",
@@ -230,14 +322,38 @@
     "faqMistakesQuestion": "What are common resume mistakes for {roleLower} candidates?"
   },
   "Faq": [
-    { "question": "Is Joben really free to start?", "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month." },
-    { "question": "What do I get with Pro?", "answer": "Pro gives you 3 saved CVs, unlimited exports, 60 cover letters/month, 60 CV-tailoring runs/month, and 200 bullet rewrites/month." },
-    { "question": "How do AI limits work?", "answer": "Each plan has clear monthly usage counters for cover letters, CV tailoring, and bullet rewrites. Counters reset at the start of each month." },
-    { "question": "Are the resumes ATS-friendly?", "answer": "Yes. Joben templates and formatting are built to work with applicant tracking systems and keep your content readable by recruiters." },
-    { "question": "Can I create multiple versions of my resume?", "answer": "Absolutely. You can create tailored versions for different roles, industries, or job descriptions and manage them from your dashboard." },
-    { "question": "Can I generate cover letters too?", "answer": "Yes. All plans can generate cover letters, with monthly limits based on your plan." },
-    { "question": "Can I cancel my paid plan anytime?", "answer": "Yes. You can manage billing from your account and cancel whenever you want. Your current period remains active until it ends." },
-    { "question": "Is my resume data secure?", "answer": "We use modern authentication and secure backend infrastructure. Your data is isolated per account and only used to power your experience." }
+    {
+      "question": "Is Joben really free to start?",
+      "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month."
+    },
+    {
+      "question": "What do I get with Pro?",
+      "answer": "Pro gives you 3 saved CVs, unlimited exports, 60 cover letters/month, 60 CV-tailoring runs/month, and 200 bullet rewrites/month."
+    },
+    {
+      "question": "How do AI limits work?",
+      "answer": "Each plan has clear monthly usage counters for cover letters, CV tailoring, and bullet rewrites. Counters reset at the start of each month."
+    },
+    {
+      "question": "Are the resumes ATS-friendly?",
+      "answer": "Yes. Joben templates and formatting are built to work with applicant tracking systems and keep your content readable by recruiters."
+    },
+    {
+      "question": "Can I create multiple versions of my resume?",
+      "answer": "Absolutely. You can create tailored versions for different roles, industries, or job descriptions and manage them from your dashboard."
+    },
+    {
+      "question": "Can I generate cover letters too?",
+      "answer": "Yes. All plans can generate cover letters, with monthly limits based on your plan."
+    },
+    {
+      "question": "Can I cancel my paid plan anytime?",
+      "answer": "Yes. You can manage billing from your account and cancel whenever you want. Your current period remains active until it ends."
+    },
+    {
+      "question": "Is my resume data secure?",
+      "answer": "We use modern authentication and secure backend infrastructure. Your data is isolated per account and only used to power your experience."
+    }
   ],
   "Footer": {
     "heading": "Your career is your most valuable asset. Start building it today.",
@@ -247,15 +363,36 @@
     "productHeading": "Product",
     "legalHeading": "Legal",
     "productLinks": [
-      { "href": "/about", "label": "About" },
-      { "href": "/pricing", "label": "Pricing" },
-      { "href": "/resume-examples", "label": "Resume Examples" },
-      { "href": "/free-ats-checker", "label": "Free ATS Checker" }
+      {
+        "href": "/about",
+        "label": "About"
+      },
+      {
+        "href": "/pricing",
+        "label": "Pricing"
+      },
+      {
+        "href": "/resume-examples",
+        "label": "Resume Examples"
+      },
+      {
+        "href": "/free-ats-checker",
+        "label": "Free ATS Checker"
+      }
     ],
     "legalLinks": [
-      { "href": "/terms", "label": "Terms & Conditions" },
-      { "href": "/privacy", "label": "Privacy Policy" },
-      { "href": "/cookies", "label": "Cookie Policy" }
+      {
+        "href": "/terms",
+        "label": "Terms & Conditions"
+      },
+      {
+        "href": "/privacy",
+        "label": "Privacy Policy"
+      },
+      {
+        "href": "/cookies",
+        "label": "Cookie Policy"
+      }
     ],
     "salBadgeAlt": "SAL (Alternative Dispute Resolution) - ANPC",
     "productHuntLabel": "Find us on Product Hunt",
@@ -270,7 +407,12 @@
     "contactBody": "Questions, feedback, or a request about your data? Reach us at {email}."
   },
   "Grade": {
-    "labels": { "Poor": "Poor", "Fair": "Fair", "Good": "Good", "Excellent": "Excellent" },
+    "labels": {
+      "Poor": "Poor",
+      "Fair": "Fair",
+      "Good": "Good",
+      "Excellent": "Excellent"
+    },
     "descriptions": {
       "Poor": "Significant issues here are likely costing you interviews.",
       "Fair": "A few fixes below would meaningfully improve your chances.",
@@ -287,13 +429,28 @@
     "manageBilling": "Manage Billing",
     "upgradeToPro": "Upgrade to Pro"
   },
+  "Shared": {
+    "close": "Close",
+    "featureButton": {
+      "accessSuspended": "Access suspended. Please contact support.",
+      "monthlyLimitReached": "Monthly limit reached. Resets on the 1st of {month}.",
+      "creditUsedUp": "Monthly AI credit has been used up.",
+      "remainingThisMonth": "{remaining} of {limit} left this month",
+      "nextMonth": "next month"
+    }
+  },
   "Dashboard": {
     "greetingMorning": "Good morning",
     "greetingEvening": "Good evening",
     "guestFallbackName": "There",
     "subGreeting": "Here's an overview of your resume and career progress.",
     "sidebarSettings": "Settings",
-    "statCards": { "resumes": "Resumes", "coverLetters": "Cover Letters", "reviews": "Reviews", "avgScore": "Avg Score" },
+    "statCards": {
+      "resumes": "Resumes",
+      "coverLetters": "Cover Letters",
+      "reviews": "Reviews",
+      "avgScore": "Avg Score"
+    },
     "industryBenchmark": {
       "title": "Industry Benchmark",
       "description": "See how your resumes compare to successful candidates.",
@@ -307,17 +464,52 @@
       "latestGradePrefix": "Latest grade: ",
       "unknownGrade": "Unknown",
       "categories": [
-        { "label": "ATS & Structure", "max": 20, "key": "ats" },
-        { "label": "Content Quality", "max": 40, "key": "content" },
-        { "label": "Writing Quality", "max": 10, "key": "writing" },
-        { "label": "Job Match", "max": 25, "key": "match" },
-        { "label": "Application Ready", "max": 5, "key": "ready" }
+        {
+          "label": "ATS & Structure",
+          "max": 20,
+          "key": "ats"
+        },
+        {
+          "label": "Content Quality",
+          "max": 40,
+          "key": "content"
+        },
+        {
+          "label": "Writing Quality",
+          "max": 10,
+          "key": "writing"
+        },
+        {
+          "label": "Job Match",
+          "max": 25,
+          "key": "match"
+        },
+        {
+          "label": "Application Ready",
+          "max": 5,
+          "key": "ready"
+        }
       ]
     },
     "quickActions": [
-      { "label": "New Resume", "href": "/resumes", "icon": "Plus", "isPrimary": true },
-      { "label": "Cover Letter", "href": "/cover-letters", "icon": "Mail", "isPrimary": false },
-      { "label": "AI Review", "href": "/ai-review", "icon": "FileSearch", "isPrimary": false }
+      {
+        "label": "New Resume",
+        "href": "/resumes",
+        "icon": "Plus",
+        "isPrimary": true
+      },
+      {
+        "label": "Cover Letter",
+        "href": "/cover-letters",
+        "icon": "Mail",
+        "isPrimary": false
+      },
+      {
+        "label": "AI Review",
+        "href": "/ai-review",
+        "icon": "FileSearch",
+        "isPrimary": false
+      }
     ],
     "yourScore": {
       "title": "Your Score",
@@ -408,20 +600,62 @@
       "footerLinkLabel": "Terms and Conditions",
       "footerSuffix": " for legal terms of service.",
       "sections": [
-        { "title": "1. Scope", "content": "This Privacy Policy explains how Joben (\"we\", \"us\") collects, uses, stores, and shares your personal data when you use joben.eu and our AI resume-building services, in accordance with the EU General Data Protection Regulation (GDPR)." },
-        { "title": "2. Data We Collect", "content": "Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number (Stripe handles that directly)). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses." },
-        { "title": "3. How We Use Data", "content": "To provide the core resume-building and AI-review service you signed up for; to process payments; to detect and prevent abuse (rate limiting); to send service emails (welcome, inactivity reminders, feedback requests); to fix bugs via error monitoring; and, only with your consent, to understand product usage through analytics." },
-        { "title": "4. AI Processing", "content": "When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic (\"Claude\"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic; we only send the document content needed for the specific request. Anthropic does not use API inputs to train its models by default." },
-        { "title": "5. Sub-Processors", "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure, so it is not a third-party sub-processor." },
-        { "title": "6. Legal Bases", "content": "Contract performance: account creation, resume/cover letter storage, AI features, and billing, all necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law." },
-        { "title": "7. Data Retention", "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window." },
-        { "title": "8. Security", "content": "We use encryption in transit (TLS) for all traffic, restrict database access to server-side service credentials only, and apply row-level security policies on every table holding personal data. No method of transmission or storage is completely secure, so we cannot guarantee absolute security." },
-        { "title": "9. Your Rights", "content": "Under the GDPR you have the right to: access the personal data we hold about you (use \"Export My Data\" in Settings for an instant JSON export); request deletion of your account and all associated data (use \"Delete Account\" in Settings, which is processed immediately); rectify inaccurate data (update it directly in the app or contact us); object to or restrict certain processing, such as analytics (use the cookie banner or contact us); and data portability (the export above is provided in a structured, machine-readable JSON format). To exercise any right not available directly in the app, email privacy@joben.eu. You also have the right to lodge a complaint with your local data protection supervisory authority." },
-        { "title": "10. Cookies and Similar Technologies", "content": "We use strictly necessary cookies to keep you signed in and secure the service, and, only if you accept them via our cookie banner, analytics cookies to understand product usage. See our full Cookie Policy for the complete list of cookies, their purpose, and how to change your choice at any time." },
-        { "title": "11. International Data Transfers", "content": "Some of our sub-processors (Anthropic, Stripe, Resend, Upstash, Vercel) are based in or process data in the United States. Where we transfer personal data outside the European Economic Area, we rely on the European Commission's Standard Contractual Clauses (SCCs) or an equivalent adequacy safeguard offered by that provider." },
-        { "title": "12. Children's Privacy", "content": "Joben is not directed at, and we do not knowingly collect data from, anyone under 16 years old, the minimum age required to use our services under these terms. If you believe a minor has provided us personal data, contact us and we will delete it." },
-        { "title": "13. Changes to This Policy", "content": "We may update this policy periodically. Material changes will be reflected by an updated \"Last updated\" date above; continued use after an update means you acknowledge the revised version." },
-        { "title": "14. Contact", "content": "For privacy requests or questions, contact us at privacy@joben.eu." }
+        {
+          "title": "1. Scope",
+          "content": "This Privacy Policy explains how Joben (\"we\", \"us\") collects, uses, stores, and shares your personal data when you use joben.eu and our AI resume-building services, in accordance with the EU General Data Protection Regulation (GDPR)."
+        },
+        {
+          "title": "2. Data We Collect",
+          "content": "Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number (Stripe handles that directly)). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses."
+        },
+        {
+          "title": "3. How We Use Data",
+          "content": "To provide the core resume-building and AI-review service you signed up for; to process payments; to detect and prevent abuse (rate limiting); to send service emails (welcome, inactivity reminders, feedback requests); to fix bugs via error monitoring; and, only with your consent, to understand product usage through analytics."
+        },
+        {
+          "title": "4. AI Processing",
+          "content": "When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic (\"Claude\"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic; we only send the document content needed for the specific request. Anthropic does not use API inputs to train its models by default."
+        },
+        {
+          "title": "5. Sub-Processors",
+          "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure, so it is not a third-party sub-processor."
+        },
+        {
+          "title": "6. Legal Bases",
+          "content": "Contract performance: account creation, resume/cover letter storage, AI features, and billing, all necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law."
+        },
+        {
+          "title": "7. Data Retention",
+          "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window."
+        },
+        {
+          "title": "8. Security",
+          "content": "We use encryption in transit (TLS) for all traffic, restrict database access to server-side service credentials only, and apply row-level security policies on every table holding personal data. No method of transmission or storage is completely secure, so we cannot guarantee absolute security."
+        },
+        {
+          "title": "9. Your Rights",
+          "content": "Under the GDPR you have the right to: access the personal data we hold about you (use \"Export My Data\" in Settings for an instant JSON export); request deletion of your account and all associated data (use \"Delete Account\" in Settings, which is processed immediately); rectify inaccurate data (update it directly in the app or contact us); object to or restrict certain processing, such as analytics (use the cookie banner or contact us); and data portability (the export above is provided in a structured, machine-readable JSON format). To exercise any right not available directly in the app, email privacy@joben.eu. You also have the right to lodge a complaint with your local data protection supervisory authority."
+        },
+        {
+          "title": "10. Cookies and Similar Technologies",
+          "content": "We use strictly necessary cookies to keep you signed in and secure the service, and, only if you accept them via our cookie banner, analytics cookies to understand product usage. See our full Cookie Policy for the complete list of cookies, their purpose, and how to change your choice at any time."
+        },
+        {
+          "title": "11. International Data Transfers",
+          "content": "Some of our sub-processors (Anthropic, Stripe, Resend, Upstash, Vercel) are based in or process data in the United States. Where we transfer personal data outside the European Economic Area, we rely on the European Commission's Standard Contractual Clauses (SCCs) or an equivalent adequacy safeguard offered by that provider."
+        },
+        {
+          "title": "12. Children's Privacy",
+          "content": "Joben is not directed at, and we do not knowingly collect data from, anyone under 16 years old, the minimum age required to use our services under these terms. If you believe a minor has provided us personal data, contact us and we will delete it."
+        },
+        {
+          "title": "13. Changes to This Policy",
+          "content": "We may update this policy periodically. Material changes will be reflected by an updated \"Last updated\" date above; continued use after an update means you acknowledge the revised version."
+        },
+        {
+          "title": "14. Contact",
+          "content": "For privacy requests or questions, contact us at privacy@joben.eu."
+        }
       ]
     },
     "terms": {
@@ -435,20 +669,62 @@
       "footerLinkLabel": "Privacy Policy",
       "footerSuffix": " for details on how we collect and process data.",
       "sections": [
-        { "title": "1. Acceptance of These Terms", "content": "By accessing or using Joben, you agree to these Terms and Conditions. If you do not agree, do not use the service." },
-        { "title": "2. Eligibility and Accounts", "content": "You must be at least 16 years old to use Joben. You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account." },
-        { "title": "3. Description of Services", "content": "Joben provides resume and cover letter tools, AI-powered analysis, and export features. Features and limits may depend on your plan." },
-        { "title": "4. No Guarantee of Employment Outcomes", "content": "Joben is a resume-writing and optimization tool. We do not guarantee interviews, job offers, or any specific employment outcome. AI-generated scores and suggestions are informational aids, not a promise of results." },
-        { "title": "5. Billing, Upgrades, and Refunds", "content": "Paid plans are billed according to the pricing shown at checkout. Taxes may apply. Unless required by law, fees are non-refundable." },
-        { "title": "6. Acceptable Use", "content": "You agree not to use Joben for unlawful, abusive, or fraudulent activity, and not to attempt unauthorized access, disruption, or misuse of the platform." },
-        { "title": "7. AI Output Disclaimer", "content": "AI-generated suggestions are produced by processing your resume and job-description text through a third-party AI provider (Anthropic). Outputs are provided for informational purposes only. You are responsible for reviewing, editing, and validating all generated content before use, including for accuracy." },
-        { "title": "8. Your Content", "content": "You retain ownership of content you upload or create. You grant us a limited license to process that content (including sending it to our AI provider), only to provide, maintain, and improve the service." },
-        { "title": "9. Intellectual Property", "content": "The Joben platform, branding, software, and related materials are protected by intellectual property laws and remain the property of Joben and its licensors." },
-        { "title": "10. Suspension and Termination", "content": "We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements. You may delete your account at any time from Settings." },
-        { "title": "11. Disclaimers and Limitation of Liability", "content": "The service is provided on an \"as is\" and \"as available\" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages, including loss of employment opportunity." },
-        { "title": "12. Governing Law", "content": "These terms are governed by the laws of the European Union and the jurisdiction in which Joben is established, without regard to conflict-of-law principles, without prejudice to any mandatory consumer-protection rights you have under the law of your country of residence." },
-        { "title": "13. Changes to Terms", "content": "We may update these terms from time to time. Continued use after updates means you accept the revised terms." },
-        { "title": "14. Contact", "content": "For legal or privacy-related questions, contact us at privacy@joben.eu." }
+        {
+          "title": "1. Acceptance of These Terms",
+          "content": "By accessing or using Joben, you agree to these Terms and Conditions. If you do not agree, do not use the service."
+        },
+        {
+          "title": "2. Eligibility and Accounts",
+          "content": "You must be at least 16 years old to use Joben. You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account."
+        },
+        {
+          "title": "3. Description of Services",
+          "content": "Joben provides resume and cover letter tools, AI-powered analysis, and export features. Features and limits may depend on your plan."
+        },
+        {
+          "title": "4. No Guarantee of Employment Outcomes",
+          "content": "Joben is a resume-writing and optimization tool. We do not guarantee interviews, job offers, or any specific employment outcome. AI-generated scores and suggestions are informational aids, not a promise of results."
+        },
+        {
+          "title": "5. Billing, Upgrades, and Refunds",
+          "content": "Paid plans are billed according to the pricing shown at checkout. Taxes may apply. Unless required by law, fees are non-refundable."
+        },
+        {
+          "title": "6. Acceptable Use",
+          "content": "You agree not to use Joben for unlawful, abusive, or fraudulent activity, and not to attempt unauthorized access, disruption, or misuse of the platform."
+        },
+        {
+          "title": "7. AI Output Disclaimer",
+          "content": "AI-generated suggestions are produced by processing your resume and job-description text through a third-party AI provider (Anthropic). Outputs are provided for informational purposes only. You are responsible for reviewing, editing, and validating all generated content before use, including for accuracy."
+        },
+        {
+          "title": "8. Your Content",
+          "content": "You retain ownership of content you upload or create. You grant us a limited license to process that content (including sending it to our AI provider), only to provide, maintain, and improve the service."
+        },
+        {
+          "title": "9. Intellectual Property",
+          "content": "The Joben platform, branding, software, and related materials are protected by intellectual property laws and remain the property of Joben and its licensors."
+        },
+        {
+          "title": "10. Suspension and Termination",
+          "content": "We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements. You may delete your account at any time from Settings."
+        },
+        {
+          "title": "11. Disclaimers and Limitation of Liability",
+          "content": "The service is provided on an \"as is\" and \"as available\" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages, including loss of employment opportunity."
+        },
+        {
+          "title": "12. Governing Law",
+          "content": "These terms are governed by the laws of the European Union and the jurisdiction in which Joben is established, without regard to conflict-of-law principles, without prejudice to any mandatory consumer-protection rights you have under the law of your country of residence."
+        },
+        {
+          "title": "13. Changes to Terms",
+          "content": "We may update these terms from time to time. Continued use after updates means you accept the revised terms."
+        },
+        {
+          "title": "14. Contact",
+          "content": "For legal or privacy-related questions, contact us at privacy@joben.eu."
+        }
       ]
     },
     "cookies": {
@@ -467,16 +743,514 @@
       "analyticsBody": "These cookies help us understand how the product is used so we can improve it. They are only set after you click \"Accept all\" in the cookie banner, and never before.",
       "marketingHeading": "Marketing",
       "marketingBody": "We do not use marketing or advertising cookies.",
-      "tableHeaders": { "name": "Name", "provider": "Provider", "purpose": "Purpose", "duration": "Duration" },
+      "tableHeaders": {
+        "name": "Name",
+        "provider": "Provider",
+        "purpose": "Purpose",
+        "duration": "Duration"
+      },
       "necessaryCookies": [
-        { "name": "__session", "provider": "Clerk", "purpose": "Keeps you signed in.", "duration": "Session" },
-        { "name": "__client_uat", "provider": "Clerk", "purpose": "Syncs sign-in state across tabs.", "duration": "1 year" },
-        { "name": "__clerk_db_jwt", "provider": "Clerk", "purpose": "Authentication token used to secure your session.", "duration": "Session" }
+        {
+          "name": "__session",
+          "provider": "Clerk",
+          "purpose": "Keeps you signed in.",
+          "duration": "Session"
+        },
+        {
+          "name": "__client_uat",
+          "provider": "Clerk",
+          "purpose": "Syncs sign-in state across tabs.",
+          "duration": "1 year"
+        },
+        {
+          "name": "__clerk_db_jwt",
+          "provider": "Clerk",
+          "purpose": "Authentication token used to secure your session.",
+          "duration": "Session"
+        }
       ],
       "analyticsCookies": [
-        { "name": "ph_*", "provider": "PostHog", "purpose": "Pseudonymous product analytics (feature usage, page views). Only set after you accept analytics cookies.", "duration": "Up to 1 year" },
-        { "name": "_vercel_*", "provider": "Vercel Analytics", "purpose": "Aggregate, privacy-friendly page-view analytics. Only set after you accept analytics cookies.", "duration": "Up to 1 year" }
+        {
+          "name": "ph_*",
+          "provider": "PostHog",
+          "purpose": "Pseudonymous product analytics (feature usage, page views). Only set after you accept analytics cookies.",
+          "duration": "Up to 1 year"
+        },
+        {
+          "name": "_vercel_*",
+          "provider": "Vercel Analytics",
+          "purpose": "Aggregate, privacy-friendly page-view analytics. Only set after you accept analytics cookies.",
+          "duration": "Up to 1 year"
+        }
       ]
+    }
+  },
+  "Builder": {
+    "tabs": {
+      "personal": "Personal Info",
+      "experience": "Experience",
+      "education": "Education",
+      "skills": "Skills",
+      "projects": "Projects",
+      "certifications": "Certifications",
+      "sections": "More Sections"
+    },
+    "personal": {
+      "heading": "Personal details",
+      "firstNameLabel": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastNameLabel": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "jobTitleLabel": "Job Title",
+      "jobTitlePlaceholder": "Software Engineer",
+      "emailLabel": "Email",
+      "emailPlaceholder": "john@example.com",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+1 (555) 000-0000",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Cluj-Napoca, Romania",
+      "summaryLabel": "Professional Summary",
+      "generateWithAi": "Generate with AI",
+      "summaryPlaceholder": "Professional summary",
+      "summaryToolbarLabel": "Summary formatting",
+      "linkedinLabel": "LinkedIn URL",
+      "linkedinPlaceholder": "https://linkedin.com/in/yourname",
+      "githubLabel": "GitHub URL",
+      "githubPlaceholder": "https://github.com/yourusername",
+      "websiteLabel": "Website / Portfolio",
+      "websitePlaceholder": "https://yourdomain.com",
+      "summaryModeResume": "Based on my resume",
+      "summaryModeScratch": "Write from scratch",
+      "summaryRolePlaceholder": "Describe your target role, level, and focus areas...",
+      "summaryGenClose": "Close",
+      "generateSummaryButton": "Generate summary",
+      "acceptSummaryButton": "Accept summary"
+    },
+    "experience": {
+      "heading": "Work Experience",
+      "addRole": "+ Add Role",
+      "entryLabel": "Experience Entry",
+      "titlePlaceholder": "Role title",
+      "companyPlaceholder": "Company",
+      "impactBulletsLabel": "Impact Bullets",
+      "addBullet": "+ Add Bullet",
+      "bulletPlaceholder": "Describe measurable impact",
+      "bulletToolbarLabel": "Bullet formatting",
+      "deleteBulletButton": "Del",
+      "confirmDelete": "Are you sure you want to delete this experience entry?",
+      "newRoleTitle": "New Role",
+      "newRoleCompany": "Company Name",
+      "newRoleDescription": "Describe your impact and achievements."
+    },
+    "ai": {
+      "aiDraft": "AI Draft",
+      "aiDraftLoading": "AI...",
+      "creditHint": "AI Draft and Regenerate each consume 1 bullet rewrite credit.",
+      "generatingDraft": "Generating AI draft...",
+      "regenerate": "Regenerate",
+      "regenerateUsesCredit": "Regenerate uses 1 credit",
+      "accept": "Accept"
+    },
+    "projects": {
+      "heading": "Projects",
+      "description": "Manage your imported and manual projects here. These are rendered separately from custom sections.",
+      "addProject": "+ Add Project",
+      "emptyState": "No projects yet. Add one to keep it separate from custom sections.",
+      "entryLabel": "Project {index}",
+      "namePlaceholder": "Project name",
+      "rolePlaceholder": "Role / Title (e.g. Solo Founder, Lead Developer)",
+      "descriptionPlaceholder": "Describe what you built, shipped, or learned. Tip: each line becomes its own bullet, e.g.:\n• Built X\n• Deployed Y\n• Reduced cost by 40%",
+      "descriptionToolbarLabel": "Project description formatting",
+      "technologiesPlaceholder": "Technologies separated by commas (React, Node.js, AWS)",
+      "urlPlaceholder": "Project URL or GitHub link"
+    },
+    "education": {
+      "heading": "Education",
+      "description": "Add each institution as a separate entry. Use the date pickers for graduation timelines.",
+      "addInstitution": "+ Add Institution",
+      "emptyState": "No education entries yet. Click + Add Institution to add your first one.",
+      "entryLabel": "Institution {index}",
+      "deleteAriaLabel": "Delete education entry",
+      "institutionPlaceholder": "Institution (e.g. Stanford University)",
+      "degreePlaceholder": "Degree (e.g. B.Sc. in Computer Science)",
+      "fieldPlaceholder": "Field of study (optional)",
+      "locationPlaceholder": "Location (optional, e.g. Stanford, CA)",
+      "detailsPlaceholder": "Optional details (GPA, honors, relevant coursework, thesis, ...)",
+      "descriptionToolbarLabel": "Education description formatting"
+    },
+    "sections": {
+      "addSection": "+ Add Section",
+      "emptyState": "No sections yet for this category. Use Add Section to create one."
+    },
+    "imports": {
+      "importing": "Importing...",
+      "importButton": "Import PDF/DOCX ({count}/{max})",
+      "tryAgain": "Try again",
+      "retrying": "Retrying..."
+    },
+    "tailor": {
+      "aiTailorButton": "AI Tailor",
+      "missingSkillsHeading": "Skills in this job description not found in your resume",
+      "missingJobDescription": "Add a job description before tailoring.",
+      "failed": "Tailor failed: {message}",
+      "genericError": "Could not tailor resume.",
+      "upgradeMessage": "Tailor is available on Pro.",
+      "modalTitle": "AI Resume Tailor",
+      "tailoringInProgress": "Tailoring...",
+      "applyTailoring": "Apply Tailoring",
+      "modalDescription": "Paste a job description and tailor your resume bullets for this role.",
+      "jobDescriptionPlaceholder": "Paste job description here...",
+      "summaryPatchLabel": "Professional Summary"
+    },
+    "bulletDraft": {
+      "emptyBulletError": "Add bullet text before generating an AI draft.",
+      "genericError": "Could not generate bullet draft.",
+      "dailyLimitReached": "Daily limit reached. Try again later.",
+      "remainingInWindow": "Remaining in current window: {remaining}/{limit}",
+      "resetsAt": "Resets at: {time}",
+      "upgradeMessage": "Bullet rewrite is available on Pro.",
+      "draftFailed": "Draft generation failed: {message}"
+    },
+    "summary": {
+      "missingRoleDescription": "Please describe the target role before generating from scratch.",
+      "genericError": "Could not generate summary. Please retry.",
+      "generationFailed": "Summary generation failed: {message}"
+    },
+    "fixBanner": {
+      "applied": "AI applied {count, plural, one {# improvement} other {# improvements}} to your resume.",
+      "autoFixComplete": "Auto-fix complete, no changes needed.",
+      "fixApplied": "Fix applied successfully."
+    },
+    "actions": {
+      "save": "Save",
+      "exporting": "Exporting...",
+      "exportPdf": "Export PDF",
+      "cancel": "Cancel"
+    },
+    "status": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "saveFailed": "Save failed"
+    },
+    "upload": {
+      "invalidFileType": "Only .pdf and .docx files are allowed.",
+      "fileTooLarge": "File must be under 5 MB.",
+      "limitReachedBody": "You can upload a maximum of 3 PDF/DOCX imports per CV slot.",
+      "limitReachedTitle": "Import limit reached",
+      "limitReachedGotIt": "Got it",
+      "warningTitle": "Before you upload",
+      "warningBody": "For best results, upload a digitally generated PDF or DOCX file. Scanned documents or photos of CVs may produce incomplete results.",
+      "uploading": "Uploading...",
+      "gotItContinue": "Got it, continue",
+      "importingOverlayTitle": "Importing PDF/DOCX",
+      "importingOverlayBody": "Parsing your resume. This can take a moment."
+    },
+    "export": {
+      "genericError": "Failed to export LaTeX PDF",
+      "upgradeMessage": "This export action requires Pro access.",
+      "networkError": "Network error while exporting PDF"
+    },
+    "save": {
+      "upgradeMessage": "This action requires Pro access."
+    },
+    "untitledResumeFallback": "Untitled Resume",
+    "exportFilenameFallback": "resume",
+    "upgradeDefaultMessage": "Upgrade to Pro to unlock this AI feature.",
+    "templateSwitcher": {
+      "heading": "Template",
+      "harvardName": "Harvard",
+      "harvardDescription": "Classic academic layout"
+    },
+    "addContentModal": {
+      "title": "Add Content Section",
+      "options": {
+        "professionalSummary": {
+          "title": "Professional Summary",
+          "description": "Concise overview of your profile"
+        },
+        "careerObjective": {
+          "title": "Career Objective",
+          "description": "Role-focused positioning statement"
+        },
+        "education": {
+          "title": "Education",
+          "description": "Degrees and academic background"
+        },
+        "leadership": {
+          "title": "Leadership",
+          "description": "Leadership and ownership examples"
+        },
+        "projects": {
+          "title": "Projects",
+          "description": "Notable projects and outcomes"
+        },
+        "research": {
+          "title": "Research",
+          "description": "Research work and findings"
+        },
+        "certifications": {
+          "title": "Certifications",
+          "description": "Professional certifications"
+        },
+        "awards": {
+          "title": "Awards & Honors",
+          "description": "Awards, scholarships, distinctions"
+        },
+        "publications": {
+          "title": "Publications",
+          "description": "Articles and publications"
+        },
+        "skills": {
+          "title": "Skills",
+          "description": "Technical and professional skills"
+        }
+      }
+    },
+    "sectionPanel": {
+      "educationFallback": "Education",
+      "deleteAriaLabel": "Delete section",
+      "contentPlaceholder": "Write section content..."
+    },
+    "beforeAfterModal": {
+      "reviewTitle": "Review {count, plural, one {# Change} other {# Changes}} Before Applying",
+      "appliedTitle": "AI Applied {count, plural, one {# Improvement} other {# Improvements}}",
+      "discard": "Discard",
+      "applyChanges": "Apply Changes",
+      "viewInEditor": "View in Editor",
+      "beforeLabel": "Before",
+      "afterLabel": "After",
+      "emptyPlaceholder": "(empty)",
+      "claimsWarning": "This rewrite added details not in your original text ({claims}). Confirm these are real before applying."
+    },
+    "aiLoadingState": {
+      "analyzing": "Analyzing your resume...",
+      "generating": "Generating suggestions...",
+      "saving": "Saving analysis..."
+    },
+    "monthYearField": {
+      "periodLabel": "Period",
+      "monthPlaceholder": "Month",
+      "yearPlaceholder": "Year",
+      "present": "Present"
+    },
+    "richTextarea": {
+      "toolbarLabelDefault": "Text formatting",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "boldPlaceholder": "bold text",
+      "italicPlaceholder": "italic text",
+      "underlinePlaceholder": "underlined text"
+    }
+  },
+  "CoverLetterBuilder": {
+    "heading": "Cover Letter Sections",
+    "progress": "Progress {completed}/{total} complete",
+    "companyLabel": "Company Name",
+    "companyPlaceholder": "e.g., Google",
+    "positionLabel": "Job Title",
+    "positionPlaceholder": "e.g., Senior Frontend Engineer",
+    "jobDescriptionLabel": "Job Description",
+    "jobDescriptionPlaceholder": "Paste the full job description here...",
+    "toneLabel": "Tone",
+    "toneOptions": {
+      "formal": "Formal",
+      "professional": "Professional",
+      "conversational": "Conversational"
+    },
+    "generateDraftButton": "Generate Draft",
+    "saveButton": "Save",
+    "exportPdfButton": "Export PDF",
+    "saveStatus": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "error": "Save failed",
+      "idle": "Idle"
+    },
+    "untitledTitle": "Untitled Cover Letter",
+    "sections": {
+      "header": "Header Information",
+      "date": "Date",
+      "recipient": "Recipient",
+      "position": "Position",
+      "salutation": "Salutation",
+      "introduction": "Introduction",
+      "bodyParagraphs": "Body Paragraphs ({count})",
+      "conclusion": "Conclusion",
+      "closing": "Closing & Signature"
+    },
+    "editSectionModal": {
+      "title": "Edit Section",
+      "helperText": "Use new lines for multi-field sections like Header, Recipient, and Position."
+    },
+    "cancelButton": "Cancel",
+    "saveChangesButton": "Save Changes",
+    "upgradeDefaultMessage": "Unlock unlimited AI cover letter generation with Pro.",
+    "errors": {
+      "generateDraft": "Could not generate draft.",
+      "generateDraftAiUpgrade": "This AI action is available on Pro.",
+      "generateDraftFailed": "Draft generation failed: {message}",
+      "exportPdf": "Could not export PDF.",
+      "exportFailed": "Export failed: {message}"
+    },
+    "paragraphModal": {
+      "title": "Body Paragraphs",
+      "addParagraphButton": "+ Add Paragraph",
+      "saveChangesButton": "Save Changes",
+      "paragraphLabel": "Paragraph {number}"
+    }
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "managedByClerk": "Managed by Clerk",
+    "account": {
+      "title": "Account",
+      "description": "Manage your profile and account details.",
+      "emailSettings": "Email settings",
+      "exportData": "Export my data",
+      "exportDataButton": "Export My Data"
+    },
+    "billing": {
+      "title": "Billing",
+      "description": "Manage your subscription and payment methods.",
+      "currentPlan": "Current plan",
+      "subscription": "Subscription"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Control email and in-app notifications.",
+      "emailNotifications": "Email notifications",
+      "enabled": "Enabled"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Password, 2FA, and session management.",
+      "twoFactor": "Two-factor authentication"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Once you delete your account, there is no going back.",
+      "deleteAccountLabel": "Delete account",
+      "deleteAccountButton": "Delete Account",
+      "modalTitle": "Delete your account",
+      "modalBody": "This permanently deletes your account, all resumes, cover letters, AI reviews, and cancels any active subscription. This cannot be undone.",
+      "errorMessage": "Something went wrong deleting your account. Please try again or contact privacy@joben.eu.",
+      "cancel": "Cancel",
+      "deleting": "Deleting…",
+      "confirmDelete": "Yes, delete my account"
+    }
+  },
+  "ResumesPage": {
+    "title": "Resumes",
+    "resumeCount": "{count} resumes",
+    "createResume": "Create Resume",
+    "searchPlaceholder": "Search resumes...",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortAZ": "A-Z",
+    "noResumesFound": "No resumes found.",
+    "untitledSearchFallback": "Untitled Resume",
+    "untitled": "Untitled",
+    "updatedPrefix": "Updated ",
+    "deleteConfirm": "Are you sure you want to delete this resume?",
+    "deleteFailedAlert": "Failed to delete resume. See console for details."
+  },
+  "CoverLettersPage": {
+    "title": "Cover Letters",
+    "letterCount": "{count} cover letters",
+    "createCoverLetter": "Create Cover Letter",
+    "searchPlaceholder": "Search cover letters...",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortAZ": "A-Z",
+    "noCoverLettersFound": "No cover letters found.",
+    "untitledCoverLetter": "Untitled Cover Letter",
+    "updatedPrefix": "Updated ",
+    "badgeLabel": "CL",
+    "deleteConfirm": "Delete this cover letter?"
+  },
+  "AiReviewPage": {
+    "list": {
+      "pageTitle": "AI Resume Review",
+      "pageSubtitle": "Get instant AI-powered feedback across 5 key categories.",
+      "targetScoreLabel": "Target Score",
+      "hireZoneSuffix": "Hire Zone",
+      "yourBestLabel": "Your Best",
+      "reviewsLabel": "Reviews",
+      "avgScoreLabel": "Avg Score",
+      "outOf100": "/100",
+      "uploadNewResume": "Upload New Resume",
+      "dropzoneText": "Drag & drop or click to browse",
+      "dropzoneHint": "PDF only. Max 10MB.",
+      "readingPdf": "Reading PDF...",
+      "readyFile": "Ready: {fileName}",
+      "jobDescriptionPlaceholder": "Optional job description for more accurate analysis",
+      "reviewUploadedPdf": "Review Uploaded PDF",
+      "startReview": "Start Review",
+      "industryBenchmark": "Industry Benchmark",
+      "benchmarkStat": "Resumes scoring 92+ get 3x more callbacks",
+      "seeHowToImprove": "See how to improve",
+      "reviewExistingResume": "Review Existing Resume",
+      "searchPlaceholder": "Search resumes...",
+      "noResumesFound": "No resumes found.",
+      "untitledResume": "Untitled Resume",
+      "untitled": "Untitled",
+      "scoreValue": "Score {score}",
+      "notReviewedYet": "Not reviewed yet",
+      "viewLatest": "View Latest",
+      "reReview": "Re-review",
+      "defaultUpgradeMessage": "Upgrade to Pro for unlimited AI analysis.",
+      "errorPdfOnly": "Only PDF files are supported at the moment.",
+      "errorPdfTooLarge": "PDF must be under 10 MB.",
+      "errorCouldNotExtractText": "Could not extract text from this PDF.",
+      "errorFailedToParsePdf": "Failed to parse uploaded PDF.",
+      "errorUploadOrSelect": "Upload a resume PDF or select an existing resume first.",
+      "errorCouldNotLoadResume": "Could not load the selected resume.",
+      "errorNoExtractableContent": "This resume has no extractable content to analyze.",
+      "errorProRequired": "This action requires Pro access.",
+      "errorAnalyzeFailed": "Analyze failed.",
+      "errorMissingResultId": "Analysis succeeded but result id is missing."
+    },
+    "detail": {
+      "defaultUpgradeMessage": "Upgrade to Pro to keep applying AI fixes.",
+      "errorMissingReviewId": "Missing review id",
+      "errorFailedToLoad": "Failed to load review",
+      "errorFixProOnly": "This AI fix is available on Pro.",
+      "errorCouldNotApplyFix": "Could not apply this fix. Try again.",
+      "errorNetworkRetry": "Network error. Please retry.",
+      "errorAutoFixTokenLimit": "Auto-fix cannot run due to token limits.",
+      "errorAutoFixProOnly": "Auto-fix is available on Pro.",
+      "errorAutoFixFailed": "Auto-fix failed. Please retry.",
+      "autoFixUnavailableTitle": "Auto-fix unavailable",
+      "gotIt": "Got it",
+      "estimatedInputTokens": "Estimated input tokens: {tokens}",
+      "remainingMonthlyTokens": "Remaining monthly tokens: {tokens}",
+      "resetsAt": "Resets at: {date}"
+    },
+    "analyzer": {
+      "noReviewData": "No review data available.",
+      "unknownGrade": "Unknown",
+      "resumeFallback": "Resume",
+      "overallMatchScore": "Overall Match Score",
+      "reviewFor": "Review for {title}.",
+      "vsPreviousReview": "vs previous review",
+      "firstReviewForResume": "First review for this resume.",
+      "pts": "pts",
+      "prevScore": "prev: {score}",
+      "autoFixAll": "Auto-Fix All",
+      "categoryFallback": "Category",
+      "actionableFeedback": "Actionable Feedback",
+      "priorityImprovements": "Priority Improvements",
+      "noImprovementSuggestions": "No improvement suggestions were returned.",
+      "defaultIssue": "Improve clarity and impact.",
+      "current": "Current:",
+      "suggested": "Suggested:",
+      "notAvailable": "N/A",
+      "applyingFix": "Applying fix...",
+      "applyThisFix": "Apply this fix",
+      "strengths": "Strengths",
+      "noStrengthsReturned": "No strengths returned.",
+      "categoryInsights": "Category Insights"
     }
   }
 }

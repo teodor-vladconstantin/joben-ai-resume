@@ -2,8 +2,10 @@
 
 import { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Lock } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import type { Feature } from '@/lib/ratelimit'
 import { useRateLimitStatus } from '@/hooks/useRateLimitStatus'
+import type { AppLocale } from '@/i18n/routing'
 
 interface FeatureButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   feature: Feature
@@ -11,14 +13,14 @@ interface FeatureButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   children: ReactNode
 }
 
-function getNextMonthLabel(resetAt?: string): string {
-  if (!resetAt) return 'next month'
+function getNextMonthLabel(locale: AppLocale, fallback: string, resetAt?: string): string {
+  if (!resetAt) return fallback
 
   try {
     const parsed = new Date(resetAt)
-    return parsed.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
+    return parsed.toLocaleString(locale === 'ro' ? 'ro-RO' : 'en-US', { month: 'long', timeZone: 'UTC' })
   } catch {
-    return 'next month'
+    return fallback
   }
 }
 
@@ -31,6 +33,8 @@ export function FeatureButton({
   title,
   ...rest
 }: FeatureButtonProps) {
+  const locale = useLocale() as AppLocale
+  const t = useTranslations('Shared.featureButton')
   const {
     status,
     isFeatureBlocked,
@@ -51,13 +55,13 @@ export function FeatureButton({
 
   let tooltip = title || ''
   if (blocked) {
-    tooltip = 'Access suspended. Please contact support.'
+    tooltip = t('accessSuspended')
   } else if (exhausted) {
-    tooltip = `Monthly limit reached. Resets on the 1st of ${getNextMonthLabel(status?.resetAt)}.`
+    tooltip = t('monthlyLimitReached', { month: getNextMonthLabel(locale, t('nextMonth'), status?.resetAt) })
   } else if (tokenExhausted) {
-    tooltip = 'Monthly AI credit has been used up.'
-  } else if (showRemainingCount) {
-    tooltip = title || `${featureStatus.remaining} of ${featureStatus.limit} left this month`
+    tooltip = t('creditUsedUp')
+  } else if (showRemainingCount && featureStatus.limit !== null && featureStatus.remaining !== null) {
+    tooltip = title || t('remainingThisMonth', { remaining: featureStatus.remaining, limit: featureStatus.limit })
   }
 
   const handleClick = async () => {

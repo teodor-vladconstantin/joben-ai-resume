@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
 import { Modal } from '@/components/ui/Modal'
 
 export type AddableSectionType =
@@ -20,19 +21,6 @@ export type AddableSection = {
   description: string
 }
 
-const SECTION_OPTIONS: AddableSection[] = [
-  { type: 'professional_summary', title: 'Professional Summary', description: 'Concise overview of your profile' },
-  { type: 'career_objective', title: 'Career Objective', description: 'Role-focused positioning statement' },
-  { type: 'education', title: 'Education', description: 'Degrees and academic background' },
-  { type: 'leadership', title: 'Leadership', description: 'Leadership and ownership examples' },
-  { type: 'projects', title: 'Projects', description: 'Notable projects and outcomes' },
-  { type: 'research', title: 'Research', description: 'Research work and findings' },
-  { type: 'certifications', title: 'Certifications', description: 'Professional certifications' },
-  { type: 'awards', title: 'Awards & Honors', description: 'Awards, scholarships, distinctions' },
-  { type: 'publications', title: 'Publications', description: 'Articles and publications' },
-  { type: 'skills', title: 'Skills', description: 'Technical and professional skills' },
-]
-
 type AddContentModalProps = {
   open: boolean
   onClose: () => void
@@ -40,8 +28,23 @@ type AddContentModalProps = {
 }
 
 export function AddContentModal({ open, onClose, onAdd }: AddContentModalProps) {
+  const t = useTranslations('Builder.addContentModal')
+
+  const SECTION_OPTIONS: AddableSection[] = [
+    { type: 'professional_summary', title: t('options.professionalSummary.title'), description: t('options.professionalSummary.description') },
+    { type: 'career_objective', title: t('options.careerObjective.title'), description: t('options.careerObjective.description') },
+    { type: 'education', title: t('options.education.title'), description: t('options.education.description') },
+    { type: 'leadership', title: t('options.leadership.title'), description: t('options.leadership.description') },
+    { type: 'projects', title: t('options.projects.title'), description: t('options.projects.description') },
+    { type: 'research', title: t('options.research.title'), description: t('options.research.description') },
+    { type: 'certifications', title: t('options.certifications.title'), description: t('options.certifications.description') },
+    { type: 'awards', title: t('options.awards.title'), description: t('options.awards.description') },
+    { type: 'publications', title: t('options.publications.title'), description: t('options.publications.description') },
+    { type: 'skills', title: t('options.skills.title'), description: t('options.skills.description') },
+  ]
+
   return (
-    <Modal open={open} onClose={onClose} title="Add Content Section" maxWidth="2xl">
+    <Modal open={open} onClose={onClose} title={t('title')} maxWidth="2xl">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {SECTION_OPTIONS.map((item) => (
           <button
