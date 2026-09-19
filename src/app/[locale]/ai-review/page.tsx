@@ -258,34 +258,34 @@ export default function AIReviewPage() {
           <Navbar />
         </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-(--foreground) mb-2">{t('pageTitle')}</h1>
             <p className="text-(--muted)">{t('pageSubtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="rounded-xl border border-(--border) bg-(--surface) p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Target className="w-4 h-4 text-(--accent-strong)" /> {t('targetScoreLabel')}</p>
-              <p className="text-3xl font-black text-(--foreground) mt-2">{targetScore}<span className="text-sm text-(--accent-strong) ml-2">+ {t('hireZoneSuffix')}</span></p>
+          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) mb-6 md:grid-cols-4 md:divide-y-0 md:divide-x">
+            <div className="p-4">
+              <p className="text-xs text-(--muted) flex items-center gap-2"><Target className="w-4 h-4 text-(--muted)" /> {t('targetScoreLabel')}</p>
+              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{targetScore}<span className="font-sans text-sm text-(--muted) ml-2">+ {t('hireZoneSuffix')}</span></p>
             </div>
-            <div className="rounded-xl border border-(--border) bg-(--surface) p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Star className="w-4 h-4 text-(--accent)" /> {t('yourBestLabel')}</p>
-              <p className="text-3xl font-black text-(--accent) mt-2">{bestScore}</p>
+            <div className="p-4">
+              <p className="text-xs text-(--muted) flex items-center gap-2"><Star className="w-4 h-4 text-(--muted)" /> {t('yourBestLabel')}</p>
+              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{bestScore}</p>
             </div>
-            <div className="rounded-xl border border-(--border) bg-(--surface) p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><History className="w-4 h-4 text-(--accent-strong)" /> {t('reviewsLabel')}</p>
-              <p className="text-3xl font-black text-(--foreground) mt-2">{reviews.length}</p>
+            <div className="p-4">
+              <p className="text-xs text-(--muted) flex items-center gap-2"><History className="w-4 h-4 text-(--muted)" /> {t('reviewsLabel')}</p>
+              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{reviews.length}</p>
             </div>
-            <div className="rounded-xl border border-(--border) bg-(--surface) p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Gauge className="w-4 h-4 text-(--accent-strong)" /> {t('avgScoreLabel')}</p>
-              <p className="text-3xl font-black text-(--foreground) mt-2">{averageScore}<span className="text-sm text-(--muted)"> {t('outOf100')}</span></p>
+            <div className="p-4">
+              <p className="text-xs text-(--muted) flex items-center gap-2"><Gauge className="w-4 h-4 text-(--muted)" /> {t('avgScoreLabel')}</p>
+              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{averageScore}<span className="font-sans text-sm text-(--muted)"> {t('outOf100')}</span></p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
-              <h3 className="text-(--foreground) font-bold mb-4 flex items-center gap-2"><Upload className="w-4 h-4 text-(--accent)" /> {t('uploadNewResume')}</h3>
+            <div className="border border-(--border) bg-(--surface) p-5">
+              <h3 className="text-(--foreground) font-bold mb-4 flex items-center gap-2"><Upload className="w-4 h-4 text-(--muted)" /> {t('uploadNewResume')}</h3>
               <input
                 ref={uploadInputRef}
                 type="file"
@@ -302,10 +302,10 @@ export default function AIReviewPage() {
               <div
                 role="button"
                 tabIndex={0}
-                className={`rounded-xl border border-dashed bg-(--surface) p-8 text-center transition-colors ${
+                className={`border border-dashed p-8 text-center transition-colors duration-150 ease-out ${
                   isDraggingUpload
-                    ? 'border-(--accent-strong)/60 bg-(--accent-muted)'
-                    : 'border-(--border) hover:border-(--accent-strong)/40'
+                    ? 'border-(--accent) bg-(--accent-muted)'
+                    : 'border-(--border) hover:border-(--accent)'
                 }`}
                 onClick={() => uploadInputRef.current?.click()}
                 onKeyDown={(e) => {
@@ -335,21 +335,21 @@ export default function AIReviewPage() {
                 <p className="text-(--foreground) font-semibold">{t('dropzoneText')}</p>
                 <p className="text-xs text-(--muted)">{t('dropzoneHint')}</p>
                 {isProcessingUpload ? (
-                  <p className="mt-3 inline-flex items-center gap-2 text-sm text-(--accent)">
+                  <p className="mt-3 inline-flex items-center gap-2 text-sm text-(--muted)">
                     <Loader2 className="h-4 w-4 animate-spin" /> {t('readingPdf')}
                   </p>
                 ) : null}
                 {!isProcessingUpload && uploadedFileName ? (
-                  <p className="mt-3 text-sm text-(--accent-strong)">{t('readyFile', { fileName: uploadedFileName })}</p>
+                  <p className="mt-3 text-sm text-(--foreground)">{t('readyFile', { fileName: uploadedFileName })}</p>
                 ) : null}
               </div>
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                className="mt-4 w-full h-24 bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) resize-none"
+                className="mt-4 w-full h-24 bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) resize-none transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
                 placeholder={t('jobDescriptionPlaceholder')}
               />
-              {error ? <p className="text-sm text-red-400 mt-3">{error}</p> : null}
+              {error ? <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2 mt-3">{error}</p> : null}
               {isAnalyzing ? (
                 <div className="mt-4">
                   <AILoadingState stage="analyzing" />
@@ -365,19 +365,19 @@ export default function AIReviewPage() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
+            <div className="border border-(--border) bg-(--surface) p-5">
               <h3 className="text-(--foreground) font-bold mb-3">{t('industryBenchmark')}</h3>
-              <div className="h-56 rounded-xl bg-(--surface) border border-(--border) flex items-center justify-center">
+              <div className="h-56 border border-(--border) flex items-center justify-center">
                 <div className="text-center">
-                  <TrendingUp className="mx-auto h-8 w-8 text-(--accent) mb-2" />
+                  <TrendingUp className="mx-auto h-8 w-8 text-(--muted) mb-2" />
                   <p className="text-(--muted)">{t('benchmarkStat')}</p>
-                  <p className="text-(--accent) text-sm mt-2 font-semibold">{t('seeHowToImprove')}</p>
+                  <p className="text-(--foreground) text-sm mt-2 font-semibold">{t('seeHowToImprove')}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-(--border) bg-(--surface) p-5">
+          <div className="border border-(--border) bg-(--surface) p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h3 className="text-xl font-bold text-(--foreground)">{t('reviewExistingResume')}</h3>
               <div className="relative w-full max-w-sm">
@@ -386,16 +386,16 @@ export default function AIReviewPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('searchPlaceholder')}
-                  className="w-full rounded-lg border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+                  className="w-full rounded-sm border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
                 />
               </div>
             </div>
             {visibleResumes.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-(--border) bg-(--surface) p-6 text-center text-sm text-(--muted)">
+              <div className="border border-dashed border-(--border) p-6 text-center text-sm text-(--muted)">
                 {t('noResumesFound')}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-3">
                 {visibleResumes.map((resume) => {
                   const resumeReviews = reviews
                     .filter((review) => review.resume_id === resume.id)
@@ -405,7 +405,7 @@ export default function AIReviewPage() {
                   const scoreHistory = resumeReviews.map((r) => Number(r.score || 0)).filter((s) => s > 0)
                   const latestScore = scoreHistory.at(-1) ?? Number(latestReview?.score || 0)
                   return (
-                    <div key={resume.id} className="rounded-xl border border-(--border) bg-(--surface) p-4">
+                    <div key={resume.id} className="p-4">
                       <p className="text-(--foreground) font-semibold truncate">{resume.title || t('untitled')}</p>
                       {hasReviews ? (
                         <p className="text-xs text-(--muted) mt-1 flex items-center gap-1 flex-wrap">
@@ -426,7 +426,7 @@ export default function AIReviewPage() {
                         <button
                           onClick={() => void handleAnalyze(resume.id)}
                           disabled={isAnalyzing}
-                          className={`${hasReviews ? 'flex-1' : 'w-full'} rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm text-(--accent) font-semibold disabled:opacity-60`}
+                          className={`${hasReviews ? 'flex-1' : 'w-full'} ${buttonVariants('secondary', 'sm')} disabled:opacity-60`}
                         >
                           {hasReviews ? t('reReview') : t('startReview')}
                         </button>

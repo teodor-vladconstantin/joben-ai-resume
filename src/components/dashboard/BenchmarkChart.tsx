@@ -37,13 +37,13 @@ export function BenchmarkChart({ userScore }: Props) {
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -32 }}>
           <defs>
             <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#2CB87A" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#2CB87A" stopOpacity={0.05} />
+              <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.03} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="score"
-            tick={{ fill: '#8A8A92', fontSize: 10 }}
+            tick={{ fill: 'var(--muted)', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => (v % 20 === 0 ? String(v) : '')}
@@ -54,7 +54,7 @@ export function BenchmarkChart({ userScore }: Props) {
               if (!active || !payload?.length) return null
               const d = payload[0].payload as { score: number; frequency: number }
               return (
-                <div className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-1.5 text-xs text-(--muted)">
+                <div className="bg-(--surface) border border-(--border) px-3 py-1.5 text-xs text-(--muted)">
                   {t('scorePrefix')}{d.score}: {d.frequency}{t('ofResumesSuffix')}
                 </div>
               )
@@ -63,7 +63,7 @@ export function BenchmarkChart({ userScore }: Props) {
           <Area
             type="monotone"
             dataKey="frequency"
-            stroke="#2CB87A"
+            stroke="var(--accent)"
             strokeWidth={2}
             fill="url(#scoreGrad)"
             dot={false}
@@ -71,13 +71,13 @@ export function BenchmarkChart({ userScore }: Props) {
           />
           <ReferenceLine
             x={userScore}
-            stroke="#4FD69B"
+            stroke="var(--foreground)"
             strokeWidth={2}
             strokeDasharray="4 2"
             label={{
               value: `${t('youLabel')}${userScore}`,
               position: userScore > 70 ? 'insideTopLeft' : 'insideTopRight',
-              fill: '#4FD69B',
+              fill: 'var(--foreground)',
               fontSize: 11,
               fontWeight: 700,
             }}
@@ -87,7 +87,7 @@ export function BenchmarkChart({ userScore }: Props) {
 
       <p className="text-xs text-(--muted) mt-3">
         {t('footerPrefix')}<span className="text-(--foreground) font-medium">{userScore}</span>{t('footerMiddle')}
-        <span className="text-(--accent) font-medium">{percentile}%</span>{t('footerSuffix')}
+        <span className="text-(--foreground) font-medium">{percentile}%</span>{t('footerSuffix')}
       </p>
     </div>
   )

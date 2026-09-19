@@ -18,7 +18,7 @@ export function SectionList({ sections, onSelect }: SectionListProps) {
         <button
           key={section.id}
           onClick={() => onSelect(section.id)}
-          className="w-full rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-left hover:border-(--accent-strong)/60"
+          className="w-full border border-(--border) bg-(--surface) px-3 py-2 text-left transition-colors duration-150 ease-out hover:border-(--accent)"
         >
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-(--foreground)">{section.label}</span>

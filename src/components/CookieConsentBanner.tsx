@@ -41,7 +41,7 @@ export function CookieConsentBanner() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-(--muted)">
           {t('messagePrefix')}{' '}
-          <Link href="/cookies" className="text-(--accent) hover:text-(--accent-strong)">
+          <Link href="/cookies" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
             {t('cookiePolicyLinkText')}
           </Link>
           .
@@ -49,13 +49,13 @@ export function CookieConsentBanner() {
         <div className="flex shrink-0 gap-3">
           <button
             onClick={handleReject}
-            className="flex-1 rounded-md border border-(--border) px-4 py-2 text-sm font-medium text-(--foreground) hover:bg-(--surface-elevated) sm:flex-none"
+            className="flex-1 rounded-none border border-(--border) px-4 py-2 text-sm font-medium text-(--foreground) transition-colors duration-150 ease-out hover:bg-(--surface-elevated) sm:flex-none"
           >
             {t('rejectNonEssential')}
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 rounded-md bg-(--accent) px-4 py-2 text-sm font-medium text-(--background) hover:bg-(--accent-strong) sm:flex-none"
+            className="flex-1 rounded-none bg-(--accent) px-4 py-2 text-sm font-medium text-(--accent-ink) transition-colors duration-150 ease-out hover:bg-(--accent-strong) sm:flex-none"
           >
             {t('acceptAll')}
           </button>

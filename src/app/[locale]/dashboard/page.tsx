@@ -77,9 +77,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         return (
           <Link key={index} href={action.href} className={`${
             action.isPrimary
-              ? 'bg-(--accent) text-(--background) hover:bg-(--accent-strong)'
-              : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)/60'
-          } p-6 rounded-2xl font-bold flex items-center justify-between transition-all`} suppressHydrationWarning>
+              ? 'bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong)'
+              : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)'
+          } p-6 font-bold flex items-center justify-between transition-colors duration-150 ease-out`} suppressHydrationWarning>
             <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-(--muted)'}`} />
           </Link>
         );
@@ -95,7 +95,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <Navbar />
         </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="mb-8" suppressHydrationWarning>
             <h1 className="text-3xl font-bold text-(--foreground) mb-2">{greeting}, {firstName}</h1>
             <p className="text-(--muted)">{d.subGreeting}</p>
@@ -108,20 +108,20 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Industry Benchmark */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)" suppressHydrationWarning>
+            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
               <h3 className="text-lg font-bold text-(--foreground) mb-2">{d.industryBenchmark.title}</h3>
               <p className="text-sm text-(--muted) mb-6">{d.industryBenchmark.description}</p>
               {hasReviewData ? (
                 <BenchmarkChart userScore={totalScore} />
               ) : (
-                <div className="h-48 flex items-center justify-center border-2 border-dashed border-(--border) rounded-xl text-(--muted) text-sm">
+                <div className="h-48 flex items-center justify-center border border-dashed border-(--border) text-(--muted) text-sm">
                   {d.industryBenchmark.noData}
                 </div>
               )}
             </div>
 
             {/* Score Breakdown */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)" suppressHydrationWarning>
+            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
               <h3 className="text-lg font-bold text-(--foreground) mb-6">{d.scoreBreakdown.title}</h3>
               {hasReviewData ? (
                 <>
@@ -131,24 +131,24 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                        const isWarning = item.key === 'match' && score < 13
                        return (
                          <div key={i}>
-                           <div className="flex justify-between text-sm mb-1">
+                           <div className="flex justify-between gap-3 text-sm mb-1">
                              <span className="text-(--foreground)">{item.label}</span>
-                             <span className="text-(--muted)">{score}/{item.max}</span>
+                             <span className="text-(--muted) font-mono tabular-nums">{score}/{item.max}</span>
                            </div>
-                           <div className="w-full bg-(--background) rounded-full h-2 mb-1">
-                             <div className="bg-(--accent) h-2 rounded-full" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
+                           <div className="w-full bg-(--border) h-1 mb-1">
+                             <div className="bg-(--accent) h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
                            </div>
-                             {isWarning && <p className="text-xs text-(--accent)">{d.scoreBreakdown.warningMatch}</p>}
+                             {isWarning && <p className="text-xs text-(--foreground) border-l-2 border-(--foreground) pl-1.5">{d.scoreBreakdown.warningMatch}</p>}
                          </div>
                        );
                      })}
                   </div>
                   <p className="mt-4 text-xs text-(--muted)">{d.scoreBreakdown.latestGradePrefix}{gradeLabel(latestReview?.grade, d.scoreBreakdown.unknownGrade)}</p>
-                  <Link href="/ai-review" className="block mt-2 text-(--accent) text-sm font-medium hover:text-(--accent-strong)">{d.scoreBreakdown.cta}</Link>
+                  <Link href="/ai-review" className="inline-block mt-2 text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.scoreBreakdown.cta}</Link>
                 </>
               ) : (
                 <div className="min-h-50 grid place-items-center">
-                  <div className="w-full rounded-xl border-2 border-dashed border-(--border) px-4 py-10 text-center text-sm text-(--muted)">
+                  <div className="w-full border border-dashed border-(--border) px-4 py-10 text-center text-sm text-(--muted)">
                     {d.scoreBreakdown.noData}
                   </div>
                 </div>
@@ -161,30 +161,23 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
           {/* Bottom cards: 3-wide normally, 2-wide for isNewUser since Weekly Goals is hidden */}
           <div className={`grid grid-cols-1 ${isNewUser ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
-            {/* Your Score Circular Gauge */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border) flex flex-col items-center justify-center text-center" suppressHydrationWarning>
+            {/* Your Score */}
+            <div className="bg-(--surface) p-6 border border-(--border) flex flex-col" suppressHydrationWarning>
               <h3 className="text-lg font-bold text-(--foreground) mb-6 w-full text-left">{d.yourScore.title}</h3>
               {hasReviewData ? (
                 <>
-                  <div
-                    className="relative w-32 h-32 flex items-center justify-center rounded-full mb-4"
-                    style={{
-                      background: `conic-gradient(var(--accent) ${totalScore}%, color-mix(in srgb, var(--foreground) 10%, transparent) ${totalScore}% 100%)`,
-                    }}
-                  >
-                     <div className="absolute inset-2 rounded-full bg-(--surface)" />
-                     <span className="relative text-4xl font-black text-(--foreground)">{totalScore}</span>
+                  <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-(--foreground)">{totalScore}</span>
+                  <div className="mt-3 h-1 w-full bg-(--border)">
+                    <div className="h-full bg-(--accent)" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
                   </div>
-                  <p className="text-(--accent) font-bold uppercase tracking-wider text-sm mb-1">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
+                  <p className="mt-4 text-(--foreground) font-bold text-sm">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
                   <p className="text-(--muted) text-xs mb-4">{latestReviewLabel}</p>
-                  <Link href="/ai-review" className="text-(--accent) hover:text-(--accent-strong) text-sm font-medium">{d.yourScore.cta}</Link>
+                  <Link href="/ai-review" className="inline-block self-start text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.yourScore.cta}</Link>
                 </>
               ) : (
-                <div className="w-full grow flex flex-col items-center justify-center text-(--muted)">
-                  <div className="w-24 h-24 rounded-full border-4 border-dashed border-(--border) flex items-center justify-center mb-4">
-                    <span className="text-xl">{d.yourScore.noDataSub}</span>
-                  </div>
-                  <p className="text-sm">{d.yourScore.noData}</p>
+                <div className="w-full grow flex flex-col items-center justify-center text-center text-(--muted)">
+                  <span className="font-mono text-(length:--text-score) font-bold leading-none text-(--border)">{d.yourScore.noDataSub}</span>
+                  <p className="mt-4 text-sm">{d.yourScore.noData}</p>
                 </div>
               )}
             </div>

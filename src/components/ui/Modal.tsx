@@ -30,14 +30,13 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'lg' 
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <Card
         elevated
-        radius="lg"
-        className={`relative flex w-full ${MAX_WIDTH_CLASSES[maxWidth]} max-h-[85vh] flex-col shadow-2xl`}
+        className={`relative flex w-full ${MAX_WIDTH_CLASSES[maxWidth]} max-h-[85vh] flex-col`}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-(--border) px-6 py-4">
-          <h3 className="font-mono text-xs font-semibold uppercase tracking-wide text-(--foreground)">{title}</h3>
+          <h3 className="font-mono text-(length:--text-label) font-semibold text-(--foreground)">{title}</h3>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)"
+            className="p-1 text-(--muted) hover:text-(--foreground) transition-colors duration-150 ease-out"
             aria-label={t('close')}
           >
             <X className="h-4 w-4" />

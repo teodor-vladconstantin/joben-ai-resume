@@ -42,7 +42,7 @@ export function DeleteAccountButton() {
         <Button
           variant="secondary"
           size="sm"
-          className="border-red-400/40 text-red-400 hover:border-red-400"
+          className="border-(--foreground)"
           onClick={() => setOpen(true)}
         >
           {t('deleteAccountButton')}
@@ -53,7 +53,7 @@ export function DeleteAccountButton() {
         <p className="text-sm text-(--muted)">
           {t('modalBody')}
         </p>
-        {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={deleting}>
             {t('cancel')}
@@ -61,7 +61,7 @@ export function DeleteAccountButton() {
           <Button
             variant="secondary"
             size="sm"
-            className="border-red-400/40 text-red-400 hover:border-red-400"
+            className="border-(--foreground)"
             onClick={handleDelete}
             disabled={deleting}
           >

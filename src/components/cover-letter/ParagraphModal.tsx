@@ -39,7 +39,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
         <div className="flex items-center justify-between">
           <button
             onClick={addParagraph}
-            className="rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--accent)/20"
+            className={buttonVariants('secondary', 'sm')}
           >
             {t('addParagraphButton')}
           </button>
@@ -51,12 +51,12 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
     >
       <div className="space-y-3">
         {paragraphs.map((paragraph, index) => (
-          <div key={index} className="rounded-xl border border-(--border) bg-(--surface) p-3">
+          <div key={index} className="border border-(--border) bg-(--surface) p-3">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium text-(--foreground)">{t('paragraphLabel', { number: index + 1 })}</p>
               <button
                 onClick={() => removeParagraph(index)}
-                className="rounded-md border border-(--accent-strong)/30 bg-(--accent-muted) p-1 text-(--accent-strong) hover:bg-(--accent)/18"
+                className="border border-(--border) p-1 text-(--muted) hover:border-(--accent) hover:text-(--foreground) transition-colors duration-150 ease-out"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -64,7 +64,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
             <textarea
               value={paragraph}
               onChange={(e) => updateParagraph(index, e.target.value)}
-              className="h-24 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+              className="h-24 w-full resize-none rounded-sm border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
             />
           </div>
         ))}

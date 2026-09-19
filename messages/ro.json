@@ -48,8 +48,8 @@
       "Robot"
     ],
     "heroSuffix": " să apuce să îl citească.",
-    "subheading": "Multe aplicații sunt filtrate automat de softurile ATS, nu pentru că îți lipsește experiența, ci pentru că CV-ul tău nu e formatat pentru mașini. Joben îți evaluează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
-    "cta": "Verifică-mi Scorul ATS. E Gratuit",
+    "subheading": "Sistemele de evaluare resping automat CV-uri formatate greșit, indiferent de experiența candidatului. Joben îți evaluează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
+    "cta": "Verifică Scorul ATS. E Gratuit",
     "features": [
       "Fără card bancar",
       "Gratuit pentru totdeauna",
@@ -116,8 +116,8 @@
     "productLoop": [
       {
         "category": "Scor",
-        "heading": "Vezi-ți scorul înainte să aplici.",
-        "description": "Încarcă-ți CV-ul și primește un scor ATS de la 0 la 100 pe cinci categorii, cu exact punctele forte și lipsurile pe care le vor vedea recrutorii și parserele.",
+        "heading": "Vezi scorul înainte să aplici.",
+        "description": "Încarcă CV-ul și primește un scor ATS de la 0 la 100 pe cinci categorii, cu exact punctele forte și lipsurile pe care le vor vedea recrutorii și parserele.",
         "bullets": [
           "Fiecare CV primește un scor de la 0 la 100 pe 5 categorii",
           "Vezi exact ce văd recrutorii și parserele ATS",

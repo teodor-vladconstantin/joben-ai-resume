@@ -40,7 +40,7 @@ function renderWithHighlights(text: string, claims: string[]): ReactNode {
   const pattern = new RegExp(`(${unique.map(escapeRegExp).join('|')})`, 'g')
   return text.split(pattern).map((part, index) =>
     unique.includes(part) ? (
-      <mark key={index} className="rounded bg-amber-400/30 px-0.5 font-semibold text-amber-200">
+      <mark key={index} className="bg-transparent px-0 font-semibold text-(--foreground) underline decoration-(--accent) decoration-2 underline-offset-2">
         {part}
       </mark>
     ) : (
@@ -86,7 +86,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={onClose}
-              className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
+              className={buttonVariants('secondary', 'md')}
             >
               {t('discard')}
             </button>
@@ -113,7 +113,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
           return (
             <div
               key={`${key}-${idx}`}
-              className="rounded-xl border border-(--border) overflow-hidden"
+              className="border border-(--border)"
             >
               {(patch.experienceTitle || patch.company) && (
                 <div className="px-4 py-2 bg-(--surface-elevated) border-b border-(--border)">
@@ -125,8 +125,8 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
 
               <div className="p-4 space-y-2">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-(--accent-strong) font-semibold mb-1.5">{t('beforeLabel')}</p>
-                  <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--accent-strong) px-3 py-2 rounded-r leading-relaxed">
+                  <p className="font-mono text-(length:--text-label) text-(--muted) mb-1.5">{t('beforeLabel')}</p>
+                  <p className="text-sm text-(--muted) border-l-2 border-(--border) px-3 py-2 leading-relaxed">
                     {patch.originalBullet || <span className="italic opacity-60">{t('emptyPlaceholder')}</span>}
                   </p>
                 </div>
@@ -136,21 +136,21 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
                 </div>
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-(--accent) font-semibold mb-1.5">{t('afterLabel')}</p>
-                  <p className="text-sm bg-(--accent-muted) text-(--accent-strong) border-l-2 border-(--accent) px-3 py-2 rounded-r leading-relaxed">
+                  <p className="font-mono text-(length:--text-label) text-(--foreground) mb-1.5">{t('afterLabel')}</p>
+                  <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--foreground) px-3 py-2 leading-relaxed">
                     {renderWithHighlights(patch.updatedBullet, claims)}
                   </p>
                 </div>
 
                 {claims.length > 0 ? (
-                  <label className="mt-2 flex cursor-pointer items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+                  <label className="mt-2 flex cursor-pointer items-start gap-2 border-l-2 border-(--foreground) px-3 py-2">
                     <input
                       type="checkbox"
                       checked={confirmedKeys.has(key)}
                       onChange={() => toggleConfirmed(key)}
-                      className="mt-0.5"
+                      className="mt-0.5 accent-(--accent)"
                     />
-                    <span className="text-xs text-amber-200">
+                    <span className="text-xs text-(--foreground)">
                       {t('claimsWarning', { claims: claims.join(', ') })}
                     </span>
                   </label>

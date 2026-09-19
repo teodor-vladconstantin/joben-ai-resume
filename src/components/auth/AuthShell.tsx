@@ -13,14 +13,10 @@ export interface AuthShellProps {
 export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellProps) {
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16" suppressHydrationWarning>
-      <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center" aria-hidden="true" suppressHydrationWarning>
-        <div className="w-150 h-150 bg-(--accent)/8 rounded-full blur-[120px]" />
-      </div>
-
       <div className="w-full max-w-md">
-        <Card elevated radius="lg" className="p-8">
+        <Card elevated className="p-8">
           <Link href="/" className="flex items-center gap-2 mb-8">
-            <span className="relative h-8 w-8 overflow-hidden rounded-lg">
+            <span className="relative h-8 w-8 overflow-hidden">
               <Image src="/jobeneu_logo.jpg" alt="Joben logo" fill sizes="32px" className="object-cover" />
             </span>
             <span className="text-xl font-bold tracking-tight text-(--foreground)">Joben</span>
@@ -33,9 +29,8 @@ export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellP
           {children}
         </Card>
 
-        <div className="mt-6 flex items-center justify-between text-xs text-(--muted)">
-          <Link href="/" className="hover:text-(--foreground)">&larr; Back to home</Link>
-          <span className="font-mono uppercase tracking-wide">ATS-Optimized &middot; AI-Powered</span>
+        <div className="mt-6 text-xs text-(--muted)">
+          <Link href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; Back to home</Link>
         </div>
       </div>
     </div>

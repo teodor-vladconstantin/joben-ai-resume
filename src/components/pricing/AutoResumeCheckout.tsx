@@ -41,10 +41,10 @@ export function AutoResumeCheckout() {
   if (!isPaidPlan(requestedPlan) || (isLoaded && !isSignedIn)) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--background)/90 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--background)/95">
       <div className="max-w-sm px-6 text-center">
         {error ? (
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p>
         ) : (
           <>
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-(--accent)" />

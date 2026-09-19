@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { startProCheckout } from '@/lib/client-billing'
+import { buttonVariants } from '@/components/ui/Button'
 import type { AppLocale } from '@/i18n/routing'
 
 type UpgradeBannerProps = {
@@ -32,22 +33,22 @@ export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
   }
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md gap-3 rounded-xl border border-(--accent-strong)/35 bg-(--accent-muted) px-4 py-2.5 shadow-lg backdrop-blur">
-      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-(--accent-strong)" />
+    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md gap-3 border border-(--border) bg-(--surface) px-4 py-2.5">
+      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-(--muted)" />
       <div className="min-w-0 flex-1">
         <p className="text-sm text-(--foreground)/85">{message}</p>
-        {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
+        {error ? <p className="mt-1 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-1.5">{error}</p> : null}
         <button
           onClick={handleUpgrade}
           disabled={loading}
-          className="mt-2 inline-flex items-center gap-2 rounded-full bg-(--accent-strong) px-3 py-1.5 text-xs font-medium text-white disabled:opacity-70"
+          className={`mt-2 disabled:opacity-70 ${buttonVariants('primary', 'sm')}`}
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('upgradeToPro')}
         </button>
       </div>
       <button
         onClick={onClose}
-        className="text-(--muted) hover:text-(--foreground) text-xs shrink-0"
+        className="text-(--muted) hover:text-(--foreground) text-xs shrink-0 transition-colors duration-150 ease-out"
       >
         x
       </button>

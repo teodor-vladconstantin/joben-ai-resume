@@ -2,9 +2,11 @@ import * as React from 'react'
 
 export type CardRadius = 'base' | 'lg'
 
+// Swiss rule: radius 0 everywhere except inputs (2px max) — 'lg' is kept as a
+// prop for callers migrating incrementally, but no longer maps to a rounder corner.
 const RADIUS_CLASSES: Record<CardRadius, string> = {
-  base: 'rounded-(--radius)',
-  lg: 'rounded-(--radius-lg)',
+  base: 'rounded-none',
+  lg: 'rounded-none',
 }
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {

@@ -93,12 +93,12 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {resumeRoles.map((role) => (
             <Link key={role.slug[locale]} href={`/resume-examples/${role.slug[locale]}`}>
-              <Card radius="lg" className="p-6 h-full transition-colors hover:border-(--accent)/50">
+              <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
                 <p className="text-(--foreground) font-semibold">{role.title[locale]}</p>
                 <p className="mt-1.5 text-sm text-(--muted)">
                   {role.keywords[locale].slice(0, 3).join(', ')}
                 </p>
-                <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--accent)">
+                <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
                   {hub.seeExamples} <ArrowRight className="h-3.5 w-3.5" />
                 </p>
               </Card>

@@ -3,8 +3,6 @@ import { CheckCircle2, X } from 'lucide-react'
 import { Metadata } from 'next'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { Navbar } from '@/components/ui/Navbar'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { AutoResumeCheckout } from '@/components/pricing/AutoResumeCheckout'
@@ -112,48 +110,44 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
       </Suspense>
       <Navbar />
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">
-        <div className="text-center mb-12">
+      <main className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto pt-32 pb-24">
+        <div className="mb-12 max-w-xl">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
             {pricing.heading}
           </h1>
-          <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
+          <p className="mt-4 text-(--muted) text-lg">
             {pricing.subheading}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-3 md:divide-x md:divide-y-0">
           {pricing.plans.map((plan, index) => {
             const meta = pricingPlanMeta[index]
             return (
-              <Card
+              <div
                 key={index}
-                elevated={meta.isBestValue}
-                radius="lg"
-                className={`p-6 flex flex-col relative ${meta.isBestValue ? 'border-(--accent)' : ''}`}
+                className={`flex flex-col p-6 ${meta.isBestValue ? 'bg-(--accent-muted)' : ''}`}
               >
                 {meta.isBestValue && (
-                  <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    {Common.bestValue}
-                  </Badge>
+                  <p className="mb-4 font-mono text-(length:--text-label) text-(--foreground)">{Common.bestValue}</p>
                 )}
 
                 <h3 className="text-xl font-semibold text-(--foreground)">{plan.name}</h3>
                 <p className="text-(--muted) text-xs mt-1">{plan.description}</p>
-                <div className="mt-4 mb-6">
-                  <span className="text-3xl text-(--foreground) font-bold">{plan.price}</span>
-                  <span className="text-(--muted)"> {plan.pricePeriod}</span>
+                <div className="mt-4 mb-6 font-mono">
+                  <span className="text-3xl text-(--foreground) font-bold tabular-nums">{plan.price}</span>
+                  <span className="font-sans text-(--muted)"> {plan.pricePeriod}</span>
                 </div>
                 <ul className="space-y-2 mb-6 grow">
                   {plan.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-2 text-sm text-(--foreground)">
-                      <CheckCircle2 size={14} className="text-(--accent) mt-0.5 shrink-0" />
+                      <CheckCircle2 size={14} className="text-(--foreground) mt-0.5 shrink-0" />
                       {feature}
                     </li>
                   ))}
                   {plan.excludedFeatures.map((feature, fIndex) => (
                     <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-(--muted) line-through">
-                      <X size={14} className="text-red-400 mt-0.5 shrink-0" />
+                      <X size={14} className="text-(--muted) mt-0.5 shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -163,7 +157,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                   plan={meta.planId}
                   className={`w-full text-center ${buttonVariants(meta.isBestValue || meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
                 />
-              </Card>
+              </div>
             )
           })}
         </div>

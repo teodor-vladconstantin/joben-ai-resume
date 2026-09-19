@@ -127,6 +127,14 @@ const stripInjectedAttrScript = `(function () {
   });
 })();`
 
+// Reveal elements default to fully visible (see .reveal-line/.reveal-rule/
+// .reveal-clip in globals.css) so no-JS visitors see finished content
+// immediately. This adds .js-motion before paint, switching them to their
+// hidden-then-reveal state; prefers-reduced-motion is handled purely in
+// CSS (the @media block there forces the visible state back with
+// !important), so this script doesn't need to check it itself.
+const motionInitScript = `document.documentElement.classList.add('js-motion');`
+
 export default async function RootLayout({
   children,
   params,
@@ -147,6 +155,11 @@ export default async function RootLayout({
     <ClerkProvider appearance={clerkAppearance}>
       <html lang={locale} suppressHydrationWarning>
         <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+          <Script
+            id="motion-init"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: motionInitScript }}
+          />
           <Script
             id="consent-mode-default"
             strategy="beforeInteractive"

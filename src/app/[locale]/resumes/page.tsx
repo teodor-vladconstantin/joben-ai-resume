@@ -3,8 +3,9 @@
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Navbar } from '@/components/ui/Navbar'
 import { buttonVariants } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { Link } from '@/i18n/navigation'
-import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
+import { Plus, Clock3, Trash2, Edit, Eye, Search, ArrowRight } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { timeAgo } from '@/lib/time-ago'
@@ -99,7 +100,7 @@ export default function ResumesPage() {
           <Navbar />
         </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
               <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
@@ -117,44 +118,50 @@ export default function ResumesPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full rounded-lg border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+                className="w-full rounded-sm border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortNewest')}</button>
-              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortOldest')}</button>
-              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortAZ')}</button>
+              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'newest' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortNewest')}</button>
+              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'oldest' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortOldest')}</button>
+              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'az' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortAZ')}</button>
             </div>
           </div>
 
 
-          <div className="rounded-2xl border border-(--border) bg-(--surface) overflow-hidden">
+          <div className="border border-(--border) bg-(--surface)">
             {visibleResumes.length === 0 ? (
-              <div className="p-10 text-center text-(--muted)">
-                <p>{t('noResumesFound')}</p>
-              </div>
+              <EmptyState
+                title={t('noResumesFound')}
+                action={
+                  <Link href="/resumes/new" className={buttonVariants('secondary', 'sm')}>
+                    <Plus className="w-4 h-4" /> {t('createResume')}
+                  </Link>
+                }
+              />
             ) : (
               <div className="divide-y divide-(--border)">
                 {visibleResumes.map((resume) => (
-                  <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-(--surface-elevated) transition-colors">
+                  <div key={resume.id} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-(--foreground) font-semibold truncate">{resume.title || t('untitled')}</p>
-                      <p className="text-xs text-(--muted)">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString()}</p>
+                      <p className="font-semibold truncate">{resume.title || t('untitled')}</p>
+                      <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-bold px-2 py-1 rounded bg-(--accent-muted) text-(--accent)">
+                      <span className="font-mono text-xs font-bold tabular-nums">
                         {Number(resume.score || 0)}
                       </span>
-                      <span className="text-xs text-(--muted) hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
-                      <Link href={`/resumes/${resume.id}`} className="text-(--muted) hover:text-(--foreground)"><Eye className="w-4 h-4" /></Link>
-                      <Link href={`/resumes/${resume.id}`} className="text-(--muted) hover:text-(--foreground)"><Edit className="w-4 h-4" /></Link>
+                      <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
+                      <Link href={`/resumes/${resume.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Eye className="w-4 h-4" /></Link>
+                      <Link href={`/resumes/${resume.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Edit className="w-4 h-4" /></Link>
                       <button
                         onClick={() => handleDelete(resume.id)}
                         disabled={isPending}
-                        className="text-(--accent-strong) disabled:opacity-50"
+                        className="opacity-70 hover:opacity-100 disabled:opacity-30 transition-opacity duration-150 ease-out"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                      <ArrowRight className="row-invert-arrow h-4 w-4 shrink-0" />
                     </div>
                   </div>
                 ))}

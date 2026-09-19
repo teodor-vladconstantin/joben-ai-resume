@@ -56,7 +56,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <h2 className="text-xl font-bold text-(--foreground) mb-2">{about.contactHeading}</h2>
         <p className="text-(--muted)">
           {about.contactBody.split('{email}')[0]}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-(--accent) hover:text-(--accent-strong)">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
             {CONTACT_EMAIL}
           </a>
           {about.contactBody.split('{email}')[1]}
