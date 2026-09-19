@@ -247,6 +247,7 @@
     "productHeading": "Product",
     "legalHeading": "Legal",
     "productLinks": [
+      { "href": "/about", "label": "About" },
       { "href": "/pricing", "label": "Pricing" },
       { "href": "/resume-examples", "label": "Resume Examples" },
       { "href": "/free-ats-checker", "label": "Free ATS Checker" }
@@ -259,6 +260,14 @@
     "salBadgeAlt": "SAL (Alternative Dispute Resolution) - ANPC",
     "productHuntLabel": "Find us on Product Hunt",
     "creatorCredit": "Built by a software engineer who understands the job search struggle."
+  },
+  "About": {
+    "metaTitle": "About Joben | Joben",
+    "metaDescription": "What Joben is, and how to reach us.",
+    "heading": "About Joben",
+    "intro": "Joben is an AI resume builder built for candidates who want to get past ATS filters and reach the interview. We score resumes, rewrite weak bullet points, and generate cover letters tailored to each application.",
+    "contactHeading": "Contact",
+    "contactBody": "Questions, feedback, or a request about your data? Reach us at {email}."
   },
   "Grade": {
     "labels": { "Poor": "Poor", "Fair": "Fair", "Good": "Good", "Excellent": "Excellent" },

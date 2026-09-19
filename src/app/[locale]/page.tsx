@@ -3,7 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
-import { pricingPlanMeta, siteConfig } from '@/lib/content'
+import { pricingPlanMeta, siteConfig, BUILD_TIME } from '@/lib/content'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
@@ -56,6 +56,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         name: 'Joben',
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Any',
+        dateModified: BUILD_TIME,
         offers: {
           '@type': 'Offer',
           price: '0',

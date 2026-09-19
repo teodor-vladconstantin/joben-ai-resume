@@ -247,6 +247,7 @@
     "productHeading": "Produs",
     "legalHeading": "Legal",
     "productLinks": [
+      { "href": "/about", "label": "Despre" },
       { "href": "/pricing", "label": "Prețuri" },
       { "href": "/resume-examples", "label": "Exemple de CV" },
       { "href": "/free-ats-checker", "label": "Verificator ATS Gratuit" }
@@ -259,6 +260,14 @@
     "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
     "productHuntLabel": "Găsește-ne pe Product Hunt",
     "creatorCredit": "Construit de un inginer software care înțelege lupta căutării unui job."
+  },
+  "About": {
+    "metaTitle": "Despre Joben | Joben",
+    "metaDescription": "Ce e Joben și cum ne poți contacta.",
+    "heading": "Despre Joben",
+    "intro": "Joben e un constructor de CV cu inteligență artificială, construit pentru candidații care vor să treacă de filtrele ATS și să ajungă la interviu. Scorăm CV-uri, rescriem punctele slabe și generăm scrisori de intenție adaptate fiecărei aplicații.",
+    "contactHeading": "Contact",
+    "contactBody": "Întrebări, feedback sau o solicitare legată de datele tale? Ne găsești la {email}."
   },
   "Grade": {
     "labels": { "Poor": "Slab", "Fair": "Acceptabil", "Good": "Bun", "Excellent": "Excelent" },
