@@ -1,5 +1,6 @@
 "use client"
 import { AreaChart, Area, XAxis, YAxis, ReferenceLine, Tooltip, ResponsiveContainer } from 'recharts'
+import { useTranslations } from 'next-intl'
 
 function bellCurveValue(x: number, mean: number, std: number): number {
   return Math.exp(-0.5 * ((x - mean) / std) ** 2)
@@ -25,6 +26,7 @@ type Props = {
 }
 
 export function BenchmarkChart({ userScore }: Props) {
+  const t = useTranslations('Dashboard.benchmarkChart')
   const percentile = Math.round(
     (data.filter((d) => d.score <= userScore).length / data.length) * 100
   )
@@ -53,7 +55,7 @@ export function BenchmarkChart({ userScore }: Props) {
               const d = payload[0].payload as { score: number; frequency: number }
               return (
                 <div className="bg-(--surface-elevated) border border-(--border) rounded-lg px-3 py-1.5 text-xs text-(--muted)">
-                  Score {d.score}: {d.frequency}% of resumes
+                  {t('scorePrefix')}{d.score}: {d.frequency}{t('ofResumesSuffix')}
                 </div>
               )
             }}
@@ -73,7 +75,7 @@ export function BenchmarkChart({ userScore }: Props) {
             strokeWidth={2}
             strokeDasharray="4 2"
             label={{
-              value: `You: ${userScore}`,
+              value: `${t('youLabel')}${userScore}`,
               position: userScore > 70 ? 'insideTopLeft' : 'insideTopRight',
               fill: '#4FD69B',
               fontSize: 11,
@@ -84,8 +86,8 @@ export function BenchmarkChart({ userScore }: Props) {
       </ResponsiveContainer>
 
       <p className="text-xs text-(--muted) mt-3">
-        Your score of <span className="text-(--foreground) font-medium">{userScore}</span> is higher than approximately{' '}
-        <span className="text-(--accent) font-medium">{percentile}%</span> of resumes in our system.
+        {t('footerPrefix')}<span className="text-(--foreground) font-medium">{userScore}</span>{t('footerMiddle')}
+        <span className="text-(--accent) font-medium">{percentile}%</span>{t('footerSuffix')}
       </p>
     </div>
   )

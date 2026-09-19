@@ -2,14 +2,11 @@
 import { Lightbulb, RefreshCw, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from '@/i18n/navigation'
-
-const tips = [
-  "Use strong action verbs to start your bullet points. E.g., 'Spearheaded' instead of 'Responsible for'.",
-  "Quantify your achievements with numbers, percentages, or dollar amounts to provide clear impact.",
-  "Keep your resume to one page unless you have more than 10 years of highly relevant experience."
-]
+import { useTranslations } from 'next-intl'
 
 export function QuickTip({ isNewUser = false }: { isNewUser?: boolean }) {
+  const t = useTranslations('Dashboard.quickTip')
+  const tips = t.raw('tips') as string[]
   const [idx, setIdx] = useState(0)
 
   return (
@@ -17,7 +14,7 @@ export function QuickTip({ isNewUser = false }: { isNewUser?: boolean }) {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
-            <Lightbulb className="text-(--accent) w-5 h-5" /> Quick Tip
+            <Lightbulb className="text-(--accent) w-5 h-5" /> {t('title')}
           </h3>
           <button onClick={() => setIdx((idx + 1) % tips.length)} className="text-(--muted) hover:text-(--foreground) p-1">
             <RefreshCw className="w-4 h-4" />
@@ -26,7 +23,7 @@ export function QuickTip({ isNewUser = false }: { isNewUser?: boolean }) {
         <p className="text-(--muted) text-sm leading-relaxed mb-6">{tips[idx]}</p>
       </div>
       <Link href="/resumes" className="text-(--accent) hover:text-(--accent-strong) text-sm font-medium flex items-center gap-1">
-        {isNewUser ? 'Create your first resume' : 'Edit resume'} <ArrowRight className="w-4 h-4" />
+        {isNewUser ? t('createFirstResume') : t('editResume')} <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
   )

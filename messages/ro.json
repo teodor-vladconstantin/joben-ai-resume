@@ -35,7 +35,7 @@
     "dashboard": "Dashboard",
     "resumes": "CV-uri",
     "coverLetters": "Scrisori de Intenție",
-    "aiReview": "Recenzie AI",
+    "aiReview": "Evaluare AI",
     "logIn": "Autentificare",
     "getStartedFree": "Începe Gratuit",
     "createNew": "Creează Nou"
@@ -96,9 +96,9 @@
       },
       {
         "category": "Adaptare",
-        "heading": "Adaptează-ți CV-ul la fișa postului.",
-        "description": "Lipește fișa postului și Joben găsește cuvintele cheie lipsă, apoi îți rescrie punctele ca să se potrivească exact cu rolul respectiv.",
-        "bullets": ["Lipești orice fișă de post, primești analiza cuvintelor cheie instant", "Puncte rescrise ca să se potrivească rolului, nu completare generică de AI", "Un click, o variantă adaptată, o ciornă nouă"]
+        "heading": "Adaptează-ți CV-ul la job description.",
+        "description": "Lipește job description-ul și Joben găsește cuvintele cheie lipsă, apoi îți rescrie punctele ca să se potrivească exact cu rolul respectiv.",
+        "bullets": ["Lipești orice job description, primești analiza cuvintelor cheie instant", "Puncte rescrise ca să se potrivească rolului, nu completare generică de AI", "Un click, o variantă adaptată, o ciornă nouă"]
       },
       {
         "category": "Rescriere",
@@ -109,8 +109,8 @@
       {
         "category": "Scrisoare de Intenție",
         "heading": "O scrisoare de intenție care se potrivește cu CV-ul și cu jobul.",
-        "description": "Generată de AI, cu ton consistent cu CV-ul tău, adaptată la aceeași fișă de post.",
-        "bullets": ["Se potrivește cu tonul și faptele din CV-ul tău adaptat", "Scrisă pentru aceeași fișă de post, nu dintr-un șablon", "Gata de trimis în timpul în care citești rândul ăsta"]
+        "description": "Generată de AI, cu ton consistent cu CV-ul tău, adaptată la același job description.",
+        "bullets": ["Se potrivește cu tonul și faptele din CV-ul tău adaptat", "Scrisă pentru același job description, nu dintr-un șablon", "Gata de trimis în timpul în care citești rândul ăsta"]
       },
       {
         "category": "Export & Organizare",
@@ -135,7 +135,7 @@
         "description": "Ideal pentru prima ta aplicație lustruită.",
         "price": "0 RON",
         "pricePeriod": "/pe viață",
-        "features": ["Constructor de CV manual", "Salvezi 1 CV", "5 exporturi PDF", "3 scrisori de intenție AI / lună", "3 adaptări de CV (CV vs fișă de post) / lună", "15 rescrieri AI de puncte / lună", "1 șablon de bază optimizat ATS"],
+        "features": ["Constructor de CV manual", "Salvezi 1 CV", "5 exporturi PDF", "3 scrisori de intenție AI / lună", "3 adaptări de CV (CV vs job description) / lună", "15 rescrieri AI de puncte / lună", "1 șablon de bază optimizat ATS"],
         "excludedFeatures": ["Suport prioritar prin email", "CV-uri salvate nelimitate", "Bibliotecă completă de șabloane"],
         "cta": "Începe Gratuit"
       },
@@ -144,7 +144,7 @@
         "description": "Pentru cei care caută activ un job și aplică constant.",
         "price": "59 RON",
         "pricePeriod": "/lună",
-        "features": ["Tot ce e în Gratuit, plus:", "Salvezi până la 3 CV-uri", "Exporturi PDF nelimitate", "60 scrisori de intenție AI / lună", "60 adaptări de CV (CV vs fișă de post) / lună", "200 rescrieri AI de puncte / lună", "Suport prioritar prin email"],
+        "features": ["Tot ce e în Gratuit, plus:", "Salvezi până la 3 CV-uri", "Exporturi PDF nelimitate", "60 scrisori de intenție AI / lună", "60 adaptări de CV (CV vs job description) / lună", "200 rescrieri AI de puncte / lună", "Suport prioritar prin email"],
         "excludedFeatures": [],
         "cta": "Treci la Pro"
       },
@@ -153,7 +153,7 @@
         "description": "Plan pe 6 luni pentru aplicații în volum mare.",
         "price": "299 RON",
         "pricePeriod": "/6 luni",
-        "features": ["Tot ce e inclus în Pro", "Salvezi până la 15 CV-uri", "300 scrisori de intenție AI / lună", "300 adaptări de CV (CV vs fișă de post) / lună", "1.000 rescrieri AI de puncte / lună", "Exporturi PDF nelimitate", "Acces la biblioteca completă de șabloane", "Suport prioritar prin email"],
+        "features": ["Tot ce e inclus în Pro", "Salvezi până la 15 CV-uri", "300 scrisori de intenție AI / lună", "300 adaptări de CV (CV vs job description) / lună", "1.000 rescrieri AI de puncte / lună", "Exporturi PDF nelimitate", "Acces la biblioteca completă de șabloane", "Suport prioritar prin email"],
         "excludedFeatures": [],
         "cta": "Obține Planul Recrutare"
       }
@@ -234,7 +234,7 @@
     { "question": "Ce primesc cu Pro?", "answer": "Pro îți oferă 3 CV-uri salvate, exporturi nelimitate, 60 scrisori de intenție/lună, 60 adaptări de CV/lună și 200 rescrieri de puncte/lună." },
     { "question": "Cum funcționează limitele AI?", "answer": "Fiecare plan are contoare lunare clare pentru scrisori de intenție, adaptare de CV și rescrieri de puncte. Contoarele se resetează la începutul fiecărei luni." },
     { "question": "CV-urile sunt compatibile cu ATS?", "answer": "Da. Șabloanele și formatarea Joben sunt construite să funcționeze cu sistemele de urmărire a candidaților și să păstreze conținutul lizibil pentru recrutori." },
-    { "question": "Pot crea mai multe variante ale CV-ului meu?", "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau fișe de post diferite și le gestionezi din dashboard." },
+    { "question": "Pot crea mai multe variante ale CV-ului meu?", "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau job description-uri diferite și le gestionezi din dashboard." },
     { "question": "Pot genera și scrisori de intenție?", "answer": "Da. Toate planurile pot genera scrisori de intenție, cu limite lunare în funcție de planul tău." },
     { "question": "Pot anula planul plătit oricând?", "answer": "Da. Îți poți gestiona facturarea din cont și anula oricând vrei. Perioada curentă rămâne activă până la final." },
     { "question": "Datele CV-ului meu sunt în siguranță?", "answer": "Folosim autentificare modernă și o infrastructură backend securizată. Datele tale sunt izolate per cont și folosite doar pentru experiența ta în aplicație." }
@@ -286,6 +286,108 @@
     "somethingWentWrong": "Ceva n-a mers bine. Încearcă din nou.",
     "manageBilling": "Gestionează Facturarea",
     "upgradeToPro": "Treci la Pro"
+  },
+  "Dashboard": {
+    "greetingMorning": "Bună dimineața",
+    "greetingEvening": "Bună seara",
+    "guestFallbackName": "acolo",
+    "subGreeting": "Iată o privire de ansamblu asupra CV-ului tău și a progresului în carieră.",
+    "sidebarSettings": "Setări",
+    "statCards": { "resumes": "CV-uri", "coverLetters": "Scrisori de Intenție", "reviews": "Evaluări", "avgScore": "Scor Mediu" },
+    "industryBenchmark": {
+      "title": "Benchmark de Industrie",
+      "description": "Vezi cum se compară CV-urile tale cu cele ale candidaților de succes.",
+      "noData": "Creează un CV pentru a debloca benchmarking-ul de industrie."
+    },
+    "scoreBreakdown": {
+      "title": "Detalierea Scorului",
+      "noData": "Niciun scor disponibil încă. Generarea unui CV și solicitarea unei Evaluări AI vor actualiza această secțiune.",
+      "cta": "Vezi cum să te îmbunătățești →",
+      "warningMatch": "Atenție: potrivește mai bine cuvintele cheie din job description",
+      "latestGradePrefix": "Ultimul grad: ",
+      "unknownGrade": "Necunoscut",
+      "categories": [
+        { "label": "ATS & Structură", "max": 20, "key": "ats" },
+        { "label": "Calitatea Conținutului", "max": 40, "key": "content" },
+        { "label": "Calitatea Scrierii", "max": 10, "key": "writing" },
+        { "label": "Potrivire cu Jobul", "max": 25, "key": "match" },
+        { "label": "Pregătit pentru Aplicare", "max": 5, "key": "ready" }
+      ]
+    },
+    "quickActions": [
+      { "label": "CV Nou", "href": "/resumes", "icon": "Plus", "isPrimary": true },
+      { "label": "Scrisoare de Intenție", "href": "/cover-letters", "icon": "Mail", "isPrimary": false },
+      { "label": "Evaluare AI", "href": "/ai-review", "icon": "FileSearch", "isPrimary": false }
+    ],
+    "yourScore": {
+      "title": "Scorul Tău",
+      "noData": "Avem nevoie de un CV pentru a calcula scorul",
+      "noDataSub": "N/A",
+      "cta": "Vezi cum să te îmbunătățești →",
+      "latestReviewedFallback": "Ultimul CV Evaluat"
+    },
+    "recentDocuments": {
+      "heading": "Documente Recente",
+      "viewAll": "Vezi Tot",
+      "coverLetterLabel": "Scrisoare de Intenție",
+      "resumeLabel": "CV",
+      "untitledDocument": "Document Fără Titlu",
+      "scorePrefix": "Scor: ",
+      "updatedPrefix": "Actualizat ",
+      "noDateValue": "N/A",
+      "noResumesYet": "Niciun CV încă",
+      "createAnother": "Creează un alt CV adaptat",
+      "createNew": "Creează Nou"
+    },
+    "weeklyGoals": {
+      "title": "Obiective Săptămânale",
+      "dayLabel": "zi",
+      "daysLabel": "zile",
+      "goalResume": "Creează un CV",
+      "goalReview": "Rulează o evaluare AI",
+      "goalCoverLetter": "Creează o scrisoare de intenție",
+      "goalsCompleteSuffix": "/3 obiective finalizate săptămâna asta",
+      "allDone": "Toate obiectivele finalizate! Așa continuă!",
+      "keepGoing": "Continuă tot așa, ești pe drumul cel bun!",
+      "startStreak": "Începe-ți seria de azi!"
+    },
+    "quickTip": {
+      "title": "Sfat Rapid",
+      "tips": [
+        "Folosește verbe de acțiune puternice la începutul punctelor din CV. Ex: „Am condus” în loc de „Responsabil pentru”.",
+        "Cuantifică-ți realizările cu cifre, procente sau sume, ca să arăți clar impactul.",
+        "Ține-ți CV-ul pe o singură pagină, cu excepția cazului în care ai peste 10 ani de experiență foarte relevantă."
+      ],
+      "createFirstResume": "Creează-ți primul CV",
+      "editResume": "Editează CV-ul"
+    },
+    "profileCompletion": {
+      "titlePrefix": "Completarea Profilului - ",
+      "item1": "Creează primul CV",
+      "item2": "Creează o scrisoare de intenție",
+      "item3": "Obține o evaluare AI"
+    },
+    "redeemCode": {
+      "heading": "Activează un Cod de Acces",
+      "subtext": "Activează accesul special instant. Codul nu ține cont de majuscule.",
+      "alreadyActiveBadge": "Recrutare Activă",
+      "placeholder": "Introdu codul privat de acces",
+      "alreadyActiveButton": "Deja Activ",
+      "applying": "Se aplică...",
+      "redeemButton": "Activează Codul",
+      "alreadyActiveMessage": "Planul Recrutare pe viață este deja activ pe contul tău.",
+      "enterValidCode": "Introdu un cod valid.",
+      "couldNotRedeem": "Codul nu a putut fi activat acum.",
+      "successDefault": "Planul Recrutare pe viață este acum activ."
+    },
+    "benchmarkChart": {
+      "scorePrefix": "Scor ",
+      "ofResumesSuffix": "% din CV-uri",
+      "youLabel": "Tu: ",
+      "footerPrefix": "Scorul tău de ",
+      "footerMiddle": " este mai mare decât aproximativ ",
+      "footerSuffix": "% din CV-urile din sistemul nostru."
+    }
   },
   "CookieConsent": {
     "ariaLabel": "Consimțământ cookie-uri",

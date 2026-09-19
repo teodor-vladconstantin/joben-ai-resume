@@ -4,19 +4,22 @@ import Image from 'next/image'
 import { Link, usePathname } from '@/i18n/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { buttonVariants } from '@/components/ui/Button'
-
-const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/resumes', label: 'Resumes', icon: FileText },
-  { href: '/cover-letters', label: 'Cover Letters', icon: Mail },
-  { href: '/ai-review', label: 'AI Review', icon: FileSearch },
-  { href: '/settings', label: 'Settings', icon: Settings },
-]
 
 export function Sidebar() {
   const pathname = usePathname()
   const { isLoaded, isSignedIn } = useAuth()
+  const tNav = useTranslations('Nav')
+  const tDashboard = useTranslations('Dashboard')
+
+  const NAV_ITEMS = [
+    { href: '/dashboard', label: tNav('dashboard'), icon: LayoutDashboard },
+    { href: '/resumes', label: tNav('resumes'), icon: FileText },
+    { href: '/cover-letters', label: tNav('coverLetters'), icon: Mail },
+    { href: '/ai-review', label: tNav('aiReview'), icon: FileSearch },
+    { href: '/settings', label: tDashboard('sidebarSettings'), icon: Settings },
+  ]
 
   return (
     <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
@@ -36,7 +39,7 @@ export function Sidebar() {
 
       <div className="px-5 mb-4">
         <Link href="/resumes/new" className={`w-full justify-center ${buttonVariants('primary', 'sm')}`}>
-          <Plus className="w-4 h-4" /> Create New
+          <Plus className="w-4 h-4" /> {tNav('createNew')}
         </Link>
       </div>
 
