@@ -1,35 +1,46 @@
 import { Link } from '@/i18n/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { routing, type AppLocale } from '@/i18n/routing'
 
-export const metadata: Metadata = {
-  title: 'Terms and Conditions | Joben AI Resume Builder',
-  description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
-  alternates: {
-    canonical: '/terms',
-  },
-  openGraph: {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  return {
     title: 'Terms and Conditions | Joben AI Resume Builder',
     description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
-    url: '/terms',
-    siteName: 'Joben',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Joben AI Resume Builder',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Terms and Conditions | Joben AI Resume Builder',
-    description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
-    images: ['/og-image.png'],
-  },
+    alternates: {
+      canonical: `/${locale}/terms`,
+      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/terms`])),
+    },
+    openGraph: {
+      title: 'Terms and Conditions | Joben AI Resume Builder',
+      description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
+      url: `/${locale}/terms`,
+      siteName: 'Joben',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Joben AI Resume Builder',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Terms and Conditions | Joben AI Resume Builder',
+      description: 'Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.',
+      images: ['/og-image.png'],
+    },
+  }
 }
 
 const lastUpdated = 'July 12, 2026'
@@ -107,9 +118,26 @@ const sections = [
   },
 ]
 
-export default function TermsPage() {
+export default async function TermsPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Common' })
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbJsonLd([
+        { name: t('home'), path: `/${locale}` },
+        { name: 'Terms and Conditions', path: `/${locale}/terms` },
+      ]),
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">

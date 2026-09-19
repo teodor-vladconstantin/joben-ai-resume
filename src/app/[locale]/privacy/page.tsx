@@ -1,17 +1,27 @@
 import { Link } from '@/i18n/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { routing, type AppLocale } from '@/i18n/routing'
 
-export const metadata: Metadata = {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  return {
   title: 'Privacy Policy | Joben AI Resume Builder',
   description: 'Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.',
   alternates: {
-    canonical: '/privacy',
+    canonical: `/${locale}/privacy`,
+    languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/privacy`])),
   },
   openGraph: {
     title: 'Privacy Policy | Joben AI Resume Builder',
     description: 'Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.',
-    url: '/privacy',
+    url: `/${locale}/privacy`,
     siteName: 'Joben',
     images: [
       {
@@ -30,6 +40,7 @@ export const metadata: Metadata = {
     description: 'Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.',
     images: ['/og-image.png'],
   },
+  }
 }
 
 const lastUpdated = 'July 12, 2026'
@@ -107,9 +118,26 @@ const sections = [
   },
 ]
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Common' })
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbJsonLd([
+        { name: t('home'), path: `/${locale}` },
+        { name: 'Privacy Policy', path: `/${locale}/privacy` },
+      ]),
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
