@@ -8,11 +8,12 @@ import { createCoverLetterSchema } from '@/lib/validation/schemas'
 
 type CoverLetterListItem = { id: string; title: string | null; updated_at: string }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const requestId = getRequestId(req)
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
+      return apiError(clientErrorMessage('auth'), 401, requestId)
     }
 
     const result = await fetchOwnedList<CoverLetterListItem>({
@@ -21,16 +22,18 @@ export async function GET() {
       userId,
       logLabel: 'cover-letters GET failed',
       logContext: { userId },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ letters: result.data }, 200)
+    return apiSuccess({ letters: result.data }, 200, requestId)
   } catch (error) {
     logger.error('cover-letters GET top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }
 

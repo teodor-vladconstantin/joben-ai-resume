@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type MonthYearRangeFieldProps = {
   label?: string
@@ -18,7 +19,7 @@ type MonthYearRangeFieldProps = {
 }
 
 export function MonthYearRangeField({
-  label = 'Period',
+  label,
   monthLabels,
   startMonth,
   startYear,
@@ -31,9 +32,12 @@ export function MonthYearRangeField({
   onEndYearChange,
   onIsCurrentChange,
 }: MonthYearRangeFieldProps) {
+  const t = useTranslations('Builder.monthYearField')
+  const resolvedLabel = label ?? t('periodLabel')
+
   return (
     <div className="rounded-xl border border-[#16DB65]/25 bg-linear-to-br from-[#0A0F0D] via-[#08160f] to-[#05110a] px-3 py-2.5">
-      <p className="text-[11px] text-white/45 uppercase tracking-[0.15em]">{label}</p>
+      <p className="text-[11px] text-white/45 uppercase tracking-[0.15em]">{resolvedLabel}</p>
       <div className="mt-2 flex items-center gap-1 flex-wrap">
         <div className="relative">
           <select
@@ -41,7 +45,7 @@ export function MonthYearRangeField({
             onChange={(e) => onStartMonthChange(e.target.value ? Number(e.target.value) : undefined)}
             className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
           >
-            <option value="">Month</option>
+            <option value="">{t('monthPlaceholder')}</option>
             {monthLabels.map((month, index) => (
               <option key={month} value={index + 1}>{month}</option>
             ))}
@@ -54,7 +58,7 @@ export function MonthYearRangeField({
           value={startYear ?? ''}
           onChange={(e) => onStartYearChange(e.target.value ? Number(e.target.value) : undefined)}
           className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-          placeholder="Year"
+          placeholder={t('yearPlaceholder')}
           min={1950}
           max={2099}
         />
@@ -62,7 +66,7 @@ export function MonthYearRangeField({
         <span className="text-white/30 text-xs">–</span>
 
         {isCurrent ? (
-          <span className="text-xs font-medium text-[#16DB65]">Present</span>
+          <span className="text-xs font-medium text-[#16DB65]">{t('present')}</span>
         ) : (
           <>
             <div className="relative">
@@ -71,7 +75,7 @@ export function MonthYearRangeField({
                 onChange={(e) => onEndMonthChange(e.target.value ? Number(e.target.value) : undefined)}
                 className="appearance-none rounded border border-white/10 bg-[#0A0F0D] pl-2 pr-6 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none [&>option]:bg-[#0A0F0D]"
               >
-                <option value="">Month</option>
+                <option value="">{t('monthPlaceholder')}</option>
                 {monthLabels.map((month, index) => (
                   <option key={month} value={index + 1}>{month}</option>
                 ))}
@@ -84,7 +88,7 @@ export function MonthYearRangeField({
               value={endYear ?? ''}
               onChange={(e) => onEndYearChange(e.target.value ? Number(e.target.value) : undefined)}
               className="w-[68px] rounded border border-white/10 bg-[#0A0F0D] px-2 py-1.5 text-xs text-white focus:border-[#16DB65] focus:outline-none"
-              placeholder="Year"
+              placeholder={t('yearPlaceholder')}
               min={1950}
               max={2099}
             />
@@ -98,7 +102,7 @@ export function MonthYearRangeField({
             onChange={(e) => onIsCurrentChange(e.target.checked)}
             className="accent-[#16DB65] w-3 h-3"
           />
-          <span className="text-xs text-white/55">Present</span>
+          <span className="text-xs text-white/55">{t('present')}</span>
         </label>
       </div>
     </div>

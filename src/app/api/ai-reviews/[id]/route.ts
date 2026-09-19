@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { apiError, apiSuccess } from '@/lib/api-response'
-import { logger } from '@/lib/logger'
+import { getRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { uuidLike } from '@/lib/validation/schemas'
 
@@ -10,17 +10,18 @@ function isMissingRelation(error: unknown): boolean {
   return err?.code === '42P01' || err?.code === 'PGRST205' || (err?.message || '').includes('relation')
 }
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
     const { userId } = await auth()
     if (!userId) {
-      return apiError(clientErrorMessage('auth'), 401)
+      return apiError(clientErrorMessage('auth'), 401, requestId)
     }
 
     const { id } = await params
     const parsedId = uuidLike.safeParse(id)
     if (!parsedId.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return apiError(clientErrorMessage('invalid_input'), 400, requestId)
     }
 
     const supabase = createServerClient()
@@ -33,10 +34,10 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
     if (error) {
       if (isMissingRelation(error)) {
-        return apiError(clientErrorMessage('server', 'AI reviews table is missing in Supabase.'), 500)
+        return apiError(clientErrorMessage('server', 'AI reviews table is missing in Supabase.'), 500, requestId)
       }
-      logger.error('ai-reviews [id] GET failed', { userId, reviewId: parsedId.data, error: error.message })
-      return apiError(clientErrorMessage('not_found'), 404)
+      logger.error('ai-reviews [id] GET failed', { requestId, userId, reviewId: parsedId.data, error: error.message })
+      return apiError(clientErrorMessage('not_found'), 404, requestId)
     }
 
     let comparison: {
@@ -73,11 +74,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       }
     }
 
-    return apiSuccess({ review: data, comparison }, 200)
+    return apiSuccess({ review: data, comparison }, 200, requestId)
   } catch (error) {
     logger.error('ai-reviews [id] GET top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }

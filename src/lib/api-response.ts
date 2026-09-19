@@ -5,31 +5,15 @@ import { createServerClient } from '@/lib/supabase/server'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { uuidLike } from '@/lib/validation/schemas'
 
-export type ApiSuccess<T> = {
-  success: true
-  data: T
-}
-
-export type ApiFailure = {
-  success: false
-  error: string
-}
-
-export type ApiEnvelope<T> = ApiSuccess<T> | ApiFailure
-
-export function apiSuccess<T>(data: T, status = 200): NextResponse<ApiSuccess<T>> {
-  return NextResponse.json({ success: true, data }, { status })
-}
-
-export function apiError(error: string, status = 400): NextResponse<ApiFailure> {
-  return NextResponse.json({ success: false, error }, { status })
-}
-
-export function apiSuccessWithRequestId<T>(data: T, status: number, requestId: string): NextResponse {
+// Both funnel through jsonWithRequestId so every route (whichever helper it
+// calls) gets the same envelope shape AND the x-request-id header — that
+// unification is the entire reason these take requestId as a required
+// param instead of defaulting it away.
+export function apiSuccess<T>(data: T, status: number, requestId: string): NextResponse {
   return jsonWithRequestId({ success: true, data }, status, requestId)
 }
 
-export function apiErrorWithRequestId(error: string, status: number, requestId: string): NextResponse {
+export function apiError(error: string, status: number, requestId: string): NextResponse {
   return jsonWithRequestId({ success: false, error }, status, requestId)
 }
 
@@ -71,17 +55,18 @@ export type OwnedResourceParams = { params: Promise<{ id: string }> }
  * ready-to-return NextResponse (401/400) matching the exact prior inline behavior.
  */
 export async function requireAuthenticatedResourceId(
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>,
+  requestId: string
 ): Promise<{ ok: true; value: { userId: string; id: string } } | { ok: false; response: NextResponse }> {
   const { userId } = await auth()
   if (!userId) {
-    return { ok: false, response: apiError(clientErrorMessage('auth'), 401) }
+    return { ok: false, response: apiError(clientErrorMessage('auth'), 401, requestId) }
   }
 
   const { id } = await params
   const parsedId = uuidLike.safeParse(id)
   if (!parsedId.success) {
-    return { ok: false, response: apiError(clientErrorMessage('invalid_input'), 400) }
+    return { ok: false, response: apiError(clientErrorMessage('invalid_input'), 400, requestId) }
   }
 
   return { ok: true, value: { userId, id: parsedId.data } }
@@ -100,6 +85,7 @@ export async function fetchOwnedList<T>(opts: {
   userId: string
   logLabel: string
   logContext?: Record<string, unknown>
+  requestId: string
 }): Promise<OwnedRowResult<T[]>> {
   const supabase = createServerClient()
   const { data, error } = await supabase
@@ -113,7 +99,7 @@ export async function fetchOwnedList<T>(opts: {
       return { ok: true, data: [] }
     }
     logger.error(opts.logLabel, { ...opts.logContext, error: error.message })
-    return { ok: false, response: apiError(clientErrorMessage('server'), 500) }
+    return { ok: false, response: apiError(clientErrorMessage('server'), 500, opts.requestId) }
   }
 
   return { ok: true, data: ((data as unknown) as T[]) || [] }
@@ -132,6 +118,7 @@ export async function fetchOwnedRow<T>(opts: {
   missingRelationMessage: string
   logLabel: string
   logContext?: Record<string, unknown>
+  requestId: string
 }): Promise<OwnedRowResult<T>> {
   const supabase = createServerClient()
   const { data, error } = await supabase
@@ -143,12 +130,12 @@ export async function fetchOwnedRow<T>(opts: {
 
   if (error) {
     if (isMissingRelation(error)) {
-      return { ok: false, response: apiError(clientErrorMessage('server', opts.missingRelationMessage), 500) }
+      return { ok: false, response: apiError(clientErrorMessage('server', opts.missingRelationMessage), 500, opts.requestId) }
     }
     // Expected case (deleted resource, stale link, wrong owner) — warn, not
     // error, so it doesn't get forwarded to Sentry as a real failure.
     logger.warn(opts.logLabel, { ...opts.logContext, error: error.message })
-    return { ok: false, response: apiError(clientErrorMessage('not_found'), 404) }
+    return { ok: false, response: apiError(clientErrorMessage('not_found'), 404, opts.requestId) }
   }
 
   return { ok: true, data: data as T }
@@ -168,6 +155,7 @@ export async function updateOwnedRow<T>(opts: {
   missingRelationMessage: string
   logLabel: string
   logContext?: Record<string, unknown>
+  requestId: string
 }): Promise<OwnedRowResult<T>> {
   const supabase = createServerClient()
   const { data, error } = await supabase
@@ -180,10 +168,10 @@ export async function updateOwnedRow<T>(opts: {
 
   if (error) {
     if (isMissingRelation(error)) {
-      return { ok: false, response: apiError(clientErrorMessage('server', opts.missingRelationMessage), 500) }
+      return { ok: false, response: apiError(clientErrorMessage('server', opts.missingRelationMessage), 500, opts.requestId) }
     }
     logger.error(opts.logLabel, { ...opts.logContext, error: error.message })
-    return { ok: false, response: apiError(clientErrorMessage('server'), 500) }
+    return { ok: false, response: apiError(clientErrorMessage('server'), 500, opts.requestId) }
   }
 
   return { ok: true, data: data as T }
@@ -201,6 +189,7 @@ export async function deleteOwnedRow(opts: {
   missingRelationMessage: string
   logLabel: string
   logContext?: Record<string, unknown>
+  requestId: string
 }): Promise<NextResponse> {
   const supabase = createServerClient()
   const { error } = await supabase
@@ -211,11 +200,11 @@ export async function deleteOwnedRow(opts: {
 
   if (error) {
     if (isMissingRelation(error)) {
-      return apiError(clientErrorMessage('server', opts.missingRelationMessage), 500)
+      return apiError(clientErrorMessage('server', opts.missingRelationMessage), 500, opts.requestId)
     }
     logger.error(opts.logLabel, { ...opts.logContext, error: error.message })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, opts.requestId)
   }
 
-  return apiSuccess({ deleted: true }, 200)
+  return apiSuccess({ deleted: true }, 200, opts.requestId)
 }

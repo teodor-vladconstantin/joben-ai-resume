@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/Card'
 
 export type ModalProps = {
@@ -21,6 +22,7 @@ const MAX_WIDTH_CLASSES: Record<NonNullable<ModalProps['maxWidth']>, string> = {
 }
 
 export function Modal({ open, onClose, title, children, footer, maxWidth = 'lg' }: ModalProps) {
+  const t = useTranslations('Shared')
   if (!open) return null
 
   return (
@@ -36,7 +38,7 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'lg' 
           <button
             onClick={onClose}
             className="rounded-md p-1 text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)"
-            aria-label="Close"
+            aria-label={t('close')}
           >
             <X className="h-4 w-4" />
           </button>

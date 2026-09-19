@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useRouter } from '@/i18n/navigation'
 import { Sidebar } from '@/components/dashboard/Sidebar'
@@ -22,6 +23,7 @@ function storePatches(patches: FixPatchWithContext[]) {
 }
 
 export default function AIReviewEditorPage() {
+  const t = useTranslations('AiReviewPage.detail')
   const params = useParams<{ id: string }>()
   const router = useRouter()
 
@@ -47,19 +49,19 @@ export default function AIReviewEditorPage() {
     resetAt?: string
   } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [upgradeMessage, setUpgradeMessage] = useState('Upgrade to Pro to keep applying AI fixes.')
+  const [upgradeMessage, setUpgradeMessage] = useState(t('defaultUpgradeMessage'))
 
   useEffect(() => {
     let cancelled = false
 
     async function loadReview() {
       const id = params?.id
-      if (!id) { setError('Missing review id'); setIsLoading(false); return }
+      if (!id) { setError(t('errorMissingReviewId')); setIsLoading(false); return }
 
       const response = await fetch(`/api/ai-reviews/${id}`, { cache: 'no-store' })
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        if (!cancelled) { setError(payload.error || 'Failed to load review'); setIsLoading(false) }
+        if (!cancelled) { setError(payload.error || t('errorFailedToLoad')); setIsLoading(false) }
         return
       }
 
@@ -82,7 +84,7 @@ export default function AIReviewEditorPage() {
 
     loadReview()
     return () => { cancelled = true }
-  }, [params?.id])
+  }, [params?.id, t])
 
   const rawReviewId = params?.id
   const reviewId = Array.isArray(rawReviewId) ? (rawReviewId[0] || '') : (rawReviewId || '')
@@ -122,11 +124,11 @@ export default function AIReviewEditorPage() {
 
       if (!res.ok || !payload.applied) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || 'This AI fix is available on Pro.')
+          setUpgradeMessage(payload.error || t('errorFixProOnly'))
           setShowUpgradeModal(true)
           return
         }
-        setFixErrors((prev) => ({ ...prev, [improvementIndex]: payload.error || 'Could not apply this fix. Try again.' }))
+        setFixErrors((prev) => ({ ...prev, [improvementIndex]: payload.error || t('errorCouldNotApplyFix') }))
         return
       }
 
@@ -147,7 +149,7 @@ export default function AIReviewEditorPage() {
       })
       if (url) router.push(url)
     } catch {
-      setFixErrors((prev) => ({ ...prev, [improvementIndex]: 'Network error. Please retry.' }))
+      setFixErrors((prev) => ({ ...prev, [improvementIndex]: t('errorNetworkRetry') }))
     } finally {
       setLoadingImprovementIndex(null)
     }
@@ -181,7 +183,7 @@ export default function AIReviewEditorPage() {
       }
 
       if (!precheckRes.ok || precheckPayload.allowed === false) {
-        setAutoFixTokenWarning(precheckPayload.error || 'Auto-fix cannot run due to token limits.')
+        setAutoFixTokenWarning(precheckPayload.error || t('errorAutoFixTokenLimit'))
         setAutoFixTokenDetails({
           estimatedInputTokens: precheckPayload.estimatedInputTokens,
           remainingTokens: precheckPayload.remainingTokens,
@@ -207,11 +209,11 @@ export default function AIReviewEditorPage() {
 
       if (!res.ok) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || 'Auto-fix is available on Pro.')
+          setUpgradeMessage(payload.error || t('errorAutoFixProOnly'))
           setShowUpgradeModal(true)
           return
         }
-        setAutoFixError(payload.error || 'Auto-fix failed. Please retry.')
+        setAutoFixError(payload.error || t('errorAutoFixFailed'))
         return
       }
 
@@ -221,7 +223,7 @@ export default function AIReviewEditorPage() {
 
       router.push(builderUrl({ fixesApplied: String(payload.fixesApplied ?? 0) }))
     } catch {
-      setAutoFixError('Network error. Please retry.')
+      setAutoFixError(t('errorNetworkRetry'))
     } finally {
       setIsSavingAutoFix(false)
     }
@@ -255,29 +257,29 @@ export default function AIReviewEditorPage() {
       <Modal
         open={showAutoFixTokenWarning}
         onClose={() => setShowAutoFixTokenWarning(false)}
-        title="Auto-fix unavailable"
+        title={t('autoFixUnavailableTitle')}
         maxWidth="md"
         footer={
           <div className="flex items-center justify-end">
             <button onClick={() => setShowAutoFixTokenWarning(false)} className={buttonVariants('primary', 'md')}>
-              Got it
+              {t('gotIt')}
             </button>
           </div>
         }
       >
         <p className="text-sm text-(--muted)">
-          {autoFixTokenWarning || 'Auto-fix cannot run due to token limits.'}
+          {autoFixTokenWarning || t('errorAutoFixTokenLimit')}
         </p>
         {autoFixTokenDetails ? (
           <div className="mt-4 rounded-xl border border-(--border) bg-(--background) px-4 py-3 text-xs text-(--muted) space-y-1">
             {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
-              <p>Estimated input tokens: {autoFixTokenDetails.estimatedInputTokens}</p>
+              <p>{t('estimatedInputTokens', { tokens: autoFixTokenDetails.estimatedInputTokens })}</p>
             ) : null}
             {typeof autoFixTokenDetails.remainingTokens === 'number' ? (
-              <p>Remaining monthly tokens: {autoFixTokenDetails.remainingTokens}</p>
+              <p>{t('remainingMonthlyTokens', { tokens: autoFixTokenDetails.remainingTokens })}</p>
             ) : null}
             {autoFixTokenDetails.resetAt ? (
-              <p>Resets at: {new Date(autoFixTokenDetails.resetAt).toLocaleString()}</p>
+              <p>{t('resetsAt', { date: new Date(autoFixTokenDetails.resetAt).toLocaleString() })}</p>
             ) : null}
           </div>
         ) : null}

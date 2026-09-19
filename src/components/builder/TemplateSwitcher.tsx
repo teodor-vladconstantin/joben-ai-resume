@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
+
 export type TemplateValue = 'harvard'
 
 type TemplateSwitcherProps = {
@@ -7,14 +9,15 @@ type TemplateSwitcherProps = {
   onChange: (value: TemplateValue) => void
 }
 
-const templates: Array<{ id: TemplateValue; name: string; description: string }> = [
-  { id: 'harvard', name: 'Harvard', description: 'Classic academic layout' },
-]
-
 export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
+  const t = useTranslations('Builder.templateSwitcher')
+  const templates: Array<{ id: TemplateValue; name: string; description: string }> = [
+    { id: 'harvard', name: t('harvardName'), description: t('harvardDescription') },
+  ]
+
   return (
     <div className="bg-(--surface) border border-(--border) rounded-xl p-4">
-      <p className="text-xs uppercase tracking-wider text-(--muted) mb-3">Template</p>
+      <p className="text-xs uppercase tracking-wider text-(--muted) mb-3">{t('heading')}</p>
       <div className="grid grid-cols-1 gap-2.5">
         {templates.map((template) => (
           <button

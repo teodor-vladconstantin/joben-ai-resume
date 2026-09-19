@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
@@ -98,6 +99,7 @@ function toResumeLikeText(sections: CoverLetterSections) {
 }
 
 export function CoverLetterBuilder() {
+  const t = useTranslations('CoverLetterBuilder')
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const routeId = params?.id
@@ -114,32 +116,32 @@ export function CoverLetterBuilder() {
   const [letterId, setLetterId] = useState<string | null>(null)
   const [modalDraft, setModalDraft] = useState('')
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [upgradeMessage, setUpgradeMessage] = useState('Unlock unlimited AI cover letter generation with Pro.')
+  const [upgradeMessage, setUpgradeMessage] = useState(t('upgradeDefaultMessage'))
 
   const computedTitle = useMemo(() => {
     if (sections.company && sections.position) return `${sections.company} - ${sections.position}`
     if (sections.company) return sections.company
     if (sections.position) return sections.position
-    return 'Untitled Cover Letter'
-  }, [sections.company, sections.position])
+    return t('untitledTitle')
+  }, [sections.company, sections.position, t])
 
   const sectionItems = useMemo(() => {
     return [
-      { id: 'header', label: 'Header Information', completed: !!sections.headerName && !!sections.headerEmail },
-      { id: 'date', label: 'Date', completed: !!sections.date },
-      { id: 'recipient', label: 'Recipient', completed: !!sections.recipientName },
-      { id: 'position', label: 'Position', completed: !!sections.position && !!sections.company },
-      { id: 'salutation', label: 'Salutation', completed: !!sections.salutation },
-      { id: 'introduction', label: 'Introduction', completed: sections.introduction.trim().length > 0 },
+      { id: 'header', label: t('sections.header'), completed: !!sections.headerName && !!sections.headerEmail },
+      { id: 'date', label: t('sections.date'), completed: !!sections.date },
+      { id: 'recipient', label: t('sections.recipient'), completed: !!sections.recipientName },
+      { id: 'position', label: t('sections.position'), completed: !!sections.position && !!sections.company },
+      { id: 'salutation', label: t('sections.salutation'), completed: !!sections.salutation },
+      { id: 'introduction', label: t('sections.introduction'), completed: sections.introduction.trim().length > 0 },
       {
         id: 'body',
-        label: `Body Paragraphs (${sections.bodyParagraphs.length})`,
+        label: t('sections.bodyParagraphs', { count: sections.bodyParagraphs.length }),
         completed: sections.bodyParagraphs.some((p) => p.trim().length > 0),
       },
-      { id: 'conclusion', label: 'Conclusion', completed: sections.conclusion.trim().length > 0 },
-      { id: 'closing', label: 'Closing & Signature', completed: sections.closingSignature.trim().length > 0 },
+      { id: 'conclusion', label: t('sections.conclusion'), completed: sections.conclusion.trim().length > 0 },
+      { id: 'closing', label: t('sections.closing'), completed: sections.closingSignature.trim().length > 0 },
     ]
-  }, [sections])
+  }, [sections, t])
 
   const completedSections = useMemo(
     () => sectionItems.filter((item) => item.completed).length,
@@ -377,12 +379,12 @@ export function CoverLetterBuilder() {
 
       if (!response.ok || !payload.result) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || 'This AI action is available on Pro.')
+          setUpgradeMessage(payload.error || t('errors.generateDraftAiUpgrade'))
           setShowUpgradeModal(true)
           setIsGenerating(false)
           return
         }
-        alert(payload.error || 'Could not generate draft.')
+        alert(payload.error || t('errors.generateDraft'))
         setIsGenerating(false)
         return
       }
@@ -401,7 +403,7 @@ export function CoverLetterBuilder() {
         closingSignature: payload.result?.closing || prev.closingSignature,
       }))
     } catch (error) {
-      alert(`Draft generation failed: ${(error as Error).message}`)
+      alert(t('errors.generateDraftFailed', { message: (error as Error).message }))
     }
 
     setIsGenerating(false)
@@ -425,7 +427,7 @@ export function CoverLetterBuilder() {
 
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        alert(payload.error || 'Could not export PDF.')
+        alert(payload.error || t('errors.exportPdf'))
         return
       }
 
@@ -437,7 +439,7 @@ export function CoverLetterBuilder() {
       anchor.click()
       URL.revokeObjectURL(url)
     } catch (error) {
-      alert(`Export failed: ${(error as Error).message}`)
+      alert(t('errors.exportFailed', { message: (error as Error).message }))
     } finally {
       setIsExportingPdf(false)
     }
@@ -447,8 +449,8 @@ export function CoverLetterBuilder() {
     <div className="w-full h-full flex flex-col lg:flex-row">
       <div className="w-full lg:w-112.5 bg-(--surface) border-r border-(--border) flex flex-col h-full z-10 shadow-2xl">
         <div className="p-6 border-b border-(--border) bg-linear-to-r from-(--surface-elevated) to-(--surface)">
-          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--accent) w-5 h-5"/> Cover Letter Sections</h2>
-          <p className="text-sm text-(--muted) mt-2">Progress {completedSections}/{sectionItems.length} complete</p>
+          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--accent) w-5 h-5"/> {t('heading')}</h2>
+          <p className="text-sm text-(--muted) mt-2">{t('progress', { completed: completedSections, total: sectionItems.length })}</p>
           <div className="mt-3 h-2 w-full rounded-full bg-(--background)">
             <div className="h-2 rounded-full bg-(--accent)" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
           </div>
@@ -458,39 +460,39 @@ export function CoverLetterBuilder() {
           <SectionList sections={sectionItems} onSelect={openSectionEditor} />
 
           <div className="space-y-2 pt-5">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Building2 className="w-4 h-4 text-(--muted)" /> Company Name</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Building2 className="w-4 h-4 text-(--muted)" /> {t('companyLabel')}</label>
             <input
               value={sections.company}
               onChange={(e) => setSections((prev) => ({ ...prev, company: e.target.value }))}
               type="text"
               className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
-              placeholder="e.g., Google"
+              placeholder={t('companyPlaceholder')}
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Briefcase className="w-4 h-4 text-(--muted)" /> Job Title</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Briefcase className="w-4 h-4 text-(--muted)" /> {t('positionLabel')}</label>
             <input
               value={sections.position}
               onChange={(e) => setSections((prev) => ({ ...prev, position: e.target.value }))}
               type="text"
               className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
-              placeholder="e.g., Senior Frontend Engineer"
+              placeholder={t('positionPlaceholder')}
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><FileText className="w-4 h-4 text-(--muted)" /> Job Description</label>
+            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><FileText className="w-4 h-4 text-(--muted)" /> {t('jobDescriptionLabel')}</label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) h-32 resize-none text-sm"
-              placeholder="Paste the full job description here..."
+              placeholder={t('jobDescriptionPlaceholder')}
             ></textarea>
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted)">Tone</label>
+            <label className="text-sm font-medium text-(--muted)">{t('toneLabel')}</label>
             <div className="grid grid-cols-3 gap-2">
               {(['formal', 'professional', 'conversational'] as const).map((tone) => (
                 <button
@@ -502,7 +504,7 @@ export function CoverLetterBuilder() {
                       : 'border-(--border) bg-(--surface) text-(--muted)'
                   }`}
                 >
-                  {tone[0].toUpperCase() + tone.slice(1)}
+                  {t(`toneOptions.${tone}`)}
                 </button>
               ))}
             </div>
@@ -518,7 +520,7 @@ export function CoverLetterBuilder() {
               <div className="w-5 h-5 border-2 border-(--background) border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-current" /> Generate Draft
+                <Play className="w-4 h-4 fill-current" /> {t('generateDraftButton')}
               </>
             )}
           </FeatureButton>
@@ -530,14 +532,14 @@ export function CoverLetterBuilder() {
             disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
             className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Save className="w-4 h-4" /> Save
+            <Save className="w-4 h-4" /> {t('saveButton')}
           </button>
           <button
             onClick={() => void exportAsPdf()}
             disabled={isLoading || isExportingPdf}
             className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Download className="w-4 h-4" /> Export PDF
+            <Download className="w-4 h-4" /> {t('exportPdfButton')}
           </button>
         </div>
       </div>
@@ -569,7 +571,7 @@ export function CoverLetterBuilder() {
         </div>
 
         <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded">
-          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Save failed' : 'Idle'}
+          {saveStatus === 'saving' ? t('saveStatus.saving') : saveStatus === 'saved' ? t('saveStatus.saved') : saveStatus === 'error' ? t('saveStatus.error') : t('saveStatus.idle')}
         </div>
       </div>
 
@@ -583,15 +585,15 @@ export function CoverLetterBuilder() {
       <Modal
         open={activeModal !== null}
         onClose={() => setActiveModal(null)}
-        title="Edit Section"
+        title={t('editSectionModal.title')}
         maxWidth="lg"
         footer={
           <div className="flex justify-end gap-2">
             <button onClick={() => setActiveModal(null)} className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)">
-              Cancel
+              {t('cancelButton')}
             </button>
             <button onClick={applyModalChanges} className={buttonVariants('primary', 'md')}>
-              Save Changes
+              {t('saveChangesButton')}
             </button>
           </div>
         }
@@ -602,7 +604,7 @@ export function CoverLetterBuilder() {
           className="h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
         />
         <p className="mt-2 text-xs text-(--muted)">
-          Use new lines for multi-field sections like Header, Recipient, and Position.
+          {t('editSectionModal.helperText')}
         </p>
       </Modal>
 

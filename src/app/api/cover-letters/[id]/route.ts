@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { getRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { updateCoverLetterSchema } from '@/lib/validation/schemas'
 import {
@@ -17,9 +17,10 @@ type CoverLetterRow = {
   updated_at: string
 }
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
-    const authResult = await requireAuthenticatedResourceId(params)
+    const authResult = await requireAuthenticatedResourceId(params, requestId)
     if (!authResult.ok) return authResult.response
     const { userId, id } = authResult.value
 
@@ -31,22 +32,25 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       missingRelationMessage: 'Cover letters table is missing in Supabase.',
       logLabel: 'cover-letters [id] GET failed',
       logContext: { userId, letterId: id },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ letter: result.data }, 200)
+    return apiSuccess({ letter: result.data }, 200, requestId)
   } catch (error) {
     logger.error('cover-letters [id] GET top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
-    const authResult = await requireAuthenticatedResourceId(params)
+    const authResult = await requireAuthenticatedResourceId(params, requestId)
     if (!authResult.ok) return authResult.response
     const { userId, id } = authResult.value
 
@@ -54,12 +58,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     try {
       rawBody = await req.json()
     } catch {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return apiError(clientErrorMessage('invalid_input'), 400, requestId)
     }
 
     const parsed = updateCoverLetterSchema.safeParse(rawBody)
     if (!parsed.success) {
-      return apiError(clientErrorMessage('invalid_input'), 400)
+      return apiError(clientErrorMessage('invalid_input'), 400, requestId)
     }
 
     const body = parsed.data
@@ -76,22 +80,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       missingRelationMessage: 'Cover letters table is missing in Supabase.',
       logLabel: 'cover-letters [id] PATCH failed',
       logContext: { userId, letterId: id },
+      requestId,
     })
 
     if (!result.ok) return result.response
 
-    return apiSuccess({ letter: result.data }, 200)
+    return apiSuccess({ letter: result.data }, 200, requestId)
   } catch (error) {
     logger.error('cover-letters [id] PATCH top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const requestId = getRequestId(req)
   try {
-    const authResult = await requireAuthenticatedResourceId(params)
+    const authResult = await requireAuthenticatedResourceId(params, requestId)
     if (!authResult.ok) return authResult.response
     const { userId, id } = authResult.value
 
@@ -102,11 +109,13 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
       missingRelationMessage: 'Cover letters table is missing in Supabase.',
       logLabel: 'cover-letters [id] DELETE failed',
       logContext: { userId, letterId: id },
+      requestId,
     })
   } catch (error) {
     logger.error('cover-letters [id] DELETE top-level failure', {
+      requestId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return apiError(clientErrorMessage('server'), 500)
+    return apiError(clientErrorMessage('server'), 500, requestId)
   }
 }

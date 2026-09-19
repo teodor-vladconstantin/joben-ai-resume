@@ -9,6 +9,7 @@ import {
   type TextareaHTMLAttributes,
 } from 'react'
 import { Bold, Italic, Underline } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type ToolbarFormat = 'bold' | 'italic' | 'underline'
 
@@ -16,12 +17,6 @@ const FORMAT_MARKERS: Record<ToolbarFormat, string> = {
   bold: '**',
   italic: '*',
   underline: '__',
-}
-
-const FORMAT_PLACEHOLDERS: Record<ToolbarFormat, string> = {
-  bold: 'bold text',
-  italic: 'italic text',
-  underline: 'underlined text',
 }
 
 export type RichTextareaProps = Omit<
@@ -53,6 +48,7 @@ export const RichTextarea = forwardRef<HTMLTextAreaElement, RichTextareaProps>(
     },
     ref,
   ) {
+    const t = useTranslations('Builder.richTextarea')
     const innerRef = useRef<HTMLTextAreaElement | null>(null)
     useImperativeHandle(ref, () => innerRef.current as HTMLTextAreaElement, [])
 
@@ -99,7 +95,7 @@ export const RichTextarea = forwardRef<HTMLTextAreaElement, RichTextareaProps>(
           return
         }
 
-        const placeholder = selected || FORMAT_PLACEHOLDERS[format]
+        const placeholder = selected || t(`${format}Placeholder`)
         const next = `${before}${marker}${placeholder}${marker}${after}`
         onValueChange(next)
         requestAnimationFrame(() => {
@@ -109,7 +105,7 @@ export const RichTextarea = forwardRef<HTMLTextAreaElement, RichTextareaProps>(
           el.setSelectionRange(newStart, newEnd)
         })
       },
-      [onValueChange, value],
+      [onValueChange, value, t],
     )
 
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -137,17 +133,17 @@ export const RichTextarea = forwardRef<HTMLTextAreaElement, RichTextareaProps>(
           <div
             className={`flex items-center gap-1 ${toolbarClassName ?? ''}`.trim()}
             role="toolbar"
-            aria-label={toolbarLabel ?? 'Text formatting'}
+            aria-label={toolbarLabel ?? t('toolbarLabelDefault')}
           >
-            <ToolbarButton onPress={() => applyFormat('bold')} label="Bold" shortcut="Ctrl+B">
+            <ToolbarButton onPress={() => applyFormat('bold')} label={t('bold')} shortcut="Ctrl+B">
               <Bold className="h-3 w-3" />
             </ToolbarButton>
-            <ToolbarButton onPress={() => applyFormat('italic')} label="Italic" shortcut="Ctrl+I">
+            <ToolbarButton onPress={() => applyFormat('italic')} label={t('italic')} shortcut="Ctrl+I">
               <Italic className="h-3 w-3" />
             </ToolbarButton>
             <ToolbarButton
               onPress={() => applyFormat('underline')}
-              label="Underline"
+              label={t('underline')}
               shortcut="Ctrl+U"
             >
               <Underline className="h-3 w-3" />

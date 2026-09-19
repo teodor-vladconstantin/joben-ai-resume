@@ -258,7 +258,7 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
     authMock.mockResolvedValue({ userId: null })
     const { GET } = await import('@/app/api/cover-letters/route')
 
-    const response = await GET()
+    const response = await GET(new Request('http://localhost/api/cover-letters'))
     expect(response.status).toBe(401)
   })
 })

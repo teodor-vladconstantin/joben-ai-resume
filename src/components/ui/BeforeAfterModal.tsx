@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { ArrowDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -49,6 +50,7 @@ function renderWithHighlights(text: string, claims: string[]): ReactNode {
 }
 
 export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterModalProps) {
+  const t = useTranslations('Builder.beforeAfterModal')
   const [confirmedKeys, setConfirmedKeys] = useState<Set<string>>(new Set())
   const count = patches.length
   const isConfirmMode = Boolean(onConfirm)
@@ -75,8 +77,8 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
       onClose={onClose}
       title={
         isConfirmMode
-          ? `Review ${count} ${count === 1 ? 'Change' : 'Changes'} Before Applying`
-          : `AI Applied ${count} ${count === 1 ? 'Improvement' : 'Improvements'}`
+          ? t('reviewTitle', { count })
+          : t('appliedTitle', { count })
       }
       maxWidth="xl"
       footer={
@@ -86,19 +88,19 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
               onClick={onClose}
               className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)"
             >
-              Discard
+              {t('discard')}
             </button>
             <button
               onClick={() => onConfirm?.(patches)}
               disabled={!allConfirmed}
               className={`disabled:cursor-not-allowed disabled:opacity-50 ${buttonVariants('primary', 'md')}`}
             >
-              Apply Changes
+              {t('applyChanges')}
             </button>
           </div>
         ) : (
           <button onClick={onClose} className={`w-full ${buttonVariants('primary', 'md')}`}>
-            View in Editor
+            {t('viewInEditor')}
           </button>
         )
       }
@@ -123,9 +125,9 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
 
               <div className="p-4 space-y-2">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-(--accent-strong) font-semibold mb-1.5">Before</p>
+                  <p className="text-[10px] uppercase tracking-widest text-(--accent-strong) font-semibold mb-1.5">{t('beforeLabel')}</p>
                   <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--accent-strong) px-3 py-2 rounded-r leading-relaxed">
-                    {patch.originalBullet || <span className="italic opacity-60">(empty)</span>}
+                    {patch.originalBullet || <span className="italic opacity-60">{t('emptyPlaceholder')}</span>}
                   </p>
                 </div>
 
@@ -134,7 +136,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
                 </div>
 
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-(--accent) font-semibold mb-1.5">After</p>
+                  <p className="text-[10px] uppercase tracking-widest text-(--accent) font-semibold mb-1.5">{t('afterLabel')}</p>
                   <p className="text-sm bg-(--accent-muted) text-(--accent-strong) border-l-2 border-(--accent) px-3 py-2 rounded-r leading-relaxed">
                     {renderWithHighlights(patch.updatedBullet, claims)}
                   </p>
@@ -149,8 +151,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
                       className="mt-0.5"
                     />
                     <span className="text-xs text-amber-200">
-                      This rewrite added details not in your original text ({claims.join(', ')}).
-                      Confirm these are real before applying.
+                      {t('claimsWarning', { claims: claims.join(', ') })}
                     </span>
                   </label>
                 ) : null}

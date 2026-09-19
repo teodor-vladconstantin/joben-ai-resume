@@ -1,6 +1,7 @@
 "use client"
 
 import { Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -12,6 +13,7 @@ type ParagraphModalProps = {
 }
 
 export function ParagraphModal({ open, paragraphs, onClose, onChange }: ParagraphModalProps) {
+  const t = useTranslations('CoverLetterBuilder.paragraphModal')
   const updateParagraph = (index: number, value: string) => {
     const next = [...paragraphs]
     next[index] = value
@@ -31,7 +33,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
     <Modal
       open={open}
       onClose={onClose}
-      title="Body Paragraphs"
+      title={t('title')}
       maxWidth="xl"
       footer={
         <div className="flex items-center justify-between">
@@ -39,10 +41,10 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
             onClick={addParagraph}
             className="rounded-lg border border-(--accent)/30 bg-(--accent-muted) px-3 py-2 text-sm font-semibold text-(--accent) hover:bg-(--accent)/20"
           >
-            + Add Paragraph
+            {t('addParagraphButton')}
           </button>
           <button onClick={onClose} className={buttonVariants('primary', 'md')}>
-            Save Changes
+            {t('saveChangesButton')}
           </button>
         </div>
       }
@@ -51,7 +53,7 @@ export function ParagraphModal({ open, paragraphs, onClose, onChange }: Paragrap
         {paragraphs.map((paragraph, index) => (
           <div key={index} className="rounded-xl border border-(--border) bg-(--surface) p-3">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-medium text-(--foreground)">Paragraph {index + 1}</p>
+              <p className="text-sm font-medium text-(--foreground)">{t('paragraphLabel', { number: index + 1 })}</p>
               <button
                 onClick={() => removeParagraph(index)}
                 className="rounded-md border border-(--accent-strong)/30 bg-(--accent-muted) p-1 text-(--accent-strong) hover:bg-(--accent)/18"

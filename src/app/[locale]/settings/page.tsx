@@ -12,6 +12,7 @@ import { Mail, CreditCard, Bell, Shield } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { getEmailHintFromSessionClaims, getUserPlan, PLAN_DEFINITIONS } from '@/lib/plans'
 import type { AppLocale } from '@/i18n/routing'
+import { getTranslations } from 'next-intl/server'
 
 export const metadata = {
   title: 'Settings | Joben',
@@ -21,6 +22,7 @@ export const metadata = {
 
 export default async function SettingsPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'SettingsPage' })
   const { userId: rawUserId, sessionClaims } = await auth()
   if (!rawUserId) redirect({ href: '/sign-in', locale })
   // next-intl's redirect() return type doesn't collapse to a bare `never`
@@ -46,16 +48,16 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
         </div>
 
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-          <h1 className="text-3xl font-bold text-(--foreground) mb-8">Settings</h1>
+          <h1 className="text-3xl font-bold text-(--foreground) mb-8">{t('title')}</h1>
 
           <div className="space-y-6">
             {/* Account */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-(--foreground)">Account</h2>
+                  <h2 className="text-lg font-bold text-(--foreground)">{t('account.title')}</h2>
                   <p className="text-sm text-(--muted) mt-1">
-                    Manage your profile and account details.
+                    {t('account.description')}
                   </p>
                 </div>
                 <AccountUserButton />
@@ -65,20 +67,20 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-(--muted)">
                     <Mail size={14} />
-                    Email settings
+                    {t('account.emailSettings')}
                   </div>
-                  <Badge variant="muted">Managed by Clerk</Badge>
+                  <Badge variant="muted">{t('managedByClerk')}</Badge>
                 </div>
-                <ExportDataButton />
+                <ExportDataButton label={t('account.exportData')} buttonLabel={t('account.exportDataButton')} />
               </div>
             </div>
 
             {/* Billing */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">Billing</h2>
+                <h2 className="text-lg font-bold text-(--foreground)">{t('billing.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
-                  Manage your subscription and payment methods.
+                  {t('billing.description')}
                 </p>
               </div>
               <Divider className="my-4" />
@@ -86,12 +88,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-(--muted)">
                     <CreditCard size={14} />
-                    Current plan
+                    {t('billing.currentPlan')}
                   </div>
                   <Badge variant="solid">{PLAN_DEFINITIONS[plan].label}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-(--muted)">Subscription</div>
+                  <div className="text-sm text-(--muted)">{t('billing.subscription')}</div>
                   <ManageBillingButton hasStripeCustomer={Boolean(profile?.stripe_customer_id)} />
                 </div>
               </div>
@@ -100,45 +102,45 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             {/* Notifications */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">Notifications</h2>
+                <h2 className="text-lg font-bold text-(--foreground)">{t('notifications.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
-                  Control email and in-app notifications.
+                  {t('notifications.description')}
                 </p>
               </div>
               <Divider className="my-4" />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-(--muted)">
                   <Bell size={14} />
-                  Email notifications
+                  {t('notifications.emailNotifications')}
                 </div>
-                <Badge variant="muted">Enabled</Badge>
+                <Badge variant="muted">{t('notifications.enabled')}</Badge>
               </div>
             </div>
 
             {/* Security */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">Security</h2>
+                <h2 className="text-lg font-bold text-(--foreground)">{t('security.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
-                  Password, 2FA, and session management.
+                  {t('security.description')}
                 </p>
               </div>
               <Divider className="my-4" />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-(--muted)">
                   <Shield size={14} />
-                  Two-factor authentication
+                  {t('security.twoFactor')}
                 </div>
-                <Badge variant="muted">Managed by Clerk</Badge>
+                <Badge variant="muted">{t('managedByClerk')}</Badge>
               </div>
             </div>
 
             {/* Danger zone */}
             <div className="bg-(--surface) p-6 rounded-2xl border border-red-400/30">
               <div>
-                <h2 className="text-lg font-bold text-red-400">Danger Zone</h2>
+                <h2 className="text-lg font-bold text-red-400">{t('dangerZone.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
-                  Once you delete your account, there is no going back.
+                  {t('dangerZone.description')}
                 </p>
               </div>
               <Divider className="my-4" />

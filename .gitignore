@@ -73,3 +73,5 @@ cleanup-reports/
 /test-results/
 /playwright-report/
 /blob-report/
+
+.env*

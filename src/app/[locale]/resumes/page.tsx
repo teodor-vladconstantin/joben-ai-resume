@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { timeAgo } from '@/lib/time-ago'
 
 type ResumeListItem = {
@@ -16,6 +17,7 @@ type ResumeListItem = {
 }
 
 export default function ResumesPage() {
+  const t = useTranslations('ResumesPage')
   const [isPending, startTransition] = useTransition()
   const [resumes, setResumes] = useState<ResumeListItem[]>([])
   const [query, setQuery] = useState('')
@@ -47,7 +49,7 @@ export default function ResumesPage() {
   }, [])
 
   const handleDelete = (resumeId: string) => {
-    if (confirm('Are you sure you want to delete this resume?')) {
+    if (confirm(t('deleteConfirm'))) {
       startTransition(async () => {
         const response = await fetch(`/api/resumes?id=${encodeURIComponent(resumeId)}`, {
           method: 'DELETE',
@@ -56,7 +58,7 @@ export default function ResumesPage() {
         if (response.ok) {
           setResumes((prev) => prev.filter((resume) => resume.id !== resumeId))
         } else {
-          alert('Failed to delete resume. See console for details.')
+          alert(t('deleteFailedAlert'))
           try {
             const payload = (await response.json()) as { error?: string }
             console.error(payload.error || 'Delete failed')
@@ -71,7 +73,7 @@ export default function ResumesPage() {
 
   const visibleResumes = useMemo(() => {
     const filtered = resumes.filter((resume) =>
-      (resume.title || 'Untitled Resume').toLowerCase().includes(query.toLowerCase())
+      (resume.title || t('untitledSearchFallback')).toLowerCase().includes(query.toLowerCase())
     )
 
     if (sortMode === 'az') {
@@ -87,7 +89,7 @@ export default function ResumesPage() {
     return [...filtered].sort(
       (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     )
-  }, [resumes, query, sortMode])
+  }, [resumes, query, sortMode, t])
 
   return (
     <div className="min-h-screen flex">
@@ -100,11 +102,11 @@ export default function ResumesPage() {
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
-              <h1 className="text-3xl font-bold text-(--foreground) mb-2">Resumes</h1>
-              <p className="text-(--muted)">{resumes.length} resumes</p>
+              <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
+              <p className="text-(--muted)">{t('resumeCount', { count: resumes.length })}</p>
             </div>
             <Link href="/resumes/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
-              <Plus className="w-5 h-5" /> Create Resume
+              <Plus className="w-5 h-5" /> {t('createResume')}
             </Link>
           </div>
 
@@ -114,14 +116,14 @@ export default function ResumesPage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search resumes..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full rounded-lg border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Newest</button>
-              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>Oldest</button>
-              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>A-Z</button>
+              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'newest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortNewest')}</button>
+              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 rounded-md ${sortMode === 'oldest' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortOldest')}</button>
+              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 rounded-md ${sortMode === 'az' ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted)'}`}>{t('sortAZ')}</button>
             </div>
           </div>
 
@@ -129,15 +131,15 @@ export default function ResumesPage() {
           <div className="rounded-2xl border border-(--border) bg-(--surface) overflow-hidden">
             {visibleResumes.length === 0 ? (
               <div className="p-10 text-center text-(--muted)">
-                <p>No resumes found.</p>
+                <p>{t('noResumesFound')}</p>
               </div>
             ) : (
               <div className="divide-y divide-(--border)">
                 {visibleResumes.map((resume) => (
                   <div key={resume.id} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-(--surface-elevated) transition-colors">
                     <div className="min-w-0">
-                      <p className="text-(--foreground) font-semibold truncate">{resume.title || 'Untitled'}</p>
-                      <p className="text-xs text-(--muted)">Updated {new Date(resume.updated_at).toLocaleDateString()}</p>
+                      <p className="text-(--foreground) font-semibold truncate">{resume.title || t('untitled')}</p>
+                      <p className="text-xs text-(--muted)">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs font-bold px-2 py-1 rounded bg-(--accent-muted) text-(--accent)">

@@ -22,6 +22,11 @@ export function organizationJsonLd() {
       'https://www.facebook.com/people/Jobeneu/100066505480256/',
       'https://www.producthunt.com/products/joben',
     ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'privacy@joben.eu',
+      contactType: 'customer support',
+    },
   }
 }
 

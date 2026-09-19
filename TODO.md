@@ -1,4 +1,61 @@
 ## Active
+- [DONE] 2026-09-19 Traducere completă dashboard (toată zona autentificată, nu doar landing-ul
+  `/dashboard`) + terminologie RO + curățenie SEO/GEO/GSC:
+  - i18n: 6 namespace-uri noi în `messages/{en,ro}.json` (`Builder`, `CoverLetterBuilder`,
+    `SettingsPage`, `ResumesPage`, `CoverLettersPage`, `AiReviewPage`, plus `Shared` pentru
+    `FeatureButton`/`Modal`) — editorul de CV (`ResumeBuilder.tsx`, 2346 linii), editorul de
+    scrisori de intenție, paginile de listă CV-uri/scrisori, paginile AI Review și Settings
+    aveau **zero** `useTranslations`/`getTranslations` înainte de acest pas (doar landing-ul
+    `/dashboard` fusese tradus pe 2026-09-14/620f794). Lucru delegat pe 5 subagenți paraleli
+    (fiecare pe fișiere disjuncte, scriind fragmente JSON în scratchpad în loc de a edita direct
+    `messages/*.json`, ca să evite conflicte de scriere), apoi merge + verificare făcute manual.
+  - Terminologie RO corectată peste tot: "constructor de CV" → "editor de CV"; "a scora/
+    scorare/scorat" (anglicism) → "a evalua/evaluare"; "verificator" → "evaluator"; contracții
+    informale cu cratimă expandate la forma completă corectă unde există (s-o → să o, n-a → nu
+    a, să-l → să îl, să-ți → să îți) — păstrate neschimbate contracțiile fără formă completă
+    validă (s-a, ne-a, te-ai, l-ar, a-l — obligatorii gramatical).
+  - Eliminat handle-ul fals `@joben_ai` din metadata Twitter/X (`layout.tsx`) — userul nu are
+    cont acolo; blocul `twitter:` (Open Graph card) păstrat, e independent de a avea profil.
+  - GEO: adăugate `/.well-known/ai.txt`, `/ai/summary.json`, `/ai/faq.json`, `/ai/service.json`
+    (conținut real din `siteConfig`/`messages/ro.json`, nimic inventat) + `contactPoint` pe
+    schema Organization. `llms.txt`/`llms-full.txt` existau deja și erau solide.
+  - **Bug critic găsit prin GSC**: domeniul `joben.eu` redirecționa către `www.joben.eu` în
+    Vercel, dar tot codul (canonical, sitemap, schema.org) declară `joben.eu` ca variantă
+    canonică — Google nu indexase nicio pagină în afară de root. User a inversat manual
+    redirectul din Vercel Dashboard (`www.joben.eu` → `joben.eu`, 308 permanent); sitemap
+    retrimis în GSC. Indexarea reală se confirmă abia peste câteva zile.
+  - Verificare: `npx tsc --noEmit` curat pe toate fișierele atinse (singurele erori rămase sunt
+    pre-existente în `src/lib/api-response.ts` + rutele API care îl folosesc, nelegate de acest
+    task). `npm run lint` curat, cu o singură excepție pre-existentă neschimbată
+    (`ExportDataButton.tsx` `<a>`→`/api/account/export`, element identic dinainte).
+  - Rămas neatins, semnalat ca follow-up: seed-ul placeholder al scrisorii de intenție noi
+    (`defaultSections` din `CoverLetterBuilder.tsx` — "Your Name", "you@example.com" etc.) e
+    încă hardcodat EN; agentul a lăsat-o intenționat pentru că funcțiile de parse/serialize
+    care îl folosesc sunt la nivel de modul, fără acces la `t()` — ar necesita restructurare.
+  - **Bonus, la cererea userului**: `npm run build` eșua din cauza unui refactor neterminat,
+    deja prezent necommis înainte de acest task (`src/lib/api-response.ts` modificat la
+    începutul sesiunii per `git status`) — `apiSuccess`/`apiError` cereau acum un `requestId`
+    obligatoriu (al treilea parametru), dar ~10 fișiere de rute API + helperii interni din
+    `api-response.ts` încă le apelau cu 2 argumente. Terminat mecanic, urmând tiparul deja
+    folosit în `parse/route.ts`/`cover-letter/pdf/route.ts` (`getRequestId(request)`): thread-uit
+    `requestId` prin `requireAuthenticatedResourceId`/`fetchOwnedList`/`fetchOwnedRow`/
+    `updateOwnedRow`/`deleteOwnedRow` (toate acceptă acum `requestId` în opts) + toate call-site-
+    urile din `resumes/route.ts`, `resumes/[id]/route.ts`, `cover-letters/route.ts`,
+    `cover-letters/[id]/route.ts`, `ai-reviews/route.ts`, `ai-reviews/[id]/route.ts`,
+    `account/delete/route.ts`, `account/export/route.ts`, `rate-limit-status/route.ts`,
+    `sentry-example-api/route.ts`. Testele care apelau handlerele direct fără `Request` (acum
+    parametru obligatoriu) actualizate: `account-delete.test.ts`, `account-export.test.ts`,
+    `crud-smoke.test.ts`. Găsit și fixat separat un bug de tipuri introdus chiar de mine în
+    `FeatureButton.tsx` (`featureStatus.limit`/`.remaining` sunt `number | null`, next-intl
+    `t()` cere valori non-null la interpolare).
+  - Verificare finală: `npx tsc --noEmit` 100% curat (zero erori), `npm run build` trece,
+    `npm run lint` curat (doar cele 2 excepții pre-existente de mai sus, neatinse). `npm run
+    test`: 196/198 — 2 eșecuri **pre-existente, neatinse de acest task** (`billing-checkout.
+    test.ts`, `billing-portal.test.ts`), confirmate prin `git status` (fișierele de rută
+    billing nu sunt modificate în working tree): testele așteaptă `success_url`/`return_url`
+    fără prefix de locale (`/dashboard`, `/settings`), dar codul construiește deja URL-uri cu
+    prefix (`/ro/dashboard`, `/ro/settings`) — fixture-urile de test n-au fost actualizate
+    când s-a introdus `localePrefix: 'always'`. De semnalat separat userului.
 - [DONE] 2026-09-14 **Renunțare Hetzner → Oracle Cloud Always Free (VM, Amsterdam)** — pivot
   dublu: Cloud Run (blocat de billing/card pe cont GCP nou) → Render (ales apoi respins de user
   în favoarea unui VM real) → Oracle Always Free, ales explicit de user în locul Render după un

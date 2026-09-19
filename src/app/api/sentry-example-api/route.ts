@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { apiError } from '@/lib/api-response'
+import { getRequestId } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 
 export const dynamic = "force-dynamic";
@@ -12,11 +13,12 @@ class SentryExampleAPIError extends Error {
 }
 
 // A faulty API route to test Sentry's error monitoring
-export function GET() {
+export function GET(req: Request) {
+  const requestId = getRequestId(req)
   // SECURITY: CLAUDE.md Medium #1 — keep this test-only route invisible in
   // production so it does not leak to scanners or pollute the attack surface.
   if (process.env.NODE_ENV === 'production') {
-    return apiError(clientErrorMessage('not_found'), 404)
+    return apiError(clientErrorMessage('not_found'), 404, requestId)
   }
 
   try {
@@ -25,9 +27,9 @@ export function GET() {
       "This error is raised on the backend called by the example page.",
     );
     Sentry.captureException(error);
-    return apiError(error.message, 500);
+    return apiError(error.message, 500, requestId);
   } catch (error) {
     Sentry.captureException(error);
-    return apiError(clientErrorMessage('server'), 500);
+    return apiError(clientErrorMessage('server'), 500, requestId);
   }
 }

@@ -2,7 +2,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { JetBrains_Mono } from 'next/font/google'
+import { Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -19,7 +19,8 @@ import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
 validateEnv()
 
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
+const hankenGrotesk = Hanken_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-hanken-grotesk' })
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-jetbrains-mono' })
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -71,7 +72,6 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      creator: '@joben_ai',
       images: ['/og-image.png'],
     },
   }
@@ -145,8 +145,8 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider appearance={clerkAppearance}>
-      <html lang={locale} className="dark" suppressHydrationWarning>
-        <body className={`${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+      <html lang={locale} suppressHydrationWarning>
+        <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="consent-mode-default"
             strategy="beforeInteractive"
