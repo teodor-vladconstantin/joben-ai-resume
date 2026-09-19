@@ -287,6 +287,108 @@
     "manageBilling": "Manage Billing",
     "upgradeToPro": "Upgrade to Pro"
   },
+  "Dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingEvening": "Good evening",
+    "guestFallbackName": "There",
+    "subGreeting": "Here's an overview of your resume and career progress.",
+    "sidebarSettings": "Settings",
+    "statCards": { "resumes": "Resumes", "coverLetters": "Cover Letters", "reviews": "Reviews", "avgScore": "Avg Score" },
+    "industryBenchmark": {
+      "title": "Industry Benchmark",
+      "description": "See how your resumes compare to successful candidates.",
+      "noData": "Create a resume to unlock industry benchmarking."
+    },
+    "scoreBreakdown": {
+      "title": "Score Breakdown",
+      "noData": "No score available yet. Generating a resume and requesting an AI Review will update this section.",
+      "cta": "See how to improve →",
+      "warningMatch": "Warning: Better match job keywords",
+      "latestGradePrefix": "Latest grade: ",
+      "unknownGrade": "Unknown",
+      "categories": [
+        { "label": "ATS & Structure", "max": 20, "key": "ats" },
+        { "label": "Content Quality", "max": 40, "key": "content" },
+        { "label": "Writing Quality", "max": 10, "key": "writing" },
+        { "label": "Job Match", "max": 25, "key": "match" },
+        { "label": "Application Ready", "max": 5, "key": "ready" }
+      ]
+    },
+    "quickActions": [
+      { "label": "New Resume", "href": "/resumes", "icon": "Plus", "isPrimary": true },
+      { "label": "Cover Letter", "href": "/cover-letters", "icon": "Mail", "isPrimary": false },
+      { "label": "AI Review", "href": "/ai-review", "icon": "FileSearch", "isPrimary": false }
+    ],
+    "yourScore": {
+      "title": "Your Score",
+      "noData": "We need a resume to calculate score",
+      "noDataSub": "N/A",
+      "cta": "See how to improve →",
+      "latestReviewedFallback": "Latest Reviewed Resume"
+    },
+    "recentDocuments": {
+      "heading": "Recent Documents",
+      "viewAll": "View All",
+      "coverLetterLabel": "Cover Letter",
+      "resumeLabel": "Resume",
+      "untitledDocument": "Untitled Document",
+      "scorePrefix": "Score: ",
+      "updatedPrefix": "Updated ",
+      "noDateValue": "N/A",
+      "noResumesYet": "No resumes yet",
+      "createAnother": "Create another tailored resume",
+      "createNew": "Create New"
+    },
+    "weeklyGoals": {
+      "title": "Weekly Goals",
+      "dayLabel": "day",
+      "daysLabel": "days",
+      "goalResume": "Build a resume",
+      "goalReview": "Run an AI review",
+      "goalCoverLetter": "Create a cover letter",
+      "goalsCompleteSuffix": "/3 goals complete this week",
+      "allDone": "All goals done! Keep it up!",
+      "keepGoing": "Keep going, you're on track!",
+      "startStreak": "Start your streak today!"
+    },
+    "quickTip": {
+      "title": "Quick Tip",
+      "tips": [
+        "Use strong action verbs to start your bullet points. E.g., 'Spearheaded' instead of 'Responsible for'.",
+        "Quantify your achievements with numbers, percentages, or dollar amounts to provide clear impact.",
+        "Keep your resume to one page unless you have more than 10 years of highly relevant experience."
+      ],
+      "createFirstResume": "Create your first resume",
+      "editResume": "Edit resume"
+    },
+    "profileCompletion": {
+      "titlePrefix": "Profile Completion - ",
+      "item1": "Create first resume",
+      "item2": "Create cover letter",
+      "item3": "Get AI review"
+    },
+    "redeemCode": {
+      "heading": "Redeem Access Code",
+      "subtext": "Activate special access instantly. Code is case-insensitive.",
+      "alreadyActiveBadge": "Recruiting Active",
+      "placeholder": "Enter private access code",
+      "alreadyActiveButton": "Already Active",
+      "applying": "Applying...",
+      "redeemButton": "Redeem Code",
+      "alreadyActiveMessage": "Recruiting lifetime plan is already active on your account.",
+      "enterValidCode": "Enter a valid code.",
+      "couldNotRedeem": "Could not redeem code right now.",
+      "successDefault": "Recruiting lifetime plan is now active."
+    },
+    "benchmarkChart": {
+      "scorePrefix": "Score ",
+      "ofResumesSuffix": "% of resumes",
+      "youLabel": "You: ",
+      "footerPrefix": "Your score of ",
+      "footerMiddle": " is higher than approximately ",
+      "footerSuffix": "% of resumes in our system."
+    }
+  },
   "CookieConsent": {
     "ariaLabel": "Cookie consent",
     "messagePrefix": "We use strictly necessary cookies to run Joben, and optional analytics cookies to improve it. See our",

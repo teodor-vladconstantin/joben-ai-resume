@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import { CheckCircle2, Gift, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import type { UserPlan } from '@/lib/plans'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -12,6 +13,7 @@ type RedeemCodeCardProps = {
 }
 
 export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
+  const t = useTranslations('Dashboard.redeemCode')
   const router = useRouter()
   const [code, setCode] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,7 +25,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
   async function handleRedeem() {
     if (alreadyRecruiting) {
       setErrorMessage(null)
-      setSuccessMessage('Recruiting lifetime plan is already active on your account.')
+      setSuccessMessage(t('alreadyActiveMessage'))
       return
     }
 
@@ -32,7 +34,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
 
     const trimmedCode = code.trim()
     if (!trimmedCode) {
-      setErrorMessage('Enter a valid code.')
+      setErrorMessage(t('enterValidCode'))
       return
     }
 
@@ -54,15 +56,15 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       }
 
       if (!response.ok || !payload.success) {
-        setErrorMessage(payload.error || 'Could not redeem code right now.')
+        setErrorMessage(payload.error || t('couldNotRedeem'))
         return
       }
 
-      setSuccessMessage(payload.message || 'Recruiting lifetime plan is now active.')
+      setSuccessMessage(payload.message || t('successDefault'))
       setCode('')
       router.refresh()
     } catch (error) {
-      setErrorMessage((error as Error).message || 'Could not redeem code right now.')
+      setErrorMessage((error as Error).message || t('couldNotRedeem'))
     } finally {
       setIsSubmitting(false)
     }
@@ -79,15 +81,15 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       <div className="flex items-start justify-between gap-4 mb-4" suppressHydrationWarning>
         <div>
           <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
-            <Gift className="w-5 h-5 text-(--accent)" /> Redeem Access Code
+            <Gift className="w-5 h-5 text-(--accent)" /> {t('heading')}
           </h3>
           <p className="text-sm text-(--muted) mt-1">
-            Activate special access instantly. Code is case-insensitive.
+            {t('subtext')}
           </p>
         </div>
         {alreadyRecruiting ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-(--accent)/40 bg-(--accent-muted) px-3 py-1 text-xs font-semibold text-(--accent)">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Recruiting Active
+            <CheckCircle2 className="w-3.5 h-3.5" /> {t('alreadyActiveBadge')}
           </span>
         ) : null}
       </div>
@@ -97,7 +99,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           type="text"
           value={code}
           onChange={(event) => setCode(event.target.value)}
-          placeholder="Enter private access code"
+          placeholder={t('placeholder')}
           disabled={isSubmitting || alreadyRecruiting}
           className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none disabled:opacity-60"
           whileFocus={{ scale: 1.01 }}
@@ -113,7 +115,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          {alreadyRecruiting ? 'Already Active' : isSubmitting ? 'Applying...' : 'Redeem Code'}
+          {alreadyRecruiting ? t('alreadyActiveButton') : isSubmitting ? t('applying') : t('redeemButton')}
         </motion.button>
       </div>
 

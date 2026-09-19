@@ -79,7 +79,7 @@ export const resumeRoles: ResumeRole[] = [
     },
     commonMistakes: {
       ro: [
-        'Listezi fiecare limbaj sau framework atins vreodată, în loc de cele 5-8 care se potrivesc cu fișa postului.',
+        'Listezi fiecare limbaj sau framework atins vreodată, în loc de cele 5-8 care se potrivesc cu job description-ul.',
         'Descrii responsabilități ("am lucrat la servicii backend") în loc de impact: latență, uptime, scală, cost.',
         'Nu menționezi mărimea echipei, scala codebase-ului sau impactul asupra utilizatorilor, ceea ce face imposibilă evaluarea senioratului.',
         'Lipsesc dovezi de ownership: funcționalități livrate, ture de on-call, mentorat sau decizii de arhitectură.',

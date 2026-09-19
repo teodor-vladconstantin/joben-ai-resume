@@ -172,6 +172,74 @@ export type Messages = {
     manageBilling: string
     upgradeToPro: string
   }
+  Dashboard: {
+    greetingMorning: string
+    greetingEvening: string
+    guestFallbackName: string
+    subGreeting: string
+    sidebarSettings: string
+    statCards: { resumes: string; coverLetters: string; reviews: string; avgScore: string }
+    industryBenchmark: { title: string; description: string; noData: string }
+    scoreBreakdown: {
+      title: string
+      noData: string
+      cta: string
+      warningMatch: string
+      latestGradePrefix: string
+      unknownGrade: string
+      categories: { label: string; max: number; key: string }[]
+    }
+    quickActions: { label: string; href: string; icon: string; isPrimary: boolean }[]
+    yourScore: { title: string; noData: string; noDataSub: string; cta: string; latestReviewedFallback: string }
+    recentDocuments: {
+      heading: string
+      viewAll: string
+      coverLetterLabel: string
+      resumeLabel: string
+      untitledDocument: string
+      scorePrefix: string
+      updatedPrefix: string
+      noDateValue: string
+      noResumesYet: string
+      createAnother: string
+      createNew: string
+    }
+    weeklyGoals: {
+      title: string
+      dayLabel: string
+      daysLabel: string
+      goalResume: string
+      goalReview: string
+      goalCoverLetter: string
+      goalsCompleteSuffix: string
+      allDone: string
+      keepGoing: string
+      startStreak: string
+    }
+    quickTip: { title: string; tips: string[]; createFirstResume: string; editResume: string }
+    profileCompletion: { titlePrefix: string; item1: string; item2: string; item3: string }
+    redeemCode: {
+      heading: string
+      subtext: string
+      alreadyActiveBadge: string
+      placeholder: string
+      alreadyActiveButton: string
+      applying: string
+      redeemButton: string
+      alreadyActiveMessage: string
+      enterValidCode: string
+      couldNotRedeem: string
+      successDefault: string
+    }
+    benchmarkChart: {
+      scorePrefix: string
+      ofResumesSuffix: string
+      youLabel: string
+      footerPrefix: string
+      footerMiddle: string
+      footerSuffix: string
+    }
+  }
   Footer: {
     heading: string
     ctaPrimary: string

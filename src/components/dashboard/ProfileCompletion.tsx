@@ -1,8 +1,10 @@
 "use client"
 import { X, CheckCircle2, Circle } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export function ProfileCompletion({ stats }: { stats?: { resumes: number, coverLetters: number, aiReviews: number } }) {
+  const t = useTranslations('Dashboard.profileCompletion')
   const [isVisible, setIsVisible] = useState(true)
   if (!isVisible) return null
 
@@ -18,14 +20,14 @@ export function ProfileCompletion({ stats }: { stats?: { resumes: number, coverL
       <button onClick={() => setIsVisible(false)} className="absolute top-4 right-4 text-(--muted) hover:text-(--foreground)">
         <X className="w-5 h-5" />
       </button>
-      <h3 className="text-xl font-bold text-(--foreground) mb-4">Profile Completion - {Math.round(percent)}%</h3>
+      <h3 className="text-xl font-bold text-(--foreground) mb-4">{t('titlePrefix')}{Math.round(percent)}%</h3>
       <div className="w-full bg-(--background) rounded-full h-2.5 mb-6 border border-(--border)">
         <div className="bg-(--accent) h-2.5 rounded-full" style={{ width: `${percent}%` }}></div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="flex items-center gap-3">{hasResume ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">Create first resume</span></div>
-        <div className="flex items-center gap-3">{hasCoverLetter ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">Create cover letter</span></div>
-        <div className="flex items-center gap-3">{hasAiReview ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">Get AI review</span></div>
+        <div className="flex items-center gap-3">{hasResume ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">{t('item1')}</span></div>
+        <div className="flex items-center gap-3">{hasCoverLetter ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">{t('item2')}</span></div>
+        <div className="flex items-center gap-3">{hasAiReview ? <CheckCircle2 className="w-5 h-5 text-(--accent)" /> : <Circle className="w-5 h-5 text-(--muted)" />}<span className="text-(--muted)">{t('item3')}</span></div>
       </div>
     </div>
   )

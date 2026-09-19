@@ -2,6 +2,7 @@
 import { FileText, Mail, FileSearch, TrendingUp } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 const cardVariants = {
   initial: { opacity: 0, y: 20 },
@@ -20,13 +21,15 @@ const iconVariants = {
 }
 
 export function StatCards({ stats }: { stats: { resumes: number, coverLetters: number, aiReviews: number, averageScore: number } }) {
+  const t = useTranslations('Dashboard.statCards')
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" suppressHydrationWarning>
       {[
-        { label: 'Resumes', count: stats.resumes.toString(), icon: FileText, href: '/resumes' },
-        { label: 'Cover Letters', count: stats.coverLetters.toString(), icon: Mail, href: '/cover-letters' },
-        { label: 'Reviews', count: stats.aiReviews.toString(), icon: FileSearch, href: '/ai-review' },
-        { label: 'Avg Score', count: `${stats.averageScore}/100`, icon: TrendingUp, href: '/ai-review' }
+        { label: t('resumes'), count: stats.resumes.toString(), icon: FileText, href: '/resumes' },
+        { label: t('coverLetters'), count: stats.coverLetters.toString(), icon: Mail, href: '/cover-letters' },
+        { label: t('reviews'), count: stats.aiReviews.toString(), icon: FileSearch, href: '/ai-review' },
+        { label: t('avgScore'), count: `${stats.averageScore}/100`, icon: TrendingUp, href: '/ai-review' }
       ].map((stat, i) => (
         <motion.div
           key={i}

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { Flame, Target, CheckCircle2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type Stats = { resumes: number; coverLetters: number; aiReviews: number }
 
@@ -33,6 +34,7 @@ function saveStreak(count: number) {
 }
 
 export function WeeklyGoals({ stats }: { stats?: Stats }) {
+  const t = useTranslations('Dashboard.weeklyGoals')
   const rsCount = stats?.resumes ?? 0
   const clCount = stats?.coverLetters ?? 0
   const aiCount = stats?.aiReviews ?? 0
@@ -57,22 +59,22 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
   }, [isActiveToday])
 
   const goals = [
-    { label: 'Build a resume', current: rsCount, target: 1, done: resumeGoalMet },
-    { label: 'Run an AI review', current: aiCount, target: 1, done: aiGoalMet },
-    { label: 'Create a cover letter', current: clCount, target: 1, done: clGoalMet },
+    { label: t('goalResume'), current: rsCount, target: 1, done: resumeGoalMet },
+    { label: t('goalReview'), current: aiCount, target: 1, done: aiGoalMet },
+    { label: t('goalCoverLetter'), current: clCount, target: 1, done: clGoalMet },
   ]
 
   return (
     <div className="bg-(--surface) p-6 rounded-2xl border border-(--border) flex flex-col" suppressHydrationWarning>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
-          <Target className="text-(--accent) w-5 h-5" /> Weekly Goals
+          <Target className="text-(--accent) w-5 h-5" /> {t('title')}
         </h3>
         <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
           streak > 0 ? 'bg-(--accent-muted) text-(--accent)' : 'bg-(--surface-elevated) text-(--muted)'
         }`}>
           <Flame className="w-4 h-4" />
-          {streak} {streak === 1 ? 'day' : 'days'}
+          {streak} {streak === 1 ? t('dayLabel') : t('daysLabel')}
         </div>
       </div>
 
@@ -99,14 +101,14 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
 
       <div className="mt-6 pt-4 border-t border-(--border) text-center">
         <p className="text-sm text-(--muted) mb-1">
-          {goalsCompleted}/3 goals complete this week
+          {goalsCompleted}{t('goalsCompleteSuffix')}
         </p>
         <p className="text-sm font-medium text-(--accent)">
           {goalsCompleted === 3
-            ? 'All goals done! Keep it up!'
+            ? t('allDone')
             : goalsCompleted > 0
-            ? 'Keep going, you\'re on track!'
-            : 'Start your streak today!'}
+            ? t('keepGoing')
+            : t('startStreak')}
         </p>
       </div>
     </div>
