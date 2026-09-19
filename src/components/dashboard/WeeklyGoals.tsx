@@ -65,14 +65,12 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
   ]
 
   return (
-    <div className="bg-(--surface) p-6 rounded-2xl border border-(--border) flex flex-col" suppressHydrationWarning>
+    <div className="bg-(--surface) p-6 border border-(--border) flex flex-col" suppressHydrationWarning>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-(--foreground) flex items-center gap-2">
-          <Target className="text-(--accent) w-5 h-5" /> {t('title')}
+          <Target className="text-(--muted) w-5 h-5" /> {t('title')}
         </h3>
-        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-          streak > 0 ? 'bg-(--accent-muted) text-(--accent)' : 'bg-(--surface-elevated) text-(--muted)'
-        }`}>
+        <div className="flex items-center gap-1.5 font-mono text-sm text-(--muted)">
           <Flame className="w-4 h-4" />
           {streak} {streak === 1 ? t('dayLabel') : t('daysLabel')}
         </div>
@@ -82,16 +80,16 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
         {goals.map((goal, i) => (
           <div key={i}>
             <div className="flex justify-between items-center mb-1.5">
-              <span className={`text-sm ${goal.done ? 'text-(--accent)' : 'text-(--muted)'}`}>
+              <span className={`text-sm ${goal.done ? 'text-(--foreground)' : 'text-(--muted)'}`}>
                 {goal.done && <CheckCircle2 className="w-4 h-4 inline mr-1.5" />}{goal.label}
               </span>
-              <span className="text-(--muted) text-xs">
+              <span className="text-(--muted) text-xs font-mono tabular-nums">
                 {Math.min(goal.current, goal.target)}/{goal.target}
               </span>
             </div>
-            <div className="w-full bg-(--surface-elevated) rounded-full h-1.5">
+            <div className="w-full bg-(--border) h-1">
               <div
-                className={`h-1.5 rounded-full transition-all ${goal.done ? 'bg-(--accent)' : 'bg-(--border)'}`}
+                className={`h-1 ${goal.done ? 'bg-(--accent)' : 'bg-(--muted)'}`}
                 style={{ width: `${Math.min((goal.current / goal.target) * 100, 100)}%` }}
               />
             </div>
@@ -103,7 +101,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
         <p className="text-sm text-(--muted) mb-1">
           {goalsCompleted}{t('goalsCompleteSuffix')}
         </p>
-        <p className="text-sm font-medium text-(--accent)">
+        <p className="text-sm font-medium text-(--foreground)">
           {goalsCompleted === 3
             ? t('allDone')
             : goalsCompleted > 0

@@ -237,7 +237,7 @@ export default function AIReviewEditorPage() {
           <Navbar />
         </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <ResumeAnalyzer
             review={review}
             comparison={comparison}
@@ -271,7 +271,7 @@ export default function AIReviewEditorPage() {
           {autoFixTokenWarning || t('errorAutoFixTokenLimit')}
         </p>
         {autoFixTokenDetails ? (
-          <div className="mt-4 rounded-xl border border-(--border) bg-(--background) px-4 py-3 text-xs text-(--muted) space-y-1">
+          <div className="mt-4 border border-(--border) px-4 py-3 text-xs text-(--muted) space-y-1">
             {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
               <p>{t('estimatedInputTokens', { tokens: autoFixTokenDetails.estimatedInputTokens })}</p>
             ) : null}

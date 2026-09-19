@@ -57,16 +57,16 @@ export default async function FeedbackPage({ params }: { params: Promise<{ local
     <main className="min-h-screen bg-(--background) px-4 py-16 text-(--foreground)">
       <div className="mx-auto w-full max-w-xl">
         <header className="mb-8 text-center">
-          <p className="font-mono text-xs uppercase tracking-wide text-(--accent-strong)">Beta feedback</p>
+          <p className="font-mono text-(length:--text-label) text-(--muted)">Beta feedback</p>
           <h1 className="mt-2 text-2xl font-semibold text-(--foreground)">Help us improve Joben</h1>
           <p className="mt-2 text-sm text-(--muted)">
             Joben is in beta. Your feedback directly shapes what we build next.
           </p>
         </header>
 
-        <Card radius="lg" className="p-6 sm:p-8">
+        <Card className="p-6 sm:p-8">
           {existing ? (
-            <div className="rounded-lg border border-(--accent-strong)/35 bg-(--accent-muted) px-6 py-8 text-center">
+            <div className="border border-(--border) bg-(--accent-muted) px-6 py-8 text-center">
               <p className="text-base font-medium text-(--foreground)">
                 You&apos;ve already left feedback, thank you!
               </p>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { Navbar } from '@/components/ui/Navbar'
+import { Eyebrow } from '@/components/ui/Badge'
 import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { BUILD_TIME } from '@/lib/content'
@@ -81,10 +82,7 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24">
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-wide text-(--accent)">
-            <span className="h-1.5 w-1.5 rounded-full bg-(--accent)" aria-hidden="true" />
-            {atsChecker.eyebrow}
-          </span>
+          <Eyebrow>{atsChecker.eyebrow}</Eyebrow>
           <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
             {atsChecker.heading}
           </h1>

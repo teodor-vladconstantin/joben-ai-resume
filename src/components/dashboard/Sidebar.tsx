@@ -6,6 +6,7 @@ import { useAuth, UserButton } from '@clerk/nextjs'
 import { LayoutDashboard, FileText, Mail, FileSearch, Settings, Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { buttonVariants } from '@/components/ui/Button'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -25,7 +26,7 @@ export function Sidebar() {
     <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
       <div className="flex items-center justify-between px-5 py-5">
         <Link href="/" className="flex items-center gap-2">
-          <span className="relative h-8 w-8 overflow-hidden rounded-lg">
+          <span className="relative h-8 w-8 overflow-hidden">
             <Image src="/jobeneu_logo.jpg" alt="Joben logo" fill sizes="32px" className="object-cover" />
           </span>
           <span className="text-lg font-bold tracking-tight text-(--foreground)">Joben</span>
@@ -51,8 +52,8 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? 'bg-(--accent-muted) text-(--accent)' : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)'
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-150 ease-out ${
+                isActive ? 'bg-(--accent-muted) text-(--foreground)' : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -61,6 +62,11 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      <div className="flex items-center justify-between border-t border-(--border) px-5 py-4">
+        <span className="text-xs text-(--muted)">Theme</span>
+        <ThemeToggle />
+      </div>
     </aside>
   )
 }

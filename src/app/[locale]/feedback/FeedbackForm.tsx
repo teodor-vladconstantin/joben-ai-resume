@@ -52,7 +52,7 @@ export function FeedbackForm({ email }: { email: string }) {
           value={likes}
           onChange={(e) => setLikes(e.target.value)}
           rows={4}
-          className="w-full resize-y rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none focus:border-(--accent)"
+          className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
           placeholder="Tell us what's working well…"
         />
       </Field>
@@ -64,7 +64,7 @@ export function FeedbackForm({ email }: { email: string }) {
           value={improvements}
           onChange={(e) => setImprovements(e.target.value)}
           rows={4}
-          className="w-full resize-y rounded-lg border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none focus:border-(--accent)"
+          className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
           placeholder="What would make Joben better?"
         />
       </Field>
@@ -80,9 +80,9 @@ export function FeedbackForm({ email }: { email: string }) {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => setNps(value)}
-                className={`h-10 w-10 rounded-lg border text-sm font-medium transition-colors ${
+                className={`h-10 w-10 rounded-sm border text-sm font-medium transition-colors duration-150 ease-out ${
                   selected
-                    ? 'border-(--accent) bg-(--accent) text-(--background)'
+                    ? 'border-(--accent) bg-(--accent) text-(--accent-ink)'
                     : 'border-(--border) bg-(--surface) text-(--foreground)/75 hover:border-(--accent)'
                 }`}
               >
@@ -103,12 +103,12 @@ export function FeedbackForm({ email }: { email: string }) {
           type="email"
           value={email}
           readOnly
-          className="w-full cursor-not-allowed rounded-lg border border-(--border) bg-(--surface-elevated) px-3 py-2 text-sm text-(--muted) outline-none"
+          className="w-full cursor-not-allowed rounded-sm border border-(--border) bg-(--surface-elevated) px-3 py-2 text-sm text-(--muted) outline-none"
         />
       </Field>
 
       {error ? (
-        <p className="text-sm text-red-400" role="alert">
+        <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2" role="alert">
           {error}
         </p>
       ) : null}
@@ -145,7 +145,7 @@ function Field({
 
 function ConfirmationCard({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-(--accent-strong)/35 bg-(--accent-muted) px-6 py-8 text-center">
+    <div className="border border-(--border) bg-(--accent-muted) px-6 py-8 text-center">
       <p className="text-base font-medium text-(--foreground)">{message}</p>
     </div>
   )

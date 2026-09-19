@@ -4,8 +4,11 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  // Accent only ever appears as a fill with the fixed --accent-ink text on
+  // top — not --foreground, which flips light/dark and would fail contrast
+  // in dark mode (see the --accent-ink comment in globals.css).
   primary:
-    'bg-(--accent) text-(--background) hover:bg-(--accent-strong)',
+    'bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong)',
   secondary:
     'bg-transparent text-(--foreground) border border-(--border) hover:border-(--accent)',
   ghost:
@@ -19,7 +22,7 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 }
 
 export function buttonVariants(variant: ButtonVariant = 'primary', size: ButtonSize = 'md'): string {
-  return `inline-flex items-center justify-center rounded-full font-medium transition-colors ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]}`
+  return `inline-flex items-center justify-center rounded-none font-medium transition-colors duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]}`
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

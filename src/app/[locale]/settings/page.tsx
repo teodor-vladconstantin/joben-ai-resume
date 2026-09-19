@@ -52,7 +52,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
 
           <div className="space-y-6">
             {/* Account */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
+            <div className="bg-(--surface) p-6 border border-(--border)">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-(--foreground)">{t('account.title')}</h2>
@@ -76,7 +76,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Billing */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
+            <div className="bg-(--surface) p-6 border border-(--border)">
               <div>
                 <h2 className="text-lg font-bold text-(--foreground)">{t('billing.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
@@ -100,7 +100,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Notifications */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
+            <div className="bg-(--surface) p-6 border border-(--border)">
               <div>
                 <h2 className="text-lg font-bold text-(--foreground)">{t('notifications.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
@@ -118,7 +118,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Security */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-(--border)">
+            <div className="bg-(--surface) p-6 border border-(--border)">
               <div>
                 <h2 className="text-lg font-bold text-(--foreground)">{t('security.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
@@ -136,9 +136,9 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Danger zone */}
-            <div className="bg-(--surface) p-6 rounded-2xl border border-red-400/30">
+            <div className="bg-(--surface) p-6 border border-(--border) border-l-2 border-l-(--foreground)">
               <div>
-                <h2 className="text-lg font-bold text-red-400">{t('dangerZone.title')}</h2>
+                <h2 className="text-lg font-bold text-(--foreground)">{t('dangerZone.title')}</h2>
                 <p className="text-sm text-(--muted) mt-1">
                   {t('dangerZone.description')}
                 </p>

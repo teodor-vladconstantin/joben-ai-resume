@@ -220,7 +220,7 @@ export function FreeAtsCheckerClient() {
             <ul className="space-y-4">
               {result.issues.map((item, index) => (
                 <li key={index} className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-(--accent) mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-(--foreground) mt-0.5" />
                   <div>
                     <p className="text-(--foreground) font-semibold text-sm">{item.issue}</p>
                     <p className="text-(--muted) text-sm mt-0.5">{item.explanation}</p>
@@ -252,7 +252,7 @@ export function FreeAtsCheckerClient() {
                   value={postScanEmail}
                   onChange={(e) => setPostScanEmail(e.target.value)}
                   placeholder={t('emailPlaceholder')}
-                  className="flex-1 rounded-lg border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+                  className="flex-1 rounded-sm border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
                 />
                 <button
                   onClick={() => void handleSendReport()}
@@ -262,7 +262,7 @@ export function FreeAtsCheckerClient() {
                   {isSendingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : t('emailMeThisReport')}
                 </button>
               </div>
-              {reportError && <p className="text-sm text-red-400 mt-2">{reportError}</p>}
+              {reportError && <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2 mt-2">{reportError}</p>}
             </Card>
           )
         )}
@@ -302,7 +302,7 @@ export function FreeAtsCheckerClient() {
   if (isRateLimited) {
     return (
       <Card radius="lg" className="p-8 text-center">
-        <AlertTriangle className="mx-auto h-8 w-8 text-(--accent) mb-3" />
+        <AlertTriangle className="mx-auto h-8 w-8 text-(--foreground) mb-3" />
         <h2 className="text-(--foreground) font-bold text-lg">{t('usedFreeScan')}</h2>
         <p className="text-(--muted) text-sm mt-2 max-w-md mx-auto">
           {t('usedFreeScanBody1')} {t('usedFreeScanBody2')}
@@ -331,8 +331,8 @@ export function FreeAtsCheckerClient() {
       <div
         role="button"
         tabIndex={0}
-        className={`rounded-xl border border-dashed p-10 text-center transition-colors cursor-pointer ${
-          isDragging ? 'border-(--accent) bg-(--accent-muted)' : 'border-(--border) hover:border-(--accent)/50'
+        className={`border border-dashed p-10 text-center transition-colors duration-150 ease-out cursor-pointer ${
+          isDragging ? 'border-(--accent) bg-(--accent-muted)' : 'border-(--border) hover:border-(--accent)'
         }`}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -358,7 +358,7 @@ export function FreeAtsCheckerClient() {
       >
         {file ? (
           <>
-            <FileText className="mx-auto h-7 w-7 text-(--accent) mb-3" />
+            <FileText className="mx-auto h-7 w-7 text-(--foreground) mb-3" />
             <p className="text-(--foreground) font-semibold">{file.name}</p>
             <p className="text-xs text-(--muted) mt-1">{t('readyToScan')}</p>
           </>
@@ -371,7 +371,7 @@ export function FreeAtsCheckerClient() {
         )}
       </div>
 
-      {error && <p className="text-sm text-red-400 mt-4 text-center">{error}</p>}
+      {error && <p className="text-sm font-medium text-(--foreground) mt-4 text-center">{error}</p>}
 
       <div className="mt-6">
         <label htmlFor="ats-check-email" className="block text-sm text-(--foreground) font-medium mb-1.5">
@@ -383,7 +383,7 @@ export function FreeAtsCheckerClient() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('emailPlaceholder')}
-          className="w-full rounded-lg border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) focus:border-(--accent) focus:outline-none"
+          className="w-full rounded-sm border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
         />
         <p className="text-xs text-(--muted) mt-1.5">{t('neverRequired')}</p>
       </div>

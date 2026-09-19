@@ -447,12 +447,12 @@ export function CoverLetterBuilder() {
 
   return (
     <div className="w-full h-full flex flex-col lg:flex-row">
-      <div className="w-full lg:w-112.5 bg-(--surface) border-r border-(--border) flex flex-col h-full z-10 shadow-2xl">
-        <div className="p-6 border-b border-(--border) bg-linear-to-r from-(--surface-elevated) to-(--surface)">
-          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--accent) w-5 h-5"/> {t('heading')}</h2>
+      <div className="w-full lg:w-112.5 bg-(--surface) border-r border-(--border) flex flex-col h-full z-10">
+        <div className="p-6 border-b border-(--border)">
+          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--muted) w-5 h-5"/> {t('heading')}</h2>
           <p className="text-sm text-(--muted) mt-2">{t('progress', { completed: completedSections, total: sectionItems.length })}</p>
-          <div className="mt-3 h-2 w-full rounded-full bg-(--background)">
-            <div className="h-2 rounded-full bg-(--accent)" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
+          <div className="mt-3 h-1 w-full bg-(--border)">
+            <div className="h-1 bg-(--accent)" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
           </div>
         </div>
 
@@ -465,7 +465,7 @@ export function CoverLetterBuilder() {
               value={sections.company}
               onChange={(e) => setSections((prev) => ({ ...prev, company: e.target.value }))}
               type="text"
-              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
+              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent)"
               placeholder={t('companyPlaceholder')}
             />
           </div>
@@ -476,7 +476,7 @@ export function CoverLetterBuilder() {
               value={sections.position}
               onChange={(e) => setSections((prev) => ({ ...prev, position: e.target.value }))}
               type="text"
-              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong)"
+              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent)"
               placeholder={t('positionPlaceholder')}
             />
           </div>
@@ -486,7 +486,7 @@ export function CoverLetterBuilder() {
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full bg-(--surface) border border-(--border) rounded-lg px-4 py-2 text-(--foreground) focus:outline-none focus:border-(--accent-strong) h-32 resize-none text-sm"
+              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent) h-32 resize-none text-sm"
               placeholder={t('jobDescriptionPlaceholder')}
             ></textarea>
           </div>
@@ -498,9 +498,9 @@ export function CoverLetterBuilder() {
                 <button
                   key={tone}
                   onClick={() => setSections((prev) => ({ ...prev, tone }))}
-                  className={`rounded-lg border px-3 py-2 text-sm ${
+                  className={`border px-3 py-2 text-sm transition-colors duration-150 ease-out ${
                     sections.tone === tone
-                      ? 'border-(--accent)/50 bg-(--accent-muted) text-(--accent)'
+                      ? 'border-(--border) bg-(--accent-muted) text-(--foreground)'
                       : 'border-(--border) bg-(--surface) text-(--muted)'
                   }`}
                 >
@@ -514,10 +514,10 @@ export function CoverLetterBuilder() {
             feature="covers"
             onClick={generateDraft}
             disabled={isGenerating}
-            className={`mt-6 w-full shadow-lg shadow-(--accent)/20 ${buttonVariants('primary', 'md')}`}
+            className={`mt-6 w-full ${buttonVariants('primary', 'md')}`}
           >
             {isGenerating ? (
-              <div className="w-5 h-5 border-2 border-(--background) border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-(--accent-ink)/30 border-t-(--accent-ink) rounded-full animate-spin"></div>
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current" /> {t('generateDraftButton')}
@@ -530,14 +530,14 @@ export function CoverLetterBuilder() {
           <button
             onClick={() => void persistLetter()}
             disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
-            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className={`flex-1 ${buttonVariants('secondary', 'md')} disabled:cursor-not-allowed disabled:opacity-60`}
           >
             <Save className="w-4 h-4" /> {t('saveButton')}
           </button>
           <button
             onClick={() => void exportAsPdf()}
             disabled={isLoading || isExportingPdf}
-            className="flex-1 bg-(--surface) border border-(--border) hover:bg-(--surface-elevated) text-(--foreground) px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className={`flex-1 ${buttonVariants('secondary', 'md')} disabled:cursor-not-allowed disabled:opacity-60`}
           >
             <Download className="w-4 h-4" /> {t('exportPdfButton')}
           </button>
@@ -545,7 +545,7 @@ export function CoverLetterBuilder() {
       </div>
 
       <div className="grow bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative">
-        <div className="w-full max-w-200 h-full bg-white rounded-lg shadow-2xl mx-auto overflow-hidden">
+        <div className="w-full max-w-200 h-full bg-white border border-(--border) mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto p-12 text-black font-serif text-[15px] leading-relaxed">
             <div className="mb-8 text-sm text-gray-700">
               <p className="font-semibold">{sections.headerName}</p>
@@ -570,7 +570,7 @@ export function CoverLetterBuilder() {
           </div>
         </div>
 
-        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-black/40 px-2 py-1 rounded">
+        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-(--surface) border border-(--border) px-2 py-1">
           {saveStatus === 'saving' ? t('saveStatus.saving') : saveStatus === 'saved' ? t('saveStatus.saved') : saveStatus === 'error' ? t('saveStatus.error') : t('saveStatus.idle')}
         </div>
       </div>
@@ -589,7 +589,7 @@ export function CoverLetterBuilder() {
         maxWidth="lg"
         footer={
           <div className="flex justify-end gap-2">
-            <button onClick={() => setActiveModal(null)} className="rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm text-(--muted)">
+            <button onClick={() => setActiveModal(null)} className={buttonVariants('secondary', 'md')}>
               {t('cancelButton')}
             </button>
             <button onClick={applyModalChanges} className={buttonVariants('primary', 'md')}>
@@ -601,7 +601,7 @@ export function CoverLetterBuilder() {
         <textarea
           value={modalDraft}
           onChange={(e) => setModalDraft(e.target.value)}
-          className="h-52 w-full resize-none rounded-lg border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) focus:border-(--accent-strong) focus:outline-none"
+          className="h-52 w-full resize-none rounded-sm border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
         />
         <p className="mt-2 text-xs text-(--muted)">
           {t('editSectionModal.helperText')}

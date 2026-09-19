@@ -167,7 +167,7 @@ export default async function ResumeRolePage({
             <ul className="space-y-4">
               {role.commonMistakes[locale].map((mistake, index) => (
                 <li key={index} className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-(--accent) mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-(--foreground) mt-0.5" />
                   <p className="text-(--muted) text-sm">{mistake}</p>
                 </li>
               ))}
@@ -179,14 +179,14 @@ export default async function ResumeRolePage({
               {r.bulletExampleHeading}
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-(--border) bg-(--surface) p-4">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--muted) mb-2">
+              <div className="border border-(--border) bg-(--surface) p-4">
+                <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-(--muted) mb-2">
                   <XCircle className="h-4 w-4" /> {r.weak}
                 </p>
                 <p className="text-sm text-(--foreground)">{role.weakBullet[locale]}</p>
               </div>
-              <div className="rounded-xl border border-(--accent)/30 bg-(--accent-muted) p-4">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--accent) mb-2">
+              <div className="border border-(--border) bg-(--accent-muted) p-4">
+                <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-(--foreground) mb-2">
                   <CheckCircle2 className="h-4 w-4" /> {r.strong}
                 </p>
                 <p className="text-sm text-(--foreground)">{role.strongBullet[locale]}</p>

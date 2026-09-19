@@ -9,34 +9,27 @@ export interface ResumeScoreCardProps {
 
 export function ResumeScoreCard({ score, scoreLabel, categoryBreakdownLabel, categories }: ResumeScoreCardProps) {
   return (
-    <Card elevated radius="lg" className="p-6 w-full max-w-xs">
-      <div className="flex flex-col items-center text-center mb-6">
-        <div
-          className="relative grid h-24 w-24 place-items-center rounded-full"
-          style={{
-            background: `conic-gradient(var(--accent) ${score}%, color-mix(in srgb, var(--foreground) 10%, transparent) ${score}% 100%)`,
-          }}
-        >
-          <div className="absolute inset-2 rounded-full bg-(--surface-elevated)" />
-          <div className="relative text-center">
-            <p className="text-2xl leading-none font-black text-(--foreground)">{score}</p>
-            <p className="mt-0.5 text-[10px] uppercase tracking-wider text-(--accent)">/ 100</p>
-          </div>
-        </div>
-        <p className="mt-3 text-sm font-semibold uppercase tracking-wide text-(--accent)">{scoreLabel}</p>
+    <Card elevated className="p-6 w-full max-w-xs">
+      <p className="font-mono text-(length:--text-label) text-(--muted)">{scoreLabel}</p>
+      <div className="mt-1 flex items-baseline gap-1">
+        <span className="font-mono text-5xl font-bold tabular-nums leading-none text-(--foreground)">{score}</span>
+        <span className="font-mono text-sm text-(--muted)">/100</span>
+      </div>
+      <div className="mt-3 h-1 w-full bg-(--border)">
+        <div className="h-full bg-(--accent)" style={{ width: `${score}%` }} />
       </div>
 
-      <div className="space-y-4">
-        <p className="text-xs font-mono uppercase tracking-wide text-(--muted)">{categoryBreakdownLabel}</p>
+      <div className="mt-6 space-y-4">
+        <p className="font-mono text-(length:--text-label) text-(--muted)">{categoryBreakdownLabel}</p>
         {categories.map((category) => (
           <div key={category.label}>
-            <div className="flex items-center justify-between text-sm mb-1.5">
+            <div className="flex items-center justify-between gap-3 text-sm mb-1.5">
               <span className="text-(--foreground)">{category.label}</span>
-              <span className="text-(--muted) font-mono text-xs">{category.value}/{category.max}</span>
+              <span className="text-(--muted) font-mono text-xs tabular-nums">{category.value}/{category.max}</span>
             </div>
-            <div className="h-1.5 rounded-full bg-(--border) overflow-hidden">
+            <div className="h-1 bg-(--border) overflow-hidden">
               <div
-                className="h-full rounded-full bg-(--accent)"
+                className="h-full bg-(--accent)"
                 style={{ width: `${(category.value / category.max) * 100}%` }}
               />
             </div>

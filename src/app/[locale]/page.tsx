@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/ui/Navbar'
 import { Link } from '@/i18n/navigation'
-import { CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
 import { pricingPlanMeta, siteConfig, BUILD_TIME } from '@/lib/content'
@@ -9,8 +9,6 @@ import { PlanCta } from '@/components/pricing/PlanCta'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
 import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
 import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
 import { StepSection } from '@/components/landing/StepSection'
@@ -19,6 +17,9 @@ import { TailorStepVisual } from '@/components/landing/steps/TailorStepVisual'
 import { RewriteStepVisual } from '@/components/landing/steps/RewriteStepVisual'
 import { CoverLetterStepVisual } from '@/components/landing/steps/CoverLetterStepVisual'
 import { ExportStepVisual } from '@/components/landing/steps/ExportStepVisual'
+import { RevealWords } from '@/components/motion/RevealWords'
+import { RevealRule } from '@/components/motion/RevealRule'
+import { Reveal } from '@/components/motion/Reveal'
 import type { Messages } from '@/i18n/messages'
 
 const icons: { [key: string]: React.ElementType } = {
@@ -89,69 +90,64 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>
         {/* HERO SECTION */}
-        <section id="builder" className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center mt-12 mb-20" suppressHydrationWarning>
-          <div className="absolute inset-0 -z-10 flex items-center justify-center" suppressHydrationWarning>
-            <div className="w-150 h-150 bg-(--accent)/6 rounded-full blur-[100px] pointer-events-none" suppressHydrationWarning></div>
-            <div className="w-100 h-100 bg-(--accent-strong)/8 rounded-full blur-[100px] pointer-events-none -ml-32" suppressHydrationWarning></div>
-          </div>
+        <section id="builder" data-section="Hero" className="relative px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto mt-12 mb-20" suppressHydrationWarning>
           <AmbientDataTexture />
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-(--foreground) max-w-4xl mx-auto leading-tight">
-            {home.heroPrefix}
-            <HeroWordRotate words={home.heroRotatingWords} />
-            {home.heroSuffix}
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-(--foreground) max-w-3xl leading-tight">
+            <RevealWords as="span" text={home.heroPrefix} />{' '}
+            <HeroWordRotate words={home.heroRotatingWords} />{' '}
+            <RevealWords as="span" text={home.heroSuffix} />
           </h1>
 
-          <p className="text-xl text-(--muted) mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-(--muted) mb-10 max-w-xl">
             {home.subheading}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" suppressHydrationWarning>
-            <AuthAwareSignupLink signedOutHref="/free-ats-checker" className={`${buttonVariants('primary', 'lg')} shadow-lg shadow-(--accent)/30`}>
+          <div className="flex flex-col sm:flex-row items-start gap-4 mb-12" suppressHydrationWarning>
+            <AuthAwareSignupLink signedOutHref="/free-ats-checker" className={buttonVariants('primary', 'lg')}>
               {home.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-(--muted)" suppressHydrationWarning>
+          <div className="flex flex-wrap gap-6 text-sm text-(--muted)" suppressHydrationWarning>
             {home.features.map((feature, index) => {
               const Icon = icons[featureIconOrder[index]];
               return (
                 <span key={index} className="flex items-center gap-1.5">
-                  <Icon className="w-4 h-4 text-(--accent)" /> {feature}
+                  <Icon className="w-4 h-4 text-(--muted)" /> {feature}
                 </span>
               );
             })}
           </div>
 
-          {/* STAT CARDS */}
+          {/* PLATFORM FEATURES */}
           <h2 className="sr-only">{home.platformFeaturesHeading}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 text-left" suppressHydrationWarning>
+          <div className="mt-20 grid grid-cols-1 border-t border-(--border) md:grid-cols-3" suppressHydrationWarning>
             {home.statCards.map((card, index) => {
               const Icon = icons[statCardIconOrder[index]];
               return (
-                <Card key={index} className="p-6">
-                  <div className="w-12 h-12 bg-(--accent-muted) rounded-xl flex items-center justify-center mb-4">
-                    <Icon className="text-(--accent) w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-bold text-(--foreground) mb-2">{card.title}</h3>
-                  <p className="text-(--muted)">{card.description}</p>
-                </Card>
+                <div key={index} className="border-b border-(--border) py-8 md:border-b-0 md:border-r md:last:border-r-0 md:pr-8 md:[&:not(:first-child)]:pl-8">
+                  <Icon className="h-5 w-5 text-(--foreground)" />
+                  <h3 className="mt-4 text-lg font-bold text-(--foreground)">{card.title}</h3>
+                  <p className="mt-2 text-sm text-(--muted)">{card.description}</p>
+                </div>
               );
             })}
           </div>
         </section>
 
         {/* ATS PREVIEW SECTION */}
-        <section id="analysis" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
-          <div className="text-center mb-12" suppressHydrationWarning>
+        <section id="analysis" data-section="Analysis" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
+          <RevealRule className="mb-20" />
+          <div className="mb-12 max-w-xl" suppressHydrationWarning>
             <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{home.atsPreview.heading}</h2>
-            <p className="text-(--muted) max-w-2xl mx-auto">{home.atsPreview.subheading}</p>
+            <p className="text-(--muted)">{home.atsPreview.subheading}</p>
           </div>
 
           <div className="relative flex flex-col items-center gap-6 lg:block lg:py-8" suppressHydrationWarning>
-            <div className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
-              <div className="rounded-2xl border border-white/10 bg-[#020202] p-3 sm:p-4" suppressHydrationWarning>
-                <div className="mx-auto rounded-md border border-black/20 bg-white px-4 py-3 font-serif text-[#1F2937] shadow-[0_10px_28px_rgba(0,0,0,0.28)]" suppressHydrationWarning>
+            <Reveal className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
+              <div className="border border-(--border) bg-(--surface) p-3 sm:p-4" suppressHydrationWarning>
+                <div className="mx-auto border border-black/10 bg-white px-4 py-3 font-serif text-[#1F2937]" suppressHydrationWarning>
                   <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
                     <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">{mock.name}</p>
                     <p className="mt-0.5 text-[10px] text-gray-700">{mock.contact}</p>
@@ -201,17 +197,17 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="lg:absolute lg:top-8 lg:-left-4 xl:-left-12">
+            <Reveal className="lg:absolute lg:top-8 lg:-left-4 xl:-left-12" threshold={0.3}>
               <ResumeFindingsCard
                 label={home.atsPreview.whatWeFoundLabel}
                 strengths={{ title: home.atsPreview.strengthsTitle, description: home.atsPreview.strengthsDescription }}
                 improvements={{ title: home.atsPreview.improvementsTitle, description: home.atsPreview.improvementsDescription }}
               />
-            </div>
+            </Reveal>
 
-            <div className="lg:absolute lg:top-24 lg:-right-4 xl:-right-12">
+            <Reveal className="lg:absolute lg:top-24 lg:-right-4 xl:-right-12" threshold={0.3}>
               <ResumeScoreCard
                 score={93}
                 scoreLabel={home.atsPreview.scoreLabel}
@@ -222,12 +218,12 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   max: [25, 35, 10, 25, 5][i],
                 }))}
               />
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* PRODUCT LOOP */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" suppressHydrationWarning>
+        <section className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto" suppressHydrationWarning>
           {home.productLoop.map((step, index) => {
             const visuals = [
               <ScoreStepVisual key="score" />,
@@ -246,44 +242,44 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                 description={step.description}
                 bullets={step.bullets}
                 visual={visuals[index]}
+                isFirst={index === 0}
               />
             )
           })}
         </section>
 
         {/* PRICING */}
-        <section id="pricing" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
-          <div className="text-center mb-16" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{home.pricingTeaserHeading}</h2>
-            <p className="text-(--muted) max-w-2xl mx-auto">{home.pricingTeaserSubheading}</p>
+        <section id="pricing" data-section="Pricing" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
+          <RevealRule className="mb-20" />
+          <div className="mb-16 max-w-xl" suppressHydrationWarning>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">
+              <RevealWords text={home.pricingTeaserHeading} />
+            </h2>
+            <p className="text-(--muted)">{home.pricingTeaserSubheading}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto" suppressHydrationWarning>
+          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-3 md:divide-x md:divide-y-0" suppressHydrationWarning>
             {pricing.plans.map((plan, index) => {
               const meta = pricingPlanMeta[index]
               return (
-                <Card
+                <div
                   key={index}
-                  elevated={meta.isBestValue}
-                  radius="lg"
-                  className={`p-8 flex flex-col relative ${meta.isBestValue ? 'border-(--accent)' : ''} ${meta.isPrimary ? 'md:-translate-y-4' : ''}`}
+                  className={`flex flex-col p-8 ${meta.isBestValue ? 'bg-(--accent-muted)' : ''}`}
                   suppressHydrationWarning
                 >
                   {meta.isBestValue && (
-                    <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                      {Common.bestValue}
-                    </Badge>
+                    <p className="mb-4 font-mono text-(length:--text-label) text-(--foreground)">{Common.bestValue}</p>
                   )}
 
                   <h3 className="text-xl font-bold text-(--foreground)">{plan.name}</h3>
                   <p className="text-(--muted) text-sm mt-2 mb-6">{plan.description}</p>
-                  <div className="text-4xl font-bold text-(--foreground) mb-6" suppressHydrationWarning>{plan.price}<span className="text-lg text-(--muted) font-normal">{plan.pricePeriod}</span></div>
+                  <div className="mb-6 font-mono text-4xl font-bold tabular-nums text-(--foreground)" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-(--muted) font-normal">{plan.pricePeriod}</span></div>
                   <ul className="space-y-4 mb-8 grow">
                     {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex gap-3 text-(--foreground)"><CheckCircle2 className="text-(--accent) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                      <li key={fIndex} className="flex gap-3 text-(--foreground)"><CheckCircle2 className="text-(--foreground) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                     ))}
                     {plan.excludedFeatures.map((feature, fIndex) => (
-                      <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-red-400 w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                      <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-(--muted) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                     ))}
                   </ul>
                   <PlanCta
@@ -291,20 +287,23 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                     plan={meta.planId}
                     className={`w-full text-center ${buttonVariants(meta.isBestValue || meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
                   />
-                </Card>
+                </div>
               )
             })}
           </div>
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-(--border)" suppressHydrationWarning>
-          <div className="text-center mb-12" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{home.faqHeading}</h2>
-            <p className="text-(--muted) max-w-2xl mx-auto">{home.faqSubheading}</p>
+        <section id="faq" data-section="FAQ" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
+          <RevealRule className="mb-20" />
+          <div className="mb-12 max-w-xl" suppressHydrationWarning>
+            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">
+              <RevealWords text={home.faqHeading} />
+            </h2>
+            <p className="text-(--muted)">{home.faqSubheading}</p>
           </div>
 
-          <div className="mx-auto max-w-4xl" suppressHydrationWarning>
+          <div className="max-w-3xl" suppressHydrationWarning>
             {faq.map((item, index) => (
               <details
                 key={index}
@@ -312,12 +311,15 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                 suppressHydrationWarning
               >
                 <summary
-                  className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left text-lg font-semibold text-(--foreground) [&::-webkit-details-marker]:hidden"
+                  className="row-invert flex cursor-pointer list-none items-center justify-between gap-4 px-2 -mx-2 py-5 text-left text-lg font-semibold [&::-webkit-details-marker]:hidden"
                   suppressHydrationWarning
                 >
-                  <span>{item.question}</span>
-                  <span className="font-mono text-xs uppercase tracking-wide text-(--accent) group-open:hidden">{home.faqOpen}</span>
-                  <span className="hidden font-mono text-xs uppercase tracking-wide text-(--accent) group-open:inline">{home.faqClose}</span>
+                  <span className="flex items-center gap-3">
+                    <ArrowRight className="row-invert-arrow h-4 w-4 shrink-0" />
+                    {item.question}
+                  </span>
+                  <span className="font-mono text-xs group-open:hidden">{home.faqOpen}</span>
+                  <span className="hidden font-mono text-xs group-open:inline">{home.faqClose}</span>
                 </summary>
                 <div className="pb-5 text-(--muted)" suppressHydrationWarning>{item.answer}</div>
               </details>
@@ -326,10 +328,10 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         </section>
       </main>
 
-      <section className="bg-(--background) py-12 border-t border-(--border) text-center" suppressHydrationWarning>
-        <div className="max-w-4xl mx-auto px-4" suppressHydrationWarning>
+      <section className="bg-(--background) py-12 border-t border-(--border)" suppressHydrationWarning>
+        <div className="max-w-(--container-max) mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
           <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footer.heading}</h2>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8" suppressHydrationWarning>
+          <div className="flex flex-col sm:flex-row gap-4 mt-8" suppressHydrationWarning>
             <AuthAwareSignupLink className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
             <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</Link>
           </div>

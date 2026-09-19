@@ -64,25 +64,25 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
       />
       <Navbar />
 
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
-        <header className="mb-8 rounded-2xl border border-white/10 bg-[#0A0F0D] p-6">
-          <h1 className="text-3xl font-bold text-white">{terms.heading}</h1>
-          <p className="mt-2 text-sm text-[#FFFFFF]/72">Last updated: {terms.lastUpdated}</p>
-          <p className="mt-4 text-[#FFFFFF]/82">{terms.intro}</p>
+      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
+        <header className="mb-8 pb-8 border-b border-(--border)">
+          <h1 className="text-3xl font-bold text-(--foreground)">{terms.heading}</h1>
+          <p className="mt-2 font-mono text-xs text-(--muted)">Last updated: {terms.lastUpdated}</p>
+          <p className="mt-4 text-(--muted)">{terms.intro}</p>
         </header>
 
-        <article className="space-y-4">
+        <article className="divide-y divide-(--border)">
           {terms.sections?.map((section) => (
-            <section key={section.title} className="rounded-2xl border border-white/10 bg-[#0A0F0D] p-6">
-              <h2 className="text-lg font-semibold text-white">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-[#FFFFFF]/80">{section.content}</p>
+            <section key={section.title} className="py-8 first:pt-0">
+              <h2 className="text-lg font-semibold text-(--foreground)">{section.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-(--muted)">{section.content}</p>
             </section>
           ))}
         </article>
 
-        <p className="mt-8 text-sm text-[#FFFFFF]/60">
+        <p className="mt-8 text-sm text-(--muted)">
           {terms.footerPrefix}
-          <Link href="/privacy" className="text-[#16DB65] hover:text-[#0A9548]">{terms.footerLinkLabel}</Link>
+          <Link href="/privacy" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{terms.footerLinkLabel}</Link>
           {terms.footerSuffix}
         </p>
       </main>

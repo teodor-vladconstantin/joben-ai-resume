@@ -75,19 +75,19 @@ function SignUpContent() {
           }}
           className="space-y-4"
         >
-          <label className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--surface) p-4 text-sm text-(--foreground)">
+          <label className="flex items-start gap-3 border border-(--border) bg-(--surface) p-4 text-sm text-(--foreground)">
             <input
               type="checkbox"
               name="accept_legal"
-              className="mt-0.5 h-4 w-4 rounded border-(--border) bg-(--surface-elevated) text-(--accent)"
+              className="mt-0.5 h-4 w-4 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
             />
             <span>
               I agree to the{' '}
-              <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-(--accent) hover:text-(--accent-strong)">
+              <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-(--accent) hover:text-(--accent-strong)">
+              <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
                 Privacy Policy
               </Link>
               .
@@ -95,11 +95,11 @@ function SignUpContent() {
           </label>
 
           {showError ? (
-            <p className="text-sm text-red-400">You must accept the terms and privacy policy to continue.</p>
+            <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">You must accept the terms and privacy policy to continue.</p>
           ) : null}
 
           {rateLimitError ? (
-            <p className="text-sm text-red-400">Too many attempts from your network. Please try again later.</p>
+            <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">Too many attempts from your network. Please try again later.</p>
           ) : null}
 
           <button type="submit" disabled={submitting} className={`w-full ${buttonVariants('primary', 'md')}`}>

@@ -58,7 +58,7 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
       <button type="button" className={className} onClick={handleClick} disabled={loading}>
         {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : label}
       </button>
-      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
     </div>
   )
 }
