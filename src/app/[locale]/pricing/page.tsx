@@ -56,7 +56,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const { locale } = await params
   setRequestLocale(locale)
   const messages = (await getMessages({ locale })) as unknown as Messages
-  const { Common, Pricing: pricing } = messages
+  const { Common, Pricing: pricing, Faq: faq } = messages
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -87,6 +87,17 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         },
         category: pricingPlanMeta[index].planId ?? 'free',
       })),
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      },
     ],
   }
 
