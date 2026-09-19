@@ -293,5 +293,88 @@
     "cookiePolicyLinkText": "Politica de Cookie-uri",
     "rejectNonEssential": "Refuză cele neesențiale",
     "acceptAll": "Acceptă tot"
+  },
+  "Legal": {
+    "privacy": {
+      "metaTitle": "Politica de Confidențialitate | Joben, generator de CV-uri cu AI",
+      "metaDescription": "Citește politica de confidențialitate Joben. Află cum generatorul nostru gratuit de CV-uri cu AI gestionează, protejează și procesează datele tale personale.",
+      "heading": "Politica de Confidențialitate",
+      "lastUpdated": "12 iulie 2026",
+      "intro": "Această politică descrie modul în care gestionăm informațiile tale atunci când folosești Joben.",
+      "breadcrumbLabel": "Politica de Confidențialitate",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Termenii și Condițiile",
+      "footerSuffix": " noastre pentru termenii legali ai serviciului.",
+      "sections": [
+        { "title": "1. Domeniul de aplicare", "content": "Această Politică de Confidențialitate explică modul în care Joben (\"noi\") colectează, utilizează, stochează și partajează datele tale cu caracter personal atunci când folosești joben.eu și serviciile noastre de creare a CV-urilor asistate de inteligență artificială, în conformitate cu Regulamentul General privind Protecția Datelor al Uniunii Europene (RGPD)." },
+        { "title": "2. Datele pe care le colectăm", "content": "Date de cont: adresa de e-mail și prenumele/numele, colectate prin Clerk la înregistrare. Conținutul CV-ului și scrisorii de intenție: textul integral și datele structurate pe care le introduci în editor (experiență profesională, educație, competențe). Rezultatele analizei AI: scoruri și feedback generate când rulezi o analiză AI. Metadate de facturare: ID-ul tău de client Stripe și ID-ul abonamentului (nu vedem și nu stocăm niciodată numărul cardului, acesta fiind gestionat direct de Stripe). Analize de utilizare: evenimente pseudonime privind utilizarea produsului (ex. funcție folosită, plan de abonament), asociate contului tău, colectate doar după ce accepți cookie-urile de analiză. Jurnale tehnice/de erori: identificatori de cerere, mesaje de eroare și, în cazul unei erori netratate, adresa IP (prin furnizorul nostru de monitorizare a erorilor). Feedback: dacă trimiți formularul nostru de feedback din aplicație, adresa de e-mail și răspunsurile în text liber." },
+        { "title": "3. Cum folosim datele", "content": "Pentru a furniza serviciul de bază de creare a CV-urilor și analiză AI la care te-ai înscris; pentru a procesa plățile; pentru a detecta și preveni abuzurile (limitarea ratei de cereri); pentru a trimite e-mailuri de serviciu (bun venit, memento de inactivitate, cereri de feedback); pentru a remedia erori prin monitorizarea lor; și, doar cu acordul tău, pentru a înțelege utilizarea produsului prin analize." },
+        { "title": "4. Procesarea prin AI", "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la job, generarea scrisorii de intenție, rescrierea punctelor bullet), textul relevant din CV sau din descrierea jobului pe care îl furnizezi este trimis către Anthropic (\"Claude\"), furnizorul nostru de AI, exclusiv pentru a genera acel rezultat. Nu trimitem numele sau adresa ta de e-mail către Anthropic; trimitem doar conținutul documentului necesar pentru cererea specifică. În mod implicit, Anthropic nu folosește datele din API pentru antrenarea modelelor sale." },
+        { "title": "5. Subprocesatori", "content": "Partajăm date cu următorii furnizori, fiecare acționând ca persoană împuternicită de operator conform propriului acord de procesare a datelor: Anthropic (procesare AI a textului din CV, SUA), Stripe (procesarea plăților, global/SUA), Resend (livrarea e-mailurilor tranzacționale, SUA), PostHog (analiză de produs, instanță găzduită în UE, doar cu consimțământ), Upstash (cache pentru limitarea ratei de cereri, SUA), Vercel (găzduirea aplicației, global/SUA), Sentry (monitorizarea erorilor, instanță găzduită în UE). Baza noastră de date principală (Supabase/Postgres) este găzduită pe propria infrastructură, deci nu este un subprocesator terț." },
+        { "title": "6. Temeiuri legale", "content": "Executarea contractului: crearea contului, stocarea CV-ului și scrisorii de intenție, funcțiile AI și facturarea, toate necesare pentru a furniza serviciul la care te-ai înscris. Interes legitim: prevenirea fraudei/abuzului (limitarea ratei), monitorizarea erorilor și e-mailurile de serviciu legate direct de contul tău. Consimțământ: cookie-urile de analiză (PostHog), care se încarcă doar după ce le accepți în bannerul de cookie-uri. Obligație legală: păstrarea evidențelor de facturare acolo unde este cerut de legislația fiscală." },
+        { "title": "7. Retenția datelor", "content": "Date de cont, CV, scrisoare de intenție și analiză AI: păstrate cât timp contul este activ și șterse imediat la ștergerea contului. Evidențe de facturare: păstrate de Stripe conform propriilor cerințe de conformitate. Formulare de feedback: păstrate 24 de luni. Jurnale de webhook și evenimente de analiză: păstrate până la 12 luni pentru securitate și depanare, apoi șterse. Jurnale de monitorizare a erorilor (Sentry): păstrate conform ferestrei implicite de 90 de zile a furnizorului. Date de limitare a ratei (Redis): expiră automat, de la câteva ore până la o lună, în funcție de fereastra limitei." },
+        { "title": "8. Securitate", "content": "Folosim criptare în tranzit (TLS) pentru tot traficul, restricționăm accesul la baza de date doar la credențialele serviciilor server-side și aplicăm politici de securitate la nivel de rând (row-level security) pe fiecare tabel care conține date cu caracter personal. Nicio metodă de transmitere sau stocare nu este complet sigură, așa că nu putem garanta securitatea absolută." },
+        { "title": "9. Drepturile tale", "content": "Conform RGPD ai dreptul de a: accesa datele cu caracter personal pe care le deținem despre tine (folosește \"Exportă datele mele\" din Setări pentru un export JSON instant); solicita ștergerea contului și a tuturor datelor asociate (folosește \"Șterge contul\" din Setări, procesat imediat); rectifica datele inexacte (actualizează-le direct în aplicație sau contactează-ne); te opune sau restricționa anumite prelucrări, precum analizele (folosește bannerul de cookie-uri sau contactează-ne); și portabilitatea datelor (exportul de mai sus este furnizat într-un format structurat, care poate fi citit automat, JSON). Pentru a exercita orice drept care nu este disponibil direct în aplicație, scrie-ne la privacy@joben.eu. Ai, de asemenea, dreptul de a depune o plângere la autoritatea de supraveghere pentru protecția datelor din țara ta (în România, ANSPDCP — Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal)." },
+        { "title": "10. Cookie-uri și tehnologii similare", "content": "Folosim cookie-uri strict necesare pentru a te menține autentificat și pentru a securiza serviciul și, doar dacă le accepți prin bannerul nostru de cookie-uri, cookie-uri de analiză pentru a înțelege utilizarea produsului. Consultă Politica noastră completă de Cookie-uri pentru lista completă a cookie-urilor, scopul lor și cum îți poți schimba alegerea oricând." },
+        { "title": "11. Transferuri internaționale de date", "content": "Unii dintre subprocesatorii noștri (Anthropic, Stripe, Resend, Upstash, Vercel) sunt localizați sau procesează date în Statele Unite. Atunci când transferăm date cu caracter personal în afara Spațiului Economic European, ne bazăm pe Clauzele Contractuale Standard (SCC) ale Comisiei Europene sau pe o garanție de adecvare echivalentă oferită de furnizorul respectiv." },
+        { "title": "12. Confidențialitatea minorilor", "content": "Joben nu se adresează și nu colectează cu bună știință date de la persoane sub 16 ani, vârsta minimă necesară pentru a utiliza serviciile noastre conform acestor termeni. Dacă ai motive să crezi că un minor ne-a furnizat date cu caracter personal, contactează-ne și le vom șterge." },
+        { "title": "13. Modificări ale acestei politici", "content": "Putem actualiza periodic această politică. Modificările semnificative vor fi reflectate printr-o dată actualizată \"Ultima actualizare\" de mai sus; utilizarea continuă după o actualizare înseamnă că accepți versiunea revizuită." },
+        { "title": "14. Contact", "content": "Pentru cereri sau întrebări privind confidențialitatea, scrie-ne la privacy@joben.eu." }
+      ]
+    },
+    "terms": {
+      "metaTitle": "Termeni și Condiții | Joben, generator de CV-uri cu AI",
+      "metaDescription": "Citește termenii și condițiile de utilizare Joben. Înțelege regulile, ghidurile și acordurile pentru folosirea generatorului nostru gratuit de CV-uri cu AI și a uneltelor de optimizare ATS.",
+      "heading": "Termeni și Condiții",
+      "lastUpdated": "12 iulie 2026",
+      "intro": "Te rugăm să citești acești termeni cu atenție înainte de a folosi Joben.",
+      "breadcrumbLabel": "Termeni și Condiții",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica noastră de Confidențialitate",
+      "footerSuffix": " pentru detalii despre cum colectăm și procesăm datele.",
+      "sections": [
+        { "title": "1. Acceptarea acestor termeni", "content": "Prin accesarea sau utilizarea Joben, ești de acord cu acești Termeni și Condiții. Dacă nu ești de acord, nu folosi serviciul." },
+        { "title": "2. Eligibilitate și conturi", "content": "Trebuie să ai cel puțin 16 ani pentru a folosi Joben. Trebuie să furnizezi informații de cont corecte și să îți păstrezi credențialele de autentificare în siguranță. Ești responsabil pentru activitatea desfășurată din contul tău." },
+        { "title": "3. Descrierea serviciilor", "content": "Joben oferă unelte pentru CV-uri și scrisori de intenție, analiză asistată de AI și funcții de export. Funcțiile și limitele pot depinde de planul tău." },
+        { "title": "4. Fără garanția rezultatelor de angajare", "content": "Joben este o unealtă de redactare și optimizare a CV-urilor. Nu garantăm interviuri, oferte de muncă sau vreun rezultat specific de angajare. Scorurile și sugestiile generate de AI sunt ajutoare informative, nu o promisiune de rezultate." },
+        { "title": "5. Facturare, upgrade-uri și rambursări", "content": "Planurile plătite sunt facturate conform prețurilor afișate la finalizarea comenzii. Se pot aplica taxe. Cu excepția cazurilor prevăzute de lege, sumele plătite nu sunt rambursabile." },
+        { "title": "6. Utilizare acceptabilă", "content": "Ești de acord să nu folosești Joben pentru activități ilegale, abuzive sau frauduloase și să nu încerci accesul neautorizat, întreruperea sau utilizarea abuzivă a platformei." },
+        { "title": "7. Declinarea răspunderii privind rezultatele AI", "content": "Sugestiile generate de AI sunt produse prin procesarea textului CV-ului tău și al descrierii jobului printr-un furnizor terț de AI (Anthropic). Rezultatele sunt furnizate doar în scop informativ. Ești responsabil pentru verificarea, editarea și validarea întregului conținut generat înainte de utilizare, inclusiv pentru acuratețe." },
+        { "title": "8. Conținutul tău", "content": "Păstrezi dreptul de proprietate asupra conținutului pe care îl încarci sau îl creezi. Ne acorzi o licență limitată pentru a procesa acel conținut (inclusiv trimiterea lui către furnizorul nostru de AI), doar pentru a furniza, menține și îmbunătăți serviciul." },
+        { "title": "9. Proprietate intelectuală", "content": "Platforma Joben, brandingul, software-ul și materialele conexe sunt protejate de legile privind proprietatea intelectuală și rămân proprietatea Joben și a licențiatorilor săi." },
+        { "title": "10. Suspendare și încetare", "content": "Putem suspenda sau înceta accesul pentru încălcarea acestor termeni, riscuri de securitate, neplată sau cerințe legale. Îți poți șterge contul oricând din Setări." },
+        { "title": "11. Declinări de responsabilitate și limitarea răspunderii", "content": "Serviciul este furnizat \"ca atare\" și \"în funcție de disponibilitate\". În limita maximă permisă de lege, Joben nu este răspunzător pentru daune indirecte, incidentale sau subsecvente, inclusiv pierderea unei oportunități de angajare." },
+        { "title": "12. Legea aplicabilă", "content": "Acești termeni sunt guvernați de legile Uniunii Europene și de jurisdicția în care Joben este înființată, fără a ține cont de principiile privind conflictul de legi, fără a aduce atingere drepturilor obligatorii de protecție a consumatorului de care beneficiezi conform legii țării tale de reședință." },
+        { "title": "13. Modificări ale termenilor", "content": "Putem actualiza acești termeni periodic. Utilizarea continuă după actualizări înseamnă că accepți termenii revizuiți." },
+        { "title": "14. Contact", "content": "Pentru întrebări legale sau privind confidențialitatea, scrie-ne la privacy@joben.eu." }
+      ]
+    },
+    "cookies": {
+      "metaTitle": "Politica de Cookie-uri | Joben, generator de CV-uri cu AI",
+      "metaDescription": "Află ce cookie-uri folosește Joben, de ce și cum le poți controla.",
+      "heading": "Politica de Cookie-uri",
+      "lastUpdated": "12 iulie 2026",
+      "intro": "Această pagină listează fiecare cookie pe care Joben îl setează, de ce și cât timp este valabil. Îți poți schimba alegerea oricând, ștergând stocarea locală a browserului pentru acest site, sau folosind bannerul de cookie-uri afișat la prima vizită.",
+      "breadcrumbLabel": "Politica de Cookie-uri",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica noastră de Confidențialitate",
+      "footerSuffix": " pentru modul în care gestionăm datele cu caracter personal, la un nivel mai general.",
+      "necessaryHeading": "Strict necesare",
+      "necessaryBody": "Aceste cookie-uri sunt necesare pentru funcționarea site-ului, în principal pentru a te menține autentificat. Nu pot fi dezactivate și nu fac obiectul consimțământului conform RGPD/ePrivacy.",
+      "analyticsHeading": "Analiză (Opțional)",
+      "analyticsBody": "Aceste cookie-uri ne ajută să înțelegem cum este folosit produsul, ca să îl putem îmbunătăți. Sunt setate doar după ce apeși \"Acceptă tot\" în bannerul de cookie-uri, niciodată înainte.",
+      "marketingHeading": "Marketing",
+      "marketingBody": "Nu folosim cookie-uri de marketing sau publicitate.",
+      "tableHeaders": { "name": "Nume", "provider": "Furnizor", "purpose": "Scop", "duration": "Durată" },
+      "necessaryCookies": [
+        { "name": "__session", "provider": "Clerk", "purpose": "Te menține autentificat.", "duration": "Sesiune" },
+        { "name": "__client_uat", "provider": "Clerk", "purpose": "Sincronizează starea de autentificare între file.", "duration": "1 an" },
+        { "name": "__clerk_db_jwt", "provider": "Clerk", "purpose": "Token de autentificare folosit pentru securizarea sesiunii.", "duration": "Sesiune" }
+      ],
+      "analyticsCookies": [
+        { "name": "ph_*", "provider": "PostHog", "purpose": "Analiză pseudonimă a produsului (utilizarea funcțiilor, vizualizări de pagini). Setat doar după ce accepți cookie-urile de analiză.", "duration": "Până la 1 an" },
+        { "name": "_vercel_*", "provider": "Vercel Analytics", "purpose": "Analiză agregată, privacy-friendly, a vizualizărilor de pagini. Setat doar după ce accepți cookie-urile de analiză.", "duration": "Până la 1 an" }
+      ]
+    }
   }
 }

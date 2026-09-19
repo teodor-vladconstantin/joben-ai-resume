@@ -192,4 +192,34 @@ export type Messages = {
     rejectNonEssential: string
     acceptAll: string
   }
+  Legal: {
+    privacy: LegalPolicy
+    terms: LegalPolicy
+    cookies: LegalPolicy & {
+      necessaryHeading: string
+      necessaryBody: string
+      analyticsHeading: string
+      analyticsBody: string
+      marketingHeading: string
+      marketingBody: string
+      tableHeaders: { name: string; provider: string; purpose: string; duration: string }
+      necessaryCookies: CookieRow[]
+      analyticsCookies: CookieRow[]
+    }
+  }
 }
+
+type LegalPolicy = {
+  metaTitle: string
+  metaDescription: string
+  heading: string
+  lastUpdated: string
+  intro: string
+  breadcrumbLabel: string
+  footerPrefix: string
+  footerLinkLabel: string
+  footerSuffix: string
+  sections?: { title: string; content: string }[]
+}
+
+type CookieRow = { name: string; provider: string; purpose: string; duration: string }
