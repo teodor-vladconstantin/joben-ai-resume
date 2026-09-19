@@ -12,10 +12,9 @@ export type ResumeRole = {
   strongBullet: LocalizedText
 }
 
-// Test set - 13 roles to validate design/copy quality before scaling to the
-// full 30+ role catalog. Add more entries here once approved; the route at
-// src/app/[locale]/resume-examples/[slug]/page.tsx and the sitemap both
-// derive their pages from this file automatically, per locale.
+// 20 roles so far, scaling toward the full 30+ role catalog. Add more entries
+// here once approved; the route at src/app/[locale]/resume-examples/[slug]/page.tsx
+// and the sitemap both derive their pages from this file automatically, per locale.
 export const resumeRoles: ResumeRole[] = [
   {
     slug: { ro: 'analist-date', en: 'data-analyst' },
@@ -366,6 +365,195 @@ export const resumeRoles: ResumeRole[] = [
     strongBullet: {
       ro: 'Am oferit îngrijire directă la 5-6 pacienți per tură pe o secție de 32 de paturi, reducând rata infecțiilor urinare asociate cateterului de la 3,1 la 0,8 la 1.000 de zile-cateter prin respectarea consecventă a protocolului standard.',
       en: 'Delivered direct care to 5-6 patients per shift on a 32-bed medical-surgical unit, reducing catheter-associated UTI rate from 3.1 to 0.8 per 1,000 catheter days through consistent bundle protocol adherence.',
+    },
+  },
+  {
+    slug: { ro: 'manager-resurse-umane', en: 'hr-manager' },
+    title: { ro: 'Manager Resurse Umane', en: 'HR Manager' },
+    keywords: {
+      ro: ['recrutare', 'onboarding', 'relații cu angajații', 'managementul performanței', 'HRIS (Workday/BambooHR)', 'compensații și beneficii', 'conformitate legislația muncii', 'rezolvarea conflictelor', 'retenția angajaților', 'employer branding', 'diversitate și incluziune', 'planificare organizațională'],
+      en: ['recruiting', 'onboarding', 'employee relations', 'performance management', 'HRIS (Workday/BambooHR)', 'compensation & benefits', 'labor law compliance', 'conflict resolution', 'employee retention', 'employer branding', 'diversity & inclusion', 'workforce planning'],
+    },
+    commonMistakes: {
+      ro: [
+        'Scrii "am gestionat resurse umane" fără să specifici câți angajați sau ce arie (recrutare, relații cu angajații, compensații).',
+        'Nu menționezi rata de retenție sau timpul mediu de ocupare a unui post, cele mai urmărite metrici HR.',
+        'Amesteci administrarea HR (dosare, concedii) cu strategia HR (design organizațional, planuri de retenție); CV-urile trebuie să arate ambele nivele dacă e cazul.',
+        'Omiți sistemul HRIS folosit efectiv (Workday, BambooHR, SAP SuccessFactors), un filtru comun ATS pentru rolurile de HR.',
+      ],
+      en: [
+        'Listing "managed HR" without specifying headcount or area owned (recruiting, employee relations, compensation).',
+        'No mention of retention rate or average time-to-fill, the two most-scanned HR metrics.',
+        'Blurring HR administration (files, leave requests) with HR strategy (org design, retention plans); resumes should show both levels when applicable.',
+        'Omitting the HRIS actually used (Workday, BambooHR, SAP SuccessFactors), a common ATS filter for HR roles.',
+      ],
+    },
+    weakBullet: { ro: 'Am gestionat procesul de recrutare și am organizat sesiuni de onboarding.', en: 'Managed the recruiting process and ran onboarding sessions.' },
+    strongBullet: {
+      ro: 'Am condus recrutarea pentru o organizație de 180 de angajați, reducând timpul mediu de ocupare a unui post de la 52 la 31 de zile prin restructurarea procesului de interviu, în timp ce am crescut retenția la 12 luni de la 74% la 89%.',
+      en: 'Led talent acquisition for a 180-person organization, cutting average time-to-fill from 52 to 31 days by restructuring the interview process, while raising 12-month retention from 74% to 89%.',
+    },
+  },
+  {
+    slug: { ro: 'designer-grafic', en: 'graphic-designer' },
+    title: { ro: 'Designer Grafic', en: 'Graphic Designer' },
+    keywords: {
+      ro: ['Adobe Creative Suite', 'identitate de brand', 'design pentru print și digital', 'tipografie', 'ilustrație', 'design pentru social media', 'prezentare de portofoliu', 'pregătire fișiere pentru tipar', 'wireframing', 'colaborare cu clienți', 'design de ambalaje', 'sisteme de brand'],
+      en: ['Adobe Creative Suite', 'brand identity', 'print and digital design', 'typography', 'illustration', 'social media design', 'portfolio presentation', 'print-ready file prep', 'wireframing', 'client collaboration', 'packaging design', 'brand systems'],
+    },
+    commonMistakes: {
+      ro: [
+        'Pui link de portofoliu fără să descrii niciun proiect concret în CV; recrutorii citesc CV-ul înainte să deschidă un link extern.',
+        'Listezi doar uneltele (Photoshop, Illustrator) fără procesul creativ sau rezultatul obținut pentru client.',
+        'Nu menționezi tipul de client sau industrie (retail, tech, ONG), esențial pentru a arăta versatilitate sau specializare.',
+        'Lipsește impactul măsurabil: creșterea engagement-ului, adoptarea unui brand nou, rezultate de conversie pentru materiale de marketing.',
+      ],
+      en: [
+        'Linking to a portfolio without describing any concrete project in the resume itself; recruiters read the resume before opening an external link.',
+        'Listing only tools (Photoshop, Illustrator) without the creative process or the outcome delivered for the client.',
+        'No mention of client type or industry (retail, tech, nonprofit), which signals versatility or specialization.',
+        'Missing measurable impact: engagement lift, brand adoption, conversion results for marketing materials.',
+      ],
+    },
+    weakBullet: { ro: 'Am creat materiale grafice pentru campaniile de marketing ale companiei.', en: "Created graphic materials for the company's marketing campaigns." },
+    strongBullet: {
+      ro: 'Am redesenat identitatea vizuală pentru un retailer cu 12 magazine, unificând ambalajele, semnalistica și materialele digitale; rebranding-ul a contribuit la o creștere de 22% a recunoașterii brandului măsurată printr-un sondaj post-lansare.',
+      en: 'Redesigned the visual identity for a 12-store retailer, unifying packaging, signage, and digital materials; the rebrand contributed to a 22% lift in brand recognition measured via post-launch survey.',
+    },
+  },
+  {
+    slug: { ro: 'manager-customer-success', en: 'customer-success-manager' },
+    title: { ro: 'Manager Customer Success', en: 'Customer Success Manager' },
+    keywords: {
+      ro: ['onboarding clienți', 'rata de retenție (churn)', 'upsell/cross-sell', 'health score', 'gestionare QBR', 'managementul conturilor', 'Gainsight/HubSpot', 'adopția produsului', 'satisfacția clienților (NPS/CSAT)', 'escaladarea problemelor tehnice', 'planuri de succes al clientului', 'renewal'],
+      en: ['customer onboarding', 'churn/retention rate', 'upsell/cross-sell', 'health scoring', 'QBR management', 'account management', 'Gainsight/HubSpot', 'product adoption', 'customer satisfaction (NPS/CSAT)', 'technical escalation handling', 'customer success plans', 'renewals'],
+    },
+    commonMistakes: {
+      ro: [
+        'Nu menționezi rata de churn sau retenția netă a portofoliului gestionat, prima metrică pe care o caută angajatorii la acest rol.',
+        'Descrii activități ("am ținut legătura cu clienții") fără rezultatul lor: renewal-uri salvate, upsell generat, adoptare crescută.',
+        'Omiți mărimea portofoliului (număr de conturi, ARR gestionat), esențial pentru a evalua nivelul rolului.',
+        'Confunzi Customer Success cu suport tehnic; CV-ul trebuie să arate proactivitate strategică, nu doar rezolvare de tichete.',
+      ],
+      en: [
+        'No mention of churn rate or net retention for the book of business owned, the first metric hiring managers scan for in this role.',
+        'Describing activities ("kept in touch with customers") without the outcome: renewals saved, upsell generated, adoption increased.',
+        'Omitting portfolio size (account count, ARR owned), essential for judging seniority.',
+        'Confusing Customer Success with technical support; the resume should show strategic proactivity, not just ticket resolution.',
+      ],
+    },
+    weakBullet: { ro: 'Am gestionat relația cu clienții și am răspuns la întrebările lor.', en: 'Managed customer relationships and answered their questions.' },
+    strongBullet: {
+      ro: 'Am gestionat un portofoliu de 45 de conturi enterprise (2,8 milioane $ ARR), reducând churn-ul anual de la 14% la 6% prin introducerea unor check-in-uri trimestriale bazate pe health score, generând totodată 310.000 $ din upsell.',
+      en: 'Owned a 45-account enterprise book of business ($2.8M ARR), cutting annual churn from 14% to 6% by introducing health-score-driven quarterly check-ins, while generating $310K in upsell revenue.',
+    },
+  },
+  {
+    slug: { ro: 'inginer-devops', en: 'devops-engineer' },
+    title: { ro: 'Inginer DevOps', en: 'DevOps Engineer' },
+    keywords: {
+      ro: ['CI/CD', 'Docker', 'Kubernetes', 'Terraform', 'infrastructură ca și cod', 'AWS/Azure/GCP', 'monitorizare și alertare', 'automatizare', 'gestionarea secretelor', 'arhitectură de microservicii', 'scripting (Bash/Python)', 'fiabilitate a sistemului (SRE)'],
+      en: ['CI/CD', 'Docker', 'Kubernetes', 'Terraform', 'infrastructure as code', 'AWS/Azure/GCP', 'monitoring & alerting', 'automation', 'secrets management', 'microservices architecture', 'scripting (Bash/Python)', 'site reliability (SRE)'],
+    },
+    commonMistakes: {
+      ro: [
+        'Listezi toate uneltele DevOps folosite vreodată, în loc de cele relevante pentru infrastructura companiei vizate.',
+        'Nu menționezi uptime, timp de recuperare (MTTR) sau frecvența deploy-urilor, metricile standard pentru acest rol.',
+        'Descrii "am menținut infrastructura" fără scală: număr de servicii, trafic, mediu (on-prem/cloud/hibrid).',
+        'Omiți impactul asupra costurilor de infrastructură; optimizarea costurilor cloud e un semnal puternic de senioritate.',
+      ],
+      en: [
+        'Listing every DevOps tool ever touched instead of the ones relevant to the target company\'s stack.',
+        'No mention of uptime, mean time to recovery (MTTR), or deploy frequency, the standard metrics for this role.',
+        'Describing "maintained infrastructure" without scale: number of services, traffic volume, environment (on-prem/cloud/hybrid).',
+        'Omitting cost impact; cloud cost optimization is a strong senior-level signal.',
+      ],
+    },
+    weakBullet: { ro: 'Am întreținut infrastructura cloud și am automatizat procesele de deploy.', en: 'Maintained cloud infrastructure and automated deployment processes.' },
+    strongBullet: {
+      ro: 'Am migrat 40 de microservicii către Kubernetes și am implementat pipeline-uri CI/CD cu GitHub Actions, reducând timpul mediu de deploy de la 45 la 6 minute și scăzând costurile lunare de infrastructură AWS cu 31.000 $ prin autoscaling.',
+      en: 'Migrated 40 microservices to Kubernetes and implemented CI/CD pipelines with GitHub Actions, cutting average deploy time from 45 to 6 minutes and reducing monthly AWS infrastructure spend by $31K through autoscaling.',
+    },
+  },
+  {
+    slug: { ro: 'analist-financiar', en: 'financial-analyst' },
+    title: { ro: 'Analist Financiar', en: 'Financial Analyst' },
+    keywords: {
+      ro: ['modelare financiară', 'bugetare și previziuni (FP&A)', 'Excel avansat', 'analiza variațiilor', 'raportare către management', 'valuation', 'analiza fluxului de numerar', 'KPI-uri financiare', 'SQL', 'prezentări pentru board', 'analiza de rentabilitate', 'consolidare financiară'],
+      en: ['financial modeling', 'budgeting & forecasting (FP&A)', 'advanced Excel', 'variance analysis', 'management reporting', 'valuation', 'cash flow analysis', 'financial KPIs', 'SQL', 'board presentations', 'profitability analysis', 'financial consolidation'],
+    },
+    commonMistakes: {
+      ro: [
+        'Scrii "am construit rapoarte financiare" fără să spui ce decizie de business a influențat raportul.',
+        'Nu cuantifici acuratețea previziunilor sau abaterea de la buget, metricile de bază pentru FP&A.',
+        'Omiți uneltele folosite dincolo de Excel (SQL, Power BI, sisteme ERP), un filtru tot mai comun în ATS pentru acest rol.',
+        'Descrii doar analiza istorică, fără recomandări sau acțiuni de business rezultate din ea.',
+      ],
+      en: [
+        'Listing "built financial reports" without stating what business decision the report informed.',
+        'No quantified forecast accuracy or budget variance, the baseline FP&A metrics.',
+        'Omitting tools used beyond Excel (SQL, Power BI, ERP systems), an increasingly common ATS filter for this role.',
+        'Describing only historical analysis without the recommendation or business action it produced.',
+      ],
+    },
+    weakBullet: { ro: 'Am construit modele financiare și am pregătit rapoarte lunare pentru management.', en: 'Built financial models and prepared monthly reports for management.' },
+    strongBullet: {
+      ro: 'Am construit un model de previziune a fluxului de numerar pe 3 unități de business, reducând abaterea de previziune de la 14% la 4%, iar analiza de rentabilitate rezultată a determinat retragerea unei linii de produs neprofitabile, economisind 620.000 $ anual.',
+      en: 'Built a rolling cash-flow forecast model across 3 business units, cutting forecast variance from 14% to 4%; the resulting profitability analysis drove the decision to sunset an unprofitable product line, saving $620K annually.',
+    },
+  },
+  {
+    slug: { ro: 'asistent-executiv', en: 'executive-assistant' },
+    title: { ro: 'Asistent Executiv', en: 'Executive Assistant' },
+    keywords: {
+      ro: ['gestionarea calendarului', 'coordonare de călătorii', 'pregătirea ședințelor de board', 'gestionarea corespondenței', 'confidențialitate', 'gestionarea bugetului', 'coordonare de evenimente', 'comunicare cu stakeholderi', 'Microsoft Office/Google Workspace', 'gestionarea proiectelor', 'filtrarea priorităților', 'redactare de documente'],
+      en: ['calendar management', 'travel coordination', 'board meeting prep', 'correspondence management', 'confidentiality', 'budget administration', 'event coordination', 'stakeholder communication', 'Microsoft Office/Google Workspace', 'project coordination', 'priority triage', 'document drafting'],
+    },
+    commonMistakes: {
+      ro: [
+        'Scrii "am gestionat calendarul" fără să spui pentru câți directori sau cât de complex era programul (întâlniri internaționale, fusuri orare).',
+        'Omiți dovezi de discreție și judecată la nivel executiv, calități pe care angajatorii le caută explicit dar rar apar în CV-uri.',
+        'Listezi sarcini administrative fără impact: economie de timp pentru executiv, reducerea erorilor, îmbunătățirea proceselor de birou.',
+        'Nu menționezi bugetul sau evenimentele gestionate direct, dacă rolul a inclus și responsabilități de coordonare de evenimente.',
+      ],
+      en: [
+        'Listing "managed calendar" without stating how many executives supported or how complex the schedule was (international meetings, time zones).',
+        'Omitting evidence of discretion and executive-level judgment, qualities hiring managers explicitly screen for but that rarely show up in resumes.',
+        'Listing administrative tasks without impact: time saved for the executive, error reduction, office process improvements.',
+        'No mention of budget or events owned directly, if the role included event coordination responsibilities.',
+      ],
+    },
+    weakBullet: { ro: 'Am gestionat calendarul directorului general și am organizat călătoriile de business.', en: "Managed the CEO's calendar and arranged business travel." },
+    strongBullet: {
+      ro: 'Am gestionat calendarul și corespondența pentru 2 directori executivi cu program pe 4 fusuri orare, coordonând peste 30 de călătorii internaționale anual și reducând conflictele de programare cu 90% după implementarea unui protocol de rezervare centralizat.',
+      en: 'Managed calendars and correspondence for 2 C-suite executives across a 4-timezone schedule, coordinating 30+ international trips annually and cutting scheduling conflicts by 90% after implementing a centralized booking protocol.',
+    },
+  },
+  {
+    slug: { ro: 'manager-social-media', en: 'social-media-manager' },
+    title: { ro: 'Manager Social Media', en: 'Social Media Manager' },
+    keywords: {
+      ro: ['strategie de conținut', 'calendar editorial', 'gestionare comunitate', 'publicitate plătită pe social media', 'analiza performanței (Insights/Analytics)', 'Canva/Adobe', 'parteneriate cu influenceri', 'ghid de voce a brandului', 'creștere organică', 'programare de postări (Hootsuite/Buffer)', 'storytelling video', 'trend-uri social media'],
+      en: ['content strategy', 'editorial calendar', 'community management', 'paid social advertising', 'performance analytics (Insights/Analytics)', 'Canva/Adobe', 'influencer partnerships', 'brand voice guidelines', 'organic growth', 'post scheduling (Hootsuite/Buffer)', 'video storytelling', 'social media trends'],
+    },
+    commonMistakes: {
+      ro: [
+        'Raportezi doar numărul de urmăritori, fără engagement rate, reach sau conversii generate din social media.',
+        'Descrii "am postat conținut" fără strategia din spate: pilonii de conținut, publicul țintă, obiectivele de campanie.',
+        'Omiți bugetul de publicitate plătită gestionat, dacă rolul a inclus și promovare plătită, nu doar organică.',
+        'Nu menționezi platformele specifice (TikTok, Instagram, LinkedIn) și rezultatele diferite obținute pe fiecare.',
+      ],
+      en: [
+        'Reporting only follower count, without engagement rate, reach, or conversions driven from social.',
+        'Describing "posted content" without the strategy behind it: content pillars, target audience, campaign goals.',
+        'Omitting paid ad budget managed, if the role included paid promotion, not just organic.',
+        'No mention of specific platforms (TikTok, Instagram, LinkedIn) and the different results achieved on each.',
+      ],
+    },
+    weakBullet: { ro: 'Am gestionat conturile de social media ale companiei și am postat conținut zilnic.', en: "Managed the company's social media accounts and posted content daily." },
+    strongBullet: {
+      ro: 'Am condus strategia de conținut pe Instagram și TikTok pentru un brand D2C, crescând urmăritorii organici de la 8.000 la 52.000 în 9 luni și generând 140.000 $ în vânzări atribuite direct campaniilor de social media.',
+      en: 'Led content strategy across Instagram and TikTok for a D2C brand, growing organic followers from 8K to 52K in 9 months and driving $140K in sales directly attributed to social media campaigns.',
     },
   },
 ]
