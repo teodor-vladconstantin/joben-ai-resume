@@ -1,35 +1,46 @@
 import { Link } from '@/i18n/navigation'
 import { Navbar } from '@/components/ui/Navbar'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { routing, type AppLocale } from '@/i18n/routing'
 
-export const metadata: Metadata = {
-  title: 'Cookie Policy | Joben AI Resume Builder',
-  description: 'Learn what cookies Joben uses, why, and how to control them.',
-  alternates: {
-    canonical: '/cookies',
-  },
-  openGraph: {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  return {
     title: 'Cookie Policy | Joben AI Resume Builder',
     description: 'Learn what cookies Joben uses, why, and how to control them.',
-    url: '/cookies',
-    siteName: 'Joben',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Joben AI Resume Builder',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Cookie Policy | Joben AI Resume Builder',
-    description: 'Learn what cookies Joben uses, why, and how to control them.',
-    images: ['/og-image.png'],
-  },
+    alternates: {
+      canonical: `/${locale}/cookies`,
+      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/cookies`])),
+    },
+    openGraph: {
+      title: 'Cookie Policy | Joben AI Resume Builder',
+      description: 'Learn what cookies Joben uses, why, and how to control them.',
+      url: `/${locale}/cookies`,
+      siteName: 'Joben',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Joben AI Resume Builder',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Cookie Policy | Joben AI Resume Builder',
+      description: 'Learn what cookies Joben uses, why, and how to control them.',
+      images: ['/og-image.png'],
+    },
+  }
 }
 
 const lastUpdated = 'July 12, 2026'
@@ -79,9 +90,26 @@ function CookieTable({ rows }: { rows: CookieRow[] }) {
   )
 }
 
-export default function CookiesPage() {
+export default async function CookiesPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Common' })
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbJsonLd([
+        { name: t('home'), path: `/${locale}` },
+        { name: 'Cookie Policy', path: `/${locale}/cookies` },
+      ]),
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">

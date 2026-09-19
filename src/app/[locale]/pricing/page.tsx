@@ -8,9 +8,14 @@ import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { AutoResumeCheckout } from '@/components/pricing/AutoResumeCheckout'
-import { pricingPlanMeta } from '@/lib/content'
+import { pricingPlanMeta, siteConfig } from '@/lib/content'
+import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+
+function priceAmount(price: string): string {
+  return price.replace(/[^\d]/g, '')
+}
 
 export async function generateMetadata({
   params,
@@ -53,8 +58,36 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const messages = (await getMessages({ locale })) as unknown as Messages
   const { Common, Pricing: pricing } = messages
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbJsonLd([
+        { name: Common.home, path: `/${locale}` },
+        { name: pricing.heading, path: `/${locale}/pricing` },
+      ]),
+      ...pricing.plans.map((plan, index) => ({
+        '@type': 'Product',
+        name: `Joben ${plan.name}`,
+        description: plan.description,
+        brand: { '@id': `${siteConfig.url}/#organization` },
+        offers: {
+          '@type': 'Offer',
+          price: priceAmount(plan.price),
+          priceCurrency: 'RON',
+          url: `${siteConfig.url}/${locale}/pricing`,
+          availability: 'https://schema.org/InStock',
+        },
+        category: pricingPlanMeta[index].planId ?? 'free',
+      })),
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Suspense fallback={null}>
         <AutoResumeCheckout />
       </Suspense>
