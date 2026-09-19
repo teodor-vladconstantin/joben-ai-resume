@@ -151,6 +151,14 @@ export type Messages = {
     faqMistakesQuestion: string
   }
   Faq: { question: string; answer: string }[]
+  About: {
+    metaTitle: string
+    metaDescription: string
+    heading: string
+    intro: string
+    contactHeading: string
+    contactBody: string // {email}
+  }
   Grade: {
     labels: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
     descriptions: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>

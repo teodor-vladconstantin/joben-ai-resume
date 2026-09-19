@@ -9,7 +9,8 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { validateEnv } from '@/lib/env'
-import { siteConfig } from '@/lib/content'
+import { siteConfig, BUILD_TIME } from '@/lib/content'
+import { organizationJsonLd } from '@/lib/structured-data'
 import { ClientProviders } from '@/components/ClientProviders'
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { SiteFooter } from '@/components/layout/SiteFooter'
@@ -179,15 +180,10 @@ export default async function RootLayout({
                     name: 'Joben',
                     description: websiteDescription,
                     inLanguage: locale,
-                    publisher: {
-                      '@type': 'Organization',
-                      name: 'Joben',
-                      logo: {
-                        '@type': 'ImageObject',
-                        url: `${siteConfig.url}/jobeneu_logo.jpg`
-                      }
-                    }
-                  }
+                    dateModified: BUILD_TIME,
+                    publisher: { '@id': `${siteConfig.url}/#organization` },
+                  },
+                  organizationJsonLd(),
                 ]
               })
             }}

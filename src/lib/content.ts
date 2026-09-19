@@ -4,6 +4,12 @@ export const siteConfig = {
   url: "https://joben.eu",
 };
 
+// Evaluated once per build (this is a module-level constant in code that
+// only runs at build time for the statically-generated marketing pages), so
+// it doubles as a "last deployed" timestamp for JSON-LD dateModified without
+// needing a CMS or a database write on every deploy.
+export const BUILD_TIME = new Date().toISOString();
+
 // Non-text plan behavior, kept locale-independent. Merge by array index with
 // the translated `Pricing.plans` array from messages/{locale}.json, which
 // holds the same 3 plans (Free, Pro, Recruiting) in the same order.
