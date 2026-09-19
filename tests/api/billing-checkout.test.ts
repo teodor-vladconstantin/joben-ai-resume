@@ -176,8 +176,8 @@ describe('POST /api/billing/checkout', () => {
       expect.objectContaining({
         mode: 'subscription',
         line_items: [{ price: 'price_dummy', quantity: 1 }],
-        success_url: 'https://app.example.com/dashboard?upgrade=success',
-        cancel_url: 'https://app.example.com/dashboard?upgrade=cancelled',
+        success_url: 'https://app.example.com/ro/dashboard?upgrade=success',
+        cancel_url: 'https://app.example.com/ro/dashboard?upgrade=cancelled',
         metadata: { userId: 'user_123', planId: 'pro' },
         customer: 'cus_existing',
         customer_email: undefined,

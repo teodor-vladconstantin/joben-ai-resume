@@ -108,7 +108,7 @@ describe('POST /api/billing/portal', () => {
     expect(payload.url).toBe('https://billing.stripe.com/session/bps_123')
     expect(portalSessionsCreateMock).toHaveBeenCalledWith({
       customer: 'cus_existing',
-      return_url: 'https://app.example.com/settings',
+      return_url: 'https://app.example.com/ro/settings',
     })
   })
 
