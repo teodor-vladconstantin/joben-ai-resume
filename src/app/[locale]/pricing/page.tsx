@@ -61,6 +61,14 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${siteConfig.url}/${locale}/pricing/#webpage`,
+        url: `${siteConfig.url}/${locale}/pricing`,
+        name: pricing.heading,
+        description: messages.Metadata.pricing.description,
+        isPartOf: { '@id': `${siteConfig.url}/#website` },
+      },
       breadcrumbJsonLd([
         { name: Common.home, path: `/${locale}` },
         { name: pricing.heading, path: `/${locale}/pricing` },
