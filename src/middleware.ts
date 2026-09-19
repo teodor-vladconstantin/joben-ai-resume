@@ -12,10 +12,14 @@ const isProtectedRoute = createRouteMatcher([
   '/(ro|en)/feedback(.*)',
 ])
 
-// /api and /parse are not localized (they're not pages, no [locale] segment).
-// Clerk still needs to run on them for auth() context, but next-intl's
-// redirect/rewrite logic must not touch them.
-const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)'])
+// /api, /parse, /ingest, and /monitoring are not localized (they're not
+// pages, no [locale] segment). Clerk still needs to run on them for
+// auth() context, but next-intl's redirect/rewrite logic must not touch
+// them. /ingest is PostHog's proxy (rewritten in next.config.ts) and
+// /monitoring is Sentry's tunnel (tunnelRoute in next.config.ts) — with
+// localePrefix: 'always', next-intl was prefixing both to /ro/..., which
+// neither rewrite matches anymore, so every request 404'd.
+const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
