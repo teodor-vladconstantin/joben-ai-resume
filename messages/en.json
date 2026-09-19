@@ -293,5 +293,88 @@
     "cookiePolicyLinkText": "Cookie Policy",
     "rejectNonEssential": "Reject non-essential",
     "acceptAll": "Accept all"
+  },
+  "Legal": {
+    "privacy": {
+      "metaTitle": "Privacy Policy | Joben AI Resume Builder",
+      "metaDescription": "Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.",
+      "heading": "Privacy Policy",
+      "lastUpdated": "July 12, 2026",
+      "intro": "This policy describes how we handle your information when you use Joben.",
+      "breadcrumbLabel": "Privacy Policy",
+      "footerPrefix": "Read our ",
+      "footerLinkLabel": "Terms and Conditions",
+      "footerSuffix": " for legal terms of service.",
+      "sections": [
+        { "title": "1. Scope", "content": "This Privacy Policy explains how Joben (\"we\", \"us\") collects, uses, stores, and shares your personal data when you use joben.eu and our AI resume-building services, in accordance with the EU General Data Protection Regulation (GDPR)." },
+        { "title": "2. Data We Collect", "content": "Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number (Stripe handles that directly)). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses." },
+        { "title": "3. How We Use Data", "content": "To provide the core resume-building and AI-review service you signed up for; to process payments; to detect and prevent abuse (rate limiting); to send service emails (welcome, inactivity reminders, feedback requests); to fix bugs via error monitoring; and, only with your consent, to understand product usage through analytics." },
+        { "title": "4. AI Processing", "content": "When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic (\"Claude\"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic; we only send the document content needed for the specific request. Anthropic does not use API inputs to train its models by default." },
+        { "title": "5. Sub-Processors", "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure, so it is not a third-party sub-processor." },
+        { "title": "6. Legal Bases", "content": "Contract performance: account creation, resume/cover letter storage, AI features, and billing, all necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law." },
+        { "title": "7. Data Retention", "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window." },
+        { "title": "8. Security", "content": "We use encryption in transit (TLS) for all traffic, restrict database access to server-side service credentials only, and apply row-level security policies on every table holding personal data. No method of transmission or storage is completely secure, so we cannot guarantee absolute security." },
+        { "title": "9. Your Rights", "content": "Under the GDPR you have the right to: access the personal data we hold about you (use \"Export My Data\" in Settings for an instant JSON export); request deletion of your account and all associated data (use \"Delete Account\" in Settings, which is processed immediately); rectify inaccurate data (update it directly in the app or contact us); object to or restrict certain processing, such as analytics (use the cookie banner or contact us); and data portability (the export above is provided in a structured, machine-readable JSON format). To exercise any right not available directly in the app, email privacy@joben.eu. You also have the right to lodge a complaint with your local data protection supervisory authority." },
+        { "title": "10. Cookies and Similar Technologies", "content": "We use strictly necessary cookies to keep you signed in and secure the service, and, only if you accept them via our cookie banner, analytics cookies to understand product usage. See our full Cookie Policy for the complete list of cookies, their purpose, and how to change your choice at any time." },
+        { "title": "11. International Data Transfers", "content": "Some of our sub-processors (Anthropic, Stripe, Resend, Upstash, Vercel) are based in or process data in the United States. Where we transfer personal data outside the European Economic Area, we rely on the European Commission's Standard Contractual Clauses (SCCs) or an equivalent adequacy safeguard offered by that provider." },
+        { "title": "12. Children's Privacy", "content": "Joben is not directed at, and we do not knowingly collect data from, anyone under 16 years old, the minimum age required to use our services under these terms. If you believe a minor has provided us personal data, contact us and we will delete it." },
+        { "title": "13. Changes to This Policy", "content": "We may update this policy periodically. Material changes will be reflected by an updated \"Last updated\" date above; continued use after an update means you acknowledge the revised version." },
+        { "title": "14. Contact", "content": "For privacy requests or questions, contact us at privacy@joben.eu." }
+      ]
+    },
+    "terms": {
+      "metaTitle": "Terms and Conditions | Joben AI Resume Builder",
+      "metaDescription": "Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.",
+      "heading": "Terms and Conditions",
+      "lastUpdated": "July 12, 2026",
+      "intro": "Please read these terms carefully before using Joben.",
+      "breadcrumbLabel": "Terms and Conditions",
+      "footerPrefix": "Read our ",
+      "footerLinkLabel": "Privacy Policy",
+      "footerSuffix": " for details on how we collect and process data.",
+      "sections": [
+        { "title": "1. Acceptance of These Terms", "content": "By accessing or using Joben, you agree to these Terms and Conditions. If you do not agree, do not use the service." },
+        { "title": "2. Eligibility and Accounts", "content": "You must be at least 16 years old to use Joben. You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account." },
+        { "title": "3. Description of Services", "content": "Joben provides resume and cover letter tools, AI-powered analysis, and export features. Features and limits may depend on your plan." },
+        { "title": "4. No Guarantee of Employment Outcomes", "content": "Joben is a resume-writing and optimization tool. We do not guarantee interviews, job offers, or any specific employment outcome. AI-generated scores and suggestions are informational aids, not a promise of results." },
+        { "title": "5. Billing, Upgrades, and Refunds", "content": "Paid plans are billed according to the pricing shown at checkout. Taxes may apply. Unless required by law, fees are non-refundable." },
+        { "title": "6. Acceptable Use", "content": "You agree not to use Joben for unlawful, abusive, or fraudulent activity, and not to attempt unauthorized access, disruption, or misuse of the platform." },
+        { "title": "7. AI Output Disclaimer", "content": "AI-generated suggestions are produced by processing your resume and job-description text through a third-party AI provider (Anthropic). Outputs are provided for informational purposes only. You are responsible for reviewing, editing, and validating all generated content before use, including for accuracy." },
+        { "title": "8. Your Content", "content": "You retain ownership of content you upload or create. You grant us a limited license to process that content (including sending it to our AI provider), only to provide, maintain, and improve the service." },
+        { "title": "9. Intellectual Property", "content": "The Joben platform, branding, software, and related materials are protected by intellectual property laws and remain the property of Joben and its licensors." },
+        { "title": "10. Suspension and Termination", "content": "We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements. You may delete your account at any time from Settings." },
+        { "title": "11. Disclaimers and Limitation of Liability", "content": "The service is provided on an \"as is\" and \"as available\" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages, including loss of employment opportunity." },
+        { "title": "12. Governing Law", "content": "These terms are governed by the laws of the European Union and the jurisdiction in which Joben is established, without regard to conflict-of-law principles, without prejudice to any mandatory consumer-protection rights you have under the law of your country of residence." },
+        { "title": "13. Changes to Terms", "content": "We may update these terms from time to time. Continued use after updates means you accept the revised terms." },
+        { "title": "14. Contact", "content": "For legal or privacy-related questions, contact us at privacy@joben.eu." }
+      ]
+    },
+    "cookies": {
+      "metaTitle": "Cookie Policy | Joben AI Resume Builder",
+      "metaDescription": "Learn what cookies Joben uses, why, and how to control them.",
+      "heading": "Cookie Policy",
+      "lastUpdated": "July 12, 2026",
+      "intro": "This page lists every cookie Joben sets, why, and how long it lasts. You can change your choice at any time by clearing your browser's local storage for this site, or by using the cookie banner shown on your first visit.",
+      "breadcrumbLabel": "Cookie Policy",
+      "footerPrefix": "Read our ",
+      "footerLinkLabel": "Privacy Policy",
+      "footerSuffix": " for how we handle personal data more broadly.",
+      "necessaryHeading": "Strictly Necessary",
+      "necessaryBody": "These cookies are required for the site to function, primarily keeping you signed in. They cannot be disabled and are not subject to consent under GDPR/ePrivacy.",
+      "analyticsHeading": "Analytics (Optional)",
+      "analyticsBody": "These cookies help us understand how the product is used so we can improve it. They are only set after you click \"Accept all\" in the cookie banner, and never before.",
+      "marketingHeading": "Marketing",
+      "marketingBody": "We do not use marketing or advertising cookies.",
+      "tableHeaders": { "name": "Name", "provider": "Provider", "purpose": "Purpose", "duration": "Duration" },
+      "necessaryCookies": [
+        { "name": "__session", "provider": "Clerk", "purpose": "Keeps you signed in.", "duration": "Session" },
+        { "name": "__client_uat", "provider": "Clerk", "purpose": "Syncs sign-in state across tabs.", "duration": "1 year" },
+        { "name": "__clerk_db_jwt", "provider": "Clerk", "purpose": "Authentication token used to secure your session.", "duration": "Session" }
+      ],
+      "analyticsCookies": [
+        { "name": "ph_*", "provider": "PostHog", "purpose": "Pseudonymous product analytics (feature usage, page views). Only set after you accept analytics cookies.", "duration": "Up to 1 year" },
+        { "name": "_vercel_*", "provider": "Vercel Analytics", "purpose": "Aggregate, privacy-friendly page-view analytics. Only set after you accept analytics cookies.", "duration": "Up to 1 year" }
+      ]
+    }
   }
 }
