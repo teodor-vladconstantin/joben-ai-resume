@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -13,9 +14,9 @@ export function ExportDataButton({ label, buttonLabel }: ExportDataButtonProps) 
         <Download size={14} />
         {label}
       </div>
-      <a href="/api/account/export" className={buttonVariants('secondary', 'sm')}>
+      <Link href="/api/account/export" prefetch={false} className={buttonVariants('secondary', 'sm')}>
         {buttonLabel}
-      </a>
+      </Link>
     </div>
   )
 }
