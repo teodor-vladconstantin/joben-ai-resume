@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { buttonVariants } from '@/components/ui/Button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher'
 
 const NAV_LINK_CLASSES =
   'block border-b border-transparent px-1 py-2 text-sm font-medium text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground) hover:border-(--accent)'
@@ -59,6 +60,7 @@ export function Navbar() {
         </section>
 
         <section className="flex items-center space-x-6">
+          <LocaleSwitcher />
           <ThemeToggle />
           {isLoaded && !isSignedIn && (
             <>

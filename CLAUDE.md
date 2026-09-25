@@ -18,7 +18,7 @@ npx supabase migration new <name>
 Architecture
 Auth
 
-middleware.ts enforces protected routes via Clerk
+src/proxy.ts enforces protected routes via Clerk (Next.js 16 renamed the middleware.ts convention to proxy.ts)
 Server: auth() from @clerk/nextjs/server; Client: useUser() / useAuth()
 Clerk users synced to Supabase via webhook at /api/webhooks/clerk
 
