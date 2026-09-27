@@ -12,6 +12,7 @@ import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 import { sanitizeAiError } from '@/lib/ai-errors'
+import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent } from '@/lib/posthog-server'
@@ -42,7 +43,10 @@ const ALLOWED_MIME_TYPES = new Set([
 ])
 
 const ATS_CHECK_RATE_LIMIT_PER_DAY = 1
-const MAX_RESUME_CHARS = 8_000
+// 8k chopped real 2-page CVs mid-sentence and the model then flagged the
+// cut as "truncated content". 20k fits ~4 dense pages, still well under
+// Haiku's context and a few cents per scan.
+const MAX_RESUME_CHARS = 20_000
 const MIN_RESUME_CHARS = 100
 const MAX_OUTPUT_TOKENS = 500
 
@@ -86,6 +90,8 @@ Important rules:
 - Concurrent/overlapping roles are NORMAL (e.g. a founder role alongside a full-time job) and must NOT be flagged as an issue.
 - A role or project with an explicit end date (anything other than "Present"/"Current") is completed. Do NOT flag it as ambiguous, inconsistent, or "unclear if ongoing" just because that end date is before today.
 - Missing graduation dates for education entries are minor cosmetic gaps, do NOT list them as issues.
+- Never flag stated durations or tenure math (e.g. "1 year 2 months" next to a date range). Do not recompute durations at all.
+- The text is machine-extracted and may be cut off at the end by our system. Never flag the resume as truncated, incomplete, or ending mid-sentence.
 - This rule applies to every dated item, not just jobs: certifications, courses, training, and side projects too. Before flagging any single date as a future date or an error, check it against today's date given above — a date on or before today is normal and correct, never an issue, regardless of what year it is.
 
 List at most 3 concrete issues, each with a ONE-sentence explanation (max ~20 words). If there are fewer than 3 real issues, return fewer items, do not pad with minor nitpicks.
@@ -346,7 +352,7 @@ export async function POST(req: Request) {
 
       const textBlock = message.content.find((block) => block.type === 'text')
       const analysisText = textBlock && textBlock.type === 'text' ? textBlock.text : ''
-      result = parseClaudeJsonText(analysisText)
+      result = stripFalsePositiveIssues(parseClaudeJsonText(analysisText))
     } catch (error) {
       if (error instanceof ClaudeJsonParseError) {
         logger.error('ATS check: Claude returned malformed JSON', {

@@ -7,6 +7,7 @@ import {
 } from '@/lib/anthropic-with-limits'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { clampAnalysisScores } from '@/lib/ai-review-validation'
+import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
@@ -34,6 +35,8 @@ Important rules:
 - Concurrent/overlapping roles are NORMAL and must NOT be flagged as an issue.
 - A role, project, certification, or training with an explicit end date (anything other than "Present"/"Current") is completed. Do NOT flag it as ambiguous, inconsistent, or future-dated just because that end date is before today.
 - Missing graduation dates for education entries are minor cosmetic gaps — do NOT list them as priority improvements.
+- Never flag stated durations or tenure math (e.g. "1 year 2 months" next to a date range). Do not recompute durations at all.
+- The text may be cut off at the end by our system. Never flag the resume as truncated, incomplete, or ending mid-sentence.
 Keep output compact:
 - strengths: exactly 3 short items
 - improvements: max 3 items
@@ -89,7 +92,9 @@ export async function POST(req: Request) {
     const body = parsed.data
 
     // SECURITY: CLAUDE.md High #3 — neutralize prompt injection + hard cap.
-    const safeResume = sanitizeForPrompt(body.resumeText, { maxChars: 10_000 })
+    // 10k chopped long CVs mid-sentence; 15k stays under the estimator's
+    // 4000-token resume budget (~16k chars).
+    const safeResume = sanitizeForPrompt(body.resumeText, { maxChars: 15_000 })
     const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })
 
     if (!safeResume) {
@@ -133,7 +138,7 @@ export async function POST(req: Request) {
       })
 
       const analysisText = extractTextFromAnthropicMessage(aiResponse)
-      const rawAnalysis = parseClaudeJsonText(analysisText)
+      const rawAnalysis = stripFalsePositiveIssues(parseClaudeJsonText(analysisText), ['improvements', 'ats_warnings'])
       const analysis = clampAnalysisScores(rawAnalysis, { requestId, userId })
 
       const supabase = createServerClient()
