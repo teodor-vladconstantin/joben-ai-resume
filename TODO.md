@@ -643,6 +643,7 @@
 
 
 ## Done
+- [DONE] ATS false positives: raised resume char caps (ats-check 20k, analyze 15k), kept PDF line breaks, code-level guardrail filter (overlap/truncation/duration/grad-date/future-date) in src/lib/ats-issue-guardrails.ts
 
 - [DONE] Email automation flows (first resume, inactivity 3d, rate limit)
 - [DONE] Harden LaTeX exporter wrapping/truncation (soft breaks for long tokens, xurl, and safer content limits)

@@ -46,7 +46,8 @@ export async function extractTextFromPdf(data: Uint8Array): Promise<string> {
       const page = await doc.getPage(i)
       try {
         const content = await page.getTextContent()
-        chunks.push(content.items.filter(isTextItem).map((item) => item.str).join(' '))
+        // Keep pdfjs line breaks so bullets/sections stay distinguishable.
+        chunks.push(content.items.filter(isTextItem).map((item) => item.str + (item.hasEOL ? '\n' : ' ')).join(''))
       } finally {
         page.cleanup()
       }
