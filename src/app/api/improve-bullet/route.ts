@@ -19,9 +19,9 @@ import { improveBulletSchema } from '@/lib/validation/schemas'
 const IMPROVE_BULLET_SYSTEM_PROMPT = `Rewrite the bullet in under 20 words using a strong action verb.
 If numeric evidence is present and the source supports it, prefer this structure: [Action verb] X by Y using Z.
 Example: Increased sales by 27% using email automation. (Action verb=Increased, X=sales, Y=27%, Z=email automation)
-Do not invent metrics, tools, or outcomes. Include a metric only if implied by the source.
+Do not invent metrics, tools, or outcomes. Use a number only if it appears in the bullet or context; never estimate one.
 If the structure cannot be supported by the source, return the best concise action-impact bullet.
-Return only the rewritten bullet.`
+Return only the rewritten bullet: no quotes, no preamble, no explanation.`
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)

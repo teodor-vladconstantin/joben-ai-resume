@@ -1,9 +1,11 @@
+import asyncio
 import hmac
 import io
 import json
 import logging
 import os
 import re
+import time
 from typing import Optional
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
@@ -68,6 +70,8 @@ class Education(BaseModel):
     institution: Optional[str] = None
     degree: Optional[str] = None
     field: Optional[str] = None
+    location: Optional[str] = None
+    description: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     start_month: Optional[int] = None
@@ -78,7 +82,12 @@ class Education(BaseModel):
 
 class Language(BaseModel):
     language: str
-    level: str
+    level: Optional[str] = None
+
+
+class AdditionalSection(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
 
 
 class Project(BaseModel):
@@ -99,6 +108,8 @@ class Project(BaseModel):
 class ResumeData(BaseModel):
     projects: list[Project] = []
     full_name: Optional[str] = None
+    headline: Optional[str] = None
+    website: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
     location: Optional[str] = None
@@ -110,6 +121,7 @@ class ResumeData(BaseModel):
     skills: list[str] = []
     languages: list[Language] = []
     certifications: list[str] = []
+    additional_sections: list[AdditionalSection] = []
 
 
 class ExtractSkillsRequest(BaseModel):
@@ -1198,7 +1210,10 @@ parser = LlamaParse(
 anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=18.0, max_retries=1)
 CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-4-5-20251001"
 CLAUDE_FALLBACK_MODEL = "claude-sonnet-5"
-CLAUDE_MAX_OUTPUT_TOKENS = 8192
+CLAUDE_MAX_OUTPUT_TOKENS = 16000
+# Next.js /api/parse aborts the upstream fetch at 55s; finish (or fail with a
+# clear 504) before that so the user never sees a bare "fetch failed".
+PARSE_DEADLINE_SECONDS = 52.0
 
 # Structured-extraction instructions, applied once to the FULL resume text
 # (all pages) so entries that span a page break (a very common case) are
@@ -1207,6 +1222,8 @@ RESUME_EXTRACTION_SYSTEM_PROMPT = (
     "You are a resume parser. Extract all information from the CV/resume text the user gives you "
     "and return a single valid JSON object with these fields:\n"
     "- full_name (string)\n"
+    "- headline (string: the professional title printed under the name, e.g. 'Senior Backend Engineer'; null if the CV has none, never infer one)\n"
+    "- website (string, personal site/portfolio URL other than LinkedIn/GitHub, if present)\n"
     "- email (string)\n"
     "- phone (string)\n"
     "- location (string)\n"
@@ -1215,10 +1232,11 @@ RESUME_EXTRACTION_SYSTEM_PROMPT = (
     "- summary (string)\n"
     "- projects (array of: name, role, description, bullets, technologies, url, start_date, end_date, start_month, start_year, end_month, end_year)\n"
     "- work_experience (array of: company, role, start_date, end_date, start_month, start_year, end_month, end_year, is_current, description, bullets)\n"
-    "- education (array of: institution, degree, field, start_date, end_date, start_month, start_year, end_month, end_year)\n"
-    "- skills (array of strings)\n"
-    "- languages (array of: language, level)\n"
-    "- certifications (array of strings)\n"
+    "- education (array of: institution, degree, field, location, description, start_date, end_date, start_month, start_year, end_month, end_year). description holds any extra lines of the entry verbatim (GPA, honors, thesis, relevant coursework), one per line.\n"
+    "- skills (array of strings, one skill per item)\n"
+    "- languages (array of: language, level; level is null when the CV gives none)\n"
+    "- certifications (array of strings, one certification per item, keep issuer/date text as written)\n"
+    "- additional_sections (array of: title, content) for EVERY other section of the CV that does not fit the fields above (awards, volunteering, courses, publications, interests, hobbies, conferences, references, etc.). title is the section heading exactly as written in the CV; content is the section text verbatim, one item per line.\n"
     "\n"
     "DISTINCTION:\n"
     "- PROJECTS: Stand-alone work items (personal, academic, side projects). Usually have: name/title, description, technologies list, optional URL/GitHub link. NO company name.\n"
@@ -1240,8 +1258,60 @@ RESUME_EXTRACTION_SYSTEM_PROMPT = (
     "12. Always populate start_month/start_year/end_month/end_year for work_experience, projects, and education when inferable from source text. Use integers; use null when unknown.\n"
     "13. The text below may include page-boundary artifacts (repeated headers/footers, 'Page X of Y' markers, a name or contact block that reappears at the top of a later page). Do not treat these as new entries or duplicate content.\n"
     "14. A single work_experience or project entry may span what would have been a page break in the source document — its company/role/dates may appear separated from its bullets by unrelated text. Reassemble it into ONE entry rather than splitting it into two.\n"
-    "15. Return only valid JSON, no markdown code blocks, no extra text.\n"
+    "15. Return only valid minified JSON (no indentation or line breaks between fields), no markdown code blocks, no extra text.\n"
+    "16. Never invent, infer, translate, or reword anything. Every value must be copied from the CV text; use null or an empty array when something is absent.\n"
+    "17. Nothing in the CV may be dropped: text that fits no other field goes into additional_sections.\n"
 )
+
+
+def coerce_str_list(value: object) -> list[str]:
+    """The model sometimes groups skills/certs as objects ({"category": "Cloud",
+    "items": [...]}) instead of plain strings; flatten instead of failing the
+    whole parse on a pydantic list[str] error."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    if isinstance(value, dict):
+        items = coerce_str_list(value.get("items") or value.get("skills") or value.get("values"))
+        label = next((value[k] for k in ("category", "name", "title") if isinstance(value.get(k), str)), None)
+        if items:
+            return [f"{label}: {', '.join(items)}"] if label else items
+        return [str(v).strip() for v in value.values() if isinstance(v, (str, int, float)) and str(v).strip()]
+    if isinstance(value, list):
+        return [item for entry in value for item in coerce_str_list(entry)]
+    return [str(value)]
+
+
+def coerce_languages(value: object) -> list[Language]:
+    languages = []
+    for entry in value if isinstance(value, list) else []:
+        if isinstance(entry, str) and entry.strip():
+            languages.append(Language(language=entry.strip()))
+        elif isinstance(entry, dict):
+            name = entry.get("language") or entry.get("name")
+            level = entry.get("level") or entry.get("proficiency")
+            if isinstance(name, str) and name.strip():
+                languages.append(Language(language=name.strip(), level=level if isinstance(level, str) else None))
+    return languages
+
+
+def coerce_additional_sections(value: object) -> list[AdditionalSection]:
+    sections = []
+    for entry in value if isinstance(value, list) else []:
+        if not isinstance(entry, dict):
+            continue
+        content = entry.get("content")
+        if isinstance(content, list):
+            content = "\n".join(coerce_str_list(content))
+        if isinstance(content, str) and content.strip():
+            title = entry.get("title")
+            sections.append(AdditionalSection(title=title if isinstance(title, str) else None, content=content.strip()))
+    return sections
+
+
+def optional_str(value: object) -> Optional[str]:
+    return value.strip() or None if isinstance(value, str) else None
 
 
 def _strip_json_fences(text: str) -> str:
@@ -1254,22 +1324,39 @@ def _strip_json_fences(text: str) -> str:
     return text
 
 
-def extract_resume_json_with_claude(raw_text: str) -> dict:
+class ExtractionDeadlineExceeded(Exception):
+    pass
+
+
+def extract_resume_json_with_claude(raw_text: str, deadline: Optional[float] = None) -> dict:
     """Run the full, multi-page resume text through Claude in a single call
-    so structured extraction always has the whole document in context."""
+    so structured extraction always has the whole document in context.
+
+    Streamed on purpose: the client's 18s timeout then bounds the gap between
+    chunks (a hung API still fails fast) instead of the whole generation. A
+    non-streamed 3-4 page CV takes 17-30s to generate, so it timed out, retried
+    and failed as "model unavailable". `deadline` (time.monotonic()) is the
+    point where the Next.js proxy gives up; stop there with a clear 504."""
     user_message = f"Resume text:\n\n{raw_text}"
 
     def _call(model: str):
-        return anthropic_client.messages.create(
+        with anthropic_client.messages.stream(
             model=model,
             max_tokens=CLAUDE_MAX_OUTPUT_TOKENS,
             temperature=0,
             system=RESUME_EXTRACTION_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_message}],
-        )
+        ) as stream:
+            for _ in stream.text_stream:
+                if deadline is not None and time.monotonic() > deadline:
+                    raise ExtractionDeadlineExceeded()
+            return stream.get_final_message()
 
     try:
         response = _call(CLAUDE_MODEL)
+    except ExtractionDeadlineExceeded:
+        logger.error("Claude extraction exceeded the request deadline")
+        raise HTTPException(status_code=504, detail="Importing this resume took too long. Please try again.")
     except Exception as e:
         if CLAUDE_MODEL != CLAUDE_FALLBACK_MODEL and re.search(r"not_found_error|model:", str(e), re.IGNORECASE):
             logger.warning(f"Claude model '{CLAUDE_MODEL}' unavailable, retrying with fallback: {e}")
@@ -1277,6 +1364,11 @@ def extract_resume_json_with_claude(raw_text: str) -> dict:
         else:
             logger.error(f"Claude extraction call failed: {e}")
             raise HTTPException(status_code=502, detail="Resume extraction model is unavailable. Please try again.")
+
+    if getattr(response, "stop_reason", None) == "max_tokens":
+        # Cut-off JSON would fail to parse anyway; say why instead of a vague 500.
+        logger.error("Claude extraction hit max_tokens; resume too long for one pass")
+        raise HTTPException(status_code=422, detail="This resume is too long to import in one pass. Try a shorter version.")
 
     text_block = next((block.text for block in response.content if block.type == "text"), "")
     cleaned = _strip_json_fences(text_block).strip()
@@ -1302,6 +1394,7 @@ async def parse_resume(
     if file_extension not in {".pdf", ".docx"}:
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF and DOCX files are allowed.")
 
+    started = time.monotonic()
     content = await file.read()
 
     if len(content) > 5 * 1024 * 1024:
@@ -1320,11 +1413,16 @@ async def parse_resume(
         if not raw_text.strip():
             raise HTTPException(status_code=422, detail="Could not extract any text from the file.")
 
-        resume_data = extract_resume_json_with_claude(raw_text)
+        # Off the event loop: the sync SDK call used to block every other
+        # request on this worker (health checks included) for the whole
+        # generation.
+        resume_data = await asyncio.to_thread(
+            extract_resume_json_with_claude, raw_text, started + PARSE_DEADLINE_SECONDS
+        )
 
         # DEBUG: Log what keys came back from extraction
         logger.info(f"Extraction returned keys: {list(resume_data.keys())}")
-        logger.info(f"Projects from extraction: {resume_data.get('projects', [])}")
+        logger.info(f"Projects from extraction: {len(resume_data.get('projects') or [])}")
         logger.info(f"Work experience count: {len(resume_data.get('work_experience', []))}")
 
         # try to extract LinkedIn/GitHub from explicit fields or from the raw text
@@ -1446,6 +1544,8 @@ async def parse_resume(
                     institution=exp.get("institution"),
                     degree=exp.get("degree"),
                     field=exp.get("field"),
+                    location=optional_str(exp.get("location")),
+                    description=optional_str(exp.get("description")),
                     start_date=nd_start,
                     end_date=nd_end,
                     start_year=s_year,
@@ -1457,6 +1557,8 @@ async def parse_resume(
 
         result = ResumeData(
             full_name=resume_data.get("full_name"),
+            headline=optional_str(resume_data.get("headline")),
+            website=optional_str(resume_data.get("website")),
             email=resume_data.get("email"),
             phone=resume_data.get("phone"),
             location=resume_data.get("location"),
@@ -1466,19 +1568,20 @@ async def parse_resume(
             projects=[normalize_project_entry(project) for project in project_entries],
             work_experience=_build_work_experience(),
             education=_build_education(),
-            skills=resume_data.get("skills") or [],
-            languages=[Language(**lang) for lang in (resume_data.get("languages") or [])],
-            certifications=resume_data.get("certifications") or [],
+            skills=coerce_str_list(resume_data.get("skills")),
+            languages=coerce_languages(resume_data.get("languages")),
+            certifications=coerce_str_list(resume_data.get("certifications")),
+            additional_sections=coerce_additional_sections(resume_data.get("additional_sections")),
         )
 
-        logger.info(f"Successfully parsed resume: {result.full_name}")
+        logger.info("Successfully parsed resume")
         return result.model_dump()
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
-        raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error parsing resume. Please try again.")
 
 
 @app.post("/extract-skills")

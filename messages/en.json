@@ -824,7 +824,8 @@
       "summaryRolePlaceholder": "Describe your target role, level, and focus areas...",
       "summaryGenClose": "Close",
       "generateSummaryButton": "Generate summary",
-      "acceptSummaryButton": "Accept summary"
+      "acceptSummaryButton": "Accept summary",
+      "summaryClaimsWarning": "This draft mentions details not found in your resume ({claims}). Confirm they are true before accepting."
     },
     "experience": {
       "heading": "Work Experience",

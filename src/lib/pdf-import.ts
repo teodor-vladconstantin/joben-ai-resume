@@ -4,6 +4,8 @@ type ParseResumeResponse = {
   success?: boolean
   error?: string
   full_name?: string
+  headline?: string | null
+  website?: string | null
   email?: string
   phone?: string
   location?: string
@@ -27,6 +29,8 @@ type ParseResumeResponse = {
     institution: string | null
     degree: string | null
     field: string | null
+    location?: string | null
+    description?: string | null
     start_date: string | null
     end_date: string | null
     start_month?: number | null
@@ -37,9 +41,13 @@ type ParseResumeResponse = {
   skills?: string[]
   languages?: Array<{
     language: string
-    level: string
+    level: string | null
   }>
   certifications?: string[]
+  additional_sections?: Array<{
+    title?: string | null
+    content?: string | null
+  }>
   projects?: Array<{
     name?: string | null
     role?: string | null
@@ -152,7 +160,29 @@ function normalizeExperienceBullets(input: string[] | null | undefined, descript
   return splitCombinedBullet(fallback)
 }
 
-function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateData {
+// The builder, preview and PDF only render bullets, so a separate prose intro
+// the parser put in `description` would silently vanish. Keep it as the first
+// bullet unless it is already one of them.
+function withIntroBullet(description: string | null | undefined, bullets: string[]): string[] {
+  const intro = decodeHtml(description).trim()
+  if (!intro) return bullets
+  const norm = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim()
+  const introNorm = norm(intro)
+  const bulletNorms = bullets.map(norm)
+  // Equal to a bullet, or the bullets were themselves split out of it.
+  if (bulletNorms.includes(introNorm) || bulletNorms.every((bullet) => introNorm.includes(bullet))) return bullets
+  return [intro, ...bullets]
+}
+
+function sectionTypeForTitle(title: string): string {
+  if (/award|honou?r|premi|distinc/i.test(title)) return 'awards'
+  if (/publica/i.test(title)) return 'publications'
+  if (/research|cercet/i.test(title)) return 'research'
+  if (/volunt|leader|lideri/i.test(title)) return 'leadership'
+  return 'custom'
+}
+
+export function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateData {
   const { firstName, lastName } = parseName(parsed.full_name)
   const dynamicSections = []
 
@@ -171,6 +201,8 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
         institution,
         degree: decodeHtml(edu.degree).trim() || undefined,
         field: decodeHtml(edu.field).trim() || undefined,
+        location: decodeHtml(edu.location).trim() || undefined,
+        description: decodeHtml(edu.description).trim() || undefined,
         startMonth: edu.start_month ?? undefined,
         startYear: edu.start_year ?? undefined,
         endMonth: edu.end_month ?? undefined,
@@ -207,6 +239,20 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
       type: 'certifications',
       title: 'Certifications',
       content: certifications.map(decodeHtml).join('\n'),
+    })
+  }
+
+  // Awards, volunteering, courses, interests... Sections the parser has no
+  // dedicated field for, kept under the CV's own heading so nothing is dropped.
+  for (const [i, section] of (parsed.additional_sections || []).entries()) {
+    const title = decodeHtml(section.title).trim()
+    const content = decodeHtml(section.content).trim()
+    if (!content) continue
+    dynamicSections.push({
+      id: `extra_${Date.now()}_${i}`,
+      type: sectionTypeForTitle(title),
+      title: title || 'Additional information',
+      content,
     })
   }
 
@@ -252,27 +298,30 @@ function mapLlamaParseToTemplate(parsed: ParseResumeResponse): ResumeTemplateDat
     personal: {
       firstName,
       lastName,
-      title: '',
+      title: decodeHtml(parsed.headline).trim(),
       email: decodeHtml(parsed.email),
       phone: decodeHtml(parsed.phone),
       summary: decodeHtml(parsed.summary),
       location: decodeHtml(parsed.location) || undefined,
       linkedin: decodeHtml(parsed.linkedin) || undefined,
       github: decodeHtml(parsed.github) || undefined,
+      website: decodeHtml(parsed.website) || undefined,
     },
-    experience: (parsed.work_experience || []).map((exp, i) => ({
-      id: `exp_${Date.now()}_${i}`,
-      title: decodeHtml(exp.role),
-      company: decodeHtml(exp.company),
-      period: formatDateRange(exp.start_date, exp.end_date),
-      startMonth: exp.start_month ?? undefined,
-      startYear: exp.start_year ?? undefined,
-      endMonth: exp.end_month ?? undefined,
-      endYear: exp.end_year ?? undefined,
-      isCurrent: exp.is_current ?? false,
-      description: decodeHtml(exp.description),
-      bullets: normalizeExperienceBullets(exp.bullets, exp.description || ''),
-    })),
+    experience: (parsed.work_experience || [])
+      .map((exp, i) => ({
+        id: `exp_${Date.now()}_${i}`,
+        title: decodeHtml(exp.role),
+        company: decodeHtml(exp.company),
+        period: formatDateRange(exp.start_date, exp.end_date),
+        startMonth: exp.start_month ?? undefined,
+        startYear: exp.start_year ?? undefined,
+        endMonth: exp.end_month ?? undefined,
+        endYear: exp.end_year ?? undefined,
+        isCurrent: exp.is_current ?? false,
+        description: decodeHtml(exp.description),
+        bullets: withIntroBullet(exp.description, normalizeExperienceBullets(exp.bullets, exp.description || '')),
+      }))
+      .filter((exp) => exp.title || exp.company || exp.bullets.length > 0),
     projects: projectsArray,
     education: educationArray,
     dynamicSections,

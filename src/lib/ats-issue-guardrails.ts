@@ -9,8 +9,15 @@ const FALSE_POSITIVE_PATTERNS: RegExp[] = [
   /truncat|cut(s)? off|mid-sentence|ends abruptly|incomplete (content|entry|sentence|text)/i,
   // Date/tenure arithmetic the model gets wrong.
   /mathematically|impossible|duration|tenure|\d+\s*(years?|months?)\s+(label|stated|listed)/i,
-  /graduation date/i,
+  /graduation (date|year)|no GPA|GPA (is )?missing/i,
   /future date|in the future/i,
+  // We only send extracted text: visual elements are invisible to the model,
+  // so any claim about them is a guess.
+  /\b(images?|icons?|photos?|pictures?|graphics?|colou?rs?|fonts?|headers? (and|or) footers?)\b/i,
+  // Any readable phone number is fine for ATS; "formatting" nitpicks are noise.
+  /\bphone\b.*\b(format|placeholder)/i,
+  // The model doubting that the candidate's own data is real.
+  /placeholder|not (actually )?(earned|real)|fabricat|verify (it|this) is (real|accurate)/i,
 ]
 
 function findingText(finding: unknown): string {

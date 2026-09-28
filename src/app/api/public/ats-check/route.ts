@@ -13,6 +13,7 @@ import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 import { sanitizeAiError } from '@/lib/ai-errors'
 import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
+import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent } from '@/lib/posthog-server'
@@ -48,7 +49,8 @@ const ATS_CHECK_RATE_LIMIT_PER_DAY = 1
 // Haiku's context and a few cents per scan.
 const MAX_RESUME_CHARS = 20_000
 const MIN_RESUME_CHARS = 100
-const MAX_OUTPUT_TOKENS = 500
+// 500 occasionally cut the JSON off mid-issue, turning a paid scan into a 502.
+const MAX_OUTPUT_TOKENS = 800
 
 // SECURITY: IP-only limiting is trivially bypassed with a VPN/proxy rotation.
 // A random per-browser cookie survives an IP change, so a request is only
@@ -79,7 +81,7 @@ const AtsScanResultSchema = z.object({
 const ATS_CHECK_SYSTEM_PROMPT = `You are an ATS (Applicant Tracking System) resume scanner. Analyze the resume text and return ONLY valid JSON, no markdown, no preamble, no text outside the JSON object.
 
 Score across exactly 4 categories, 25 points each (total 100):
-- ats_formatting: how cleanly this would parse in ATS software, clear section headings, no reliance on tables/columns/graphics/images for content, no critical info in headers/footers.
+- ats_formatting: how cleanly this would parse in ATS software: clear, standard section headings and text that comes out in a sensible reading order.
 - structure: presence and logical order of standard sections (contact info, experience, education, skills), consistent and unambiguous date formatting.
 - keyword_impact: use of concrete, role-relevant keywords and quantifiable achievements (numbers, metrics, outcomes) instead of vague duty descriptions.
 - clarity: concise, readable bullets and sentences, no wall-of-text paragraphs, consistent tense.
@@ -92,6 +94,9 @@ Important rules:
 - Missing graduation dates for education entries are minor cosmetic gaps, do NOT list them as issues.
 - Never flag stated durations or tenure math (e.g. "1 year 2 months" next to a date range). Do not recompute durations at all.
 - The text is machine-extracted and may be cut off at the end by our system. Never flag the resume as truncated, incomplete, or ending mid-sentence.
+- Treat every detail the candidate wrote as real: never suggest a date, certification or contact detail may be fake or a placeholder, and do not critique the formatting of a readable phone number or email.
+- You only see machine-extracted text, not the document. Never claim the resume uses images, icons, photos, graphics, colors, fonts, tables, columns, headers or footers. Only flag a formatting problem the extracted text itself shows (e.g. scrambled reading order, missing section headings).
+- Every issue must point at something actually present (or clearly absent) in the text. Do not guess.
 - This rule applies to every dated item, not just jobs: certifications, courses, training, and side projects too. Before flagging any single date as a future date or an error, check it against today's date given above — a date on or before today is normal and correct, never an issue, regardless of what year it is.
 
 List at most 3 concrete issues, each with a ONE-sentence explanation (max ~20 words). If there are fewer than 3 real issues, return fewer items, do not pad with minor nitpicks.
@@ -345,14 +350,15 @@ export async function POST(req: Request) {
       const message = await anthropic.messages.create({
         model,
         max_tokens: MAX_OUTPUT_TOKENS,
-        temperature: 0.2,
+        // 0: the same CV should get the same score on a re-scan.
+        temperature: 0,
         system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT),
         messages: [{ role: 'user', content: `Resume:\n${safeResumeText}` }],
       })
 
       const textBlock = message.content.find((block) => block.type === 'text')
       const analysisText = textBlock && textBlock.type === 'text' ? textBlock.text : ''
-      result = stripFalsePositiveIssues(parseClaudeJsonText(analysisText))
+      result = normalizeAtsScanScores(stripFalsePositiveIssues(parseClaudeJsonText(analysisText)))
     } catch (error) {
       if (error instanceof ClaudeJsonParseError) {
         logger.error('ATS check: Claude returned malformed JSON', {

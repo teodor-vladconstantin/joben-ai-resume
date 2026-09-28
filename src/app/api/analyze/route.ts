@@ -6,7 +6,7 @@ import {
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
-import { clampAnalysisScores } from '@/lib/ai-review-validation'
+import { clampAnalysisScores, verifyAnalysisAgainstSource } from '@/lib/ai-review-validation'
 import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
@@ -37,6 +37,11 @@ Important rules:
 - Missing graduation dates for education entries are minor cosmetic gaps — do NOT list them as priority improvements.
 - Never flag stated durations or tenure math (e.g. "1 year 2 months" next to a date range). Do not recompute durations at all.
 - The text may be cut off at the end by our system. Never flag the resume as truncated, incomplete, or ending mid-sentence.
+- Treat every detail the candidate wrote as real: never suggest a date, certification or contact detail may be fake or a placeholder, and do not critique the formatting of a readable phone number or email.
+- You only see machine-extracted text. Never comment on layout, columns, tables, fonts, colors, images, icons or photos.
+- Ground every claim in the given text: weak_example must be copied verbatim from the resume, keywords_found must appear in the resume, keywords_missing must appear in the job description.
+- strong_example rewrites that same line using only facts it already contains. Where a metric would help but the resume has none, write a placeholder such as [X%] instead of inventing a number.
+- If the job description is "N/A": score job_match on how clearly the resume targets one coherent role (title, summary, skills and experience pointing the same way), and return keywords_missing as [].
 Keep output compact:
 - strengths: exactly 3 short items
 - improvements: max 3 items
@@ -139,7 +144,12 @@ export async function POST(req: Request) {
 
       const analysisText = extractTextFromAnthropicMessage(aiResponse)
       const rawAnalysis = stripFalsePositiveIssues(parseClaudeJsonText(analysisText), ['improvements', 'ats_warnings'])
-      const analysis = clampAnalysisScores(rawAnalysis, { requestId, userId })
+      // Checked against the raw text the user sent, not the prompt-sanitized copy.
+      const analysis = verifyAnalysisAgainstSource(
+        clampAnalysisScores(rawAnalysis, { requestId, userId }),
+        body.resumeText,
+        body.jobDescription
+      )
 
       const supabase = createServerClient()
       const { data: createdReview, error: insertError } = await supabase

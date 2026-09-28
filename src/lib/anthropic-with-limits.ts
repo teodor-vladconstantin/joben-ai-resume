@@ -106,7 +106,8 @@ async function createMessage(
   return anthropic.messages.create({
     model,
     max_tokens: input.maxTokens,
-    temperature: 0.2,
+    // 0: scores stay stable across re-runs and rewrites stick closer to the source text.
+    temperature: 0,
     system,
     stream: false,
     messages: input.messages,

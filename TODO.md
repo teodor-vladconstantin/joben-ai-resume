@@ -1,4 +1,39 @@
 ## Active
+- [DONE] 2026-09-28 Verificare claim-uri summary + risc timeout parser + validare live before/after (fără rebuild VPS, așteaptă decizia userului):
+  - Summary: context cu educație/proiecte/career span real, prompt structurat pozitiv, split de propoziții
+    care nu mai rupe "Node.js", claim-check (cifre + cifre în litere EN/RO + tool-uri) cu checkbox
+    obligatoriu în UI. Live 5x: BEFORE "over five years" (real 8) + "I am" + trunchiere; AFTER 0 inventări.
+  - Parser: streaming Claude + deadline 52s + asyncio.to_thread + JSON minified. Live: CV 4 pagini
+    BEFORE pică la 36.6s ("model unavailable"), AFTER OK în 19.7s cu 80/80 bullets. Proxy Next nu mai
+    reîncearcă alt URL după timeout (re-billa LlamaParse).
+  - ATS/analyze live pe CV-capcană: eliminate keywords_missing inventate fără JD, avertismente false
+    (graduation year, GPA, telefon "neformatat", "certificare 2026 poate fi placeholder").
+  - Round-trip real parse→import→export→PDF: BEFORE 49/71 rânduri intacte (7 pierdute, 15 stricate
+    pentru ATS), AFTER 71/71. Compatibil în orice ordine de deploy Vercel/VPS (testat).
+  - **Securitate latex-service (găsit la deploy):** în producție `LATEX_SERVICE_AUTH_REQUIRED` nu era
+    setat pe VM, deci `latex-service.joben.eu` compila TeX arbitrar fără secret (posibilă citire de
+    fișiere/env). Fix: auth obligatoriu când există secret (comparare timing-safe), procesul TeX nu
+    mai moștenește secretul, `openin_any/openout_any=p` + cwd izolat; compose setează explicit auth și
+    healthcheck-ul trimite secretul. Testat local: 401 fără secret, citirea /etc/passwd blocată.
+  - Notă: tests/api/critical-routes (webhook Clerk, neatins) a picat intermitent 2 din ~8 rulări
+    complete; nu s-a reprodus nici cu cache rece.
+- [DONE] 2026-09-28 Audit deep parsing CV / ATS checker / export PDF / evaluări+optimizări AI:
+  - Import: parserul extrage acum headline, website, locație+detalii educație (GPA/onoruri),
+    `additional_sections` (awards/voluntariat/cursuri/interese); coerciție robustă (level null,
+    skills grupate nu mai dau 500); `stop_reason=max_tokens` → 422 clar; fără PII în loguri.
+    Maparea TS păstrează descrierea în proză a experienței ca prim bullet, filtrează intrări goale;
+    builder-ul nu mai pierde lunile/anii structurați la import; secțiunile `languages`/`custom`
+    sunt acum editabile (înainte invizibile în editor).
+  - Export PDF: fix injecție LaTeX prin URL-uri în `\href` (citire fișiere din container);
+    eliminate trunchierile silențioase (bullet 260, summary 900, max 8 tehnologii/bullets);
+    secțiunile custom folosesc titlul userului + rânduri păstrate (ca în preview); intrări goale
+    sărite; `~` nu mai e accent tilde. **XeLaTeX** în latex-service (Dockerfile + index.js, `-no-shell-escape`): testat e2e, PDF-ul extrage corect „Firmă/București/Ș/Ț” (pdflatex dădea „Firm˘ a” pentru ATS). Preambul compatibil și cu pdflatex vechi până la redeploy VPS.
+  - AI: overall/grade/status/worst_category derivate în cod din categorii (analyze + ATS gratuit);
+    keywords_found/missing verificate contra textului CV/JD; improvements cu weak_example inventat
+    eliminate; guardrail pe afirmații vizuale (iconițe/fonturi/culori) invizibile în text;
+    temperature 0; apply-fix/auto-fix resping cifre noi/placeholder-e și nu mai suprascriu
+    ultimul bullet la index invalid; tailor: reguli anti-keyword-stuffing + claim-check pe summary.
+  - Teste noi: export-latex, pdf-import, fix-improvements, validare scoruri, test_coercion.py.
 - [DONE] 2026-09-19 Traducere completă dashboard (toată zona autentificată, nu doar landing-ul
   `/dashboard`) + terminologie RO + curățenie SEO/GEO/GSC:
   - i18n: 6 namespace-uri noi în `messages/{en,ro}.json` (`Builder`, `CoverLetterBuilder`,

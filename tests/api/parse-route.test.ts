@@ -133,6 +133,35 @@ describe('/api/parse route', () => {
     )
   })
 
+  it('does not restart the parse on another candidate after a timeout', async () => {
+    process.env.RESUME_PARSER_URL = 'http://89.167.48.64:8001'
+    delete process.env.NEXT_PUBLIC_RESUME_PARSER_URL
+    vi.doMock('@/lib/security/route-rate-limit', () => ({
+      checkRouteRateLimit: vi.fn().mockResolvedValue({ ok: true, retryAfter: 0 }),
+      resolveRateLimitIdentity: () => 'user:test',
+    }))
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    // Hangs until the route's own timeout aborts it, like a slow parse.
+    const fetchMock = vi.fn((_url: string, init: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(new Error('aborted')))
+      })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { POST } = await import('@/app/api/parse/route')
+    const pending = POST(buildUploadRequest() as unknown as NextRequest)
+    // Let auth/form parsing reach the upstream fetch before moving the clock.
+    while (fetchMock.mock.calls.length === 0) await new Promise((resolve) => setImmediate(resolve))
+    await vi.advanceTimersByTimeAsync(56_000)
+    const response = await pending
+    vi.useRealTimers()
+
+    expect(response.status).toBe(503)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it('returns 503 with a generic message when all parser candidates fail', async () => {
     delete process.env.RESUME_PARSER_URL
     delete process.env.NEXT_PUBLIC_RESUME_PARSER_URL

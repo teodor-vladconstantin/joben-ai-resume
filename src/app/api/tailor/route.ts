@@ -42,6 +42,13 @@ Return ONLY JSON in this exact shape:
 jobIndex and bulletIndex must exactly match the numbers given in the input list — never
 guess, renumber, or reorder them.
 
+Truthfulness rules (they override the goal of matching the job description):
+- Use only facts already in that bullet or elsewhere in the same job. Never add a number,
+  metric, tool, technology, certification, employer, or achievement the resume does not state.
+- Reuse the job description's wording only for things the candidate demonstrably did.
+- The "skills not found in the resume" list is for information only. Never write those
+  skills into a bullet or the summary.
+
 "summary" is a rewritten version of the candidate's own resume summary/profile paragraph
 (2-4 sentences, third person or implied subject — never "I"), tailored to this job
 description. It is content for the candidate's resume, written as if the candidate wrote
@@ -222,9 +229,17 @@ export async function POST(req: Request) {
         })
       )
 
+      // The summary goes through the same confirm modal as bullets, so flag
+      // anything it states that the resume does not.
+      const proposedSummary = isRecord(rawResult) && typeof rawResult.summary === 'string' ? rawResult.summary : ''
+      const summaryNewClaims = proposedSummary.trim()
+        ? await findNewClaims('', extractSkillGapInputText(body.resumeData), proposedSummary)
+        : []
+
       const candidateResult = {
         ...(isRecord(rawResult) ? rawResult : {}),
         updatedBullets,
+        summaryNewClaims,
         missingSkills,
       }
       const validated = tailorResponseSchema.safeParse(candidateResult)

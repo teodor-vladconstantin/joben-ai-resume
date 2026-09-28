@@ -23,7 +23,17 @@ describe('stripFalsePositiveIssues', () => {
           { issue: 'Roles overlap without clarity', weak_example: 'a', strong_example: 'b' },
           { issue: 'Weak action verbs', weak_example: 'Managed part-time staff', strong_example: 'Led 6 staff' },
         ],
-        ats_warnings: ['Resume appears truncated', 'Uses a two-column table layout'],
+        ats_warnings: [
+          'Resume appears truncated',
+          'Uses a two-column table layout',
+          'Contact details rely on icons that ATS cannot read',
+          'Decorative fonts and colors may confuse parsers',
+          // Seen live on 2026-09-28 against a CV with valid 2026 dates:
+          'Education entry missing graduation year; add for completeness',
+          'Phone number not in standard international format (+40 700 000 000 is valid but could be clearer)',
+          'AWS Cloud Practitioner cert dated Aug 2026 is recent; ensure it is actually earned and not a placeholder',
+          'No GPA, honors, or academic achievements listed',
+        ],
       },
       ['improvements', 'ats_warnings']
     )
