@@ -11,6 +11,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
 import { applyFixSchema } from '@/lib/validation/schemas'
 import {
+  addsUnsupportedClaims,
   buildExperienceForPrompt,
   fetchOwnedResumeForFix,
   handleFixRouteError,
@@ -33,7 +34,8 @@ Rules:
 - Find the bullet that best matches "Weak example" (fuzzy match acceptable, pick closest)
 - Rewrite it guided by "Strong example" but adapted to the ACTUAL original context
 - Keep the result under 20 words; start with a strong action verb
-- NEVER invent metrics, numbers, or facts not present in the original bullet
+- NEVER invent metrics, numbers, tools, or facts not present in the original bullet
+- The strong example may contain placeholders like [X%]; never copy a placeholder or make up a value for it. If the fix needs data the bullet lacks, improve wording only
 - The updated bullet MUST be semantically distinct from ALL other bullets in the resume — do not copy or closely paraphrase any existing bullet
 - If no genuine unique improvement can be made, return { "applied": false }
 
@@ -139,10 +141,24 @@ Improvement to apply:
       }, 422, requestId)
     }
 
+    // An out-of-range index used to fall back to the LAST bullet, silently
+    // overwriting a bullet the improvement was never about.
+    if (!Number.isInteger(patch.bulletIndex) || patch.bulletIndex < 0 || patch.bulletIndex >= targetBullets.length) {
+      return jsonWithRequestId({ error: 'No matching bullet found to improve.', applied: false }, 422, requestId)
+    }
+    const safeIndex = patch.bulletIndex
+
+    if (addsUnsupportedClaims(patch.updatedBullet, targetEntry)) {
+      logger.warn('apply-fix: rewrite added unsupported claims, rejecting', {
+        requestId, userId, resumeId: body.resumeId,
+      })
+      return jsonWithRequestId({
+        error: 'The suggested rewrite added details that are not in your resume, so it was not applied.',
+        applied: false,
+      }, 422, requestId)
+    }
+
     // Record original before mutation
-    const safeIndex = patch.bulletIndex >= 0 && patch.bulletIndex < targetBullets.length
-      ? patch.bulletIndex
-      : targetBullets.length - 1
     const originalBullet = targetBullets[safeIndex] || ''
 
     // Apply patch

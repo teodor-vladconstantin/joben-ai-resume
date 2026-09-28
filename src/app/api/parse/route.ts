@@ -109,6 +109,10 @@ async function fetchParser(
       return { response }
     } catch (error) {
       lastError = error
+      // A timeout means the parser was reached and is still working; trying
+      // the next candidate would restart (and re-bill) the whole parse past
+      // Vercel's maxDuration. Only connection-level failures fall through.
+      if (controller.signal.aborted) break
     } finally {
       clearTimeout(timeout)
     }

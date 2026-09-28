@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const express = require('express');
 const { exec } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -16,7 +17,17 @@ app.use((req, res, next) => {
 
 const TMP_DIR = process.env.TMP_DIR || '/tmp';
 const LATEX_SERVICE_SECRET = process.env.LATEX_SERVICE_SECRET || '';
-const REQUIRE_SERVICE_AUTH = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true';
+// SECURITY: this endpoint compiles arbitrary TeX, and TeX can read files. It
+// used to be open unless LATEX_SERVICE_AUTH_REQUIRED=true, which prod never
+// set. Any configured secret now makes auth mandatory.
+const REQUIRE_SERVICE_AUTH = process.env.LATEX_SERVICE_AUTH_REQUIRED === 'true' || Boolean(LATEX_SERVICE_SECRET);
+const LATEX_ENGINE = process.env.LATEX_ENGINE === 'pdflatex' ? 'pdflatex' : 'xelatex';
+
+// The TeX child never sees our secrets (\input{/proc/self/environ}), and
+// openin_any/openout_any=p stops it reading or writing absolute or parent
+// paths, so user text can only touch its own job files in TMP_DIR.
+const TEX_ENV = { ...process.env, openin_any: 'p', openout_any: 'p' };
+delete TEX_ENV.LATEX_SERVICE_SECRET;
 
 function resolveSuppliedSecret(req) {
     const authHeader = req.header('authorization') || '';
@@ -38,8 +49,9 @@ function isAuthorizedRequest(req) {
         return false;
     }
 
-    const suppliedSecret = resolveSuppliedSecret(req);
-    return suppliedSecret === LATEX_SERVICE_SECRET;
+    const supplied = Buffer.from(resolveSuppliedSecret(req));
+    const expected = Buffer.from(LATEX_SERVICE_SECRET);
+    return supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
 }
 
 app.get('/health', (req, res) => {
@@ -79,11 +91,13 @@ app.post('/api/compile', (req, res) => {
             return res.status(500).json({ error: 'Error writing TeX file' });
         }
 
-        // Run pdflatex (interaction=nonstopmode to avoid hanging, output-dir=/tmp)
-        const cmd = `pdflatex -interaction=nonstopmode -output-directory=${TMP_DIR} ${texFile}`;
+        // xelatex embeds real Unicode fonts, so ATS parsers read Romanian
+        // diacritics correctly (pdflatex's default fonts extract "ă" as "˘ a").
+        // -no-shell-escape: user text ends up in this file; never let it run commands.
+        const cmd = `${LATEX_ENGINE} -no-shell-escape -interaction=nonstopmode ${id}.tex`;
 
         // Increase timeout and buffer to support larger compilations.
-        exec(cmd, { timeout: 120000, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+        exec(cmd, { cwd: TMP_DIR, env: TEX_ENV, timeout: 120000, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
             // Log compiler output for debugging
             if (stdout) console.info('pdflatex stdout:', stdout.substring(0, 10000));
             if (stderr) console.error('pdflatex stderr:', stderr.substring(0, 10000));

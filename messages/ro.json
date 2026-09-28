@@ -824,7 +824,8 @@
       "summaryRolePlaceholder": "Descrie rolul țintă, nivelul și ariile de focus...",
       "summaryGenClose": "Închide",
       "generateSummaryButton": "Generează rezumat",
-      "acceptSummaryButton": "Acceptă rezumatul"
+      "acceptSummaryButton": "Acceptă rezumatul",
+      "summaryClaimsWarning": "Acest draft menționează detalii care nu apar în CV-ul tău ({claims}). Confirmă că sunt reale înainte de a-l accepta."
     },
     "experience": {
       "heading": "Experiență Profesională",

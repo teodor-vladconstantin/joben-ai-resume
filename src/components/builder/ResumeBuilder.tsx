@@ -360,10 +360,10 @@ const initialResumeData: ResumeData = {
 
 const tabSectionMap: Record<string, AddableSection['type'][]> = {
   education: ['education'],
-  skills: ['skills'],
+  skills: ['skills', 'languages'],
   projects: ['projects'],
   certifications: ['certifications'],
-  sections: ['professional_summary', 'career_objective', 'leadership', 'research', 'awards', 'publications'],
+  sections: ['professional_summary', 'career_objective', 'leadership', 'research', 'awards', 'publications', 'custom'],
 }
 
 const MAX_PDF_IMPORTS_PER_RESUME = 3
@@ -425,6 +425,10 @@ export function ResumeBuilder() {
   const [summaryRoleDescription, setSummaryRoleDescription] = useState('')
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
   const [generatedSummaryDraft, setGeneratedSummaryDraft] = useState('')
+  // Details the draft states that the resume does not (numbers, tools); the
+  // user must confirm them before the draft can replace their summary.
+  const [summaryDraftClaims, setSummaryDraftClaims] = useState<string[]>([])
+  const [summaryClaimsConfirmed, setSummaryClaimsConfirmed] = useState(false)
   const [summaryGenerationError, setSummaryGenerationError] = useState<string | null>(null)
   const [pendingBulletScrollKey, setPendingBulletScrollKey] = useState<string | null>(null)
   const creationSourceRef = useRef<'import' | 'scratch'>('scratch')
@@ -735,16 +739,11 @@ export function ResumeBuilder() {
       return {
         ...prev,
         personal: data.personal,
-        experience: (data.experience ?? []).map((exp, i) => ({
-          id: exp.id || `exp_${Date.now()}_${i}`,
-          title: exp.title || '',
-          company: exp.company || '',
-          period: exp.period || '',
-          description: exp.description || '',
-          bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0
-            ? exp.bullets
-            : exp.description ? [exp.description] : [''],
-        })),
+        // normalizeExperienceEntry keeps the parser's structured month/year
+        // fields; the old inline mapping dropped them on import.
+        experience: (data.experience ?? []).map((exp, i) =>
+          normalizeExperienceEntry({ ...exp, id: exp.id || `exp_${Date.now()}_${i}` })
+        ),
         projects: (data.projects ?? []).map((project) => normalizeProjectEntry(project)),
         education: nextEducation,
         dynamicSections: nextDynamic,
@@ -1200,6 +1199,7 @@ export function ResumeBuilder() {
             newClaims?: string[]
           }>
           summary?: string
+          summaryNewClaims?: string[]
           missingSkills?: string[]
         }
         showUpgrade?: boolean
@@ -1266,6 +1266,7 @@ export function ResumeBuilder() {
           originalBullet: currentSummary,
           updatedBullet: proposedSummary,
           experienceTitle: t('tailor.summaryPatchLabel'),
+          newClaims: payload.result.summaryNewClaims || [],
         })
       }
 
@@ -1485,6 +1486,7 @@ export function ResumeBuilder() {
 
       const payload = (await response.json()) as {
         summary?: string
+        newClaims?: string[]
         error?: string
       }
 
@@ -1495,6 +1497,8 @@ export function ResumeBuilder() {
       }
 
       setGeneratedSummaryDraft(payload.summary)
+      setSummaryDraftClaims(payload.newClaims || [])
+      setSummaryClaimsConfirmed(false)
     } catch (error) {
       setSummaryGenerationError(t('summary.generationFailed', { message: (error as Error).message }))
     }
@@ -1789,6 +1793,19 @@ export function ResumeBuilder() {
                         >
                           <p className="font-mono text-(length:--text-label) text-(--muted)">{t('ai.aiDraft')}</p>
                           <p className="text-sm text-(--foreground)/95 leading-relaxed">{generatedSummaryDraft}</p>
+                          {summaryDraftClaims.length > 0 ? (
+                            <label className="flex cursor-pointer items-start gap-2 border-l-2 border-(--foreground) px-3 py-2">
+                              <input
+                                type="checkbox"
+                                checked={summaryClaimsConfirmed}
+                                onChange={(event) => setSummaryClaimsConfirmed(event.target.checked)}
+                                className="mt-0.5 accent-(--accent)"
+                              />
+                              <span className="text-xs text-(--foreground)">
+                                {t('personal.summaryClaimsWarning', { claims: summaryDraftClaims.join(', ') })}
+                              </span>
+                            </label>
+                          ) : null}
                           <div className="flex items-center justify-end gap-2 pt-1">
                             <button
                               onClick={() => void handleGenerateSummary(summaryGenerationMode)}
@@ -1799,7 +1816,8 @@ export function ResumeBuilder() {
                             </button>
                             <button
                               onClick={() => updatePersonalField('summary', generatedSummaryDraft)}
-                              className="rounded-none bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--accent-ink) hover:bg-(--accent)"
+                              disabled={summaryDraftClaims.length > 0 && !summaryClaimsConfirmed}
+                              className="rounded-none bg-(--accent-strong) px-3 py-1.5 text-xs font-semibold text-(--accent-ink) hover:bg-(--accent) disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {t('personal.acceptSummaryButton')}
                             </button>

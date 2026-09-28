@@ -133,6 +133,7 @@ export const tailorResponseSchema = z
       )
       .default([]),
     summary: z.string().default(''),
+    summaryNewClaims: z.array(z.string()).default([]),
     missingSkills: z.array(z.string()).default([]),
   })
   .passthrough()

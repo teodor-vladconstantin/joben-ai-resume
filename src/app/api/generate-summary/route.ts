@@ -28,6 +28,10 @@ import { sanitizeForPrompt, sanitizeJsonForPrompt } from '@/lib/security/prompt-
 
 import { generateSummarySchema } from '@/lib/validation/schemas'
 
+import { findNewClaims } from '@/lib/claim-diff'
+
+import { extraSummaryContext, limitSentences, summarySourceText } from '@/lib/summary-grounding'
+
 
 
 type ResumeSummaryInput = {
@@ -80,11 +84,13 @@ Write a professional summary that is:
 
 - Formal tone
 
-- First person perspective
+- Implied first person: no "I", no name, no third person
 
 - Maximum 3 sentences
 
 - Clear and specific
+
+Build it only from the input: the current title, the career span if given, the main technologies, and one or two achievements restated in the words of the bullets they come from. Describe what the person did, exactly as the input states it, with plain verbs and no adjectives the input does not use. If the input lacks a detail, leave it out.
 
 Return plain text only, with no bullets, markdown, or extra commentary.`
 
@@ -106,15 +112,15 @@ function normalizeSummaryOutput(text: string): string {
 
 
 
-  const sentences = (compact.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [])
-
-    .map((part) => part.trim())
-
-    .filter(Boolean)
+  return limitSentences(compact, 3)
 
 
 
-  return sentences.slice(0, 3).join(' ')
+
+
+
+
+
 
 }
 
@@ -282,7 +288,11 @@ export async function POST(req: Request) {
 
       const safeResumeData = sanitizeJsonForPrompt(body.resumeData as ResumeSummaryInput, { maxChars: 4_000 })
 
-      const resumeContext = buildResumeContext(safeResumeData)
+      const resumeContext = [buildResumeContext(safeResumeData), extraSummaryContext(safeResumeData)]
+
+        .filter((part) => part.trim())
+
+        .join('\n')
 
       if (!resumeContext.trim()) {
 
@@ -440,7 +450,17 @@ export async function POST(req: Request) {
 
 
 
-      return jsonWithRequestId({ summary }, 200, requestId)
+      // Same check as tailored bullets: numbers/tools the source never states.
+
+      // The UI makes the user confirm them before the draft can be used.
+
+      const source = mode === 'resume' ? summarySourceText(body.resumeData ?? {}) : body.roleDescription ?? ''
+
+      const newClaims = await findNewClaims('', source, summary)
+
+
+
+      return jsonWithRequestId({ summary, newClaims }, 200, requestId)
 
     } catch (error) {
 

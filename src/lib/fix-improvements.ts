@@ -14,6 +14,7 @@ import { auth } from '@clerk/nextjs/server'
 import type { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRateLimitExceededError } from '@/lib/anthropic-with-limits'
+import { findNewNumberClaims } from '@/lib/claim-diff'
 import { ClaudeJsonParseError } from '@/lib/claude-json'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { jsonWithRequestId, logger } from '@/lib/logger'
@@ -44,6 +45,18 @@ export type ResumeData = {
 
 export function normalizeBullet(b: string): string {
   return b.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+// --- Unsupported-claim guard ---
+// apply-fix/auto-fix save straight to the resume with no confirm step, so a
+// rewrite may not add facts: no number absent from that same role, and no
+// unfilled "[X%]" placeholder copied over from the analysis' strong example.
+export function addsUnsupportedClaims(updated: string, entry: ExperienceEntry): boolean {
+  if (/\[[^\]]*\]/.test(updated)) return true
+  const source = [entry.title, entry.company, entry.period, entry.description, ...(entry.bullets || [])]
+    .filter(Boolean)
+    .join('\n')
+  return findNewNumberClaims('', source, updated).length > 0
 }
 
 export function isDuplicateOf(candidate: string, existing: string): boolean {

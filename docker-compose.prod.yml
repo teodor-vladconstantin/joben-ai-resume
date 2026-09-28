@@ -47,10 +47,12 @@ services:
     environment:
       PORT: 3001
       LATEX_SERVICE_SECRET: ${LATEX_SERVICE_SECRET}
+      LATEX_SERVICE_AUTH_REQUIRED: "true"
     mem_limit: 512m
     cpus: "0.75"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      # /health needs the secret now that auth is enforced.
+      test: ["CMD-SHELL", "curl -fsS -H \"Authorization: Bearer $$LATEX_SERVICE_SECRET\" http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3

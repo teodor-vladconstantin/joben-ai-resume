@@ -105,8 +105,15 @@ function normalizeContactText(url: string): string {
   return normalizeLatexText(url).replace(/^https?:\/\/(www\.)?/i, '')
 }
 
+// SECURITY: the URL is user input dropped into \href{...}. A `}` or `\` would
+// close the argument and let the rest run as TeX (e.g. \input{/proc/self/environ}),
+// so strip those outright and escape the two chars hyperref needs escaped.
+function sanitizeHrefUrl(url: string): string {
+  return normalizeLatexText(url).replace(/[\\{}\s]/g, '').replace(/[%#]/g, (char) => `\\${char}`)
+}
+
 function makeLatexLink(url: string, label: string): string {
-  return String.raw`\href{${normalizeLatexText(url)}}{${escapeLatex(label)}}`
+  return String.raw`\href{${sanitizeHrefUrl(url)}}{${escapeLatex(label)}}`
 }
 
 // Mirror `HarvardTemplate` validation: LinkedIn/GitHub/website inputs often
@@ -145,7 +152,8 @@ function escapeLatexChars(text: string): string {
     .replace(/_/g, '\\_')
     .replace(/\{/g, '\\{')
     .replace(/\}/g, '\\}')
-    .replace(/~/g, '\\~')
+    // `\~` is the tilde ACCENT (it put a ˜ on the next letter), not a literal tilde.
+    .replace(/~/g, '\\textasciitilde{}')
     .replace(/\^/g, '\\textasciicircum ')
 
   // Prevent overfull lines for very long unbroken strings (ids, hashes, accidental keyboard mash).
@@ -162,13 +170,12 @@ function normalizeBulletCandidate(text: string): string {
   // Keep inline-format markers (**bold**, *italic*, __underline__) so the
   // LaTeX renderer can translate them — strip only stray leading bullet
   // glyphs and outer quotes the user did not intend to keep.
-  return clampLatexText(
+  return normalizeLatexText(
     text
       // Require whitespace after the glyph so we do not eat the leading
       // asterisk of an *italic* marker.
       .replace(/^[-*•]\s+/, '')
-      .replace(/^['"`]+|['"`]+$/g, ''),
-    260
+      .replace(/^['"`]+|['"`]+$/g, '')
   )
 }
 
@@ -176,6 +183,16 @@ function escapeLatexFormatted(text: string | undefined): string {
   const normalized = normalizeLatexText(text)
   if (!normalized) return ''
   return renderInlineLatex(normalized, (segment) => escapeLatexChars(segment))
+}
+
+// Keeps the user's line breaks (the web preview renders free-text sections
+// with whitespace-pre-wrap); a bare newline in TeX collapses into a space.
+function escapeLatexMultiline(text: string | undefined): string {
+  return normalizeLatexText(text)
+    .split('\n')
+    .map((line) => escapeLatexFormatted(line))
+    .filter(Boolean)
+    .join(' \\\\\n')
 }
 
 function splitProjectDescription(description: string | undefined): string[] {
@@ -186,20 +203,20 @@ function splitProjectDescription(description: string | undefined): string[] {
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean)
-  if (lines.length > 1) return lines.slice(0, 6)
+  if (lines.length > 1) return lines
 
   const bulletSplit = normalized
     .split(/\s*[•·▪◦●○▸▶➤➢✓✔]\s+/)
     .map((line) => line.trim())
     .filter(Boolean)
-  if (bulletSplit.length > 1) return bulletSplit.slice(0, 6)
+  if (bulletSplit.length > 1) return bulletSplit
 
   const sentenceSplit = normalized
     .split(/(?<=[.!?])\s+(?=[A-Z])/)
     .map((line) => line.trim())
     .filter(Boolean)
 
-  return (sentenceSplit.length > 1 ? sentenceSplit : [normalized]).slice(0, 4)
+  return sentenceSplit.length > 1 ? sentenceSplit : [normalized]
 }
 
 function resolveProjectBullets(project: LatexProjectEntry): string[] {
@@ -210,7 +227,7 @@ function resolveProjectBullets(project: LatexProjectEntry): string[] {
         .filter((bullet: string) => Boolean(bullet) && /[\p{L}\p{N}]/u.test(bullet))
     : []
 
-  if (fromBullets.length > 0) return fromBullets.slice(0, 8)
+  if (fromBullets.length > 0) return fromBullets
 
   return splitProjectDescription(project.description)
 }
@@ -326,6 +343,11 @@ function generateLatex(data: LatexResumeData): string {
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
 \usepackage{fancyhdr}
+% XeLaTeX + fontspec embeds real Unicode glyphs, so ATS text extraction reads
+% "Firmă", "București" instead of "Firm˘ a". The pdfTeX branch keeps a
+% not-yet-upgraded latex-service compiling exactly as before.
+\usepackage{iftex}
+\ifPDFTeX\else\usepackage{fontspec}\fi
 \usepackage[english]{babel}
 \usepackage{tabularx}
 \usepackage{xurl}
@@ -382,17 +404,22 @@ ${titleBlock}${contactBlock}\end{center}
   if (personal?.summary) {
     tex += String.raw`
 \section{Summary}
-\small{${escapeLatexFormatted(clampLatexText(personal.summary, 900))}}
+\small{${escapeLatexMultiline(personal.summary)}}
 `
   }
 
-  if (experience && experience.length > 0) {
+  // Skip blank cards (no title, company or bullets) so they never print as an
+  // empty subheading or an empty "Experience" section.
+  const filledExperience = (experience || []).filter(
+    (exp) => exp.title?.trim() || exp.company?.trim() || extractSafeBullets(exp).length > 0
+  )
+  if (filledExperience.length > 0) {
     tex += String.raw`
 \section{Experience}
   \begin{itemize}[leftmargin=0.15in, label={}]
 `
 
-    for (const exp of experience) {
+    for (const exp of filledExperience) {
       const safeBullets = extractSafeBullets(exp)
       const bulletItems = safeBullets
         .map((bullet: string) => String.raw`        \resumeItem{${escapeLatexFormatted(bullet)}}`)
@@ -423,16 +450,19 @@ ${bulletItems}
       const projPeriod = escapeLatex(clampLatexText(proj.period || '', 50))
       const projBullets = resolveProjectBullets(proj)
       const techs = proj.technologies && proj.technologies.length > 0
-        ? escapeLatex(clampLatexText(proj.technologies.slice(0, 8).join(', '), 220))
+        ? escapeLatex(proj.technologies.join(', '))
         : ''
 
       const itemLines: string[] = []
       for (const bullet of projBullets) {
-        itemLines.push(escapeLatexFormatted(clampLatexText(bullet, 900)))
+        itemLines.push(escapeLatexFormatted(bullet))
       }
       if (techs) itemLines.push(String.raw`\textit{Technologies:} ${techs}`)
-      if (proj.url) {
-        itemLines.push(makeLatexLink(proj.url, normalizeContactText(proj.url)))
+      if (looksLikeUrl(proj.url)) {
+        const projectUrl = normalizeHref(proj.url!)
+        itemLines.push(makeLatexLink(projectUrl, normalizeContactText(projectUrl)))
+      } else if (proj.url?.trim()) {
+        itemLines.push(escapeLatex(proj.url))
       }
 
       const projectItems = itemLines
@@ -472,7 +502,7 @@ ${projectItems}
       const period = escapeLatex(formatLatexEducationPeriod(entry))
       const degreeLine = escapeLatex(clampLatexText(buildLatexEducationDegreeLine(entry), 220))
       const location = escapeLatex(clampLatexText(entry.location || '', 120))
-      const description = escapeLatexFormatted(clampLatexText(entry.description || '', 600))
+      const description = escapeLatexMultiline(entry.description)
 
       tex += String.raw`
     \resumeSubheading
@@ -490,65 +520,40 @@ ${projectItems}
 `
   }
 
-  const groupedSections = dynamicSections
-    .filter((section) => section.type !== 'projects') // projects are now rendered separately
-    .filter((section) => !(structuredEducation.length > 0 && section.type === 'education'))
-    .reduce<Record<string, LatexDynamicSection[]>>((acc, current) => {
-    if (!acc[current.type]) acc[current.type] = []
-    acc[current.type].push(current)
-    return acc
-  }, {})
-
-  for (const [type, sections] of Object.entries(groupedSections)) {
-    const sectionTitle = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')
-
-    tex += String.raw`\section{${escapeLatex(sectionTitle)}}
+  // Legacy text-blob education only prints when there is no structured
+  // education, so the same data never appears twice.
+  const legacyEducation = structuredEducation.length === 0
+    ? dynamicSections.filter((section) => section.type === 'education')
+    : []
+  const legacyEducationEntries = legacyEducation.flatMap((section) => parseEducationContent(section.content))
+  if (legacyEducationEntries.length > 0) {
+    tex += String.raw`\section{Education}
+  \begin{itemize}[leftmargin=0.15in, label={}]
 `
-
-    if (type === 'education' || type === 'certifications') {
-      tex += String.raw`  \begin{itemize}[leftmargin=0.15in, label={}]
-`
-      for (const section of sections) {
-        if (type === 'education') {
-          const entries = parseEducationContent(section.content)
-          if (entries.length > 0) {
-            for (const entry of entries) {
-              const details = entry.details.map((line) => escapeLatex(clampLatexText(line, 420))).join(' \\ ')
-              tex += String.raw`
+    for (const entry of legacyEducationEntries) {
+      const details = entry.details.map((line) => escapeLatex(line)).join(' \\ ')
+      tex += String.raw`
     \resumeSubheading
       {${escapeLatex(clampLatexText(entry.institution, 120))}}{ }
       {${details || ' '}}{ }
 `
-            }
-            continue
-          }
-          // No structured entries — render the raw content directly without
-          // leaking the (potentially-corrupt) section.title into the heading.
-          const fallback = escapeLatexFormatted(clampLatexText(section.content, 900))
-          if (fallback) {
-            tex += String.raw`
-    \resumeSubheading
-      {${fallback}}{ }
-      { }{ }
-`
-          }
-          continue
-        }
-
-        tex += String.raw`
-    \resumeSubheading
-      {${escapeLatex(clampLatexText(section.title, 120))}}{ }
-      {${escapeLatexFormatted(clampLatexText(section.content, 900))}}{ }
-`
-      }
-      tex += String.raw`  \end{itemize}
-`
-    } else {
-      for (const section of sections) {
-        tex += String.raw`\textbf{${escapeLatex(clampLatexText(section.title, 120))}}: ${escapeLatexFormatted(clampLatexText(section.content, 1200))} \\ \vspace{2pt}
-`
-      }
     }
+    tex += String.raw`  \end{itemize}
+`
+  }
+
+  // Mirrors HarvardTemplate: every section gets its own heading with the
+  // title the user typed, and its content keeps the user's line breaks.
+  const otherSections = dynamicSections.filter(
+    (section) => section.type !== 'projects' && section.type !== 'education'
+  )
+  for (const section of otherSections) {
+    const body = escapeLatexMultiline(section.content)
+    if (!body) continue
+    const heading = section.title?.trim() || section.type.charAt(0).toUpperCase() + section.type.slice(1).replace(/_/g, ' ')
+    tex += String.raw`\section{${escapeLatex(clampLatexText(heading, 120))}}
+\small{${body}}
+`
   }
 
   tex += String.raw`

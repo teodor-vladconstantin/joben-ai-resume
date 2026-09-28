@@ -22,6 +22,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
 import { autoFixSchema } from '@/lib/validation/schemas'
 import {
+  addsUnsupportedClaims,
   buildExperienceForPrompt,
   fetchOwnedResumeForFix,
   handleFixRouteError,
@@ -53,7 +54,8 @@ Rules:
 - For each improvement, find the bullet that best matches the "Weak example" and improve it
 - Guided by "Strong example" but adapted to the ACTUAL original text — do not copy verbatim
 - Keep bullets under 20 words; start with a strong action verb
-- NEVER invent metrics, numbers, or facts not present in the original bullet
+- NEVER invent metrics, numbers, tools, or facts not present in the original bullet
+- Strong examples may contain placeholders like [X%]; never copy a placeholder or make up a value for it. If a fix needs data the bullet lacks, improve wording only
 - Every updated bullet MUST be completely unique — do not duplicate or closely paraphrase any other existing bullet in the resume
 - Each bullet position should be patched at most once
 - If a genuine unique improvement cannot be made for a given suggestion, skip it
@@ -315,14 +317,19 @@ ${improvementsText}`
         ? targetEntry.bullets
         : [targetEntry.description || '']
 
-      const safeIdx = raw.bulletIndex >= 0 && raw.bulletIndex < targetBullets.length
-        ? raw.bulletIndex
-        : targetBullets.length - 1
+      // Out-of-range index: drop it rather than overwrite the last bullet.
+      if (!Number.isInteger(raw.bulletIndex) || raw.bulletIndex < 0 || raw.bulletIndex >= targetBullets.length) continue
+      const safeIdx = raw.bulletIndex
 
       // Skip if this position was already patched
       if (patchMap.get(raw.experienceId)?.has(safeIdx)) continue
 
       const updatedText = raw.updatedBullet.trim()
+
+      if (addsUnsupportedClaims(updatedText, targetEntry)) {
+        logger.warn('auto-fix: skipping patch with unsupported claims', { requestId, userId, experienceId: raw.experienceId })
+        continue
+      }
 
       // Duplicate check against all OTHER existing bullets (not the one being replaced)
       const otherBullets = allExistingBullets.filter(

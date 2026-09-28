@@ -6,10 +6,24 @@
 import { callResumeParserJson } from '@/lib/resume-parser-client'
 import { computeMissingSkills } from '@/lib/skill-gap'
 
-const NUMBER_TOKEN_PATTERN = /\d+(?:\.\d+)?%?/g
+// Spelled-out counts ("five years", "cinci ani") are the same claim as "5";
+// without these a summary could say "ten years" and pass the check.
+// ponytail: 2-20 + tens in EN/RO only; "one"/"un"/"opt" left out, too often not numbers.
+const NUMBER_WORDS: Record<string, string> = {
+  two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9', ten: '10',
+  eleven: '11', twelve: '12', thirteen: '13', fourteen: '14', fifteen: '15', sixteen: '16',
+  seventeen: '17', eighteen: '18', nineteen: '19', twenty: '20', thirty: '30', forty: '40', fifty: '50',
+  doi: '2', două: '2', doua: '2', trei: '3', patru: '4', cinci: '5', șase: '6', sase: '6', șapte: '7',
+  sapte: '7', nouă: '9', zece: '10', douăzeci: '20', douazeci: '20',
+}
+
+const NUMBER_TOKEN_PATTERN = new RegExp(
+  `\\d+(?:\\.\\d+)?%?|(?<!\\p{L})(?:${Object.keys(NUMBER_WORDS).join('|')})(?!\\p{L})`,
+  'giu'
+)
 
 function bareNumber(token: string): string {
-  return token.replace(/%$/, '')
+  return NUMBER_WORDS[token.toLowerCase()] ?? token.replace(/%$/, '')
 }
 
 /**

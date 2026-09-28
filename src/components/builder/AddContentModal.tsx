@@ -14,6 +14,10 @@ export type AddableSectionType =
   | 'awards'
   | 'publications'
   | 'skills'
+  // Only created by CV import today (no add-modal option yet); still
+  // editable because tabSectionMap routes them to a tab.
+  | 'languages'
+  | 'custom'
 
 export type AddableSection = {
   type: AddableSectionType
