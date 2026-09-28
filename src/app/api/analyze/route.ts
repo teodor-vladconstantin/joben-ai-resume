@@ -173,6 +173,19 @@ export async function POST(req: Request) {
         return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
       }
 
+      // resumes.score was only ever set to 0 on insert, so every resume in
+      // the list showed 0 no matter how it was evaluated.
+      if (body.resumeId) {
+        const { error: scoreError } = await supabase
+          .from('resumes')
+          .update({ score: Math.round(Number(analysis.overall_score || 0)) })
+          .eq('id', body.resumeId)
+          .eq('user_id', userId)
+        if (scoreError) {
+          logger.warn('Failed to store resume score', { requestId, userId, route: '/api/analyze', error: scoreError.message })
+        }
+      }
+
       logger.info('AI review created', {
         requestId,
         userId,

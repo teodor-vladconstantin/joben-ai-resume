@@ -26,9 +26,14 @@ const icons: { [key: string]: React.ElementType } = {
 
 // Authenticated-only page: prevent indexing if a URL ever leaks (linked
 // externally, etc) since it otherwise inherits the homepage's title/OG data.
-export const metadata: Metadata = {
-  title: 'Dashboard | Joben',
-  robots: { index: false, follow: false },
+// Localized: a fixed English title showed on the Romanian UI.
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Nav' })
+  return {
+    title: `${t('dashboard')} | Joben`,
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: AppLocale }> }) {

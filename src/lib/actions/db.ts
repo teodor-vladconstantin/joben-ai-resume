@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
+import { analysisGrade } from '@/lib/ai-review-validation'
 
 type ReviewFeedback = {
   overall_score?: number
@@ -194,9 +195,12 @@ export async function getLatestReviewSummary(userId: string): Promise<LatestRevi
     const breakdown = normalizeBreakdown(feedback)
     const breakdownTotal = Object.values(breakdown).reduce((sum, value) => sum + value, 0)
 
+    // Reviews saved before scores were derived in code can carry an overall
+    // that disagrees with their own categories (42 over a 39 breakdown). The
+    // dashboard shows both side by side, so the breakdown sum wins.
     return {
-      totalScore: Number(feedback?.overall_score || data.score || breakdownTotal || 0),
-      grade: feedback?.grade || 'Unknown',
+      totalScore: breakdownTotal || Number(feedback?.overall_score || data.score || 0),
+      grade: breakdownTotal ? analysisGrade(breakdownTotal) : feedback?.grade || 'Unknown',
       breakdown,
       resumeTitle: getJoinedResumeTitle((data as { resumes?: JoinedResume }).resumes),
     }

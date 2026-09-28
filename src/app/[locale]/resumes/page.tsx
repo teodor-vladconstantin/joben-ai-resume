@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search, ArrowRight } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { timeAgo } from '@/lib/time-ago'
 
 type ResumeListItem = {
@@ -20,7 +20,11 @@ type ResumeListItem = {
 export default function ResumesPage() {
   const t = useTranslations('ResumesPage')
   const [isPending, startTransition] = useTransition()
+  const locale = useLocale()
   const [resumes, setResumes] = useState<ResumeListItem[]>([])
+  // 'loading' used to render as "0 resumes / none found" for a few seconds,
+  // and a failed fetch looked identical to having no resumes.
+  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading')
   const [query, setQuery] = useState('')
   const [sortMode, setSortMode] = useState<'newest' | 'oldest' | 'az'>('newest')
 
@@ -34,15 +38,20 @@ export default function ResumesPage() {
       })
 
       if (!response.ok) {
-        if (!cancelled) setResumes([])
+        if (!cancelled) setLoadState('error')
         return
       }
 
       const payload = (await response.json()) as { resumes?: ResumeListItem[]; data?: { resumes?: ResumeListItem[] } }
-      if (!cancelled) setResumes(payload.data?.resumes || payload.resumes || [])
+      if (!cancelled) {
+        setResumes(payload.data?.resumes || payload.resumes || [])
+        setLoadState('ready')
+      }
     }
 
-    loadResumes()
+    loadResumes().catch(() => {
+      if (!cancelled) setLoadState('error')
+    })
 
     return () => {
       cancelled = true
@@ -104,7 +113,7 @@ export default function ResumesPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
               <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
-              <p className="text-(--muted)">{t('resumeCount', { count: resumes.length })}</p>
+              <p className="text-(--muted)">{loadState === 'ready' ? t('resumeCount', { count: resumes.length }) : '\u00a0'}</p>
             </div>
             <Link href="/resumes/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
               <Plus className="w-5 h-5" /> {t('createResume')}
@@ -130,7 +139,11 @@ export default function ResumesPage() {
 
 
           <div className="border border-(--border) bg-(--surface)">
-            {visibleResumes.length === 0 ? (
+            {loadState === 'loading' ? (
+              <p className="px-4 py-10 text-center text-sm text-(--muted)">{t('loading')}</p>
+            ) : loadState === 'error' ? (
+              <p className="px-4 py-10 text-center text-sm text-(--foreground)">{t('loadFailed')}</p>
+            ) : visibleResumes.length === 0 ? (
               <EmptyState
                 title={t('noResumesFound')}
                 action={
@@ -145,13 +158,13 @@ export default function ResumesPage() {
                   <div key={resume.id} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{resume.title || t('untitled')}</p>
-                      <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString()}</p>
+                      <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString(locale)}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="font-mono text-xs font-bold tabular-nums">
                         {Number(resume.score || 0)}
                       </span>
-                      <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at)}</span>
+                      <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at, locale)}</span>
                       <Link href={`/resumes/${resume.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Eye className="w-4 h-4" /></Link>
                       <Link href={`/resumes/${resume.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Edit className="w-4 h-4" /></Link>
                       <button

@@ -408,12 +408,16 @@
   },
   "Grade": {
     "labels": {
+      "Critical": "Critic",
+      "Outstanding": "Remarcabil",
       "Poor": "Slab",
       "Fair": "Acceptabil",
       "Good": "Bun",
       "Excellent": "Excelent"
     },
     "descriptions": {
+      "Critical": "Lipsesc secțiuni sau conținut esențial; majoritatea aplicațiilor se vor opri la filtrul ATS.",
+      "Outstanding": "CV de top. Este deja ușor de citit pentru softurile ATS și pentru recrutori.",
       "Poor": "Probleme semnificative aici îți reduc șansele la interviuri.",
       "Fair": "Câteva reparații de mai jos ți-ar îmbunătăți semnificativ șansele.",
       "Good": "CV solid. Câteva ajustări l-ar face și mai puternic.",
@@ -578,7 +582,7 @@
       "youLabel": "Tu: ",
       "footerPrefix": "Scorul tău de ",
       "footerMiddle": " este mai mare decât aproximativ ",
-      "footerSuffix": "% din CV-urile din sistemul nostru."
+      "footerSuffix": " din CV-urile din sistemul nostru."
     }
   },
   "CookieConsent": {
@@ -929,6 +933,7 @@
       "cancel": "Anulează"
     },
     "status": {
+      "loading": "Se încarcă CV-ul...",
       "saving": "Se salvează...",
       "saved": "Salvat",
       "saveFailed": "Salvarea a eșuat"
@@ -1142,6 +1147,8 @@
     }
   },
   "ResumesPage": {
+    "loading": "Se încarcă...",
+    "loadFailed": "Nu am putut încărca CV-urile. Reîncarcă pagina pentru a încerca din nou.",
     "title": "CV-uri",
     "resumeCount": "{count} CV-uri",
     "createResume": "Creează CV",
@@ -1157,6 +1164,9 @@
     "deleteFailedAlert": "Ștergerea CV-ului a eșuat. Vezi consola pentru detalii."
   },
   "CoverLettersPage": {
+    "loading": "Se încarcă...",
+    "loadFailed": "Nu am putut încărca scrisorile de intenție. Reîncarcă pagina pentru a încerca din nou.",
+    "deleteFailedAlert": "Nu am putut șterge scrisoarea de intenție. Încearcă din nou.",
     "title": "Scrisori de Intenție",
     "letterCount": "{count} scrisori de intenție",
     "createCoverLetter": "Creează Scrisoare de Intenție",
@@ -1182,7 +1192,7 @@
       "outOf100": "/100",
       "uploadNewResume": "Încarcă un CV Nou",
       "dropzoneText": "Trage și lasă sau apasă pentru a răsfoi",
-      "dropzoneHint": "Doar PDF. Maxim 10MB.",
+      "dropzoneHint": "Doar PDF. Maxim 5MB.",
       "readingPdf": "Se citește PDF-ul...",
       "readyFile": "Gata: {fileName}",
       "jobDescriptionPlaceholder": "Descrierea jobului, opțional, pentru o analiză mai precisă",
@@ -1202,7 +1212,7 @@
       "reReview": "Reevaluează",
       "defaultUpgradeMessage": "Treci la Pro pentru analiză AI nelimitată.",
       "errorPdfOnly": "Momentan sunt acceptate doar fișiere PDF.",
-      "errorPdfTooLarge": "PDF-ul trebuie să aibă sub 10 MB.",
+      "errorPdfTooLarge": "PDF-ul trebuie să aibă sub 5 MB.",
       "errorCouldNotExtractText": "Nu am putut extrage text din acest PDF.",
       "errorFailedToParsePdf": "Procesarea PDF-ului încărcat a eșuat.",
       "errorUploadOrSelect": "Încarcă un CV în format PDF sau selectează un CV existent.",
