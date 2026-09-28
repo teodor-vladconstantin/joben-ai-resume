@@ -9,7 +9,10 @@ const FALSE_POSITIVE_PATTERNS: RegExp[] = [
   /truncat|cut(s)? off|mid-sentence|ends abruptly|incomplete (content|entry|sentence|text)/i,
   // Date/tenure arithmetic the model gets wrong.
   /mathematically|impossible|duration|tenure|\d+\s*(years?|months?)\s+(label|stated|listed)/i,
-  /graduation (date|year)|no GPA|GPA (is )?missing/i,
+  /(graduation|completion|end) (date|year)|degree completion|no GPA|GPA (is )?missing/i,
+  // The model reads OUR plain-text rendering of the resume, so dashes, bullet
+  // characters and separators are ours, never the candidate's formatting.
+  /(dashes?|hyphens?) (vs\.?|versus|instead of|and|or) bullets?|bullets? (vs\.?|versus|instead of) (dashes?|hyphens?)|inconsistent (bullet|list) (style|format)|liniuț\w* (în loc de|și) (buline|bullet)/i,
   /future date|in the future/i,
   // We only send extracted text: visual elements are invisible to the model,
   // so any claim about them is a guess.
@@ -18,6 +21,17 @@ const FALSE_POSITIVE_PATTERNS: RegExp[] = [
   /\bphone\b.*\b(format|placeholder)/i,
   // The model doubting that the candidate's own data is real.
   /placeholder|not (actually )?(earned|real)|fabricat|verify (it|this) is (real|accurate)/i,
+  // Month names/abbreviations in the resume's own language (Romanian "Ian").
+  /(non-standard|typo|artifact|instead of).*(month|date|abbreviation)|(month|date) abbreviation|abrevier\w* (a )?lun|denumir\w* lun/i,
+  // Romanian equivalents: feedback is written in Romanian for /ro users, and
+  // the English patterns above would silently stop matching.
+  /suprapu|simultan|concomitent|în același timp|normă parțială/i,
+  /trunchiat|se termină brusc|mijlocul (unei )?propoziți|conținut incomplet|intrare incompletă/i,
+  /durat[aă] (declarat|menționat)|vechime|imposibil|matematic/i,
+  /(an|dat)[aă]? (de )?(absolvir|finaliz)|lipse\w* (media|GPA)/i,
+  /(dat[aă]|date) (din|în) viitor/i,
+  /\b(imagin|iconi|pictogram|fotografi|grafic|culor|fonturi|antet\w* (și|sau) subsol)/i,
+  /\btelefon\w*.*format|substituent|fictiv|verific\w* dacă (este|e) real/i,
 ]
 
 function findingText(finding: unknown): string {

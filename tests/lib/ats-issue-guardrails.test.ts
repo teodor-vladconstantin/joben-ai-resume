@@ -33,12 +33,28 @@ describe('stripFalsePositiveIssues', () => {
           'Phone number not in standard international format (+40 700 000 000 is valid but could be clearer)',
           'AWS Cloud Practitioner cert dated Aug 2026 is recent; ensure it is actually earned and not a placeholder',
           'No GPA, honors, or academic achievements listed',
+          'Education section missing degree completion date and explicit degree name.',
+          'Projects section uses inconsistent formatting (dashes vs. bullets) and lacks context.',
         ],
       },
       ['improvements', 'ats_warnings']
     )
     expect(result.improvements.map((i) => i.issue)).toEqual(['Weak action verbs'])
     expect(result.ats_warnings).toEqual(['Uses a two-column table layout'])
+  })
+
+  it('drops Romanian-date and Romanian-language false positives, keeps real Romanian issues', () => {
+    const result = stripFalsePositiveIssues({
+      issues: [
+        // Seen live on joben.eu for a Romanian CV:
+        { issue: "Dates use non-standard 'Ian' abbreviation instead of 'Jan' for January.", explanation: 'Machine-extraction artifact or typo.' },
+        { issue: 'Rolurile se suprapun în timp', explanation: 'Nu e clar cum ai împărțit timpul.' },
+        { issue: 'Lipsește anul absolvirii', explanation: 'Adaugă data de absolvire.' },
+        { issue: 'Pictogramele de contact nu pot fi citite', explanation: 'ATS ignoră imaginile.' },
+        { issue: 'Punctele nu conțin rezultate măsurabile', explanation: 'Adaugă cifre concrete acolo unde le ai.' },
+      ],
+    })
+    expect(result.issues.map((i) => i.issue)).toEqual(['Punctele nu conțin rezultate măsurabile'])
   })
 
   it('passes through non-object results untouched', () => {

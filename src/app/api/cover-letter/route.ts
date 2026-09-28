@@ -7,6 +7,7 @@ import {
 } from '@/lib/anthropic-with-limits'
 import { parseClaudeJsonText } from '@/lib/claude-json'
 import { resumeToPlainText } from '@/lib/resume-text'
+import { careerSpanLine } from '@/lib/summary-grounding'
 import { createServerClient } from '@/lib/supabase/server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
@@ -25,7 +26,10 @@ const COVER_LETTER_SYSTEM_PROMPT = `Generate a cover letter JSON with this exact
 }
 
 Rules:
-- Every claim about the candidate (roles, employers, skills, numbers, achievements) must come from the Resume. Never invent experience; if the resume does not support a requirement from the job description, do not claim it.
+- Every claim about the candidate (roles, employers, skills, numbers, achievements) must come from the Resume. Never invent experience.
+- If the resume does not support a requirement from the job description, leave that requirement out entirely: do not claim it and do not point out that it is missing.
+- Describe people, teams and scale exactly as the resume does (a team of 4 students stays 4 students, not 4 developers), and do not add adjectives about complexity or impact that the resume does not use.
+- Mention years of experience only as given by the "Career span" line; never compute or estimate them yourself.
 - Write in the language of the job description.
 - Do not use cliches.
 - Keep language specific and concise.`
@@ -38,7 +42,10 @@ async function loadResumeText(userId: string, resumeId: string | undefined): Pro
   let query = supabase.from('resumes').select('data').eq('user_id', userId)
   query = resumeId ? query.eq('id', resumeId) : query.order('updated_at', { ascending: false })
   const { data } = await query.limit(1).maybeSingle()
-  return resumeToPlainText(data?.data)
+  const resume = data?.data
+  if (!resume || typeof resume !== 'object') return ''
+  // The model miscounts years from date ranges ("3+ years" for a 2021 start).
+  return [careerSpanLine(resume as Record<string, unknown>), resumeToPlainText(resume)].filter(Boolean).join('\n')
 }
 
 export async function POST(req: Request) {

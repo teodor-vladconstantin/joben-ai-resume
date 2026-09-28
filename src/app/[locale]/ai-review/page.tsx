@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Navbar } from '@/components/ui/Navbar'
@@ -30,10 +30,13 @@ const extractResumeText = resumeToPlainText
 
 export default function AIReviewPage() {
   const t = useTranslations('AiReviewPage.list')
+  const locale = useLocale()
   const router = useRouter()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
   const [resumes, setResumes] = useState<ResumeItem[]>([])
   const [reviews, setReviews] = useState<ReviewItem[]>([])
+  // Without it the list said "no resumes found" until the fetch finished.
+  const [isLoadingList, setIsLoadingList] = useState(true)
   const [selectedResumeId, setSelectedResumeId] = useState('')
   const [uploadedResumeText, setUploadedResumeText] = useState('')
   const [uploadedFileName, setUploadedFileName] = useState('')
@@ -68,7 +71,9 @@ export default function AIReviewPage() {
       }
     }
 
-    loadData()
+    loadData().finally(() => {
+      if (!cancelled) setIsLoadingList(false)
+    })
     return () => {
       cancelled = true
     }
@@ -161,6 +166,7 @@ export default function AIReviewPage() {
           resumeText,
           jobDescription,
           resumeId: resumeId || null,
+          locale,
         }),
       })
 
@@ -347,9 +353,9 @@ export default function AIReviewPage() {
                 />
               </div>
             </div>
-            {visibleResumes.length === 0 ? (
+            {isLoadingList || visibleResumes.length === 0 ? (
               <div className="border border-dashed border-(--border) p-6 text-center text-sm text-(--muted)">
-                {t('noResumesFound')}
+                {isLoadingList ? t('loadingResumes') : t('noResumesFound')}
               </div>
             ) : (
               <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-3">

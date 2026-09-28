@@ -8,6 +8,7 @@ import {
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { clampAnalysisScores, verifyAnalysisAgainstSource } from '@/lib/ai-review-validation'
 import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
+import { outputLanguageRule, RENDERED_TEXT_RULE, RESUME_LANGUAGE_RULE } from '@/lib/ai-system-prompt'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { trackProductEvent } from '@/lib/analytics'
@@ -38,6 +39,8 @@ Important rules:
 - Never flag stated durations or tenure math (e.g. "1 year 2 months" next to a date range). Do not recompute durations at all.
 - The text may be cut off at the end by our system. Never flag the resume as truncated, incomplete, or ending mid-sentence.
 - Treat every detail the candidate wrote as real: never suggest a date, certification or contact detail may be fake or a placeholder, and do not critique the formatting of a readable phone number or email.
+${RESUME_LANGUAGE_RULE}
+${RENDERED_TEXT_RULE}
 - You only see machine-extracted text. Never comment on layout, columns, tables, fonts, colors, images, icons or photos.
 - Ground every claim in the given text: weak_example must be copied verbatim from the resume, keywords_found must appear in the resume, keywords_missing must appear in the job description.
 - strong_example rewrites that same line using only facts it already contains. Where a metric would help but the resume has none, write a placeholder such as [X%] instead of inventing a number.
@@ -139,7 +142,7 @@ export async function POST(req: Request) {
         feature: 'reviews',
         inputText: prompt,
         messages,
-        system: ANALYZE_SYSTEM_PROMPT,
+        system: ANALYZE_SYSTEM_PROMPT + outputLanguageRule(body.locale),
       })
 
       const analysisText = extractTextFromAnthropicMessage(aiResponse)

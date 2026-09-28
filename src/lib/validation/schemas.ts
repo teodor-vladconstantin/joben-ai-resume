@@ -97,6 +97,7 @@ export const analyzeSchema = z
     resumeText: nonEmptyTrimmedString(RESUME_TEXT_MAX),
     jobDescription: optionalTrimmedString(LONG_TEXT_MAX),
     resumeId: uuidLike.optional(),
+    locale: z.enum(['en', 'ro']).optional(),
   })
   .strict()
 

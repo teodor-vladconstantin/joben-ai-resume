@@ -1182,6 +1182,7 @@
   },
   "AiReviewPage": {
     "list": {
+      "loadingResumes": "Loading your resumes...",
       "pageTitle": "AI Resume Review",
       "pageSubtitle": "Get instant AI-powered feedback across 5 key categories.",
       "targetScoreLabel": "Target Score",

@@ -79,6 +79,8 @@ export function ResumeAnalyzer({
   fixErrors = {},
 }: ResumeAnalyzerProps) {
   const t = useTranslations('AiReviewPage.analyzer')
+  const tGrade = useTranslations('Grade')
+  const tBreakdown = useTranslations('Dashboard.scoreBreakdown')
   const tScore = useTranslations('Dashboard.scoreBreakdown')
 
   if (isLoading) {
@@ -107,14 +109,21 @@ export function ResumeAnalyzer({
 
   const feedback = review.feedback || {}
   const overallScore = Number(feedback.overall_score ?? review.score ?? 0)
-  const grade = feedback.grade || t('unknownGrade')
+  // Grade and category names come from our translations, not the model's
+  // English "label"/"grade" strings, which showed "Good" / "Content" on /ro.
+  const grade = feedback.grade && tGrade.has(`labels.${feedback.grade}`)
+    ? tGrade(`labels.${feedback.grade}`)
+    : feedback.grade || t('unknownGrade')
+  const categoryLabels = tBreakdown.raw('categories') as Array<{ label: string }>
   const categories = [
     feedback.categories?.ats_structure,
     feedback.categories?.content_quality,
     feedback.categories?.writing_quality,
     feedback.categories?.job_match,
     feedback.categories?.application_ready,
-  ].filter(Boolean) as CategoryItem[]
+  ]
+    .map((item, index) => (item ? { ...item, label: categoryLabels[index]?.label ?? item.label } : null))
+    .filter(Boolean) as CategoryItem[]
 
   const improvements = feedback.improvements || []
   const strengths = feedback.strengths || []
