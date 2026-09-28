@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Upload, Loader2, AlertTriangle, CheckCircle2, RotateCcw, FileText } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
@@ -49,6 +49,7 @@ function getWorstCategory(categories: Record<AtsCategoryKey, AtsCategory>): AtsC
 
 export function FreeAtsCheckerClient() {
   const t = useTranslations('AtsChecker')
+  const locale = useLocale()
   const tGrade = useTranslations('Grade')
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -101,6 +102,7 @@ export function FreeAtsCheckerClient() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('locale', locale)
       if (email.trim()) {
         formData.append('email', email.trim())
       }

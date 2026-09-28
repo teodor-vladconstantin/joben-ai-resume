@@ -1182,6 +1182,7 @@
   },
   "AiReviewPage": {
     "list": {
+      "loadingResumes": "Se încarcă CV-urile...",
       "pageTitle": "Evaluare AI a CV-ului",
       "pageSubtitle": "Primești feedback AI instant pe 5 categorii cheie.",
       "targetScoreLabel": "Scor Țintă",

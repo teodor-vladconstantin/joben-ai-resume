@@ -1,4 +1,17 @@
 ## Active
+- [DONE] 2026-09-28 Test end-to-end live pe joben.eu, bug-uri silențioase găsite și reparate (commits
+  `5d94ac1`, `d56e986` + următorul): dublură bullet la import; evaluarea AI primea CV-ul FĂRĂ educație/
+  proiecte/link-uri (false "missing education"); scrisoarea de intenție era generată din propriul text
+  (placeholder-e) în loc de CV → acum din CV-ul real + career span; autosave la simpla deschidere a
+  unui CV/scrisori (crea CV-uri goale, bump updated_at, persista normalizarea); `resumes.score` nescris
+  niciodată (listă cu 0); liste fără stare de încărcare/eroare ("0 CV-uri" la load); "43%%"; grade
+  "Critical/Outstanding" netraduse (afișau "Bun"); feedback AI în engleză pe /ro + fals pozitiv pe
+  lunile românești ("Ian"); artefacte de randare semnalate ca formatare; titluri/date/timp relativ
+  netraduse; hint upload 10MB fals (limita reală 5MB).
+  - **De făcut manual:** migrarea `20260928120000_backfill_resume_scores.sql` (CLI Supabase dă 403 pe
+    login role; aplică din SQL Editor sau cu `SUPABASE_DB_PASSWORD`).
+  - Rămase, semnalate: seed-ul EN al scrisorii noi ("Your Name", paragrafe generice); mesajele de
+    eroare de la server sunt în engleză (ex. limita de export); `alert()` nativ la erori.
 - [DONE] 2026-09-28 Verificare claim-uri summary + risc timeout parser + validare live before/after (fără rebuild VPS, așteaptă decizia userului):
   - Summary: context cu educație/proiecte/career span real, prompt structurat pozitiv, split de propoziții
     care nu mai rupe "Node.js", claim-check (cifre + cifre în litere EN/RO + tool-uri) cu checkbox

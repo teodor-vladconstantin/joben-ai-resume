@@ -10,7 +10,7 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
-import { withCurrentDateContext } from '@/lib/ai-system-prompt'
+import { outputLanguageRule, RESUME_LANGUAGE_RULE, withCurrentDateContext } from '@/lib/ai-system-prompt'
 import { sanitizeAiError } from '@/lib/ai-errors'
 import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
@@ -97,6 +97,7 @@ Important rules:
 - Treat every detail the candidate wrote as real: never suggest a date, certification or contact detail may be fake or a placeholder, and do not critique the formatting of a readable phone number or email.
 - You only see machine-extracted text, not the document. Never claim the resume uses images, icons, photos, graphics, colors, fonts, tables, columns, headers or footers. Only flag a formatting problem the extracted text itself shows (e.g. scrambled reading order, missing section headings).
 - Every issue must point at something actually present (or clearly absent) in the text. Do not guess.
+${RESUME_LANGUAGE_RULE}
 - This rule applies to every dated item, not just jobs: certifications, courses, training, and side projects too. Before flagging any single date as a future date or an error, check it against today's date given above — a date on or before today is normal and correct, never an issue, regardless of what year it is.
 
 List at most 3 concrete issues, each with a ONE-sentence explanation (max ~20 words). If there are fewer than 3 real issues, return fewer items, do not pad with minor nitpicks.
@@ -352,7 +353,7 @@ export async function POST(req: Request) {
         max_tokens: MAX_OUTPUT_TOKENS,
         // 0: the same CV should get the same score on a re-scan.
         temperature: 0,
-        system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT),
+        system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT + outputLanguageRule(String(formData.get('locale') || ''))),
         messages: [{ role: 'user', content: `Resume:\n${safeResumeText}` }],
       })
 
