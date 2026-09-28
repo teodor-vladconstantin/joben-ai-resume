@@ -15,6 +15,11 @@
     fișiere/env). Fix: auth obligatoriu când există secret (comparare timing-safe), procesul TeX nu
     mai moștenește secretul, `openin_any/openout_any=p` + cwd izolat; compose setează explicit auth și
     healthcheck-ul trimite secretul. Testat local: 401 fără secret, citirea /etc/passwd blocată.
+  - **Deploy 2026-09-28:** push `cedc5d6` → Vercel production READY; VM Oracle rebuild (latex-service
+    XeLaTeX + parser nou), ambele containere healthy. Verificat în producție: latex-service public
+    fără secret → 401; `joben.eu/api/health` ok (secretele Vercel/VM coincid); compile real prin HTTPS
+    → PDF cu diacritice corecte; `\input{/etc/passwd}` blocat. Rollback disponibil pe VM:
+    `~/joben-backup-20260928-1915` + imagini `joben-latex-service:prev` / `joben-resume-parser:prev`.
   - Notă: tests/api/critical-routes (webhook Clerk, neatins) a picat intermitent 2 din ~8 rulări
     complete; nu s-a reprodus nici cu cache rece.
 - [DONE] 2026-09-28 Audit deep parsing CV / ATS checker / export PDF / evaluări+optimizări AI:
