@@ -123,6 +123,38 @@ describe('CRUD smoke tests for resumes and cover letters APIs', () => {
     expect(payload.resume?.id).toBe('resume_1')
   })
 
+  it('allows creation when the Redis cv counter drifted but the user has no saved resumes', async () => {
+    // Seen live: an account with 0 resumes got "You have used all 1 saved resumes".
+    authMock.mockResolvedValue({ userId: 'user_123' })
+    checkFeatureLimitMock.mockResolvedValueOnce({ allowed: false, used: 1, limit: 1, blocked: false })
+    const created = { id: 'resume_2', title: 'T', updated_at: new Date().toISOString(), score: 0, data: {} }
+    createServerClientMock.mockReturnValue({
+      from: vi.fn((table: string) => {
+        if (table === 'resumes') {
+          return {
+            select: vi.fn((_columns: string, options?: { head?: boolean }) =>
+              options?.head
+                ? { eq: vi.fn().mockResolvedValue({ count: 0, error: null }) }
+                : { eq: vi.fn().mockResolvedValue({ data: null, error: null }) }
+            ),
+            insert: vi.fn(() => ({ select: vi.fn(() => ({ single: vi.fn().mockResolvedValue({ data: created, error: null }) })) })),
+          }
+        }
+        if (table === 'product_events') return { insert: vi.fn().mockResolvedValue({ error: null }) }
+        if (table === 'users') {
+          return { select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: vi.fn().mockResolvedValue({ data: { plan: 'free' }, error: null }) })) })) }
+        }
+        return { select: vi.fn().mockResolvedValue({ data: null, error: null }) }
+      }),
+    })
+
+    const { POST } = await import('@/app/api/resumes/route')
+    const response = await POST(
+      new Request('http://localhost/api/resumes', { method: 'POST', body: JSON.stringify({ title: 'T', data: { personal: {} } }) })
+    )
+    expect(response.status).toBe(201)
+  })
+
   it('blocks resume creation when cv feature limit is reached', async () => {
     authMock.mockResolvedValue({ userId: 'user_123' })
     checkFeatureLimitMock.mockResolvedValueOnce({

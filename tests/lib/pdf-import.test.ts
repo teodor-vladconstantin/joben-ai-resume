@@ -52,6 +52,23 @@ describe('mapLlamaParseToTemplate', () => {
     expect(data.dynamicSections?.some((section) => section.title === 'Interests')).toBe(false)
   })
 
+  it('does not duplicate an intro the parser already turned into a bullet', () => {
+    // Real parser output seen live: bullets lose the trailing period, the description keeps it.
+    const data = mapLlamaParseToTemplate({
+      work_experience: [
+        {
+          company: 'Acme',
+          role: 'Engineer',
+          start_date: null,
+          end_date: null,
+          description: 'Worked in a cross-functional squad to ship features.',
+          bullets: ['Worked in a cross-functional squad to ship features', 'Led the payments service'],
+        },
+      ],
+    })
+    expect(data.experience[0].bullets).toEqual(['Worked in a cross-functional squad to ship features', 'Led the payments service'])
+  })
+
   it('does not duplicate a description the bullets were split from', () => {
     const data = mapLlamaParseToTemplate({
       work_experience: [
