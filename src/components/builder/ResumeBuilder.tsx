@@ -396,6 +396,12 @@ export function ResumeBuilder() {
   const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData)
+  // The blank form, or exactly what was loaded from the DB. Autosave skips
+  // while resumeData is still this object: opening a resume used to PATCH
+  // it straight back (bumping updated_at and persisting load-time
+  // normalization such as sentence-split bullets), and opening "new"
+  // created an empty resume, before the user changed anything.
+  const pristineDataRef = useRef<ResumeData>(initialResumeData)
   const [isPending] = useTransition()
   const [isLoading, setIsLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -520,7 +526,7 @@ export function ResumeBuilder() {
               nextDynamic = migrated.remaining
             }
 
-            return {
+            const next = {
               template: normalizeTemplate(),
               personal: { ...prev.personal, ...(loadedData.personal || {}) },
               experience: incomingExperience,
@@ -529,6 +535,8 @@ export function ResumeBuilder() {
               dynamicSections: nextDynamic,
               importMeta: loadedData.importMeta || prev.importMeta,
             }
+            pristineDataRef.current = next
+            return next
           })
         }
       }
@@ -696,12 +704,13 @@ export function ResumeBuilder() {
 
   useEffect(() => {
     if (isLoading || isImportingPdf || isExportingPdf) return
+    if (resumeData === pristineDataRef.current) return
     const handle = setTimeout(() => {
       void persistResume()
     }, 800)
 
     return () => clearTimeout(handle)
-  }, [isExportingPdf, isImportingPdf, isLoading, persistResume])
+  }, [isExportingPdf, isImportingPdf, isLoading, persistResume, resumeData])
 
   const updatePersonalField = (field: keyof typeof initialResumeData.personal, value: string) => {
     setResumeData((prev) => ({
@@ -2228,7 +2237,7 @@ export function ResumeBuilder() {
           <HarvardTemplate data={resumeData} />
         </div>
         <div className="absolute top-3 right-4 text-xs text-(--muted) bg-(--surface) border border-(--border) px-2 py-1 print:hidden" suppressHydrationWarning>
-          {saveStatus === 'saving' ? t('status.saving') : saveStatus === 'saved' ? t('status.saved') : saveStatus === 'error' ? t('status.saveFailed') : ''}
+          {isLoading && !isCreateMode ? t('status.loading') : saveStatus === 'saving' ? t('status.saving') : saveStatus === 'saved' ? t('status.saved') : saveStatus === 'error' ? t('status.saveFailed') : ''}
         </div>
       </div>
 

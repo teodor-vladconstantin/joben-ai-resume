@@ -148,6 +148,7 @@ export const improveBulletSchema = z
 export const coverLetterAiSchema = z
   .object({
     resumeText: optionalTrimmedString(RESUME_TEXT_MAX),
+    resumeId: uuidLike.optional(),
     company: nonEmptyTrimmedString(SHORT_TEXT_MAX),
     position: nonEmptyTrimmedString(SHORT_TEXT_MAX),
     jobDescription: nonEmptyTrimmedString(LONG_TEXT_MAX),

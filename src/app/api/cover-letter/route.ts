@@ -6,6 +6,8 @@ import {
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import { parseClaudeJsonText } from '@/lib/claude-json'
+import { resumeToPlainText } from '@/lib/resume-text'
+import { createServerClient } from '@/lib/supabase/server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { capturePostHogEvent } from '@/lib/posthog-server'
@@ -23,9 +25,21 @@ const COVER_LETTER_SYSTEM_PROMPT = `Generate a cover letter JSON with this exact
 }
 
 Rules:
-- Do not hallucinate facts.
+- Every claim about the candidate (roles, employers, skills, numbers, achievements) must come from the Resume. Never invent experience; if the resume does not support a requirement from the job description, do not claim it.
+- Write in the language of the job description.
 - Do not use cliches.
 - Keep language specific and concise.`
+
+// The builder used to send the cover letter's own text (placeholders on a new
+// letter) as "resume", so the model had no real facts and made them up. The
+// source is now the user's actual resume: the one given, else the latest.
+async function loadResumeText(userId: string, resumeId: string | undefined): Promise<string> {
+  const supabase = createServerClient()
+  let query = supabase.from('resumes').select('data').eq('user_id', userId)
+  query = resumeId ? query.eq('id', resumeId) : query.order('updated_at', { ascending: false })
+  const { data } = await query.limit(1).maybeSingle()
+  return resumeToPlainText(data?.data)
+}
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
@@ -52,7 +66,15 @@ export async function POST(req: Request) {
     const body = parsed.data
 
     // SECURITY: every free-text field going to Anthropic must be sanitized.
-    const safeResume = sanitizeForPrompt(body.resumeText, { maxChars: 10_000 })
+    const resumeText = (await loadResumeText(userId, body.resumeId)) || body.resumeText || ''
+    if (!resumeText.trim()) {
+      return jsonWithRequestId(
+        { error: clientErrorMessage('invalid_input', 'Create or import a resume first so the letter can use your real experience.') },
+        400,
+        requestId
+      )
+    }
+    const safeResume = sanitizeForPrompt(resumeText, { maxChars: 10_000 })
     const safeCompany = sanitizeForPrompt(body.company, { maxChars: 500 })
     const safePosition = sanitizeForPrompt(body.position, { maxChars: 500 })
     const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })

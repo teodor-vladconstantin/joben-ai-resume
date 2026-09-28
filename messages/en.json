@@ -408,12 +408,16 @@
   },
   "Grade": {
     "labels": {
+      "Critical": "Critical",
+      "Outstanding": "Outstanding",
       "Poor": "Poor",
       "Fair": "Fair",
       "Good": "Good",
       "Excellent": "Excellent"
     },
     "descriptions": {
+      "Critical": "Core sections or content are missing; most applications will stall at the ATS stage.",
+      "Outstanding": "Top-tier resume. It already reads well to ATS software and recruiters.",
       "Poor": "Significant issues here are likely costing you interviews.",
       "Fair": "A few fixes below would meaningfully improve your chances.",
       "Good": "Solid resume. A couple of tweaks would make it stronger.",
@@ -578,7 +582,7 @@
       "youLabel": "You: ",
       "footerPrefix": "Your score of ",
       "footerMiddle": " is higher than approximately ",
-      "footerSuffix": "% of resumes in our system."
+      "footerSuffix": " of resumes in our system."
     }
   },
   "CookieConsent": {
@@ -929,6 +933,7 @@
       "cancel": "Cancel"
     },
     "status": {
+      "loading": "Loading resume...",
       "saving": "Saving...",
       "saved": "Saved",
       "saveFailed": "Save failed"
@@ -1142,6 +1147,8 @@
     }
   },
   "ResumesPage": {
+    "loading": "Loading...",
+    "loadFailed": "Could not load your resumes. Refresh the page to try again.",
     "title": "Resumes",
     "resumeCount": "{count} resumes",
     "createResume": "Create Resume",
@@ -1157,6 +1164,9 @@
     "deleteFailedAlert": "Failed to delete resume. See console for details."
   },
   "CoverLettersPage": {
+    "loading": "Loading...",
+    "loadFailed": "Could not load your cover letters. Refresh the page to try again.",
+    "deleteFailedAlert": "Could not delete the cover letter. Please try again.",
     "title": "Cover Letters",
     "letterCount": "{count} cover letters",
     "createCoverLetter": "Create Cover Letter",
@@ -1182,7 +1192,7 @@
       "outOf100": "/100",
       "uploadNewResume": "Upload New Resume",
       "dropzoneText": "Drag & drop or click to browse",
-      "dropzoneHint": "PDF only. Max 10MB.",
+      "dropzoneHint": "PDF only. Max 5MB.",
       "readingPdf": "Reading PDF...",
       "readyFile": "Ready: {fileName}",
       "jobDescriptionPlaceholder": "Optional job description for more accurate analysis",
@@ -1202,7 +1212,7 @@
       "reReview": "Re-review",
       "defaultUpgradeMessage": "Upgrade to Pro for unlimited AI analysis.",
       "errorPdfOnly": "Only PDF files are supported at the moment.",
-      "errorPdfTooLarge": "PDF must be under 10 MB.",
+      "errorPdfTooLarge": "PDF must be under 5 MB.",
       "errorCouldNotExtractText": "Could not extract text from this PDF.",
       "errorFailedToParsePdf": "Failed to parse uploaded PDF.",
       "errorUploadOrSelect": "Upload a resume PDF or select an existing resume first.",

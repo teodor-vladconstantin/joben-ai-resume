@@ -1,5 +1,5 @@
 "use client"
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -86,18 +86,6 @@ function parseSections(content: string): CoverLetterSections {
   return defaultSections
 }
 
-function toResumeLikeText(sections: CoverLetterSections) {
-  return [
-    sections.headerName,
-    sections.position,
-    sections.introduction,
-    ...sections.bodyParagraphs,
-    sections.conclusion,
-  ]
-    .filter(Boolean)
-    .join('\n')
-}
-
 export function CoverLetterBuilder() {
   const t = useTranslations('CoverLetterBuilder')
   const params = useParams<{ id: string }>()
@@ -106,6 +94,10 @@ export function CoverLetterBuilder() {
   const isCreateMode = routeId === 'new' || !routeId
 
   const [sections, setSections] = useState<CoverLetterSections>(defaultSections)
+  // What was just loaded (or the new-letter seed). Autosave waits until the
+  // user changes something: visiting "new" used to create a placeholder
+  // letter, and opening one re-saved it and bumped its updated_at.
+  const pristineSectionsRef = useRef<CoverLetterSections | null>(null)
   const [jobDescription, setJobDescription] = useState('')
   const [activeModal, setActiveModal] = useState<TextModalId | null>(null)
   const [isBodyModalOpen, setIsBodyModalOpen] = useState(false)
@@ -153,10 +145,11 @@ export function CoverLetterBuilder() {
 
     async function loadLetter() {
       if (isCreateMode) {
-        setSections((prev) => ({
-          ...prev,
-          date: prev.date || new Date().toISOString().slice(0, 10),
-        }))
+        setSections((prev) => {
+          const next = { ...prev, date: prev.date || new Date().toISOString().slice(0, 10) }
+          pristineSectionsRef.current = next
+          return next
+        })
         setIsLoading(false)
         return
       }
@@ -190,16 +183,13 @@ export function CoverLetterBuilder() {
       }
 
       setLetterId(letterPayload.id)
-      setSections(parseSections(letterPayload.content || ''))
-
+      const loaded = parseSections(letterPayload.content || '')
       const parts = (letterPayload.title || '').split(' - ')
-      if (parts.length >= 2) {
-        setSections((prev) => ({
-          ...prev,
-          company: prev.company || parts[0],
-          position: prev.position || parts.slice(1).join(' - '),
-        }))
-      }
+      const next = parts.length >= 2
+        ? { ...loaded, company: loaded.company || parts[0], position: loaded.position || parts.slice(1).join(' - ') }
+        : loaded
+      pristineSectionsRef.current = next
+      setSections(next)
 
       setIsLoading(false)
     }
@@ -256,12 +246,12 @@ export function CoverLetterBuilder() {
   }, [computedTitle, isCreateMode, letterId, routeId, router, sections])
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading || sections === pristineSectionsRef.current) return
     const handle = setTimeout(() => {
       void persistLetter()
     }, 2000)
     return () => clearTimeout(handle)
-  }, [isLoading, persistLetter])
+  }, [isLoading, persistLetter, sections])
 
   function openSectionEditor(id: string) {
     if (id === 'body') {
@@ -359,7 +349,6 @@ export function CoverLetterBuilder() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          resumeText: toResumeLikeText(sections),
           company: sections.company,
           position: sections.position,
           jobDescription,

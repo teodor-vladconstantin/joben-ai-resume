@@ -10,6 +10,7 @@ import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } fro
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { importPdfClientSide } from '@/lib/pdf-import'
+import { resumeToPlainText } from '@/lib/resume-text'
 
 type ResumeItem = {
   id: string
@@ -24,53 +25,8 @@ type ReviewItem = {
   resumes?: { title?: string } | Array<{ title?: string }> | null
 }
 
-function extractResumeText(data: unknown) {
-  if (!data || typeof data !== 'object') return ''
-  const payload = data as {
-    personal?: {
-      firstName?: string
-      lastName?: string
-      title?: string
-      email?: string
-      phone?: string
-      summary?: string
-    }
-    experience?: Array<{
-      title?: string
-      company?: string
-      period?: string
-      description?: string
-      bullets?: string[]
-    }>
-    dynamicSections?: Array<{
-      title?: string
-      content?: string
-    }>
-  }
-
-  const personal = payload.personal || {}
-  const base = [
-    `${personal.firstName || ''} ${personal.lastName || ''}`.trim(),
-    personal.title || '',
-    personal.email || '',
-    personal.phone || '',
-    personal.summary || '',
-  ]
-
-  const experience = (payload.experience || []).map((e) => {
-    const bullets = Array.isArray(e.bullets)
-      ? e.bullets.map((b) => b.trim()).filter(Boolean)
-      : []
-    const bulletText = bullets.length > 0 ? bullets.join(' | ') : (e.description || '')
-    return `${e.title || ''} at ${e.company || ''} (${e.period || ''}) ${bulletText}`
-  })
-
-  const dynamic = (payload.dynamicSections || []).map(
-    (s) => `${s.title || ''}:\n${s.content || ''}`
-  )
-
-  return [...base, ...experience, ...dynamic].filter(Boolean).join('\n')
-}
+// Every section, with headings: see resumeToPlainText.
+const extractResumeText = resumeToPlainText
 
 export default function AIReviewPage() {
   const t = useTranslations('AiReviewPage.list')
@@ -133,7 +89,8 @@ export default function AIReviewPage() {
       return
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    // Same cap as the import pipeline this goes through (it rejects > 5 MB).
+    if (file.size > 5 * 1024 * 1024) {
       setError(t('errorPdfTooLarge'))
       return
     }

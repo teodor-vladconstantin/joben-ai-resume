@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from '@/i18n/navigation'
 import { Sidebar } from '@/components/dashboard/Sidebar'
@@ -14,10 +15,14 @@ import { getEmailHintFromSessionClaims, getUserPlan, PLAN_DEFINITIONS } from '@/
 import type { AppLocale } from '@/i18n/routing'
 import { getTranslations } from 'next-intl/server'
 
-export const metadata = {
-  title: 'Settings | Joben',
-  description: 'Manage your account settings.',
-  robots: { index: false, follow: false },
+// Localized: a fixed English title showed on the Romanian UI.
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Dashboard' })
+  return {
+    title: `${t('sidebarSettings')} | Joben`,
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function SettingsPage({ params }: { params: Promise<{ locale: AppLocale }> }) {

@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search, ArrowRight } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { timeAgo } from '@/lib/time-ago'
 
 type CoverLetterItem = {
@@ -18,6 +18,8 @@ type CoverLetterItem = {
 
 export default function CoverLettersPage() {
   const t = useTranslations('CoverLettersPage')
+  const locale = useLocale()
+  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading')
   const [letters, setLetters] = useState<CoverLetterItem[]>([])
   const [isPending, startTransition] = useTransition()
   const [query, setQuery] = useState('')
@@ -29,15 +31,20 @@ export default function CoverLettersPage() {
     async function loadLetters() {
       const response = await fetch('/api/cover-letters', { cache: 'no-store' })
       if (!response.ok) {
-        if (!cancelled) setLetters([])
+        if (!cancelled) setLoadState('error')
         return
       }
 
       const payload = (await response.json()) as { letters?: CoverLetterItem[]; data?: { letters?: CoverLetterItem[] } }
-      if (!cancelled) setLetters(payload.data?.letters || payload.letters || [])
+      if (!cancelled) {
+        setLetters(payload.data?.letters || payload.letters || [])
+        setLoadState('ready')
+      }
     }
 
-    loadLetters()
+    loadLetters().catch(() => {
+      if (!cancelled) setLoadState('error')
+    })
 
     return () => {
       cancelled = true
@@ -49,7 +56,10 @@ export default function CoverLettersPage() {
 
     startTransition(async () => {
       const response = await fetch(`/api/cover-letters/${id}`, { method: 'DELETE' })
-      if (!response.ok) return
+      if (!response.ok) {
+        alert(t('deleteFailedAlert'))
+        return
+      }
       setLetters((prev) => prev.filter((item) => item.id !== id))
     })
   }
@@ -111,7 +121,11 @@ export default function CoverLettersPage() {
           </div>
 
           <div className="border border-(--border) bg-(--surface)">
-            {visibleLetters.length === 0 ? (
+            {loadState === 'loading' ? (
+              <p className="px-4 py-10 text-center text-sm text-(--muted)">{t('loading')}</p>
+            ) : loadState === 'error' ? (
+              <p className="px-4 py-10 text-center text-sm text-(--foreground)">{t('loadFailed')}</p>
+            ) : visibleLetters.length === 0 ? (
               <EmptyState
                 title={t('noCoverLettersFound')}
                 action={
@@ -126,11 +140,11 @@ export default function CoverLettersPage() {
                   <div key={letter.id} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{letter.title || t('untitledCoverLetter')}</p>
-                      <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(letter.updated_at).toLocaleDateString()}</p>
+                      <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(letter.updated_at).toLocaleDateString(locale)}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="font-mono text-xs font-bold opacity-70">{t('badgeLabel')}</span>
-                      <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(letter.updated_at)}</span>
+                      <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(letter.updated_at, locale)}</span>
                       <Link href={`/cover-letters/${letter.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Eye className="w-4 h-4" /></Link>
                       <Link href={`/cover-letters/${letter.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Edit className="w-4 h-4" /></Link>
                       <button

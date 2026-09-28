@@ -102,7 +102,7 @@ export function clampAnalysisScores(analysis: unknown, context: ClampLogContext)
   return result
 }
 
-function analysisGrade(score: number): string {
+export function analysisGrade(score: number): string {
   if (score < 40) return 'Critical'
   if (score < 55) return 'Poor'
   if (score < 70) return 'Fair'
