@@ -166,7 +166,9 @@ function normalizeExperienceBullets(input: string[] | null | undefined, descript
 function withIntroBullet(description: string | null | undefined, bullets: string[]): string[] {
   const intro = decodeHtml(description).trim()
   if (!intro) return bullets
-  const norm = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim()
+  // The parser strips trailing punctuation from bullets but not from the
+  // description, so "...features." and "...features" must count as equal.
+  const norm = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').replace(/[\s.,;:!]+$/, '').trim()
   const introNorm = norm(intro)
   const bulletNorms = bullets.map(norm)
   // Equal to a bullet, or the bullets were themselves split out of it.

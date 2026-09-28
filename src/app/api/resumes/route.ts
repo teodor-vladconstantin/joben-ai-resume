@@ -87,7 +87,19 @@ export async function POST(req: Request) {
       isGodModeUser(userId),
     ])
     if (!godMode) {
-      const featureCheck = await checkFeatureLimit(userId, 'cvs', plan)
+      let featureCheck = await checkFeatureLimit(userId, 'cvs', plan)
+      // The Redis 'cvs' counter can drift above the real row count (a skipped
+      // fail-open decrement, rows removed outside this route), which locked
+      // users with 0 saved resumes out of saving. The DB count is the truth.
+      if (!featureCheck.allowed && !featureCheck.blocked && featureCheck.limit !== null) {
+        const { count } = await createServerClient()
+          .from('resumes')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+        if (count !== null && count < featureCheck.limit) {
+          featureCheck = { ...featureCheck, allowed: true }
+        }
+      }
       if (!featureCheck.allowed) {
         await recordLimitHit(userId, 'cvs')
         await sendRateLimitEmailIfEligible({
