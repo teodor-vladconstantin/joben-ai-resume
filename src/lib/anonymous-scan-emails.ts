@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sendAnonymousScanReportEmail, type AnonScanEmailLocale, type AnonScanEmailType } from '@/lib/resend'
-import { anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { logger } from '@/lib/logger'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 
@@ -12,16 +12,19 @@ function isDuplicateError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
 
-// One event per successfully sent anonymous-scan email (report, 48h, 7d),
-// under the scan's server-side id; the scan route aliases that id to the
-// visitor's browser id when they accepted analytics cookies.
+// One event per sent anonymous-scan email (report, 48h, 7d), captured under
+// the visitor's browser distinct id (anonymous_scans.posthog_distinct_id).
+// That id only exists when they accepted analytics cookies; without it
+// nothing is captured, so refusing cookies also covers these server events.
 export async function captureAnonEmailSent(input: {
+  analyticsDistinctId: string | null
   type: AnonScanEmailType
   scanId: string
   locale: AnonScanEmailLocale
 }): Promise<void> {
+  if (!input.analyticsDistinctId) return
   await capturePostHogEvent({
-    distinctId: anonScanDistinctId(input.scanId),
+    distinctId: input.analyticsDistinctId,
     event: 'anon_email_sent',
     properties: { type: input.type, scanId: input.scanId, locale: input.locale },
   })
@@ -31,6 +34,7 @@ type ScanReportInput = {
   scanId: string
   email: string
   locale: AnonScanEmailLocale
+  analyticsDistinctId: string | null
   overallScore: number
   grade: string
   categories: Record<AtsCategoryKey, { score: number; max: number }>
@@ -99,7 +103,12 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
       .eq('source_event_id', sourceEventId)
 
     if (result.success) {
-      await captureAnonEmailSent({ type: 'report', scanId: input.scanId, locale: input.locale })
+      await captureAnonEmailSent({
+        analyticsDistinctId: input.analyticsDistinctId,
+        type: 'report',
+        scanId: input.scanId,
+        locale: input.locale,
+      })
     }
 
     if (updateError) {

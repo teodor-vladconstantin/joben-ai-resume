@@ -8,7 +8,15 @@ type ClaimInput = {
   emailVerified: boolean
 }
 
-export type ClaimResult = { scanId: string; by: 'scan_id' | 'email' } | null
+// analyticsDistinctId: the scan's posthog_distinct_id, set only if the
+// visitor accepted analytics cookies when scanning (else null).
+export type ClaimResult = {
+  scanId: string
+  by: 'scan_id' | 'email'
+  analyticsDistinctId: string | null
+} | null
+
+type ClaimedRow = { id: string; posthog_distinct_id: string | null } | null
 
 // Links an anonymous ATS scan to a newly created account (Clerk webhook,
 // user.created). Scan id first: it came through the sign-up link, and scan
@@ -28,11 +36,12 @@ export async function claimAnonymousScan(input: ClaimInput): Promise<ClaimResult
         .update({ claimed_by: input.userId, claimed_at: claimedAt })
         .eq('id', input.scanId)
         .is('claimed_by', null)
-        .select('id')
+        .select('id, posthog_distinct_id')
         .maybeSingle()
 
       if (error) throw new Error(error.message)
-      if (data?.id) return { scanId: data.id, by: 'scan_id' }
+      const row = data as ClaimedRow
+      if (row?.id) return { scanId: row.id, by: 'scan_id', analyticsDistinctId: row.posthog_distinct_id ?? null }
     }
 
     if (!input.email || !input.emailVerified) return null
@@ -54,11 +63,12 @@ export async function claimAnonymousScan(input: ClaimInput): Promise<ClaimResult
       .update({ claimed_by: input.userId, claimed_at: claimedAt })
       .eq('id', latest.id)
       .is('claimed_by', null)
-      .select('id')
+      .select('id, posthog_distinct_id')
       .maybeSingle()
 
     if (claimError) throw new Error(claimError.message)
-    return claimed?.id ? { scanId: claimed.id, by: 'email' } : null
+    const row = claimed as ClaimedRow
+    return row?.id ? { scanId: row.id, by: 'email', analyticsDistinctId: row.posthog_distinct_id ?? null } : null
   } catch (error) {
     logger.warn('Anonymous scan claim failed', {
       source: 'claimAnonymousScan',

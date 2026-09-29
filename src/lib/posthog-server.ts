@@ -53,25 +53,21 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
   })
 }
 
-// Merges `alias` (a never-identified id, e.g. `anon:scan:<id>`) into the
-// person behind `distinctId`, so events captured under the alias show up in
-// that person's history and funnels.
+// Merges `alias` (a never-identified browser id) into the person behind
+// `distinctId` (the Clerk user id), so the anonymous history shows up in that
+// account's timeline and funnels. PostHog ignores it if `alias` already
+// belongs to an identified person.
 export async function aliasPostHogDistinctId(input: { distinctId: string; alias: string }): Promise<void> {
   await withPostHogClient('alias', (client) => {
     client.alias({ distinctId: input.distinctId, alias: input.alias })
   })
 }
 
-// Server-side distinct id for events about one anonymous ATS scan.
-export function anonScanDistinctId(scanId: string): string {
-  return `anon:scan:${scanId}`
-}
-
 // A browser distinct id the client sent along (only when the visitor accepted
 // analytics cookies). It is caller-supplied, so it is bounded, charset-limited,
 // and never a Clerk user id (`user_…`, what identify() sets after sign-in) or
-// one of our server-side ids (`anon:…`): otherwise anyone who knows such an id
-// could alias events into that person.
+// one of our server-side ids (`anon:…`, e.g. the IP-hash scan counter):
+// otherwise anyone who knows such an id could alias events into that person.
 const BROWSER_DISTINCT_ID_PATTERN = /^[A-Za-z0-9_.:@-]{1,200}$/
 
 export function toBrowserDistinctId(value: unknown): string | null {

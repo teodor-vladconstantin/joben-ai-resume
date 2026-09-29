@@ -30,11 +30,12 @@ describe('claimAnonymousScan', () => {
 
   it('claims by scan id first, only while unclaimed', async () => {
     const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
-    results.push({ data: { id: SCAN }, error: null })
+    results.push({ data: { id: SCAN, posthog_distinct_id: 'ph-browser-1' }, error: null })
 
     const claim = await claimAnonymousScan({ userId: 'user_1', scanId: SCAN, email: 'a@b.ro', emailVerified: true })
 
-    expect(claim).toEqual({ scanId: SCAN, by: 'scan_id' })
+    // The stored browser id comes back so the webhook can alias it (consented scan).
+    expect(claim).toEqual({ scanId: SCAN, by: 'scan_id', analyticsDistinctId: 'ph-browser-1' })
     expect(calls).toContainEqual(['eq', ['id', SCAN]])
     expect(calls).toContainEqual(['is', ['claimed_by', null]])
   })
@@ -50,12 +51,22 @@ describe('claimAnonymousScan', () => {
 
   it('falls back to the newest unclaimed scan with the same verified email', async () => {
     const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
-    results.push({ data: { id: SCAN }, error: null }, { data: { id: SCAN }, error: null })
+    results.push({ data: { id: SCAN }, error: null }, { data: { id: SCAN, posthog_distinct_id: null }, error: null })
 
     const claim = await claimAnonymousScan({ userId: 'user_1', scanId: null, email: 'a@b.ro', emailVerified: true })
 
-    expect(claim).toEqual({ scanId: SCAN, by: 'email' })
+    // Scan made without analytics consent: nothing to alias.
+    expect(claim).toEqual({ scanId: SCAN, by: 'email', analyticsDistinctId: null })
     expect(calls).toContainEqual(['eq', ['email', 'a@b.ro']])
+  })
+
+  it('does not fall back to email when the scan id is already claimed and the email is unverified', async () => {
+    const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
+    results.push({ data: null, error: null })
+
+    const claim = await claimAnonymousScan({ userId: 'user_2', scanId: SCAN, email: 'a@b.ro', emailVerified: false })
+
+    expect(claim).toBeNull()
   })
 
   it('returns null instead of throwing when the database errors', async () => {

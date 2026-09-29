@@ -16,12 +16,7 @@ import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
-import {
-  aliasPostHogDistinctId,
-  anonScanDistinctId,
-  capturePostHogEvent,
-  toBrowserDistinctId,
-} from '@/lib/posthog-server'
+import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
@@ -166,6 +161,7 @@ async function storeAnonymousScan(input: {
   weakestCategory: string | null
   reportJson: unknown
   locale: AnonScanEmailLocale
+  analyticsDistinctId: string | null
 }): Promise<string | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -182,6 +178,7 @@ async function storeAnonymousScan(input: {
       weakest_category: input.weakestCategory,
       report_json: input.reportJson,
       locale: input.locale,
+      posthog_distinct_id: input.analyticsDistinctId,
     })
     .select('id')
     .single()
@@ -413,6 +410,12 @@ export async function POST(req: Request) {
       }
     }
 
+    // The browser's PostHog distinct id: the client sends it only after the
+    // visitor accepted analytics cookies, so its presence IS the consent
+    // signal. Stored on the scan row, it is the only id server-side events
+    // about this scan (emails sent, claim at sign-up) are ever captured under.
+    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+
     // Persisted unconditionally (not only when an email was given) so a
     // scanId always exists for the post-scan "email me this report" flow.
     // Only worth doing when the report actually parsed, that's the content
@@ -427,6 +430,7 @@ export async function POST(req: Request) {
           weakestCategory,
           reportJson: typedResult.data,
           locale,
+          analyticsDistinctId: browserDistinctId,
         })
 
         if (scanId && scanEmail) {
@@ -439,6 +443,7 @@ export async function POST(req: Request) {
             scanId,
             email: scanEmail,
             locale,
+            analyticsDistinctId: browserDistinctId,
             overallScore: typedResult.data.overall_score,
             grade: typedResult.data.grade,
             categories: typedResult.data.categories,
@@ -455,28 +460,23 @@ export async function POST(req: Request) {
       }
     }
 
-    // The browser's PostHog distinct id is only sent by the client after the
-    // visitor accepted analytics cookies. With it, this event joins the
-    // browser's history (and, via identify() at sign-in, the account's), and
-    // the alias pulls later scan-scoped server events (report email, 48h/7d
-    // sends) into the same person.
-    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
-    if (browserDistinctId && scanId) {
-      await aliasPostHogDistinctId({ distinctId: browserDistinctId, alias: anonScanDistinctId(scanId) })
+    // The one server-side event that also fires for visitors who refused
+    // cookies, exactly as on main: an anonymous scan counter under the IP
+    // hash, with no scanId (which would link it to the stored email).
+    // With consent it joins the browser's history instead (and, via
+    // identify() at sign-in, the account's) and carries the scanId.
+    const scanStats = {
+      hasEmail: Boolean(scanEmail),
+      overallScore,
+      locale,
+      issuesCount: typedResult.success ? typedResult.data.issues.length : null,
+      weakestCategory,
     }
-
-    await capturePostHogEvent({
-      distinctId: browserDistinctId || (scanId ? anonScanDistinctId(scanId) : `anon:${ipHash || 'unknown'}`),
-      event: 'anonymous_ats_check_completed',
-      properties: {
-        hasEmail: Boolean(scanEmail),
-        overallScore,
-        scanId,
-        locale,
-        issuesCount: typedResult.success ? typedResult.data.issues.length : null,
-        weakestCategory,
-      },
-    })
+    await capturePostHogEvent(
+      browserDistinctId
+        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId } }
+        : { distinctId: `anon:${ipHash || 'unknown'}`, event: 'anonymous_ats_check_completed', properties: scanStats }
+    )
 
     return withDeviceCookie(jsonWithRequestId({ result, scanId, emailSent: Boolean(scanId && scanEmail) }, 200, requestId))
   } catch (error) {
