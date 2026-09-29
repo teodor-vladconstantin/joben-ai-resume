@@ -1,7 +1,11 @@
 ## Active
-- [IN PROGRESS] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, 6 commit-uri: copy, ordine
-  rezultat, emailuri localizate + UTM, tracking PostHog, consimțământ inline la sign-up, claim scan în cont).
-  Migrările doar ca fișiere SQL, neaplicate în producție.
+- [IN PROGRESS] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, nepush-uit). Făcute: copy
+  corect (limite free reale, "fișierul e șters după scanare"), rezultat: probleme → CTA gratuit → email → Pro,
+  emailuri anonime RO/EN cu escape + UTM + `scan=<id>`, evenimente PostHog + stitching distinct id,
+  consimțământ inline localizat la sign-up (localStorage, refolosit 20 min, tokenul expiră la 30), claim scan
+  în cont + card pe dashboard, fix-uri din review. Urmează: verificare completă + fix-urile mici (a-d).
+  - DE FĂCUT de user, ÎNAINTE de deploy: migrările `20260929120000_add_anonymous_scans_locale.sql` și
+    `20260929130000_add_anonymous_scans_claimed_by.sql`.
 - [DONE] 2026-09-29 Smoke test producție după `af4ef74` (curl: /ro, /en, /api/health ok; dashboard redirect la
   sign-in ok) + resturile din 2026-09-28. Verificat live după deploy `23a35cc` (Chrome, logat): scrisoare nouă
   pe /ro cu antet din cont + salut/încheiere RO + hint, fără autosave la deschidere (lista rămâne la 2);
