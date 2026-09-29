@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { capturePostHogEvent } from '@/lib/posthog-server'
+import { aliasPostHogDistinctId, anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
+import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
 import { OWNED_TABLES } from '@/app/api/account/delete/route'
 
@@ -207,11 +208,25 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
+    // Set by the sign-up page when the visit came from the free ATS checker
+    // (result page CTA or an anonymous-scan email); re-validated here.
+    const atsAttribution = readAtsSignupAttribution(evt.data.unsafe_metadata)
+
     await capturePostHogEvent({
       distinctId: id,
       event: 'signup_completed',
-      properties: { method: 'clerk' },
+      properties: {
+        method: 'clerk',
+        source: atsAttribution?.source ?? null,
+        scanId: atsAttribution?.scanId ?? null,
+      },
     })
+
+    if (atsAttribution?.scanId) {
+      // Pulls the scan's server-side events (report/48h/7d email sends) into
+      // this user, for visitors whose browser id never reached the server.
+      await aliasPostHogDistinctId({ distinctId: id, alias: anonScanDistinctId(atsAttribution.scanId) })
+    }
 
     if (primaryEmail) {
       const { data: existingUser, error: existingUserError } = await supabase

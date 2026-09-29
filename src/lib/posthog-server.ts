@@ -12,7 +12,7 @@ type CapturePostHogEventInput = {
 // Serverless route handlers can freeze/exit right after responding, so each
 // call gets its own client and is flushed + shut down before returning
 // rather than reusing a long-lived singleton that may never flush.
-export async function capturePostHogEvent(input: CapturePostHogEventInput): Promise<void> {
+async function withPostHogClient(label: string, send: (client: PostHog) => void): Promise<void> {
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
   if (!apiKey) return
 
@@ -23,16 +23,11 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
   })
 
   try {
-    client.capture({
-      distinctId: input.distinctId,
-      event: input.event,
-      properties: input.properties,
-    })
+    send(client)
   } catch (error) {
-    logger.warn('PostHog server-side capture threw error', {
-      source: 'capturePostHogEvent',
-      event: input.event,
-      distinctId: input.distinctId,
+    logger.warn('PostHog server-side call threw error', {
+      source: 'posthog-server',
+      label,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
   } finally {
@@ -40,10 +35,42 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
       await client.shutdown()
     } catch (error) {
       logger.warn('PostHog server-side client shutdown failed', {
-        source: 'capturePostHogEvent',
-        event: input.event,
+        source: 'posthog-server',
+        label,
         error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }
+}
+
+export async function capturePostHogEvent(input: CapturePostHogEventInput): Promise<void> {
+  await withPostHogClient(input.event, (client) => {
+    client.capture({
+      distinctId: input.distinctId,
+      event: input.event,
+      properties: input.properties,
+    })
+  })
+}
+
+// Merges `alias` (a never-identified id, e.g. `anon:scan:<id>`) into the
+// person behind `distinctId`, so events captured under the alias show up in
+// that person's history and funnels.
+export async function aliasPostHogDistinctId(input: { distinctId: string; alias: string }): Promise<void> {
+  await withPostHogClient('alias', (client) => {
+    client.alias({ distinctId: input.distinctId, alias: input.alias })
+  })
+}
+
+// Server-side distinct id for events about one anonymous ATS scan.
+export function anonScanDistinctId(scanId: string): string {
+  return `anon:scan:${scanId}`
+}
+
+// A browser distinct id the client sent along (only when the visitor accepted
+// analytics cookies). Bounded and charset-limited: it is caller-supplied.
+const BROWSER_DISTINCT_ID_PATTERN = /^[A-Za-z0-9_.:@-]{1,200}$/
+
+export function toBrowserDistinctId(value: unknown): string | null {
+  return typeof value === 'string' && BROWSER_DISTINCT_ID_PATTERN.test(value) ? value : null
 }

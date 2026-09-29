@@ -5,6 +5,7 @@ import {
   type AnonScanEmailLocale,
   type AtsCategoryKey,
 } from '@/lib/resend'
+import { captureAnonEmailSent } from '@/lib/anonymous-scan-emails'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -220,6 +221,7 @@ export async function POST(request: Request) {
         })
         .eq('source_event_id', sourceEventId)
 
+      await captureAnonEmailSent({ type: '48h', scanId: row.id, locale: toAnonScanEmailLocale(row.locale) })
       sent += 1
     }
 
