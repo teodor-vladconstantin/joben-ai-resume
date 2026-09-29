@@ -1,6 +1,8 @@
 ## Active
 - [DONE] 2026-09-29 Smoke test producție după `af4ef74` (curl: /ro, /en, /api/health ok; dashboard redirect la
-  sign-in ok; paginile autentificate netestate, extensia Chrome nu era conectată) + resturile din 2026-09-28:
+  sign-in ok) + resturile din 2026-09-28. Verificat live după deploy `23a35cc` (Chrome, logat): scrisoare nouă
+  pe /ro cu antet din cont + salut/încheiere RO + hint, fără autosave la deschidere (lista rămâne la 2);
+  toast RO la adaptare fără JD (fără credit consumat); scoruri reale în lista de CV-uri; 0 erori în consolă.
   - `useServerError` (src/hooks): pe /ro nu se mai afișează mesajele englezești ale API-urilor (~20 locuri:
     builder, scrisori, AI review, ATS gratuit, redeem); 429 → mesaj tradus; cazuri specifice păstrate
     (scrisoare fără CV → `code: 'no_resume'`, ATS 400 → fișier necitibil, redeem 400 → cod invalid).
