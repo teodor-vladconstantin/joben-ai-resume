@@ -6,6 +6,7 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { toAnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
 
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
 
     const { data: scan, error: fetchError } = await supabase
       .from('anonymous_scans')
-      .select('id, email, report_json')
+      .select('id, email, report_json, locale, posthog_distinct_id')
       .eq('id', scanId)
       .maybeSingle()
 
@@ -129,17 +130,23 @@ export async function POST(req: Request) {
     await sendAnonymousScanReportEmailIfEligible({
       scanId,
       email: finalEmail,
+      locale: toAnonScanEmailLocale(scan.locale),
+      analyticsDistinctId: scan.posthog_distinct_id ?? null,
       overallScore: reportJson.data.overall_score,
       grade: reportJson.data.grade,
       categories: reportJson.data.categories,
       issues: reportJson.data.issues,
     })
 
-    await capturePostHogEvent({
-      distinctId: `anon:scan:${scanId}`,
-      event: 'anonymous_ats_check_email_captured_post_scan',
-      properties: { overallScore: reportJson.data.overall_score },
-    })
+    // Only for visitors who accepted analytics cookies at scan time (see
+    // anonymous_scans.posthog_distinct_id); refused means no server event.
+    if (scan.posthog_distinct_id) {
+      await capturePostHogEvent({
+        distinctId: scan.posthog_distinct_id,
+        event: 'anonymous_ats_check_email_captured_post_scan',
+        properties: { overallScore: reportJson.data.overall_score, scanId },
+      })
+    }
 
     return jsonWithRequestId({ success: true, email: finalEmail }, 200, requestId)
   } catch (error) {

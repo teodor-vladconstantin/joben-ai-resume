@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScan7dEmail } from '@/lib/resend'
+import { sendAnonymousScan7dEmail, toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
+import { captureAnonEmailSent } from '@/lib/anonymous-scan-emails'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -24,15 +25,22 @@ const MAX_AGE_MS = 21 * 24 * 60 * 60 * 1000
 type CandidateScan = {
   id: string
   email: string | null
+  locale: string | null
+  posthog_distinct_id: string | null
 }
 
 function buildSourceEventId(scanId: string): string {
   return `anon-scan-7d:${scanId}`
 }
 
-async function sendWithRetry(input: { to: string; maxRetries: number }) {
+async function sendWithRetry(input: {
+  to: string
+  scanId: string
+  locale: AnonScanEmailLocale
+  maxRetries: number
+}) {
   return sendEmailWithRetry(
-    ({ to }) => sendAnonymousScan7dEmail({ to }),
+    ({ to }) => sendAnonymousScan7dEmail({ to, scanId: input.scanId, locale: input.locale }),
     { to: input.to, firstName: null, maxRetries: input.maxRetries }
   )
 }
@@ -58,8 +66,10 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('anonymous_scans')
-      .select('id, email')
+      .select('id, email, locale, posthog_distinct_id')
       .not('email', 'is', null)
+      // Claimed = already turned into an account (possibly under another email).
+      .is('claimed_by', null)
       .gte('created_at', minCreatedAt)
       .lte('created_at', maxCreatedAt)
       .limit(options.limit)
@@ -121,6 +131,7 @@ export async function POST(request: Request) {
     let sent = 0
     let retried = 0
     let deduped = 0
+    let suppressed = 0
     const failures: Array<{ scan_id: string; reason: string }> = []
 
     for (const row of eligible) {
@@ -152,6 +163,8 @@ export async function POST(request: Request) {
 
       const result = await sendWithRetry({
         to: row.email as string,
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
         maxRetries: options.maxRetries,
       })
 
@@ -184,13 +197,26 @@ export async function POST(request: Request) {
       await supabase
         .from('email_events')
         .update({
-          status: 'sent',
+          status: result.suppressed ? 'suppressed' : 'sent',
           provider_id: result.providerId || null,
           error: null,
           metadata: { source: EVENT_SOURCE, attempts: result.attempts, scanId: row.id },
         })
         .eq('source_event_id', sourceEventId)
 
+      // Unsubscribed: counted as handled (the lock stays, no retry) but no
+      // email went out, so no anon_email_sent and not in `sent`.
+      if (result.suppressed) {
+        suppressed += 1
+        continue
+      }
+
+      await captureAnonEmailSent({
+        analyticsDistinctId: row.posthog_distinct_id,
+        type: '7d',
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
+      })
       sent += 1
     }
 
@@ -202,6 +228,7 @@ export async function POST(request: Request) {
       sent,
       retried,
       deduped,
+      suppressed,
       failed: failures.length,
     })
 
@@ -212,6 +239,7 @@ export async function POST(request: Request) {
         sent,
         retried,
         deduped,
+        suppressed,
         failed: failures.length,
         dryRun: false,
         failures,

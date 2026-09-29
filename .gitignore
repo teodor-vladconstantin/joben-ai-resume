@@ -75,3 +75,6 @@ cleanup-reports/
 /blob-report/
 
 .env*
+
+# Per-user Claude Code settings (permissions allowlist), never shared
+.claude/settings.local.json

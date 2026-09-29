@@ -214,6 +214,51 @@ export async function getLatestReviewSummary(userId: string): Promise<LatestRevi
   }
 }
 
+export type ClaimedAtsScan = {
+  scanId: string
+  score: number
+  issues: { issue: string; explanation: string }[]
+}
+
+// Latest free-ATS-checker scan linked to this account by the Clerk webhook
+// (anonymous_scans.claimed_by). Null when there is none, so the dashboard
+// card does not render.
+export async function getLatestClaimedAtsScan(userId: string): Promise<ClaimedAtsScan | null> {
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('anonymous_scans')
+      .select('id, overall_score, report_json')
+      .eq('claimed_by', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) throw new Error(error.message)
+    if (!data) return null
+
+    const report = (data.report_json || {}) as { overall_score?: unknown; issues?: unknown }
+    const score = typeof data.overall_score === 'number' ? data.overall_score : Number(report.overall_score)
+    if (!Number.isFinite(score)) return null
+
+    const issues = Array.isArray(report.issues)
+      ? report.issues.filter(
+          (item): item is { issue: string; explanation: string } =>
+            typeof item?.issue === 'string' && typeof item?.explanation === 'string'
+        )
+      : []
+
+    return { scanId: data.id, score, issues }
+  } catch (error) {
+    logger.error('Supabase claimed ATS scan fetch failed', {
+      source: 'getLatestClaimedAtsScan',
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return null
+  }
+}
+
 export async function getUserResumes(userId: string) {
   try {
     const supabase = createServerClient()
