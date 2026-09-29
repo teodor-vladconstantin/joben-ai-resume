@@ -209,15 +209,6 @@ export function FreeAtsCheckerClient() {
           />
         </Card>
 
-        <Card radius="lg" className="p-6 text-center">
-          <p className="text-(--foreground) font-semibold">{t('wantRewriting')}</p>
-          <p className="mt-2">
-            <span className="text-2xl text-(--foreground) font-bold">{t('proPrice')}</span>
-            <span className="text-(--muted)"> {t('proPricePeriod')}</span>
-          </p>
-          <PlanCta plan="pro" label={t(`ctaByCategory.${CATEGORY_TO_MESSAGE_KEY[worstCategory]}.cta`)}className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`} />
-        </Card>
-
         {hasIssues && (
           <Card radius="lg" className="p-6">
             <h2 className="text-(--foreground) font-bold mb-4">{t('whatToFix')}</h2>
@@ -234,6 +225,26 @@ export function FreeAtsCheckerClient() {
             </ul>
           </Card>
         )}
+
+        <Card elevated radius="lg" className="p-6 text-center">
+          {worstCategoryMessageKey ? (
+            <>
+              <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
+              <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
+              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+                {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
+              </AuthAwareSignupLink>
+            </>
+          ) : (
+            <>
+              <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
+              <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
+              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+                {t('createFreeAccount')}
+              </AuthAwareSignupLink>
+            </>
+          )}
+        </Card>
 
         {scanId && (
           emailSentTo ? (
@@ -271,24 +282,13 @@ export function FreeAtsCheckerClient() {
           )
         )}
 
-        <Card elevated radius="lg" className="p-6 text-center">
-          {worstCategoryMessageKey ? (
-            <>
-              <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
-              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
-                {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
-              </AuthAwareSignupLink>
-            </>
-          ) : (
-            <>
-              <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
-              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
-                {t('createFreeAccount')}
-              </AuthAwareSignupLink>
-            </>
-          )}
+        <Card radius="lg" className="p-6 text-center">
+          <p className="text-(--foreground) font-semibold">{t('wantRewriting')}</p>
+          <p className="mt-2">
+            <span className="text-2xl text-(--foreground) font-bold">{t('proPrice')}</span>
+            <span className="text-(--muted)"> {t('proPricePeriod')}</span>
+          </p>
+          <PlanCta plan="pro" label={t(`ctaByCategory.${CATEGORY_TO_MESSAGE_KEY[worstCategory]}.cta`)} className={`mt-4 inline-flex ${buttonVariants('secondary', 'md')}`} />
         </Card>
 
         <div className="text-center">
