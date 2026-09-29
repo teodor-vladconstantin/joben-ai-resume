@@ -95,14 +95,16 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
     const { error: updateError } = await supabase
       .from('email_events')
       .update({
-        status: result.success ? 'sent' : 'failed',
+        status: result.success ? (result.suppressed ? 'suppressed' : 'sent') : 'failed',
         provider_id: result.providerId || null,
         error: result.error || null,
         metadata: { source: 'anonymous_scan_report', scanId: input.scanId },
       })
       .eq('source_event_id', sourceEventId)
 
-    if (result.success) {
+    // Unsubscribed recipients count as success (nothing to retry) but no
+    // email went out, so no anon_email_sent.
+    if (result.success && !result.suppressed) {
       await captureAnonEmailSent({
         analyticsDistinctId: input.analyticsDistinctId,
         type: 'report',

@@ -17,6 +17,9 @@ type EmailResult = {
   success: boolean
   error?: string
   providerId?: string
+  // true when nothing was sent because the recipient unsubscribed: still a
+  // success (nothing to retry or alert on), but not a delivered email.
+  suppressed?: boolean
 }
 
 type ResendResponse = {
@@ -62,7 +65,7 @@ async function sendEmail(input: {
   if (await isEmailSuppressed(input.to)) {
     // Not a failure: the recipient opted out, so "not delivered" is the
     // correct outcome, not something callers should retry or alert on.
-    return { success: true }
+    return { success: true, suppressed: true }
   }
 
   const token = signUnsubscribeToken(input.to)
