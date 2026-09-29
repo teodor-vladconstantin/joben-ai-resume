@@ -16,8 +16,9 @@ import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
-import { capturePostHogEvent } from '@/lib/posthog-server'
+import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -159,6 +160,8 @@ async function storeAnonymousScan(input: {
   ipHash: string | null
   weakestCategory: string | null
   reportJson: unknown
+  locale: AnonScanEmailLocale
+  analyticsDistinctId: string | null
 }): Promise<string | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -174,6 +177,8 @@ async function storeAnonymousScan(input: {
       ip_hash: input.ipHash,
       weakest_category: input.weakestCategory,
       report_json: input.reportJson,
+      locale: input.locale,
+      posthog_distinct_id: input.analyticsDistinctId,
     })
     .select('id')
     .single()
@@ -305,8 +310,9 @@ export async function POST(req: Request) {
 
     // Rate limit checked/incremented here, right before the paid AI call,
     // not earlier. A file that fails validation or extraction above never
-    // reaches this point, so it never costs the visitor one of their 3
-    // daily scans; only an upload that actually produced usable text does.
+    // reaches this point, so it never costs the visitor their daily scan
+    // (ATS_CHECK_RATE_LIMIT_PER_DAY); only an upload that actually produced
+    // usable text does.
     // Checked on BOTH identities (IP and device cookie) so a request is only
     // allowed when neither has exhausted its own daily quota.
     const [ipLimit, deviceLimit] = await Promise.all([
@@ -345,6 +351,10 @@ export async function POST(req: Request) {
         )
       )
     }
+
+    // Page locale the scan was run from, stored on the row: every
+    // anonymous-scan email (report, 48h, 7d) is sent in this language.
+    const locale = toAnonScanEmailLocale(String(formData.get('locale') || ''))
 
     let result: unknown
     try {
@@ -400,6 +410,12 @@ export async function POST(req: Request) {
       }
     }
 
+    // The browser's PostHog distinct id: the client sends it only after the
+    // visitor accepted analytics cookies, so its presence IS the consent
+    // signal. Stored on the scan row, it is the only id server-side events
+    // about this scan (emails sent, claim at sign-up) are ever captured under.
+    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+
     // Persisted unconditionally (not only when an email was given) so a
     // scanId always exists for the post-scan "email me this report" flow.
     // Only worth doing when the report actually parsed, that's the content
@@ -413,6 +429,8 @@ export async function POST(req: Request) {
           ipHash,
           weakestCategory,
           reportJson: typedResult.data,
+          locale,
+          analyticsDistinctId: browserDistinctId,
         })
 
         if (scanId && scanEmail) {
@@ -424,6 +442,8 @@ export async function POST(req: Request) {
           await sendAnonymousScanReportEmailIfEligible({
             scanId,
             email: scanEmail,
+            locale,
+            analyticsDistinctId: browserDistinctId,
             overallScore: typedResult.data.overall_score,
             grade: typedResult.data.grade,
             categories: typedResult.data.categories,
@@ -440,14 +460,23 @@ export async function POST(req: Request) {
       }
     }
 
-    await capturePostHogEvent({
-      distinctId: `anon:${ipHash || 'unknown'}`,
-      event: 'anonymous_ats_check_completed',
-      properties: {
-        hasEmail: Boolean(scanEmail),
-        overallScore,
-      },
-    })
+    // The one server-side event that also fires for visitors who refused
+    // cookies, exactly as on main: an anonymous scan counter under the IP
+    // hash, with no scanId (which would link it to the stored email).
+    // With consent it joins the browser's history instead (and, via
+    // identify() at sign-in, the account's) and carries the scanId.
+    const scanStats = {
+      hasEmail: Boolean(scanEmail),
+      overallScore,
+      locale,
+      issuesCount: typedResult.success ? typedResult.data.issues.length : null,
+      weakestCategory,
+    }
+    await capturePostHogEvent(
+      browserDistinctId
+        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId } }
+        : { distinctId: `anon:${ipHash || 'unknown'}`, event: 'anonymous_ats_check_completed', properties: scanStats }
+    )
 
     return withDeviceCookie(jsonWithRequestId({ result, scanId, emailSent: Boolean(scanId && scanEmail) }, 200, requestId))
   } catch (error) {

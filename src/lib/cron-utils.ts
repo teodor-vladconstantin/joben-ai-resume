@@ -63,10 +63,12 @@ export type SendEmailResult = {
   success: boolean
   error?: string
   providerId?: string
+  suppressed?: boolean
 }
 
+// suppressed: success, but the recipient unsubscribed so nothing was sent.
 export type SendWithRetryResult =
-  | { success: true; attempts: number; providerId?: string }
+  | { success: true; attempts: number; providerId?: string; suppressed?: boolean }
   | { success: false; attempts: number; error: string }
 
 /**
@@ -88,6 +90,7 @@ export async function sendEmailWithRetry(
         success: true,
         attempts: attempt + 1,
         providerId: result.providerId,
+        suppressed: result.suppressed,
       }
     }
 

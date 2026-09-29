@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScanReportEmail } from '@/lib/resend'
+import { sendAnonymousScanReportEmail, type AnonScanEmailLocale, type AnonScanEmailType } from '@/lib/resend'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { logger } from '@/lib/logger'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 
@@ -11,9 +12,29 @@ function isDuplicateError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
 
+// One event per sent anonymous-scan email (report, 48h, 7d), captured under
+// the visitor's browser distinct id (anonymous_scans.posthog_distinct_id).
+// That id only exists when they accepted analytics cookies; without it
+// nothing is captured, so refusing cookies also covers these server events.
+export async function captureAnonEmailSent(input: {
+  analyticsDistinctId: string | null
+  type: AnonScanEmailType
+  scanId: string
+  locale: AnonScanEmailLocale
+}): Promise<void> {
+  if (!input.analyticsDistinctId) return
+  await capturePostHogEvent({
+    distinctId: input.analyticsDistinctId,
+    event: 'anon_email_sent',
+    properties: { type: input.type, scanId: input.scanId, locale: input.locale },
+  })
+}
+
 type ScanReportInput = {
   scanId: string
   email: string
+  locale: AnonScanEmailLocale
+  analyticsDistinctId: string | null
   overallScore: number
   grade: string
   categories: Record<AtsCategoryKey, { score: number; max: number }>
@@ -63,6 +84,8 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
 
     const result = await sendAnonymousScanReportEmail({
       to: input.email,
+      scanId: input.scanId,
+      locale: input.locale,
       overallScore: input.overallScore,
       grade: input.grade,
       categories: input.categories,
@@ -72,12 +95,23 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
     const { error: updateError } = await supabase
       .from('email_events')
       .update({
-        status: result.success ? 'sent' : 'failed',
+        status: result.success ? (result.suppressed ? 'suppressed' : 'sent') : 'failed',
         provider_id: result.providerId || null,
         error: result.error || null,
         metadata: { source: 'anonymous_scan_report', scanId: input.scanId },
       })
       .eq('source_event_id', sourceEventId)
+
+    // Unsubscribed recipients count as success (nothing to retry) but no
+    // email went out, so no anon_email_sent.
+    if (result.success && !result.suppressed) {
+      await captureAnonEmailSent({
+        analyticsDistinctId: input.analyticsDistinctId,
+        type: 'report',
+        scanId: input.scanId,
+        locale: input.locale,
+      })
+    }
 
     if (updateError) {
       logger.warn('Anonymous scan report email event update failed', {

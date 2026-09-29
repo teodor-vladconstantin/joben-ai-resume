@@ -17,6 +17,9 @@ type EmailResult = {
   success: boolean
   error?: string
   providerId?: string
+  // true when nothing was sent because the recipient unsubscribed: still a
+  // success (nothing to retry or alert on), but not a delivered email.
+  suppressed?: boolean
 }
 
 type ResendResponse = {
@@ -37,6 +40,7 @@ async function sendEmail(input: {
   to: string
   subject: string
   html: string
+  unsubscribeLabel?: string
 }): Promise<EmailResult> {
   const client = getResendClient()
   if (!client) {
@@ -61,7 +65,7 @@ async function sendEmail(input: {
   if (await isEmailSuppressed(input.to)) {
     // Not a failure: the recipient opted out, so "not delivered" is the
     // correct outcome, not something callers should retry or alert on.
-    return { success: true }
+    return { success: true, suppressed: true }
   }
 
   const token = signUnsubscribeToken(input.to)
@@ -70,7 +74,7 @@ async function sendEmail(input: {
   }
   const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?email=${encodeURIComponent(input.to)}&token=${token}`
   const htmlWithFooter = `${input.html}
-<p style="margin-top:16px;text-align:center;"><a href="${unsubscribeUrl}" style="color:#5C5C57;font-size:12px;text-decoration:underline;">Unsubscribe from these emails</a></p>`
+<p style="margin-top:16px;text-align:center;"><a href="${unsubscribeUrl}" style="color:#5C5C57;font-size:12px;text-decoration:underline;">${input.unsubscribeLabel || 'Unsubscribe from these emails'}</a></p>`
 
   try {
     const response = (await client.emails.send({
@@ -176,93 +180,266 @@ export async function sendInactivityEmail(input: {
 
 export type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 
-const CATEGORY_LABELS: Record<AtsCategoryKey, string> = {
-  ats_formatting: 'ATS Formatting',
-  structure: 'Structure',
-  keyword_impact: 'Keywords & Impact',
-  clarity: 'Clarity',
+// Anonymous ATS-checker emails are localized from anonymous_scans.locale.
+// The account emails in this file stay English (users has no locale yet).
+export type AnonScanEmailLocale = 'ro' | 'en'
+export type AnonScanEmailType = 'report' | '48h' | '7d'
+
+// Rows scanned before the locale column existed have NULL: default to 'ro',
+// the site's default locale.
+export function toAnonScanEmailLocale(value: string | null | undefined): AnonScanEmailLocale {
+  return value === 'en' ? 'en' : 'ro'
+}
+
+// Issue text comes from the model reading user-supplied CV text, so it is
+// escaped before going into HTML.
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+// `scan` is read by the sign-up page to claim the scan into the new account;
+// utm_* is picked up by PostHog on landing.
+export function anonScanCtaUrl(locale: AnonScanEmailLocale, type: AnonScanEmailType, scanId: string): string {
+  const params = new URLSearchParams({
+    utm_source: 'email',
+    utm_campaign: `anon_scan_${type}`,
+    scan: scanId,
+  })
+  return `${appUrl}/${locale}/sign-up?${params.toString()}`
+}
+
+function anonCtaButton(href: string, label: string): string {
+  return `<a href="${escapeHtml(href)}" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">${label}</a>`
+}
+
+const CATEGORY_LABELS: Record<AnonScanEmailLocale, Record<AtsCategoryKey, string>> = {
+  en: {
+    ats_formatting: 'ATS Formatting',
+    structure: 'Structure',
+    keyword_impact: 'Keywords & Impact',
+    clarity: 'Clarity',
+  },
+  ro: {
+    ats_formatting: 'Formatare ATS',
+    structure: 'Structură',
+    keyword_impact: 'Cuvinte Cheie & Impact',
+    clarity: 'Claritate',
+  },
+}
+
+// Same labels as messages/ro.json Grade.labels.
+const GRADE_LABELS_RO: Record<string, string> = {
+  Critical: 'Critic',
+  Poor: 'Slab',
+  Fair: 'Acceptabil',
+  Good: 'Bun',
+  Excellent: 'Excelent',
+  Outstanding: 'Remarcabil',
+}
+
+const ANON_FOOTER: Record<AnonScanEmailLocale, string> = {
+  en: 'You are receiving this because you requested your ATS score report on joben.eu.',
+  ro: 'Primești acest email pentru că ai cerut raportul scorului ATS pe joben.eu.',
+}
+
+const UNSUBSCRIBE_LABEL: Record<AnonScanEmailLocale, string> = {
+  en: 'Unsubscribe from these emails',
+  ro: 'Dezabonează-te de la aceste emailuri',
+}
+
+const REPORT_COPY: Record<AnonScanEmailLocale, {
+  subject: (score: number) => string
+  heading: (score: number, grade: string) => string
+  intro: string
+  topFixes: string
+  cta: string
+}> = {
+  en: {
+    subject: (score) => `Your resume scored ${score}/100: here's what to fix`,
+    heading: (score, grade) => `Your resume scored ${score}/100 (${grade}).`,
+    intro: 'Here is the category breakdown from your free ATS scan:',
+    topFixes: 'Top things to fix:',
+    cta: 'Fix It Free with Joben',
+  },
+  ro: {
+    subject: (score) => `CV-ul tău a obținut ${score}/100: iată ce ai de reparat`,
+    heading: (score, grade) => `CV-ul tău a obținut ${score}/100 (${grade}).`,
+    intro: 'Iată scorurile pe categorii din scanarea ATS gratuită:',
+    topFixes: 'Ce să repari mai întâi:',
+    cta: 'Repară-l gratuit cu Joben',
+  },
 }
 
 export async function sendAnonymousScanReportEmail(input: {
   to: string
+  scanId: string
+  locale: AnonScanEmailLocale
   overallScore: number
   grade: string
   categories: Record<AtsCategoryKey, { score: number; max: number }>
   issues: { issue: string; explanation: string }[]
 }): Promise<EmailResult> {
-  const categoryRows = (Object.keys(CATEGORY_LABELS) as AtsCategoryKey[])
-    .map((key) => `<li style="margin:0 0 4px 0;">${CATEGORY_LABELS[key]}: ${input.categories[key].score}/${input.categories[key].max}</li>`)
+  const copy = REPORT_COPY[input.locale]
+  const labels = CATEGORY_LABELS[input.locale]
+  const grade = input.locale === 'ro' ? GRADE_LABELS_RO[input.grade] || input.grade : input.grade
+
+  const categoryRows = (Object.keys(labels) as AtsCategoryKey[])
+    .map((key) => `<li style="margin:0 0 4px 0;">${labels[key]}: ${input.categories[key].score}/${input.categories[key].max}</li>`)
     .join('')
 
   const issueRows = input.issues
     .slice(0, 3)
-    .map((item) => `<li style="margin:0 0 10px 0;"><strong>${item.issue}</strong><br/><span style="color:#5C5C57;font-size:13px;">${item.explanation}</span></li>`)
+    .map((item) => `<li style="margin:0 0 10px 0;"><strong>${escapeHtml(item.issue)}</strong><br/><span style="color:#5C5C57;font-size:13px;">${escapeHtml(item.explanation)}</span></li>`)
     .join('')
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
-    subject: `Your resume scored ${input.overallScore}/100: here's what to fix`,
+    subject: copy.subject(input.overallScore),
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
     html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Your resume scored ${input.overallScore}/100 (${input.grade}).</h1>
-  <p style="margin:0 0 12px 0;">Here is the category breakdown from your free ATS scan:</p>
+  <h1 style="font-size:22px;margin-bottom:8px;">${escapeHtml(copy.heading(input.overallScore, grade))}</h1>
+  <p style="margin:0 0 12px 0;">${copy.intro}</p>
   <ul style="margin:0 0 18px 18px;padding:0;">${categoryRows}</ul>
-  ${issueRows ? `<p style="margin:0 0 8px 0;">Top things to fix:</p><ul style="margin:0 0 18px 18px;padding:0;">${issueRows}</ul>` : ''}
-  <a href="${appUrl}/sign-up" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Fix It Free with Joben</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu.</p>
+  ${issueRows ? `<p style="margin:0 0 8px 0;">${copy.topFixes}</p><ul style="margin:0 0 18px 18px;padding:0;">${issueRows}</ul>` : ''}
+  ${anonCtaButton(anonScanCtaUrl(input.locale, 'report', input.scanId), copy.cta)}
+  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
 </div>`,
   })
 }
 
-const CATEGORY_48H_COPY: Record<AtsCategoryKey, { subject: string; body: string }> = {
-  keyword_impact: {
-    subject: 'Your resume is missing the numbers recruiters scan for',
-    body: 'Your ATS scan flagged Keywords & Impact as the weakest section: bullets without concrete numbers or outcomes read as junior, even when the work behind them was not.',
+const CATEGORY_48H_COPY: Record<AnonScanEmailLocale, Record<AtsCategoryKey, { subject: string; body: string }>> = {
+  en: {
+    keyword_impact: {
+      subject: 'Your resume is missing the numbers recruiters scan for',
+      body: 'Your ATS scan flagged Keywords & Impact as the weakest section: bullets without concrete numbers or outcomes read as junior, even when the work behind them was not.',
+    },
+    clarity: {
+      subject: 'Your resume bullets could be sharper',
+      body: 'Your ATS scan flagged Clarity as the weakest section: dense or vague bullets make recruiters skim past real accomplishments.',
+    },
+    structure: {
+      subject: "Your resume's structure is working against you",
+      body: 'Your ATS scan flagged Structure as the weakest section: missing or misordered sections make ATS software misread your experience.',
+    },
+    ats_formatting: {
+      subject: 'Your resume format may be tripping up ATS software',
+      body: 'Your ATS scan flagged ATS Formatting as the weakest section: layout choices like tables or graphics can cause parsers to drop content entirely.',
+    },
   },
-  clarity: {
-    subject: 'Your resume bullets could be sharper',
-    body: 'Your ATS scan flagged Clarity as the weakest section: dense or vague bullets make recruiters skim past real accomplishments.',
+  ro: {
+    keyword_impact: {
+      subject: 'CV-ului tău îi lipsesc cifrele pe care le caută recrutorii',
+      body: 'Scanarea ATS a arătat că secțiunea Cuvinte Cheie & Impact e cea mai slabă: punctele fără cifre sau rezultate concrete par de nivel junior, chiar dacă munca din spatele lor valorează mult mai mult.',
+    },
+    clarity: {
+      subject: 'Punctele din CV-ul tău pot fi mai clare',
+      body: 'Scanarea ATS a arătat că secțiunea Claritate e cea mai slabă: punctele dense sau vagi îi fac pe recrutori să treacă în grabă peste realizări reale.',
+    },
+    structure: {
+      subject: 'Structura CV-ului tău lucrează împotriva ta',
+      body: 'Scanarea ATS a arătat că secțiunea Structură e cea mai slabă: secțiunile lipsă sau așezate în altă ordine fac software-ul ATS să îți citească greșit experiența.',
+    },
+    ats_formatting: {
+      subject: 'Formatul CV-ului tău poate încurca software-ul ATS',
+      body: 'Scanarea ATS a arătat că secțiunea Formatare ATS e cea mai slabă: elemente de layout precum tabelele sau graficele pot face parserele să piardă conținut cu totul.',
+    },
   },
-  structure: {
-    subject: "Your resume's structure is working against you",
-    body: 'Your ATS scan flagged Structure as the weakest section: missing or misordered sections make ATS software misread your experience.',
+}
+
+const FOLLOWUP_48H_COPY: Record<AnonScanEmailLocale, {
+  fallbackSubject: string
+  heading: string
+  fallbackBody: string
+  pitch: string
+  cta: string
+}> = {
+  en: {
+    fallbackSubject: 'Still want to fix what your resume scan found?',
+    heading: 'A couple of days ago you scanned your resume on Joben.',
+    fallbackBody: 'Your ATS scan found a few things worth fixing before your next application.',
+    pitch: 'A free Joben account gives you AI-guided rewrites and an ATS-optimized template to fix it in minutes.',
+    cta: 'Fix My Resume Free',
   },
-  ats_formatting: {
-    subject: 'Your resume format may be tripping up ATS software',
-    body: 'Your ATS scan flagged ATS Formatting as the weakest section: layout choices like tables or graphics can cause parsers to drop content entirely.',
+  ro: {
+    fallbackSubject: 'Mai vrei să repari ce a găsit scanarea CV-ului tău?',
+    heading: 'Acum două zile ți-ai scanat CV-ul pe Joben.',
+    fallbackBody: 'Scanarea ATS a găsit câteva lucruri de reparat înainte de următoarea aplicare.',
+    pitch: 'Un cont Joben gratuit îți oferă rescrieri ghidate de AI și un șablon optimizat ATS ca să le repari în câteva minute.',
+    cta: 'Repară-mi CV-ul gratuit',
   },
 }
 
 export async function sendAnonymousScan48hEmail(input: {
   to: string
+  scanId: string
+  locale: AnonScanEmailLocale
   weakestCategory: AtsCategoryKey | null
 }): Promise<EmailResult> {
-  const copy = input.weakestCategory ? CATEGORY_48H_COPY[input.weakestCategory] : null
+  const base = FOLLOWUP_48H_COPY[input.locale]
+  const copy = input.weakestCategory ? CATEGORY_48H_COPY[input.locale][input.weakestCategory] : null
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
-    subject: copy?.subject || 'Still want to fix what your resume scan found?',
+    subject: copy?.subject || base.fallbackSubject,
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
     html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">A couple of days ago you scanned your resume on Joben.</h1>
-  <p style="margin:0 0 12px 0;">${copy?.body || 'Your ATS scan found a few things worth fixing before your next application.'}</p>
-  <p style="margin:0 0 18px 0;">A free Joben account gives you AI-guided rewrites and an ATS-optimized template to fix it in minutes.</p>
-  <a href="${appUrl}/sign-up" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Fix My Resume Free</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu.</p>
+  <h1 style="font-size:22px;margin-bottom:8px;">${base.heading}</h1>
+  <p style="margin:0 0 12px 0;">${copy?.body || base.fallbackBody}</p>
+  <p style="margin:0 0 18px 0;">${base.pitch}</p>
+  ${anonCtaButton(anonScanCtaUrl(input.locale, '48h', input.scanId), base.cta)}
+  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
 </div>`,
   })
 }
 
-export async function sendAnonymousScan7dEmail(input: { to: string }): Promise<EmailResult> {
+// Numbers match the free plan in src/lib/ratelimit.ts (jds 3, bullets 15, covers 3).
+const FOLLOWUP_7D_COPY: Record<AnonScanEmailLocale, {
+  subject: string
+  heading: string
+  body: string
+  cta: string
+  lastReminder: string
+}> = {
+  en: {
+    subject: 'Still on the job hunt?',
+    heading: 'No pressure, just leaving this here.',
+    body: 'A week ago you ran a free ATS scan on Joben. If you are still applying, a free account gives you 3 AI resume tailorings, 15 bullet rewrites and 3 cover letters every month.',
+    cta: 'Create a Free Account',
+    lastReminder: 'This is the last reminder in this series.',
+  },
+  ro: {
+    subject: 'Încă îți cauți un job?',
+    heading: 'Fără presiune, doar îți lăsăm asta aici.',
+    body: 'Acum o săptămână ai făcut o scanare ATS gratuită pe Joben. Dacă încă aplici, un cont gratuit îți oferă în fiecare lună 3 adaptări AI ale CV-ului, 15 rescrieri de puncte și 3 scrisori de intenție.',
+    cta: 'Creează un cont gratuit',
+    lastReminder: 'Acesta e ultimul memento din serie.',
+  },
+}
+
+export async function sendAnonymousScan7dEmail(input: {
+  to: string
+  scanId: string
+  locale: AnonScanEmailLocale
+}): Promise<EmailResult> {
+  const copy = FOLLOWUP_7D_COPY[input.locale]
+
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
-    subject: 'Still on the job hunt?',
+    subject: copy.subject,
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
     html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">No pressure, just leaving this here.</h1>
-  <p style="margin:0 0 12px 0;">A week ago you ran a free ATS scan on Joben. If you are still applying, a free account gives you AI resume tailoring, bullet rewrites, and cover letters whenever you need them.</p>
-  <a href="${appUrl}/sign-up" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Create a Free Account</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you requested your ATS score report on joben.eu. This is the last reminder in this series.</p>
+  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
+  <p style="margin:0 0 12px 0;">${copy.body}</p>
+  ${anonCtaButton(anonScanCtaUrl(input.locale, '7d', input.scanId), copy.cta)}
+  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]} ${copy.lastReminder}</p>
 </div>`,
   })
 }
@@ -302,7 +479,7 @@ export async function sendRateLimitEmail(input: {
   <p style="margin:0 0 12px 0;">You just reached a free plan limit on Joben.</p>
   <p style="margin:0 0 18px 0;">Upgrade to Pro to unlock:</p>
   <ul style="margin:0 0 18px 18px;padding:0;">
-    <li>Unlimited resumes and PDF exports</li>
+    <li>Save up to 3 CVs and unlimited PDF exports</li>
     <li>Much higher AI limits for reviews and rewrites</li>
     <li>Priority support when you need help</li>
   </ul>

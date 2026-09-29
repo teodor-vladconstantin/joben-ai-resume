@@ -192,7 +192,7 @@
         ],
         "excludedFeatures": [
           "Suport prioritar prin email",
-          "CV-uri salvate nelimitate",
+          "Salvezi până la 3 CV-uri",
           "Bibliotecă completă de șabloane"
         ],
         "cta": "Începe Gratuit"
@@ -287,7 +287,7 @@
     "createFreeAccount": "Creează-ți contul gratuit",
     "scanAnother": "Scanează alt CV",
     "usedFreeScan": "Ți-ai folosit scanarea gratuită de azi",
-    "usedFreeScanBody1": "Creează-ți un cont gratuit ca să primești încă o scanare chiar acum, plus rescrieri nelimitate.",
+    "usedFreeScanBody1": "Creează-ți un cont gratuit ca să continui chiar acum: 10 evaluări AI ale CV-ului și 15 rescrieri AI de puncte în fiecare lună.",
     "usedFreeScanBody2": "Sau revii mâine pentru următoarea scanare gratuită.",
     "createFreeAccountShort": "Creează un cont gratuit",
     "readyToScan": "Gata de scanare, dă click ca să alegi alt fișier",
@@ -297,7 +297,15 @@
     "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
-    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · nimic salvat"
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare"
+  },
+  "SignUp": {
+    "eyebrow": "Cont nou",
+    "heading": "Creează-ți contul gratuit",
+    "subheading": "Îți repari CV-ul, îl adaptezi pentru joburi și scrii scrisori de intenție, totul într-un singur loc.",
+    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "acceptToContinue": "Bifează căsuța de mai sus ca să continui la formularul de înregistrare.",
+    "rateLimited": "Prea multe încercări din rețeaua ta. Încearcă din nou mai târziu."
   },
   "ResumeExamplesHub": {
     "eyebrow": "Exemple de CV Gratuite",
@@ -446,6 +454,15 @@
     "rateLimited": "Prea multe cereri. Așteaptă puțin și încearcă din nou."
   },
   "Dashboard": {
+    "atsScanCard": {
+      "eyebrow": "Din scanarea ATS gratuită",
+      "headlineWithIssues": "Ultimul tău scor ATS: {score}/100, repară {count, plural, one {această problemă} few {aceste # probleme} other {aceste # de probleme}}",
+      "headlineNoIssues": "Ultimul tău scor ATS: {score}/100",
+      "hint": "Încarcă același CV în editor și repară cu AI ce a găsit scanarea.",
+      "hintNoIssues": "Încarcă același CV în editor ca să îl adaptezi pentru joburi reale.",
+      "cta": "Deschide editorul",
+      "loading": "Încărcăm scorul din scanarea ATS gratuită..."
+    },
     "greetingMorning": "Bună dimineața",
     "greetingEvening": "Bună seara",
     "guestFallbackName": "acolo",
