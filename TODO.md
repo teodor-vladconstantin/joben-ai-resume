@@ -1,11 +1,13 @@
 ## Active
-- [IN PROGRESS] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, nepush-uit). Făcute: copy
-  corect (limite free reale, "fișierul e șters după scanare"), rezultat: probleme → CTA gratuit → email → Pro,
-  emailuri anonime RO/EN cu escape + UTM + `scan=<id>`, evenimente PostHog + stitching distinct id,
-  consimțământ inline localizat la sign-up (localStorage, refolosit 20 min, tokenul expiră la 30), claim scan
-  în cont + card pe dashboard, fix-uri din review. Urmează: verificare completă + fix-urile mici (a-d).
-  - DE FĂCUT de user, ÎNAINTE de deploy: migrările `20260929120000_add_anonymous_scans_locale.sql` și
-    `20260929130000_add_anonymous_scans_claimed_by.sql`.
+- [DONE] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, nepush-uit): copy corect, rezultat:
+  probleme → CTA gratuit → email → Pro, emailuri anonime RO/EN (escape, UTM, `scan=<id>`), evenimente PostHog
+  doar cu consimțământ cookie (id browser salvat pe scan), consimțământ inline la sign-up (refolosit 20 min),
+  claim scan în cont + card pe dashboard (+ stare de încărcare), fără `anon_email_sent` pentru dezabonați.
+  Verificat: tsc, lint, 245 teste (de 2 ori, și în condițiile vechiului flake).
+  - DE FĂCUT de user, ÎNAINTE de deploy: 3 migrări `20260929120000` (locale), `20260929130000` (claimed_by),
+    `20260929140000` (posthog_distinct_id). Apoi Clerk dashboard + checklist manual pe preview.
+  - Doar raportat: "Unlimited saved CVs" (messages/en.json:195, ro.json:195) și "Unlimited resumes"
+    (src/lib/resend.ts, email limită plan) vs Pro = 3 CV-uri; overflow card Clerk la 390px exista și pe main.
 - [DONE] 2026-09-29 Smoke test producție după `af4ef74` (curl: /ro, /en, /api/health ok; dashboard redirect la
   sign-in ok) + resturile din 2026-09-28. Verificat live după deploy `23a35cc` (Chrome, logat): scrisoare nouă
   pe /ro cu antet din cont + salut/încheiere RO + hint, fără autosave la deschidere (lista rămâne la 2);
