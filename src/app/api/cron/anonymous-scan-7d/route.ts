@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sendAnonymousScan7dEmail, toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
+import { captureAnonEmailSent } from '@/lib/anonymous-scan-emails'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -199,6 +200,7 @@ export async function POST(request: Request) {
         })
         .eq('source_event_id', sourceEventId)
 
+      await captureAnonEmailSent({ type: '7d', scanId: row.id, locale: toAnonScanEmailLocale(row.locale) })
       sent += 1
     }
 

@@ -4,7 +4,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
-import { capturePostHogEvent } from '@/lib/posthog-server'
+import { anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale } from '@/lib/resend'
 
@@ -138,9 +138,9 @@ export async function POST(req: Request) {
     })
 
     await capturePostHogEvent({
-      distinctId: `anon:scan:${scanId}`,
+      distinctId: anonScanDistinctId(scanId),
       event: 'anonymous_ats_check_email_captured_post_scan',
-      properties: { overallScore: reportJson.data.overall_score },
+      properties: { overallScore: reportJson.data.overall_score, scanId },
     })
 
     return jsonWithRequestId({ success: true, email: finalEmail }, 200, requestId)

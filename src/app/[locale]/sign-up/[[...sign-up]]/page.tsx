@@ -5,11 +5,35 @@ import { Link } from '@/i18n/navigation'
 import { SignUp } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
 import { useLocale } from 'next-intl'
+import posthog from 'posthog-js'
 import { AuthShell } from '@/components/auth/AuthShell'
 import { buttonVariants } from '@/components/ui/Button'
+import {
+  isEmailAtsSource,
+  parseAtsSignupAttribution,
+  readAtsSignupAttribution,
+  type AtsSignupAttribution,
+} from '@/lib/ats-attribution'
 import type { AppLocale } from '@/i18n/routing'
 
 const LEGAL_ACCEPTED_KEY = 'joben_legal_accepted'
+const ATS_ATTRIBUTION_KEY = 'joben_ats_signup'
+
+// Read back in the Clerk webhook: consentToken (ToS acceptance) and
+// atsSource/atsScanId (signup_completed properties). User-editable, so the
+// webhook re-validates everything.
+function buildUnsafeMetadata(
+  consentToken: string | null,
+  attribution: AtsSignupAttribution | null
+): Record<string, string> | undefined {
+  const metadata: Record<string, string> = {}
+  if (consentToken) metadata.consentToken = consentToken
+  if (attribution) {
+    metadata.atsSource = attribution.source
+    if (attribution.scanId) metadata.atsScanId = attribution.scanId
+  }
+  return Object.keys(metadata).length > 0 ? metadata : undefined
+}
 
 function sanitizeReturnBackUrl(value: string | null, fallback: string): string {
   if (!value) return fallback
@@ -28,11 +52,31 @@ function SignUpContent() {
   const [rateLimitError, setRateLimitError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [consentToken, setConsentToken] = useState<string | null>(null)
+  const [attribution, setAttribution] = useState<AtsSignupAttribution | null>(null)
 
   useEffect(() => {
     if (window.sessionStorage.getItem(LEGAL_ACCEPTED_KEY) === '1') {
       setAccepted(true)
     }
+
+    // Clerk moves through /sign-up/verify-email-address etc. and drops the
+    // query string, so the ATS attribution is kept for the tab's lifetime.
+    const fromUrl = parseAtsSignupAttribution(new URLSearchParams(window.location.search))
+    if (fromUrl) {
+      window.sessionStorage.setItem(ATS_ATTRIBUTION_KEY, JSON.stringify({ atsSource: fromUrl.source, atsScanId: fromUrl.scanId }))
+      if (isEmailAtsSource(fromUrl.source)) {
+        posthog.capture('email_cta_clicked', { type: fromUrl.source.replace('email_', ''), scanId: fromUrl.scanId })
+      }
+      posthog.capture('signup_started_from_ats', { source: fromUrl.source, scanId: fromUrl.scanId })
+      setAttribution(fromUrl)
+    } else {
+      try {
+        setAttribution(readAtsSignupAttribution(JSON.parse(window.sessionStorage.getItem(ATS_ATTRIBUTION_KEY) || 'null')))
+      } catch {
+        setAttribution(null)
+      }
+    }
+
     setCheckedStorage(true)
   }, [])
 
@@ -68,6 +112,7 @@ function SignUpContent() {
               // gate — proceed to Clerk's form even if it failed, consistent
               // with this codebase's bias toward availability.
               window.sessionStorage.setItem(LEGAL_ACCEPTED_KEY, '1')
+              posthog.capture('signup_consent_accepted', { source: attribution?.source ?? null })
               setAccepted(true)
             } finally {
               setSubmitting(false)
@@ -117,7 +162,7 @@ function SignUpContent() {
         path={`/${locale}/sign-up`}
         signInUrl={`/${locale}/sign-in`}
         fallbackRedirectUrl={returnBackUrl}
-        unsafeMetadata={consentToken ? { consentToken } : undefined}
+        unsafeMetadata={buildUnsafeMetadata(consentToken, attribution)}
       />
     </AuthShell>
   )

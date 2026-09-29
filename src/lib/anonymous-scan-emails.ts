@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScanReportEmail, type AnonScanEmailLocale } from '@/lib/resend'
+import { sendAnonymousScanReportEmail, type AnonScanEmailLocale, type AnonScanEmailType } from '@/lib/resend'
+import { anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
 import { logger } from '@/lib/logger'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 
@@ -9,6 +10,21 @@ const ANON_SCAN_REPORT_EMAIL_TYPE = 'anon_scan_report'
 
 function isDuplicateError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
+}
+
+// One event per successfully sent anonymous-scan email (report, 48h, 7d),
+// under the scan's server-side id; the scan route aliases that id to the
+// visitor's browser id when they accepted analytics cookies.
+export async function captureAnonEmailSent(input: {
+  type: AnonScanEmailType
+  scanId: string
+  locale: AnonScanEmailLocale
+}): Promise<void> {
+  await capturePostHogEvent({
+    distinctId: anonScanDistinctId(input.scanId),
+    event: 'anon_email_sent',
+    properties: { type: input.type, scanId: input.scanId, locale: input.locale },
+  })
 }
 
 type ScanReportInput = {
@@ -81,6 +97,10 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
         metadata: { source: 'anonymous_scan_report', scanId: input.scanId },
       })
       .eq('source_event_id', sourceEventId)
+
+    if (result.success) {
+      await captureAnonEmailSent({ type: 'report', scanId: input.scanId, locale: input.locale })
+    }
 
     if (updateError) {
       logger.warn('Anonymous scan report email event update failed', {

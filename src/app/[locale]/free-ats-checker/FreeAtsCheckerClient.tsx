@@ -1,8 +1,9 @@
 "use client"
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Upload, Loader2, AlertTriangle, CheckCircle2, RotateCcw, FileText } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import posthog from 'posthog-js'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
@@ -40,6 +41,23 @@ function getExtension(name: string): string {
   return idx >= 0 ? name.slice(idx).toLowerCase() : ''
 }
 
+// posthog.capture() is already a no-op until the visitor accepts analytics
+// cookies (opt_out_capturing_by_default in instrumentation-client.ts). The
+// distinct id is only handed to the server under the same condition.
+function consentedDistinctId(): string | null {
+  try {
+    return posthog.__loaded && posthog.has_opted_in_capturing() ? posthog.get_distinct_id() : null
+  } catch {
+    return null
+  }
+}
+
+// Fires for clicks on any link/button inside a CTA card, whatever component
+// renders it (AuthAwareSignupLink, PlanCta).
+function isCtaClick(event: React.MouseEvent): boolean {
+  return event.target instanceof Element && Boolean(event.target.closest('a, button'))
+}
+
 function getWorstCategory(categories: Record<AtsCategoryKey, AtsCategory>): AtsCategoryKey {
   return CATEGORY_ORDER.reduce((worst, key) => {
     const ratio = categories[key].score / categories[key].max
@@ -66,6 +84,40 @@ export function FreeAtsCheckerClient() {
   const [postScanEmail, setPostScanEmail] = useState('')
   const [isSendingReport, setIsSendingReport] = useState(false)
   const [reportError, setReportError] = useState<string | null>(null)
+  const freeCtaRef = useRef<HTMLDivElement | null>(null)
+
+  // One ats_result_viewed per rendered result. The score comes back on the
+  // same URL, so without this a result view is indistinguishable from the
+  // upload pageview.
+  useEffect(() => {
+    if (!result) return
+    posthog.capture('ats_result_viewed', {
+      scanId,
+      score: result.overall_score,
+      grade: result.grade,
+      issuesCount: result.issues.length,
+      worstCategory: getWorstCategory(result.categories),
+    })
+  }, [result, scanId])
+
+  // Separates "saw the free signup CTA and did not click" from "never
+  // scrolled that far": fires once when half the CTA card is on screen.
+  useEffect(() => {
+    const target = freeCtaRef.current
+    if (!result || !target || typeof IntersectionObserver === 'undefined') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          posthog.capture('ats_result_scrolled_to_cta', { scanId, score: result.overall_score })
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 }
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [result, scanId])
 
   const categoryLabels = {
     ats_formatting: t('categoryLabels.formatting'),
@@ -80,17 +132,20 @@ export function FreeAtsCheckerClient() {
 
     const extension = getExtension(selected.name)
     if (!ALLOWED_EXTENSIONS.includes(extension)) {
+      posthog.capture('ats_scan_failed', { status: 'client', reason: 'file_type', extension })
       setError(t('errors.fileType'))
       setFile(null)
       return
     }
 
     if (selected.size > MAX_UPLOAD_BYTES) {
+      posthog.capture('ats_scan_failed', { status: 'client', reason: 'file_size', extension })
       setError(t('errors.fileSize'))
       setFile(null)
       return
     }
 
+    posthog.capture('ats_file_selected', { extension, sizeKb: Math.round(selected.size / 1024) })
     setFile(selected)
   }
 
@@ -101,12 +156,19 @@ export function FreeAtsCheckerClient() {
     setError(null)
     setIsRateLimited(false)
 
+    const hasEmail = Boolean(email.trim())
+    posthog.capture('ats_scan_started', { hasEmail })
+
     try {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('locale', locale)
-      if (email.trim()) {
+      if (hasEmail) {
         formData.append('email', email.trim())
+      }
+      const distinctId = consentedDistinctId()
+      if (distinctId) {
+        formData.append('distinctId', distinctId)
       }
 
       const response = await fetch('/api/public/ats-check', {
@@ -120,8 +182,10 @@ export function FreeAtsCheckerClient() {
 
       if (!response.ok) {
         if (response.status === 429) {
+          posthog.capture('ats_scan_rate_limited')
           setIsRateLimited(true)
         } else {
+          posthog.capture('ats_scan_failed', { status: response.status, reason: 'server' })
           setError(serverError(payload, t(response.status === 400 ? 'errors.unreadable' : 'errors.generic')))
         }
         setIsScanning(false)
@@ -129,15 +193,25 @@ export function FreeAtsCheckerClient() {
       }
 
       if (!payload?.result) {
+        posthog.capture('ats_scan_failed', { status: response.status, reason: 'empty_result' })
         setError(t('errors.generic'))
         setIsScanning(false)
         return
+      }
+
+      if (hasEmail) {
+        posthog.capture('ats_report_email_requested', {
+          when: 'pre_scan',
+          scanId: payload.scanId ?? null,
+          sent: Boolean(payload.emailSent),
+        })
       }
 
       setResult(payload.result)
       setScanId(payload.scanId ?? null)
       setEmailSentTo(payload.emailSent ? email.trim() : null)
     } catch {
+      posthog.capture('ats_scan_failed', { status: 0, reason: 'network' })
       setError(t('errors.networkScan'))
     }
 
@@ -147,6 +221,7 @@ export function FreeAtsCheckerClient() {
   async function handleSendReport() {
     if (!scanId || !postScanEmail.trim()) return
 
+    posthog.capture('ats_report_email_requested', { when: 'post_scan', scanId })
     setIsSendingReport(true)
     setReportError(null)
 
@@ -191,6 +266,8 @@ export function FreeAtsCheckerClient() {
     const worstCategory = getWorstCategory(result.categories)
     const hasIssues = result.issues.length > 0
     const worstCategoryMessageKey = hasIssues ? CATEGORY_TO_MESSAGE_KEY[worstCategory] : null
+    // `from`/`scan` are read by the sign-up page (src/lib/ats-attribution.ts).
+    const signUpHref = `/sign-up?${new URLSearchParams(scanId ? { from: 'ats', scan: scanId } : { from: 'ats' }).toString()}`
 
     const scoreCategories = CATEGORY_ORDER.map((key) => ({
       label: categoryLabels[key],
@@ -226,12 +303,20 @@ export function FreeAtsCheckerClient() {
           </Card>
         )}
 
-        <Card elevated radius="lg" className="p-6 text-center">
+        <Card
+          ref={freeCtaRef}
+          elevated
+          radius="lg"
+          className="p-6 text-center"
+          onClickCapture={(event) => {
+            if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'free', scanId, score: result.overall_score })
+          }}
+        >
           {worstCategoryMessageKey ? (
             <>
               <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
               <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
-              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
                 {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
               </AuthAwareSignupLink>
             </>
@@ -239,7 +324,7 @@ export function FreeAtsCheckerClient() {
             <>
               <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
               <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
-              <AuthAwareSignupLink className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
                 {t('createFreeAccount')}
               </AuthAwareSignupLink>
             </>
@@ -282,7 +367,13 @@ export function FreeAtsCheckerClient() {
           )
         )}
 
-        <Card radius="lg" className="p-6 text-center">
+        <Card
+          radius="lg"
+          className="p-6 text-center"
+          onClickCapture={(event) => {
+            if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'pro', scanId, score: result.overall_score })
+          }}
+        >
           <p className="text-(--foreground) font-semibold">{t('wantRewriting')}</p>
           <p className="mt-2">
             <span className="text-2xl text-(--foreground) font-bold">{t('proPrice')}</span>
@@ -305,13 +396,22 @@ export function FreeAtsCheckerClient() {
 
   if (isRateLimited) {
     return (
-      <Card radius="lg" className="p-8 text-center">
+      <Card
+        radius="lg"
+        className="p-8 text-center"
+        onClickCapture={(event) => {
+          if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'rate_limited', scanId: null })
+        }}
+      >
         <AlertTriangle className="mx-auto h-8 w-8 text-(--foreground) mb-3" />
         <h2 className="text-(--foreground) font-bold text-lg">{t('usedFreeScan')}</h2>
         <p className="text-(--muted) text-sm mt-2 max-w-md mx-auto">
           {t('usedFreeScanBody1')} {t('usedFreeScanBody2')}
         </p>
-        <AuthAwareSignupLink className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
+        <AuthAwareSignupLink
+          signedOutHref="/sign-up?from=ats_rate_limited"
+          className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}
+        >
           {t('createFreeAccountShort')}
         </AuthAwareSignupLink>
       </Card>

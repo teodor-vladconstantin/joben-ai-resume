@@ -16,7 +16,12 @@ import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
-import { capturePostHogEvent } from '@/lib/posthog-server'
+import {
+  aliasPostHogDistinctId,
+  anonScanDistinctId,
+  capturePostHogEvent,
+  toBrowserDistinctId,
+} from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
@@ -450,12 +455,26 @@ export async function POST(req: Request) {
       }
     }
 
+    // The browser's PostHog distinct id is only sent by the client after the
+    // visitor accepted analytics cookies. With it, this event joins the
+    // browser's history (and, via identify() at sign-in, the account's), and
+    // the alias pulls later scan-scoped server events (report email, 48h/7d
+    // sends) into the same person.
+    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+    if (browserDistinctId && scanId) {
+      await aliasPostHogDistinctId({ distinctId: browserDistinctId, alias: anonScanDistinctId(scanId) })
+    }
+
     await capturePostHogEvent({
-      distinctId: `anon:${ipHash || 'unknown'}`,
+      distinctId: browserDistinctId || (scanId ? anonScanDistinctId(scanId) : `anon:${ipHash || 'unknown'}`),
       event: 'anonymous_ats_check_completed',
       properties: {
         hasEmail: Boolean(scanEmail),
         overallScore,
+        scanId,
+        locale,
+        issuesCount: typedResult.success ? typedResult.data.issues.length : null,
+        weakestCategory,
       },
     })
 
