@@ -6,7 +6,11 @@
     (scrisoare fără CV → `code: 'no_resume'`, ATS 400 → fișier necitibil, redeem 400 → cod invalid).
   - Scrisoare nouă: eliminat seed-ul generic ("Your Name", "+1 (555)", paragrafe inventate care se exportau
     ca atare); antet din contul Clerk, salut/încheiere traduse, hint în preview. PDF fără fallback-uri EN.
-  - Rămas: `alert()` nativ (fără librărie de toast; de făcut doar dacă se adaugă un sistem de notificări).
+  - `alert()` nativ înlocuit cu toast (`sonner`, toast-ul standard shadcn/ui, montat în ClientProviders cu
+    culorile temei) în builder, scrisori, listele de CV-uri/scrisori.
+  - Flake teste rezolvat: primul test din fiecare `tests/api/*` depășea 5s la import rece al rutei
+    (după tsc/cache invalidat) → 15-20 eșecuri în cascadă. `testTimeout: 20000`; verificat pe rulări reci.
+  - **De făcut:** migrarea `20260928120000_backfill_resume_scores.sql` (în așteptare: extensia Chrome neconectată).
 - [DONE] 2026-09-28 Test end-to-end live pe joben.eu, bug-uri silențioase găsite și reparate (commits
   `5d94ac1`, `d56e986` + următorul): dublură bullet la import; evaluarea AI primea CV-ul FĂRĂ educație/
   proiecte/link-uri (false "missing education"); scrisoarea de intenție era generată din propriul text

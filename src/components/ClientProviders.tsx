@@ -1,4 +1,5 @@
 import { ThemeProvider } from 'next-themes'
+import { Toaster } from 'sonner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
@@ -19,6 +20,17 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <ScrollProgress />
         <GridOverlay />
         {children}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: 'var(--surface)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--border)',
+              borderRadius: 0,
+            },
+          }}
+        />
         <WebVitalsReporter />
         <AnalyticsGate />
         <SpeedInsights />

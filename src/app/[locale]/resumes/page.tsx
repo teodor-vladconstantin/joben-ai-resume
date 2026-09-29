@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search, ArrowRight } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { timeAgo } from '@/lib/time-ago'
 
 type ResumeListItem = {
@@ -68,7 +69,7 @@ export default function ResumesPage() {
         if (response.ok) {
           setResumes((prev) => prev.filter((resume) => resume.id !== resumeId))
         } else {
-          alert(t('deleteFailedAlert'))
+          toast.error(t('deleteFailedAlert'))
           try {
             const payload = (await response.json()) as { error?: string }
             console.error(payload.error || 'Delete failed')

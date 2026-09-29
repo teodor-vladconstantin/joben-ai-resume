@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation'
 import { Plus, Clock3, Trash2, Edit, Eye, Search, ArrowRight } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { timeAgo } from '@/lib/time-ago'
 
 type CoverLetterItem = {
@@ -57,7 +58,7 @@ export default function CoverLettersPage() {
     startTransition(async () => {
       const response = await fetch(`/api/cover-letters/${id}`, { method: 'DELETE' })
       if (!response.ok) {
-        alert(t('deleteFailedAlert'))
+        toast.error(t('deleteFailedAlert'))
         return
       }
       setLetters((prev) => prev.filter((item) => item.id !== id))

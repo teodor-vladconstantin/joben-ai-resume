@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Award, User, Briefcase, GraduationCap, Code, Cpu, Save, Download, Trash2, FileText, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useParams, useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 import { useRouter } from '@/i18n/navigation'
 import { TemplateSwitcher, type TemplateValue } from '@/components/builder/TemplateSwitcher'
 import { HarvardTemplate } from '@/components/templates/HarvardTemplate'
@@ -794,7 +795,7 @@ export function ResumeBuilder() {
           return
         }
 
-        alert(serverError(err, t('export.genericError'), res.status))
+        toast.error(serverError(err, t('export.genericError'), res.status))
         setSaveStatus('error')
         return
       }
@@ -809,7 +810,7 @@ export function ResumeBuilder() {
       document.body.removeChild(a)
       setSaveStatus('saved')
     } catch {
-      alert(t('export.networkError'))
+      toast.error(t('export.networkError'))
       setSaveStatus('error')
     } finally {
       setIsExportingPdf(false)
@@ -1182,7 +1183,7 @@ export function ResumeBuilder() {
 
   const handleTailorResume = async () => {
     if (!tailorJobDescription.trim()) {
-      alert(t('tailor.missingJobDescription'))
+      toast.error(t('tailor.missingJobDescription'))
       return
     }
 
@@ -1224,7 +1225,7 @@ export function ResumeBuilder() {
           setIsTailoring(false)
           return
         }
-        alert(serverError(payload, t('tailor.genericError'), response.status))
+        toast.error(serverError(payload, t('tailor.genericError'), response.status))
         setIsTailoring(false)
         return
       }
@@ -1288,7 +1289,7 @@ export function ResumeBuilder() {
 
       setIsTailorModalOpen(false)
     } catch (error) {
-      alert(t('tailor.failed', { message: (error as Error).message }))
+      toast.error(t('tailor.failed', { message: (error as Error).message }))
     }
 
     setIsTailoring(false)
