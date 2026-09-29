@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScan7dEmail } from '@/lib/resend'
+import { sendAnonymousScan7dEmail, toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -24,15 +24,21 @@ const MAX_AGE_MS = 21 * 24 * 60 * 60 * 1000
 type CandidateScan = {
   id: string
   email: string | null
+  locale: string | null
 }
 
 function buildSourceEventId(scanId: string): string {
   return `anon-scan-7d:${scanId}`
 }
 
-async function sendWithRetry(input: { to: string; maxRetries: number }) {
+async function sendWithRetry(input: {
+  to: string
+  scanId: string
+  locale: AnonScanEmailLocale
+  maxRetries: number
+}) {
   return sendEmailWithRetry(
-    ({ to }) => sendAnonymousScan7dEmail({ to }),
+    ({ to }) => sendAnonymousScan7dEmail({ to, scanId: input.scanId, locale: input.locale }),
     { to: input.to, firstName: null, maxRetries: input.maxRetries }
   )
 }
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('anonymous_scans')
-      .select('id, email')
+      .select('id, email, locale')
       .not('email', 'is', null)
       .gte('created_at', minCreatedAt)
       .lte('created_at', maxCreatedAt)
@@ -152,6 +158,8 @@ export async function POST(request: Request) {
 
       const result = await sendWithRetry({
         to: row.email as string,
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
         maxRetries: options.maxRetries,
       })
 

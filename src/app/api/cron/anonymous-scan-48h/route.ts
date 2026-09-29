@@ -1,5 +1,10 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScan48hEmail, type AtsCategoryKey } from '@/lib/resend'
+import {
+  sendAnonymousScan48hEmail,
+  toAnonScanEmailLocale,
+  type AnonScanEmailLocale,
+  type AtsCategoryKey,
+} from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -28,6 +33,7 @@ type CandidateScan = {
   id: string
   email: string | null
   weakest_category: string | null
+  locale: string | null
 }
 
 const VALID_CATEGORY_KEYS: readonly AtsCategoryKey[] = ['ats_formatting', 'structure', 'keyword_impact', 'clarity']
@@ -42,11 +48,18 @@ function buildSourceEventId(scanId: string): string {
 
 async function sendWithRetry(input: {
   to: string
+  scanId: string
+  locale: AnonScanEmailLocale
   weakestCategory: AtsCategoryKey | null
   maxRetries: number
 }) {
   return sendEmailWithRetry(
-    ({ to }) => sendAnonymousScan48hEmail({ to, weakestCategory: input.weakestCategory }),
+    ({ to }) => sendAnonymousScan48hEmail({
+      to,
+      scanId: input.scanId,
+      locale: input.locale,
+      weakestCategory: input.weakestCategory,
+    }),
     { to: input.to, firstName: null, maxRetries: input.maxRetries }
   )
 }
@@ -72,7 +85,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('anonymous_scans')
-      .select('id, email, weakest_category')
+      .select('id, email, weakest_category, locale')
       .not('email', 'is', null)
       .gte('created_at', minCreatedAt)
       .lte('created_at', maxCreatedAt)
@@ -165,6 +178,8 @@ export async function POST(request: Request) {
 
       const result = await sendWithRetry({
         to: row.email as string,
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
         weakestCategory: toCategoryKey(row.weakest_category),
         maxRetries: options.maxRetries,
       })

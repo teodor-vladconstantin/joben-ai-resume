@@ -18,6 +18,7 @@ import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -159,6 +160,7 @@ async function storeAnonymousScan(input: {
   ipHash: string | null
   weakestCategory: string | null
   reportJson: unknown
+  locale: AnonScanEmailLocale
 }): Promise<string | null> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -174,6 +176,7 @@ async function storeAnonymousScan(input: {
       ip_hash: input.ipHash,
       weakest_category: input.weakestCategory,
       report_json: input.reportJson,
+      locale: input.locale,
     })
     .select('id')
     .single()
@@ -347,6 +350,10 @@ export async function POST(req: Request) {
       )
     }
 
+    // Page locale the scan was run from, stored on the row: every
+    // anonymous-scan email (report, 48h, 7d) is sent in this language.
+    const locale = toAnonScanEmailLocale(String(formData.get('locale') || ''))
+
     let result: unknown
     try {
       const message = await anthropic.messages.create({
@@ -414,6 +421,7 @@ export async function POST(req: Request) {
           ipHash,
           weakestCategory,
           reportJson: typedResult.data,
+          locale,
         })
 
         if (scanId && scanEmail) {
@@ -425,6 +433,7 @@ export async function POST(req: Request) {
           await sendAnonymousScanReportEmailIfEligible({
             scanId,
             email: scanEmail,
+            locale,
             overallScore: typedResult.data.overall_score,
             grade: typedResult.data.grade,
             categories: typedResult.data.categories,

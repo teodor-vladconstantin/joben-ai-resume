@@ -6,6 +6,7 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { toAnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
 
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
 
     const { data: scan, error: fetchError } = await supabase
       .from('anonymous_scans')
-      .select('id, email, report_json')
+      .select('id, email, report_json, locale')
       .eq('id', scanId)
       .maybeSingle()
 
@@ -129,6 +130,7 @@ export async function POST(req: Request) {
     await sendAnonymousScanReportEmailIfEligible({
       scanId,
       email: finalEmail,
+      locale: toAnonScanEmailLocale(scan.locale),
       overallScore: reportJson.data.overall_score,
       grade: reportJson.data.grade,
       categories: reportJson.data.categories,

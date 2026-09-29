@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScanReportEmail } from '@/lib/resend'
+import { sendAnonymousScanReportEmail, type AnonScanEmailLocale } from '@/lib/resend'
 import { logger } from '@/lib/logger'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 
@@ -14,6 +14,7 @@ function isDuplicateError(error: { code?: string } | null): boolean {
 type ScanReportInput = {
   scanId: string
   email: string
+  locale: AnonScanEmailLocale
   overallScore: number
   grade: string
   categories: Record<AtsCategoryKey, { score: number; max: number }>
@@ -63,6 +64,8 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
 
     const result = await sendAnonymousScanReportEmail({
       to: input.email,
+      scanId: input.scanId,
+      locale: input.locale,
       overallScore: input.overallScore,
       grade: input.grade,
       categories: input.categories,
