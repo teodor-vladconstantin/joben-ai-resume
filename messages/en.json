@@ -287,7 +287,7 @@
     "createFreeAccount": "Create your free account",
     "scanAnother": "Scan another resume",
     "usedFreeScan": "You've used your free scan for today",
-    "usedFreeScanBody1": "Create a free account to get another scan right now, plus unlimited rewrites.",
+    "usedFreeScanBody1": "Create a free account to keep going right now: 10 AI resume reviews and 15 AI bullet rewrites every month.",
     "usedFreeScanBody2": "Or come back tomorrow for your next free scan.",
     "createFreeAccountShort": "Create a free account",
     "readyToScan": "Ready to scan, click to choose a different file",
@@ -297,7 +297,7 @@
     "neverRequired": "Never required, you'll see your score either way.",
     "scanning": "Scanning your resume...",
     "scanButton": "Scan My Resume, Free",
-    "scanDisclaimer": "1 free scan a day · no signup · nothing saved"
+    "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan"
   },
   "ResumeExamplesHub": {
     "eyebrow": "Free Resume Examples",

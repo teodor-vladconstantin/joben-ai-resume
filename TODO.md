@@ -1,4 +1,7 @@
 ## Active
+- [IN PROGRESS] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, 6 commit-uri: copy, ordine
+  rezultat, emailuri localizate + UTM, tracking PostHog, consimțământ inline la sign-up, claim scan în cont).
+  Migrările doar ca fișiere SQL, neaplicate în producție.
 - [DONE] 2026-09-29 Smoke test producție după `af4ef74` (curl: /ro, /en, /api/health ok; dashboard redirect la
   sign-in ok) + resturile din 2026-09-28. Verificat live după deploy `23a35cc` (Chrome, logat): scrisoare nouă
   pe /ro cu antet din cont + salut/încheiere RO + hint, fără autosave la deschidere (lista rămâne la 2);

@@ -215,7 +215,7 @@ export function FreeAtsCheckerClient() {
             <span className="text-2xl text-(--foreground) font-bold">{t('proPrice')}</span>
             <span className="text-(--muted)"> {t('proPricePeriod')}</span>
           </p>
-          <PlanCta plan="pro" label={t('ctaByCategory.keywords.cta')} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`} />
+          <PlanCta plan="pro" label={t(`ctaByCategory.${CATEGORY_TO_MESSAGE_KEY[worstCategory]}.cta`)}className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`} />
         </Card>
 
         {hasIssues && (
