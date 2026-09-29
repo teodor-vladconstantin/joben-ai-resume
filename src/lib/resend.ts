@@ -479,7 +479,7 @@ export async function sendRateLimitEmail(input: {
   <p style="margin:0 0 12px 0;">You just reached a free plan limit on Joben.</p>
   <p style="margin:0 0 18px 0;">Upgrade to Pro to unlock:</p>
   <ul style="margin:0 0 18px 18px;padding:0;">
-    <li>Unlimited resumes and PDF exports</li>
+    <li>Save up to 3 CVs and unlimited PDF exports</li>
     <li>Much higher AI limits for reviews and rewrites</li>
     <li>Priority support when you need help</li>
   </ul>
