@@ -127,7 +127,7 @@ export async function POST(request: Request) {
         React.createElement(
           View,
           { style: styles.headerBlock },
-          React.createElement(Text, { style: styles.bold }, sections.headerName || 'Your Name'),
+          sections.headerName ? React.createElement(Text, { style: styles.bold }, sections.headerName) : null,
           sections.headerEmail ? React.createElement(Text, null, sections.headerEmail) : null,
           sections.headerPhone ? React.createElement(Text, null, sections.headerPhone) : null,
           React.createElement(Text, { style: { marginTop: 8 } }, sections.date || new Date().toLocaleDateString())
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
           sections.recipientTitle ? React.createElement(Text, null, sections.recipientTitle) : null,
           sections.company ? React.createElement(Text, null, sections.company) : null
         ),
-        React.createElement(Text, { style: styles.paragraph }, sections.salutation || 'Dear Hiring Manager,'),
+        sections.salutation ? React.createElement(Text, { style: styles.paragraph }, sections.salutation) : null,
         sections.introduction ? React.createElement(Text, { style: styles.paragraph }, sections.introduction) : null,
         ...bodyParagraphs.map((paragraph, index) =>
           React.createElement(Text, { key: `body-${index}`, style: styles.paragraph }, paragraph)

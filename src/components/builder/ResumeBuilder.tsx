@@ -19,6 +19,7 @@ import type { ResumeTemplateData } from '@/components/templates/types'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { BeforeAfterModal, type FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { AILoadingState } from '@/components/ui/AILoadingState'
+import { useServerError } from '@/hooks/useServerError'
 
 type ResumeTemplate = TemplateValue
 
@@ -392,6 +393,7 @@ function getPdfImportCount(data: ResumeData): number {
 
 export function ResumeBuilder() {
   const t = useTranslations('Builder')
+  const serverError = useServerError()
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
@@ -666,7 +668,7 @@ export function ResumeBuilder() {
           }
 
           if (errorPayload.showUpgrade) {
-            setUpgradeMessage(errorPayload.error || t('save.upgradeMessage'))
+            setUpgradeMessage(serverError(errorPayload, t('save.upgradeMessage')))
             setShowUpgradeModal(true)
           }
         } catch {
@@ -700,7 +702,7 @@ export function ResumeBuilder() {
     })
 
     setSaveStatus(updateRes.ok ? 'saved' : 'error')
-  }, [derivedTitle, isCreateMode, resumeData, resumeId, routeResumeId, router, t])
+  }, [derivedTitle, isCreateMode, resumeData, resumeId, routeResumeId, router, serverError, t])
 
   useEffect(() => {
     if (isLoading || isImportingPdf || isExportingPdf) return
@@ -786,13 +788,13 @@ export function ResumeBuilder() {
         }
 
         if (err.showUpgrade) {
-          setUpgradeMessage(err.error || t('export.upgradeMessage'))
+          setUpgradeMessage(serverError(err, t('export.upgradeMessage')))
           setShowUpgradeModal(true)
           setSaveStatus('error')
           return
         }
 
-        alert(err.error || t('export.genericError'))
+        alert(serverError(err, t('export.genericError'), res.status))
         setSaveStatus('error')
         return
       }
@@ -1217,12 +1219,12 @@ export function ResumeBuilder() {
 
       if (!response.ok || !payload.result) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || t('tailor.upgradeMessage'))
+          setUpgradeMessage(serverError(payload, t('tailor.upgradeMessage')))
           setShowUpgradeModal(true)
           setIsTailoring(false)
           return
         }
-        alert(payload.error || t('tailor.genericError'))
+        alert(serverError(payload, t('tailor.genericError'), response.status))
         setIsTailoring(false)
         return
       }
@@ -1352,10 +1354,10 @@ export function ResumeBuilder() {
       }
 
       if (!response.ok || !payload.bullet) {
-        let errorMessage = payload.error || t('bulletDraft.genericError')
+        let errorMessage = serverError(payload, t('bulletDraft.genericError'))
 
         if (response.status === 429) {
-          const details: string[] = [payload.error || t('bulletDraft.dailyLimitReached')]
+          const details: string[] = [serverError(payload, t('bulletDraft.dailyLimitReached'))]
 
           if (typeof payload.remaining === 'number' && typeof payload.limit === 'number') {
             details.push(t('bulletDraft.remainingInWindow', { remaining: payload.remaining, limit: payload.limit }))
@@ -1372,7 +1374,7 @@ export function ResumeBuilder() {
             setShowUpgradeModal(true)
           }
         } else if (payload.showUpgrade) {
-          errorMessage = payload.error || t('bulletDraft.upgradeMessage')
+          errorMessage = serverError(payload, t('bulletDraft.upgradeMessage'))
           setUpgradeMessage(errorMessage)
           setShowUpgradeModal(true)
         }
@@ -1500,7 +1502,7 @@ export function ResumeBuilder() {
       }
 
       if (!response.ok || !payload.summary) {
-        setSummaryGenerationError(payload.error || t('summary.genericError'))
+        setSummaryGenerationError(serverError(payload, t('summary.genericError'), response.status))
         setIsGeneratingSummary(false)
         return
       }

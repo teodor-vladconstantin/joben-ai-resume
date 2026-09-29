@@ -1,4 +1,12 @@
 ## Active
+- [DONE] 2026-09-29 Smoke test producție după `af4ef74` (curl: /ro, /en, /api/health ok; dashboard redirect la
+  sign-in ok; paginile autentificate netestate, extensia Chrome nu era conectată) + resturile din 2026-09-28:
+  - `useServerError` (src/hooks): pe /ro nu se mai afișează mesajele englezești ale API-urilor (~20 locuri:
+    builder, scrisori, AI review, ATS gratuit, redeem); 429 → mesaj tradus; cazuri specifice păstrate
+    (scrisoare fără CV → `code: 'no_resume'`, ATS 400 → fișier necitibil, redeem 400 → cod invalid).
+  - Scrisoare nouă: eliminat seed-ul generic ("Your Name", "+1 (555)", paragrafe inventate care se exportau
+    ca atare); antet din contul Clerk, salut/încheiere traduse, hint în preview. PDF fără fallback-uri EN.
+  - Rămas: `alert()` nativ (fără librărie de toast; de făcut doar dacă se adaugă un sistem de notificări).
 - [DONE] 2026-09-28 Test end-to-end live pe joben.eu, bug-uri silențioase găsite și reparate (commits
   `5d94ac1`, `d56e986` + următorul): dublură bullet la import; evaluarea AI primea CV-ul FĂRĂ educație/
   proiecte/link-uri (false "missing education"); scrisoarea de intenție era generată din propriul text
@@ -10,8 +18,7 @@
   netraduse; hint upload 10MB fals (limita reală 5MB).
   - **De făcut manual:** migrarea `20260928120000_backfill_resume_scores.sql` (CLI Supabase dă 403 pe
     login role; aplică din SQL Editor sau cu `SUPABASE_DB_PASSWORD`).
-  - Rămase, semnalate: seed-ul EN al scrisorii noi ("Your Name", paragrafe generice); mesajele de
-    eroare de la server sunt în engleză (ex. limita de export); `alert()` nativ la erori.
+  - Rămase, semnalate: rezolvate pe 2026-09-29 (vezi mai sus), mai puțin `alert()` nativ.
 - [DONE] 2026-09-28 Verificare claim-uri summary + risc timeout parser + validare live before/after (fără rebuild VPS, așteaptă decizia userului):
   - Summary: context cu educație/proiecte/career span real, prompt structurat pozitiv, split de propoziții
     care nu mai rupe "Node.js", claim-check (cifre + cifre în litere EN/RO + tool-uri) cu checkbox

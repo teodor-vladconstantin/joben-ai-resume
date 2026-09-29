@@ -11,6 +11,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
+import { useServerError } from '@/hooks/useServerError'
 
 const SESSION_KEY = 'ai-fix-patches'
 
@@ -24,6 +25,7 @@ function storePatches(patches: FixPatchWithContext[]) {
 
 export default function AIReviewEditorPage() {
   const t = useTranslations('AiReviewPage.detail')
+  const serverError = useServerError()
   const params = useParams<{ id: string }>()
   const router = useRouter()
 
@@ -61,7 +63,7 @@ export default function AIReviewEditorPage() {
       const response = await fetch(`/api/ai-reviews/${id}`, { cache: 'no-store' })
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        if (!cancelled) { setError(payload.error || t('errorFailedToLoad')); setIsLoading(false) }
+        if (!cancelled) { setError(serverError(payload, t('errorFailedToLoad'))); setIsLoading(false) }
         return
       }
 
@@ -84,7 +86,7 @@ export default function AIReviewEditorPage() {
 
     loadReview()
     return () => { cancelled = true }
-  }, [params?.id, t])
+  }, [params?.id, serverError, t])
 
   const rawReviewId = params?.id
   const reviewId = Array.isArray(rawReviewId) ? (rawReviewId[0] || '') : (rawReviewId || '')
@@ -124,11 +126,11 @@ export default function AIReviewEditorPage() {
 
       if (!res.ok || !payload.applied) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || t('errorFixProOnly'))
+          setUpgradeMessage(serverError(payload, t('errorFixProOnly')))
           setShowUpgradeModal(true)
           return
         }
-        setFixErrors((prev) => ({ ...prev, [improvementIndex]: payload.error || t('errorCouldNotApplyFix') }))
+        setFixErrors((prev) => ({ ...prev, [improvementIndex]: serverError(payload, t('errorCouldNotApplyFix'), res.status) }))
         return
       }
 
@@ -183,7 +185,7 @@ export default function AIReviewEditorPage() {
       }
 
       if (!precheckRes.ok || precheckPayload.allowed === false) {
-        setAutoFixTokenWarning(precheckPayload.error || t('errorAutoFixTokenLimit'))
+        setAutoFixTokenWarning(serverError(precheckPayload, t('errorAutoFixTokenLimit')))
         setAutoFixTokenDetails({
           estimatedInputTokens: precheckPayload.estimatedInputTokens,
           remainingTokens: precheckPayload.remainingTokens,
@@ -209,11 +211,11 @@ export default function AIReviewEditorPage() {
 
       if (!res.ok) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || t('errorAutoFixProOnly'))
+          setUpgradeMessage(serverError(payload, t('errorAutoFixProOnly')))
           setShowUpgradeModal(true)
           return
         }
-        setAutoFixError(payload.error || t('errorAutoFixFailed'))
+        setAutoFixError(serverError(payload, t('errorAutoFixFailed'), res.status))
         return
       }
 

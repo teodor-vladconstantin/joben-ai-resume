@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     const resumeText = (await loadResumeText(userId, body.resumeId)) || body.resumeText || ''
     if (!resumeText.trim()) {
       return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Create or import a resume first so the letter can use your real experience.') },
+        { error: clientErrorMessage('invalid_input', 'Create or import a resume first so the letter can use your real experience.'), code: 'no_resume' },
         400,
         requestId
       )

@@ -11,6 +11,7 @@ import { AILoadingState } from '@/components/ui/AILoadingState'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { resumeToPlainText } from '@/lib/resume-text'
+import { useServerError } from '@/hooks/useServerError'
 
 type ResumeItem = {
   id: string
@@ -30,6 +31,7 @@ const extractResumeText = resumeToPlainText
 
 export default function AIReviewPage() {
   const t = useTranslations('AiReviewPage.list')
+  const serverError = useServerError()
   const locale = useLocale()
   const router = useRouter()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
@@ -178,12 +180,12 @@ export default function AIReviewPage() {
 
       if (!analyzeRes.ok) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || t('errorProRequired'))
+          setUpgradeMessage(serverError(payload, t('errorProRequired')))
           setShowUpgradeModal(true)
           setIsAnalyzing(false)
           return
         }
-        setError(payload.error || t('errorAnalyzeFailed'))
+        setError(serverError(payload, t('errorAnalyzeFailed'), analyzeRes.status))
         setIsAnalyzing(false)
         return
       }

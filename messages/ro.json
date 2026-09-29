@@ -268,7 +268,8 @@
       "generic": "Ceva nu a mers bine. Încearcă din nou.",
       "networkScan": "Nu am putut contacta scanner-ul. Verifică-ți conexiunea și încearcă din nou.",
       "emailGeneric": "Nu am putut trimite raportul. Încearcă din nou.",
-      "emailNetwork": "Nu am putut contacta serverul. Verifică-ți conexiunea și încearcă din nou."
+      "emailNetwork": "Nu am putut contacta serverul. Verifică-ți conexiunea și încearcă din nou.",
+      "unreadable": "Nu am putut citi textul din fișier. Încarcă un PDF sau DOCX cu text selectabil."
     },
     "wantRewriting": "Vrei rescriere automată a punctelor slabe?",
     "proPrice": "59 RON",
@@ -441,7 +442,8 @@
       "creditUsedUp": "Creditul AI lunar s-a epuizat.",
       "remainingThisMonth": "{remaining} din {limit} rămase luna asta",
       "nextMonth": "luna viitoare"
-    }
+    },
+    "rateLimited": "Prea multe cereri. Așteaptă puțin și încearcă din nou."
   },
   "Dashboard": {
     "greetingMorning": "Bună dimineața",
@@ -1097,13 +1099,21 @@
       "generateDraftAiUpgrade": "Această acțiune AI este disponibilă cu Pro.",
       "generateDraftFailed": "Generarea ciornei a eșuat: {message}",
       "exportPdf": "PDF-ul nu a putut fi exportat.",
-      "exportFailed": "Exportul a eșuat: {message}"
+      "exportFailed": "Exportul a eșuat: {message}",
+      "noResume": "Creează sau importă mai întâi un CV, ca scrisoarea să folosească experiența ta reală."
     },
     "paragraphModal": {
       "title": "Paragrafe de Conținut",
       "addParagraphButton": "+ Adaugă Paragraf",
       "saveChangesButton": "Salvează Modificările",
       "paragraphLabel": "Paragraful {number}"
+    },
+    "seed": {
+      "salutation": "Stimată doamnă / Stimate domn,",
+      "closing": "Cu stimă,"
+    },
+    "preview": {
+      "emptyHint": "Scrie scrisoarea pe secțiuni în stânga sau generează o ciornă din CV-ul tău și descrierea jobului."
     }
   },
   "SettingsPage": {

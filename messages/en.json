@@ -268,7 +268,8 @@
       "generic": "Something went wrong. Please try again.",
       "networkScan": "Could not reach the scanner. Check your connection and try again.",
       "emailGeneric": "Could not send the report. Please try again.",
-      "emailNetwork": "Could not reach the server. Check your connection and try again."
+      "emailNetwork": "Could not reach the server. Check your connection and try again.",
+      "unreadable": "We could not read text from this file. Upload a PDF or DOCX with selectable text."
     },
     "wantRewriting": "Want automatic rewriting of your weak points?",
     "proPrice": "59 RON",
@@ -441,7 +442,8 @@
       "creditUsedUp": "Monthly AI credit has been used up.",
       "remainingThisMonth": "{remaining} of {limit} left this month",
       "nextMonth": "next month"
-    }
+    },
+    "rateLimited": "Too many requests. Wait a moment and try again."
   },
   "Dashboard": {
     "greetingMorning": "Good morning",
@@ -1097,13 +1099,21 @@
       "generateDraftAiUpgrade": "This AI action is available on Pro.",
       "generateDraftFailed": "Draft generation failed: {message}",
       "exportPdf": "Could not export PDF.",
-      "exportFailed": "Export failed: {message}"
+      "exportFailed": "Export failed: {message}",
+      "noResume": "Create or import a resume first so the letter can use your real experience."
     },
     "paragraphModal": {
       "title": "Body Paragraphs",
       "addParagraphButton": "+ Add Paragraph",
       "saveChangesButton": "Save Changes",
       "paragraphLabel": "Paragraph {number}"
+    },
+    "seed": {
+      "salutation": "Dear Hiring Manager,",
+      "closing": "Sincerely,"
+    },
+    "preview": {
+      "emptyHint": "Write the letter section by section on the left, or generate a draft from your resume and the job description."
     }
   },
   "SettingsPage": {
