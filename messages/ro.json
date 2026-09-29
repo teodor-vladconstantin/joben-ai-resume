@@ -299,6 +299,14 @@
     "scanButton": "Scanează-mi CV-ul, Gratuit",
     "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare"
   },
+  "SignUp": {
+    "eyebrow": "Cont nou",
+    "heading": "Creează-ți contul gratuit",
+    "subheading": "Îți repari CV-ul, îl adaptezi pentru joburi și scrii scrisori de intenție, totul într-un singur loc.",
+    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "acceptToContinue": "Bifează căsuța de mai sus ca să continui la formularul de înregistrare.",
+    "rateLimited": "Prea multe încercări din rețeaua ta. Încearcă din nou mai târziu."
+  },
   "ResumeExamplesHub": {
     "eyebrow": "Exemple de CV Gratuite",
     "heading": "Exemple de CV și Cuvinte Cheie ATS pe Roluri",

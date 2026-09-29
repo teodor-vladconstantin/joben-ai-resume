@@ -299,6 +299,14 @@
     "scanButton": "Scan My Resume, Free",
     "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan"
   },
+  "SignUp": {
+    "eyebrow": "Sign up",
+    "heading": "Create your free account",
+    "subheading": "Fix your resume, tailor it to jobs and write cover letters, all in one place.",
+    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "acceptToContinue": "Tick the box above to continue to the sign-up form.",
+    "rateLimited": "Too many attempts from your network. Please try again later."
+  },
   "ResumeExamplesHub": {
     "eyebrow": "Free Resume Examples",
     "heading": "Resume Examples & ATS Keywords by Role",
