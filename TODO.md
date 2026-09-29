@@ -10,7 +10,8 @@
     culorile temei) în builder, scrisori, listele de CV-uri/scrisori.
   - Flake teste rezolvat: primul test din fiecare `tests/api/*` depășea 5s la import rece al rutei
     (după tsc/cache invalidat) → 15-20 eșecuri în cascadă. `testTimeout: 20000`; verificat pe rulări reci.
-  - **De făcut:** migrarea `20260928120000_backfill_resume_scores.sql` (în așteptare: extensia Chrome neconectată).
+  - Migrarea `20260928120000_backfill_resume_scores.sql` aplicată de user din SQL Editor; verificat: 12/12 CV-uri
+    cu evaluare au `score` = ultima evaluare AI (55 CV-uri total).
 - [DONE] 2026-09-28 Test end-to-end live pe joben.eu, bug-uri silențioase găsite și reparate (commits
   `5d94ac1`, `d56e986` + următorul): dublură bullet la import; evaluarea AI primea CV-ul FĂRĂ educație/
   proiecte/link-uri (false "missing education"); scrisoarea de intenție era generată din propriul text
@@ -20,8 +21,7 @@
   "Critical/Outstanding" netraduse (afișau "Bun"); feedback AI în engleză pe /ro + fals pozitiv pe
   lunile românești ("Ian"); artefacte de randare semnalate ca formatare; titluri/date/timp relativ
   netraduse; hint upload 10MB fals (limita reală 5MB).
-  - **De făcut manual:** migrarea `20260928120000_backfill_resume_scores.sql` (CLI Supabase dă 403 pe
-    login role; aplică din SQL Editor sau cu `SUPABASE_DB_PASSWORD`).
+  - Migrarea `20260928120000_backfill_resume_scores.sql` aplicată pe 2026-09-29 (vezi mai sus).
   - Rămase, semnalate: rezolvate pe 2026-09-29 (vezi mai sus), mai puțin `alert()` nativ.
 - [DONE] 2026-09-28 Verificare claim-uri summary + risc timeout parser + validare live before/after (fără rebuild VPS, așteaptă decizia userului):
   - Summary: context cu educație/proiecte/career span real, prompt structurat pozitiv, split de propoziții
