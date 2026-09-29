@@ -454,6 +454,14 @@
     "rateLimited": "Too many requests. Wait a moment and try again."
   },
   "Dashboard": {
+    "atsScanCard": {
+      "eyebrow": "From your free ATS scan",
+      "headlineWithIssues": "Your last ATS score: {score}/100, fix these {count, plural, one {# issue} other {# issues}}",
+      "headlineNoIssues": "Your last ATS score: {score}/100",
+      "hint": "Upload the same CV in the editor and fix what the scan found with AI.",
+      "hintNoIssues": "Upload the same CV in the editor to tailor it for real job postings.",
+      "cta": "Open the editor"
+    },
     "greetingMorning": "Good morning",
     "greetingEvening": "Good evening",
     "guestFallbackName": "There",

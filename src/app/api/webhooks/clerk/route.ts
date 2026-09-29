@@ -7,6 +7,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { aliasPostHogDistinctId, anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
+import { claimAnonymousScan } from '@/lib/anonymous-scan-claim'
 import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
 import { OWNED_TABLES } from '@/app/api/account/delete/route'
 
@@ -226,6 +227,22 @@ export async function POST(req: Request) {
       // Pulls the scan's server-side events (report/48h/7d email sends) into
       // this user, for visitors whose browser id never reached the server.
       await aliasPostHogDistinctId({ distinctId: id, alias: anonScanDistinctId(atsAttribution.scanId) })
+    }
+
+    // Carries the free-ATS-checker scan into the account (dashboard card):
+    // by the scan id from the sign-up link, else by the same verified email.
+    const claim = await claimAnonymousScan({
+      userId: id,
+      scanId: atsAttribution?.scanId ?? null,
+      email: primaryEmail || null,
+      emailVerified: email_addresses?.[0]?.verification?.status === 'verified',
+    })
+    if (claim) {
+      await capturePostHogEvent({
+        distinctId: id,
+        event: 'ats_scan_claimed',
+        properties: { scanId: claim.scanId, by: claim.by, source: atsAttribution?.source ?? null },
+      })
     }
 
     if (primaryEmail) {

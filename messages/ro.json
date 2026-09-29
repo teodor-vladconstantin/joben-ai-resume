@@ -454,6 +454,14 @@
     "rateLimited": "Prea multe cereri. Așteaptă puțin și încearcă din nou."
   },
   "Dashboard": {
+    "atsScanCard": {
+      "eyebrow": "Din scanarea ATS gratuită",
+      "headlineWithIssues": "Ultimul tău scor ATS: {score}/100, repară {count, plural, one {această problemă} few {aceste # probleme} other {aceste # de probleme}}",
+      "headlineNoIssues": "Ultimul tău scor ATS: {score}/100",
+      "hint": "Încarcă același CV în editor și repară cu AI ce a găsit scanarea.",
+      "hintNoIssues": "Încarcă același CV în editor ca să îl adaptezi pentru joburi reale.",
+      "cta": "Deschide editorul"
+    },
     "greetingMorning": "Bună dimineața",
     "greetingEvening": "Bună seara",
     "guestFallbackName": "acolo",

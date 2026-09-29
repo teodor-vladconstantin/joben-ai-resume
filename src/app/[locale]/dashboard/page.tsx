@@ -11,7 +11,8 @@ import { Plus, FileSearch, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { getMessages, getTranslations } from 'next-intl/server'
 
-import { getLatestReviewSummary, getRecentDocuments, getUserDashboardStats } from '@/lib/actions/db'
+import { getLatestClaimedAtsScan, getLatestReviewSummary, getRecentDocuments, getUserDashboardStats } from '@/lib/actions/db'
+import { AtsScanCard } from '@/components/dashboard/AtsScanCard'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
 import { RedeemCodeCard } from '@/components/dashboard/RedeemCodeCard'
 import { getUserPlan } from '@/lib/plans'
@@ -56,6 +57,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   const stats = await getUserDashboardStats(userId)
   const recentDocs = await getRecentDocuments(userId)
   const latestReview = await getLatestReviewSummary(userId)
+  const claimedAtsScan = user?.id ? await getLatestClaimedAtsScan(user.id) : null
 
   // Drives the new-user empty state: hide modules that carry no signal at
   // zero (stat cards, Weekly Goals' streak, Redeem Code) and promote Quick
@@ -106,6 +108,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             <p className="text-(--muted)">{d.subGreeting}</p>
           </div>
 
+          {claimedAtsScan && <AtsScanCard scan={claimedAtsScan} locale={locale} />}
           <ProfileCompletion stats={stats} />
           {isNewUser && quickActions}
           {!isNewUser && <RedeemCodeCard currentPlan={currentPlan} />}
