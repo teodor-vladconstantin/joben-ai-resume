@@ -460,7 +460,8 @@
       "headlineNoIssues": "Ultimul tău scor ATS: {score}/100",
       "hint": "Încarcă același CV în editor și repară cu AI ce a găsit scanarea.",
       "hintNoIssues": "Încarcă același CV în editor ca să îl adaptezi pentru joburi reale.",
-      "cta": "Deschide editorul"
+      "cta": "Deschide editorul",
+      "loading": "Încărcăm scorul din scanarea ATS gratuită..."
     },
     "greetingMorning": "Bună dimineața",
     "greetingEvening": "Bună seara",
