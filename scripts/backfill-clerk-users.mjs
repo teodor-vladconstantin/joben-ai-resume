@@ -25,6 +25,9 @@
 import { createClient } from '@supabase/supabase-js'
 
 const execute = process.argv.includes('--execute')
+// Full addresses only on request (e.g. to confirm a specific user is in the
+// list); masked by default so the output can be pasted around.
+const showEmails = process.argv.includes('--show-emails')
 const clerkKey = process.env.CLERK_SECRET_KEY || ''
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -75,7 +78,8 @@ const existing = new Set((rows || []).map((row) => row.clerk_id))
 const missing = clerkUsers.filter((user) => !existing.has(user.id))
 console.log(`Clerk users: ${clerkUsers.length}, users rows: ${existing.size}, missing: ${missing.length}`)
 for (const user of missing) {
-  console.log(`  ${user.id}  ${maskEmail(primaryEmail(user))}  created ${new Date(user.created_at).toISOString()}`)
+  const email = showEmails ? primaryEmail(user) || '(no email)' : maskEmail(primaryEmail(user))
+  console.log(`  ${user.id}  ${email}  created ${new Date(user.created_at).toISOString()}`)
 }
 
 if (!execute) {
