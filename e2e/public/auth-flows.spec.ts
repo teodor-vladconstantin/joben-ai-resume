@@ -8,16 +8,24 @@ test.describe('Auth flows and edge cases (unauthenticated)', () => {
     await expect(page).toHaveURL(/\/sign-in/)
   })
 
-  test('sign-up requires accepting the legal checkbox before Clerk form appears', async ({ page }) => {
-    await page.goto('/sign-up')
+  test('sign-up requires accepting the inline legal checkbox before Clerk form appears', async ({ page }) => {
+    await page.goto('/en/sign-up')
     await expect(page.getByText(/terms and conditions/i)).toBeVisible()
-
-    await page.getByRole('button', { name: /continue to sign up/i }).click()
-    await expect(page.getByText(/must accept the terms/i)).toBeVisible()
+    await expect(page.getByText(/tick the box above/i)).toBeVisible()
+    await expect(page.locator('.cl-rootBox, .cl-signUp-root')).toHaveCount(0)
 
     await page.getByRole('checkbox').check()
-    await page.getByRole('button', { name: /continue to sign up/i }).click()
     await expect(page.locator('.cl-rootBox, .cl-signUp-root').first()).toBeVisible({ timeout: 15_000 })
+
+    // Remembered in localStorage: a new visit starts ticked with the form shown.
+    await page.goto('/en/sign-up')
+    await expect(page.getByRole('checkbox')).toBeChecked()
+    await expect(page.locator('.cl-rootBox, .cl-signUp-root').first()).toBeVisible({ timeout: 15_000 })
+  })
+
+  test('sign-up consent is localized on /ro', async ({ page }) => {
+    await page.goto('/ro/sign-up')
+    await expect(page.getByText(/termenii și condițiile/i)).toBeVisible()
   })
 
   test('sign-in shows an error for a wrong password', async ({ page }) => {
