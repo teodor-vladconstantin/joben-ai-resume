@@ -1,4 +1,9 @@
 ## Active
+- [BLOCKED] 2026-09-29 Deploy `feat/ats-funnel`: branch pushat, preview READY (în spatele Vercel
+  Authentication). Migrările NU sunt aplicate: `supabase db push` cere `SUPABASE_DB_PASSWORD` (403 pe login
+  role). URGENT, independent de branch: webhook-ul Clerk de producție are 100% erori pentru că
+  `https://www.joben.eu/api/webhooks/clerk` răspunde 308 → `https://joben.eu/...` (Svix nu urmează
+  redirect-uri); Clerk are 30 sign-up-uri, tabela `users` are 16. Fix: URL-ul endpoint-ului fără `www`.
 - [DONE] 2026-09-29 Funnel ATS gratuit → cont (branch `feat/ats-funnel`, nepush-uit): copy corect, rezultat:
   probleme → CTA gratuit → email → Pro, emailuri anonime RO/EN (escape, UTM, `scan=<id>`), evenimente PostHog
   doar cu consimțământ cookie (id browser salvat pe scan), consimțământ inline la sign-up (refolosit 20 min),
