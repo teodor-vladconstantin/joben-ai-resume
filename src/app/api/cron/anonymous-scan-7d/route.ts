@@ -67,6 +67,8 @@ export async function POST(request: Request) {
       .from('anonymous_scans')
       .select('id, email, locale')
       .not('email', 'is', null)
+      // Claimed = already turned into an account (possibly under another email).
+      .is('claimed_by', null)
       .gte('created_at', minCreatedAt)
       .lte('created_at', maxCreatedAt)
       .limit(options.limit)
