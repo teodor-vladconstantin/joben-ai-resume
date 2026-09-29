@@ -305,8 +305,9 @@ export async function POST(req: Request) {
 
     // Rate limit checked/incremented here, right before the paid AI call,
     // not earlier. A file that fails validation or extraction above never
-    // reaches this point, so it never costs the visitor one of their 3
-    // daily scans; only an upload that actually produced usable text does.
+    // reaches this point, so it never costs the visitor their daily scan
+    // (ATS_CHECK_RATE_LIMIT_PER_DAY); only an upload that actually produced
+    // usable text does.
     // Checked on BOTH identities (IP and device cookie) so a request is only
     // allowed when neither has exhausted its own daily quota.
     const [ipLimit, deviceLimit] = await Promise.all([

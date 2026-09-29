@@ -287,7 +287,7 @@
     "createFreeAccount": "Creează-ți contul gratuit",
     "scanAnother": "Scanează alt CV",
     "usedFreeScan": "Ți-ai folosit scanarea gratuită de azi",
-    "usedFreeScanBody1": "Creează-ți un cont gratuit ca să primești încă o scanare chiar acum, plus rescrieri nelimitate.",
+    "usedFreeScanBody1": "Creează-ți un cont gratuit ca să continui chiar acum: 10 evaluări AI ale CV-ului și 15 rescrieri AI de puncte în fiecare lună.",
     "usedFreeScanBody2": "Sau revii mâine pentru următoarea scanare gratuită.",
     "createFreeAccountShort": "Creează un cont gratuit",
     "readyToScan": "Gata de scanare, dă click ca să alegi alt fișier",
@@ -297,7 +297,7 @@
     "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
-    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · nimic salvat"
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare"
   },
   "ResumeExamplesHub": {
     "eyebrow": "Exemple de CV Gratuite",
