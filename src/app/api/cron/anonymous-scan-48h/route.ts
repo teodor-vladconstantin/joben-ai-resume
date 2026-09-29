@@ -35,6 +35,7 @@ type CandidateScan = {
   email: string | null
   weakest_category: string | null
   locale: string | null
+  posthog_distinct_id: string | null
 }
 
 const VALID_CATEGORY_KEYS: readonly AtsCategoryKey[] = ['ats_formatting', 'structure', 'keyword_impact', 'clarity']
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('anonymous_scans')
-      .select('id, email, weakest_category, locale')
+      .select('id, email, weakest_category, locale, posthog_distinct_id')
       .not('email', 'is', null)
       // Claimed = already turned into an account (possibly under another email).
       .is('claimed_by', null)
@@ -223,7 +224,12 @@ export async function POST(request: Request) {
         })
         .eq('source_event_id', sourceEventId)
 
-      await captureAnonEmailSent({ type: '48h', scanId: row.id, locale: toAnonScanEmailLocale(row.locale) })
+      await captureAnonEmailSent({
+        analyticsDistinctId: row.posthog_distinct_id,
+        type: '48h',
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
+      })
       sent += 1
     }
 

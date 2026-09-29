@@ -26,6 +26,7 @@ type CandidateScan = {
   id: string
   email: string | null
   locale: string | null
+  posthog_distinct_id: string | null
 }
 
 function buildSourceEventId(scanId: string): string {
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('anonymous_scans')
-      .select('id, email, locale')
+      .select('id, email, locale, posthog_distinct_id')
       .not('email', 'is', null)
       // Claimed = already turned into an account (possibly under another email).
       .is('claimed_by', null)
@@ -202,7 +203,12 @@ export async function POST(request: Request) {
         })
         .eq('source_event_id', sourceEventId)
 
-      await captureAnonEmailSent({ type: '7d', scanId: row.id, locale: toAnonScanEmailLocale(row.locale) })
+      await captureAnonEmailSent({
+        analyticsDistinctId: row.posthog_distinct_id,
+        type: '7d',
+        scanId: row.id,
+        locale: toAnonScanEmailLocale(row.locale),
+      })
       sent += 1
     }
 

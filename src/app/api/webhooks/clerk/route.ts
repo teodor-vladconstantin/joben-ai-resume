@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/resend'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { aliasPostHogDistinctId, anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
+import { aliasPostHogDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { claimAnonymousScan } from '@/lib/anonymous-scan-claim'
 import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
@@ -223,12 +223,6 @@ export async function POST(req: Request) {
       },
     })
 
-    if (atsAttribution?.scanId) {
-      // Pulls the scan's server-side events (report/48h/7d email sends) into
-      // this user, for visitors whose browser id never reached the server.
-      await aliasPostHogDistinctId({ distinctId: id, alias: anonScanDistinctId(atsAttribution.scanId) })
-    }
-
     // Carries the free-ATS-checker scan into the account (dashboard card):
     // by the scan id from the sign-up link, else by the same verified email.
     const claim = await claimAnonymousScan({
@@ -243,6 +237,14 @@ export async function POST(req: Request) {
         event: 'ats_scan_claimed',
         properties: { scanId: claim.scanId, by: claim.by, source: atsAttribution?.source ?? null },
       })
+
+      // Only after a successful claim (never from the user-editable scan id
+      // alone), and only if the visitor accepted analytics cookies when they
+      // scanned: merges the scanning browser's history (scan, emails sent)
+      // into this account, also when they signed up on another device.
+      if (claim.analyticsDistinctId) {
+        await aliasPostHogDistinctId({ distinctId: id, alias: claim.analyticsDistinctId })
+      }
     }
 
     if (primaryEmail) {

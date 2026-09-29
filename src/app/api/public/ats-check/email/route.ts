@@ -4,7 +4,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
-import { anonScanDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
+import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale } from '@/lib/resend'
 
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
 
     const { data: scan, error: fetchError } = await supabase
       .from('anonymous_scans')
-      .select('id, email, report_json, locale')
+      .select('id, email, report_json, locale, posthog_distinct_id')
       .eq('id', scanId)
       .maybeSingle()
 
@@ -131,17 +131,22 @@ export async function POST(req: Request) {
       scanId,
       email: finalEmail,
       locale: toAnonScanEmailLocale(scan.locale),
+      analyticsDistinctId: scan.posthog_distinct_id ?? null,
       overallScore: reportJson.data.overall_score,
       grade: reportJson.data.grade,
       categories: reportJson.data.categories,
       issues: reportJson.data.issues,
     })
 
-    await capturePostHogEvent({
-      distinctId: anonScanDistinctId(scanId),
-      event: 'anonymous_ats_check_email_captured_post_scan',
-      properties: { overallScore: reportJson.data.overall_score, scanId },
-    })
+    // Only for visitors who accepted analytics cookies at scan time (see
+    // anonymous_scans.posthog_distinct_id); refused means no server event.
+    if (scan.posthog_distinct_id) {
+      await capturePostHogEvent({
+        distinctId: scan.posthog_distinct_id,
+        event: 'anonymous_ats_check_email_captured_post_scan',
+        properties: { overallScore: reportJson.data.overall_score, scanId },
+      })
+    }
 
     return jsonWithRequestId({ success: true, email: finalEmail }, 200, requestId)
   } catch (error) {
