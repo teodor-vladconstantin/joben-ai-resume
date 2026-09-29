@@ -9,6 +9,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
     },
+    // The first test in each API file imports its route module cold, which
+    // can exceed the 5s default when the transform cache is invalidated.
+    testTimeout: 20000,
     clearMocks: true,
     restoreMocks: true,
   },

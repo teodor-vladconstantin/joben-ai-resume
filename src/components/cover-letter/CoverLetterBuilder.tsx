@@ -4,6 +4,7 @@ import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from '
 import { useParams } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { useRouter } from '@/i18n/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
 import { ParagraphModal } from '@/components/cover-letter/ParagraphModal'
@@ -386,7 +387,7 @@ export function CoverLetterBuilder() {
           setIsGenerating(false)
           return
         }
-        alert(serverError(payload, t(payload.code === 'no_resume' ? 'errors.noResume' : 'errors.generateDraft'), response.status))
+        toast.error(serverError(payload, t(payload.code === 'no_resume' ? 'errors.noResume' : 'errors.generateDraft'), response.status))
         setIsGenerating(false)
         return
       }
@@ -405,7 +406,7 @@ export function CoverLetterBuilder() {
         closingSignature: payload.result?.closing || prev.closingSignature,
       }))
     } catch (error) {
-      alert(t('errors.generateDraftFailed', { message: (error as Error).message }))
+      toast.error(t('errors.generateDraftFailed', { message: (error as Error).message }))
     }
 
     setIsGenerating(false)
@@ -429,7 +430,7 @@ export function CoverLetterBuilder() {
 
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        alert(serverError(payload, t('errors.exportPdf'), response.status))
+        toast.error(serverError(payload, t('errors.exportPdf'), response.status))
         return
       }
 
@@ -441,7 +442,7 @@ export function CoverLetterBuilder() {
       anchor.click()
       URL.revokeObjectURL(url)
     } catch (error) {
-      alert(t('errors.exportFailed', { message: (error as Error).message }))
+      toast.error(t('errors.exportFailed', { message: (error as Error).message }))
     } finally {
       setIsExportingPdf(false)
     }
