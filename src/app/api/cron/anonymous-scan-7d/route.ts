@@ -131,6 +131,7 @@ export async function POST(request: Request) {
     let sent = 0
     let retried = 0
     let deduped = 0
+    let suppressed = 0
     const failures: Array<{ scan_id: string; reason: string }> = []
 
     for (const row of eligible) {
@@ -196,12 +197,19 @@ export async function POST(request: Request) {
       await supabase
         .from('email_events')
         .update({
-          status: 'sent',
+          status: result.suppressed ? 'suppressed' : 'sent',
           provider_id: result.providerId || null,
           error: null,
           metadata: { source: EVENT_SOURCE, attempts: result.attempts, scanId: row.id },
         })
         .eq('source_event_id', sourceEventId)
+
+      // Unsubscribed: counted as handled (the lock stays, no retry) but no
+      // email went out, so no anon_email_sent and not in `sent`.
+      if (result.suppressed) {
+        suppressed += 1
+        continue
+      }
 
       await captureAnonEmailSent({
         analyticsDistinctId: row.posthog_distinct_id,
@@ -220,6 +228,7 @@ export async function POST(request: Request) {
       sent,
       retried,
       deduped,
+      suppressed,
       failed: failures.length,
     })
 
@@ -230,6 +239,7 @@ export async function POST(request: Request) {
         sent,
         retried,
         deduped,
+        suppressed,
         failed: failures.length,
         dryRun: false,
         failures,
