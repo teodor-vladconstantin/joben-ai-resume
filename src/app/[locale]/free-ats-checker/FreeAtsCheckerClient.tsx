@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
 import { PlanCta } from '@/components/pricing/PlanCta'
+import { useServerError } from '@/hooks/useServerError'
 
 type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 type GradeKey = 'Poor' | 'Fair' | 'Good' | 'Excellent'
@@ -49,6 +50,7 @@ function getWorstCategory(categories: Record<AtsCategoryKey, AtsCategory>): AtsC
 
 export function FreeAtsCheckerClient() {
   const t = useTranslations('AtsChecker')
+  const serverError = useServerError()
   const locale = useLocale()
   const tGrade = useTranslations('Grade')
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -120,7 +122,7 @@ export function FreeAtsCheckerClient() {
         if (response.status === 429) {
           setIsRateLimited(true)
         } else {
-          setError(payload?.error || t('errors.generic'))
+          setError(serverError(payload, t(response.status === 400 ? 'errors.unreadable' : 'errors.generic')))
         }
         setIsScanning(false)
         return
@@ -160,7 +162,7 @@ export function FreeAtsCheckerClient() {
         | null
 
       if (!response.ok || !payload?.success) {
-        setReportError(payload?.error || t('errors.emailGeneric'))
+        setReportError(serverError(payload, t('errors.emailGeneric'), response.status))
         setIsSendingReport(false)
         return
       }

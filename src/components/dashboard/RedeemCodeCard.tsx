@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import type { UserPlan } from '@/lib/plans'
 import { buttonVariants } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { useServerError } from '@/hooks/useServerError'
 
 type RedeemCodeCardProps = {
   currentPlan: UserPlan
@@ -14,6 +15,7 @@ type RedeemCodeCardProps = {
 
 export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
   const t = useTranslations('Dashboard.redeemCode')
+  const serverError = useServerError()
   const router = useRouter()
   const [code, setCode] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -56,7 +58,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
       }
 
       if (!response.ok || !payload.success) {
-        setErrorMessage(payload.error || t('couldNotRedeem'))
+        setErrorMessage(serverError(payload, t(response.status === 400 ? 'enterValidCode' : 'couldNotRedeem'), response.status))
         return
       }
 

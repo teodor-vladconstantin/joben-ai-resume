@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FileText, Save, Download, Play, Building2, Briefcase, Sparkles } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { SectionList } from '@/components/cover-letter/SectionList'
@@ -10,6 +11,7 @@ import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { Modal } from '@/components/ui/Modal'
 import { FeatureButton } from '@/components/FeatureButton'
 import { buttonVariants } from '@/components/ui/Button'
+import { useServerError } from '@/hooks/useServerError'
 
 type CoverLetterSections = {
   headerName: string
@@ -38,24 +40,23 @@ type TextModalId =
   | 'conclusion'
   | 'closing'
 
+// Empty on purpose: a generic seed ("I delivered measurable impact...") reads
+// like a finished letter and got exported unchanged. New letters are seeded
+// from the account in the component instead.
 const defaultSections: CoverLetterSections = {
-  headerName: 'Your Name',
-  headerEmail: 'you@example.com',
-  headerPhone: '+1 (555) 000-0000',
+  headerName: '',
+  headerEmail: '',
+  headerPhone: '',
   date: '',
   recipientName: '',
   recipientTitle: '',
   company: '',
   position: '',
-  salutation: 'Dear Hiring Manager,',
-  introduction:
-    'I am writing to express my strong interest in this role. With my background in software development, I am confident I can contribute from day one.',
-  bodyParagraphs: [
-    'In recent roles, I delivered measurable impact, collaborated across teams, and maintained high standards for quality and execution.',
-  ],
-  conclusion:
-    'I would welcome the opportunity to discuss how my experience aligns with your team needs.',
-  closingSignature: 'Sincerely,\nYour Name',
+  salutation: '',
+  introduction: '',
+  bodyParagraphs: [''],
+  conclusion: '',
+  closingSignature: '',
   tone: 'professional',
 }
 
@@ -88,10 +89,12 @@ function parseSections(content: string): CoverLetterSections {
 
 export function CoverLetterBuilder() {
   const t = useTranslations('CoverLetterBuilder')
+  const serverError = useServerError()
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const routeId = params?.id
   const isCreateMode = routeId === 'new' || !routeId
+  const { user, isLoaded: isUserLoaded } = useUser()
 
   const [sections, setSections] = useState<CoverLetterSections>(defaultSections)
   // What was just loaded (or the new-letter seed). Autosave waits until the
@@ -144,15 +147,8 @@ export function CoverLetterBuilder() {
     let cancelled = false
 
     async function loadLetter() {
-      if (isCreateMode) {
-        setSections((prev) => {
-          const next = { ...prev, date: prev.date || new Date().toISOString().slice(0, 10) }
-          pristineSectionsRef.current = next
-          return next
-        })
-        setIsLoading(false)
-        return
-      }
+      // New letters are seeded by the effect below once the account is loaded.
+      if (isCreateMode) return
 
       const response = await fetch(`/api/cover-letters/${routeId}`, { cache: 'no-store' })
       if (!response.ok) {
@@ -200,6 +196,22 @@ export function CoverLetterBuilder() {
       cancelled = true
     }
   }, [isCreateMode, routeId])
+
+  useEffect(() => {
+    if (!isCreateMode || !isUserLoaded || pristineSectionsRef.current) return
+    const name = user?.fullName?.trim() || ''
+    const next: CoverLetterSections = {
+      ...defaultSections,
+      headerName: name,
+      headerEmail: user?.primaryEmailAddress?.emailAddress || '',
+      date: new Date().toISOString().slice(0, 10),
+      salutation: t('seed.salutation'),
+      closingSignature: [t('seed.closing'), name].filter(Boolean).join('\n'),
+    }
+    pristineSectionsRef.current = next
+    setSections(next)
+    setIsLoading(false)
+  }, [isCreateMode, isUserLoaded, user, t])
 
   const persistLetter = useCallback(async () => {
     setSaveStatus('saving')
@@ -364,16 +376,17 @@ export function CoverLetterBuilder() {
         }
         showUpgrade?: boolean
         error?: string
+        code?: string
       }
 
       if (!response.ok || !payload.result) {
         if (payload.showUpgrade) {
-          setUpgradeMessage(payload.error || t('errors.generateDraftAiUpgrade'))
+          setUpgradeMessage(serverError(payload, t('errors.generateDraftAiUpgrade')))
           setShowUpgradeModal(true)
           setIsGenerating(false)
           return
         }
-        alert(payload.error || t('errors.generateDraft'))
+        alert(serverError(payload, t(payload.code === 'no_resume' ? 'errors.noResume' : 'errors.generateDraft'), response.status))
         setIsGenerating(false)
         return
       }
@@ -416,7 +429,7 @@ export function CoverLetterBuilder() {
 
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        alert(payload.error || t('errors.exportPdf'))
+        alert(serverError(payload, t('errors.exportPdf'), response.status))
         return
       }
 
@@ -550,6 +563,9 @@ export function CoverLetterBuilder() {
             </div>
 
             <p className="mb-4 whitespace-pre-wrap">{sections.salutation}</p>
+            {!sections.introduction.trim() && !sections.conclusion.trim() && sections.bodyParagraphs.every((p) => !p.trim()) ? (
+              <p className="mb-4 text-sm text-gray-400 font-sans">{t('preview.emptyHint')}</p>
+            ) : null}
             <p className="mb-4 whitespace-pre-wrap">{sections.introduction}</p>
             {sections.bodyParagraphs.map((paragraph, index) => (
               <p key={index} className="mb-4 whitespace-pre-wrap">{paragraph}</p>
