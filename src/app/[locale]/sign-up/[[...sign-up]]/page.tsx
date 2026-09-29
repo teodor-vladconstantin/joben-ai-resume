@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { SignUp } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import posthog from 'posthog-js'
@@ -16,11 +16,35 @@ import {
 } from '@/lib/ats-attribution'
 import type { AppLocale } from '@/i18n/routing'
 
-// localStorage so the acceptance survives new tabs (email links) and Clerk's
-// multi-step flow; the server-side record is still a fresh signup_consents
-// token per visit (see acceptTerms below).
+// The acceptance (with its signup_consents token) is kept in localStorage so
+// it survives new tabs and Clerk's multi-step flow, but only while the token
+// is still usable. The server expires it 30 minutes after issuing
+// (signup_consents.expires_at) and the webhook consumes it only once Clerk's
+// flow finishes (after email verification), so reuse stops at 20 minutes,
+// leaving ~10 minutes to complete sign-up. After that the box starts unticked:
+// a later visit, or another person on the same computer, ticks it again.
 const LEGAL_ACCEPTED_KEY = 'joben_legal_accepted'
+const CONSENT_TTL_MS = 20 * 60 * 1000
 const ATS_ATTRIBUTION_KEY = 'joben_ats_signup'
+
+type StoredConsent = { token: string | null; at: number }
+
+function readStoredConsent(): StoredConsent | null {
+  try {
+    const value = JSON.parse(readStorage('local', LEGAL_ACCEPTED_KEY) || 'null') as Partial<StoredConsent> | null
+    if (
+      value &&
+      typeof value.at === 'number' &&
+      Date.now() - value.at < CONSENT_TTL_MS &&
+      (value.token === null || typeof value.token === 'string')
+    ) {
+      return { token: value.token, at: value.at }
+    }
+  } catch {
+    // Unparseable (e.g. the old '1' flag): treated as not accepted.
+  }
+  return null
+}
 
 function readStorage(storage: 'local' | 'session', key: string): string | null {
   try {
@@ -68,6 +92,7 @@ const legalLinkClass = 'text-(--foreground) underline decoration-(--border) unde
 function SignUpContent() {
   const t = useTranslations('SignUp')
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const locale = useLocale() as AppLocale
   const returnBackUrl = sanitizeReturnBackUrl(searchParams.get('redirect_url'), `/${locale}/dashboard`)
   const [checked, setChecked] = useState(false)
@@ -81,9 +106,10 @@ function SignUpContent() {
   // Records the acceptance server-side (signup_consents row, same as before)
   // and only then shows Clerk's form, so the token is in unsafeMetadata from
   // the first render of <SignUp>.
-  const acceptTerms = useCallback(async (source: AtsSignupAttribution['source'] | null, remembered: boolean) => {
+  const acceptTerms = useCallback(async (source: AtsSignupAttribution['source'] | null) => {
     setRateLimitError(false)
     setSubmitting(true)
+    let token: string | null = null
     try {
       const response = await fetch('/api/signup/consent', { method: 'POST' })
       if (response.status === 429) {
@@ -93,19 +119,20 @@ function SignUpContent() {
       }
       if (response.ok) {
         const data = (await response.json()) as { token?: string }
-        if (data.token) setConsentToken(data.token)
+        token = data.token || null
       }
-      // Server-side consent tracking is defense-in-depth, not a hard
-      // gate: proceed to Clerk's form even if it failed, consistent
-      // with this codebase's bias toward availability.
-      writeStorage('local', LEGAL_ACCEPTED_KEY, '1')
-      if (!remembered) posthog.capture('signup_consent_accepted', { source })
-      setAccepted(true)
     } catch {
-      setAccepted(true)
+      // Network error: fall through without a token, see below.
     } finally {
       setSubmitting(false)
     }
+    // Server-side consent tracking is defense-in-depth, not a hard gate:
+    // proceed to Clerk's form even if it failed, consistent with this
+    // codebase's bias toward availability.
+    writeStorage('local', LEGAL_ACCEPTED_KEY, JSON.stringify({ token, at: Date.now() } satisfies StoredConsent))
+    posthog.capture('signup_consent_accepted', { source })
+    setConsentToken(token)
+    setAccepted(true)
   }, [])
 
   useEffect(() => {
@@ -128,18 +155,43 @@ function SignUpContent() {
     }
     setAttribution(current)
 
-    // Accepted earlier in this browser: the box starts ticked and a fresh
-    // consent token is requested, since tokens expire after 30 minutes.
-    if (readStorage('local', LEGAL_ACCEPTED_KEY) === '1') {
+    // Ticked within the last 30 minutes (another tab, an earlier Clerk step,
+    // the OAuth round trip): reuse that acceptance and its token, no new
+    // request, so no extra signup_consents rows and no rate-limit dead end.
+    const stored = readStoredConsent()
+    if (stored) {
       setChecked(true)
-      void acceptTerms(current?.source ?? null, true)
+      setConsentToken(stored.token)
+      setAccepted(true)
     }
 
     setCheckedStorage(true)
-  }, [acceptTerms])
+  }, [])
 
   if (!checkedStorage) {
     return null
+  }
+
+  const signUp = (
+    <SignUp
+      routing="path"
+      path={`/${locale}/sign-up`}
+      signInUrl={`/${locale}/sign-in`}
+      fallbackRedirectUrl={returnBackUrl}
+      unsafeMetadata={buildUnsafeMetadata(consentToken, attribution)}
+    />
+  )
+
+  // /sign-up/verify-email-address, /sign-up/sso-callback, /sign-up/continue:
+  // the sign-up attempt (with its unsafeMetadata) was created on the first
+  // step, after the box was ticked, so Clerk always renders here. Gating these
+  // on the checkbox again could strand a user mid-flow.
+  if (pathname !== `/${locale}/sign-up`) {
+    return (
+      <AuthShell eyebrow={t('eyebrow')} heading={t('heading')} subheading={t('subheading')}>
+        {signUp}
+      </AuthShell>
+    )
   }
 
   return (
@@ -155,7 +207,7 @@ function SignUpContent() {
               const next = event.target.checked
               setChecked(next)
               if (next) {
-                void acceptTerms(attribution?.source ?? null, false)
+                void acceptTerms(attribution?.source ?? null)
               } else {
                 writeStorage('local', LEGAL_ACCEPTED_KEY, null)
                 setAccepted(false)
@@ -184,15 +236,7 @@ function SignUpContent() {
           <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{t('rateLimited')}</p>
         ) : null}
 
-        {accepted ? (
-          <SignUp
-            routing="path"
-            path={`/${locale}/sign-up`}
-            signInUrl={`/${locale}/sign-in`}
-            fallbackRedirectUrl={returnBackUrl}
-            unsafeMetadata={buildUnsafeMetadata(consentToken, attribution)}
-          />
-        ) : (
+        {accepted ? signUp : (
           <p className="flex items-center gap-2 text-sm text-(--muted)">
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {t('acceptToContinue')}

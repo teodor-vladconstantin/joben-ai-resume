@@ -68,9 +68,14 @@ export function anonScanDistinctId(scanId: string): string {
 }
 
 // A browser distinct id the client sent along (only when the visitor accepted
-// analytics cookies). Bounded and charset-limited: it is caller-supplied.
+// analytics cookies). It is caller-supplied, so it is bounded, charset-limited,
+// and never a Clerk user id (`user_…`, what identify() sets after sign-in) or
+// one of our server-side ids (`anon:…`): otherwise anyone who knows such an id
+// could alias events into that person.
 const BROWSER_DISTINCT_ID_PATTERN = /^[A-Za-z0-9_.:@-]{1,200}$/
 
 export function toBrowserDistinctId(value: unknown): string | null {
-  return typeof value === 'string' && BROWSER_DISTINCT_ID_PATTERN.test(value) ? value : null
+  if (typeof value !== 'string' || !BROWSER_DISTINCT_ID_PATTERN.test(value)) return null
+  if (value.startsWith('user_') || value.startsWith('anon:')) return null
+  return value
 }
