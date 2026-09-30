@@ -46,6 +46,9 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
+  // Outlook/Bing link scanners (CefSharp) reject this when crawling emailed
+  // links; it never comes from our code.
+  ignoreErrors: [/Object Not Found Matching Id:\d+, MethodName:\w+, ParamCount:\d+/],
   beforeSend: scrubSentryEvent,
 });
 
