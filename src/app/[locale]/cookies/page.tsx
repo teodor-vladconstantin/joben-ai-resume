@@ -1,5 +1,6 @@
 import { Link } from '@/i18n/navigation'
 import { Navbar } from '@/components/ui/Navbar'
+import { CompanyDetails } from '@/components/layout/CompanyDetails'
 import type { Metadata } from 'next'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
@@ -103,6 +104,7 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
           <h1 className="text-3xl font-bold text-(--foreground)">{cookies.heading}</h1>
           <p className="mt-2 font-mono text-xs text-(--muted)">Last updated: {cookies.lastUpdated}</p>
           <p className="mt-4 text-(--muted)">{cookies.intro}</p>
+          <CompanyDetails className="mt-4 text-sm text-(--muted)" />
         </header>
 
         <article className="divide-y divide-(--border)">
