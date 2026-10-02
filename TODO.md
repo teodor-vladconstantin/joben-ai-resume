@@ -723,6 +723,8 @@
 
 
 ## Done
+- [DONE] 2026-10-02 Date de identificare firmă (TETA ABC SRL, CUI, Nr. Reg. Com., sediu social, hello@joben.eu) în footer + Termeni, Confidențialitate, Cookies: `company` în src/lib/content.ts, `CompanyDetails` în src/components/layout/, `Footer.companyLine` în messages.
+- [DONE] 2026-10-02 Sentry: client-side noise filter for injected in-app browser / link scanner / extension scripts (BROWSER_NOISE_ERRORS + BROWSER_NOISE_URLS in src/lib/security/sentry-scrub.ts, wired as ignoreErrors/denyUrls in src/instrumentation-client.ts, test in tests/security/sentry-scrub.test.ts)
 - [DONE] ATS false positives: raised resume char caps (ats-check 20k, analyze 15k), kept PDF line breaks, code-level guardrail filter (overlap/truncation/duration/grad-date/future-date) in src/lib/ats-issue-guardrails.ts
 
 - [DONE] Email automation flows (first resume, inactivity 3d, rate limit)

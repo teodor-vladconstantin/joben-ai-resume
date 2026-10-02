@@ -252,6 +252,7 @@ export type Messages = {
     salBadgeAlt: string
     productHuntLabel: string
     creatorCredit: string
+    companyLine: string // {legalName} {cui} {regCom} {address} {email}
   }
   CookieConsent: {
     ariaLabel: string

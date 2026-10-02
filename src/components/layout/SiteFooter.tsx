@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
+import { CompanyDetails } from '@/components/layout/CompanyDetails'
 
 export async function SiteFooter() {
   const t = await getTranslations('Footer')
@@ -46,7 +47,10 @@ export async function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col items-start gap-4 border-t border-(--border) pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-(--muted)">{t('creatorCredit')}</p>
+          <div className="max-w-xl space-y-2">
+            <p className="text-xs text-(--muted)">{t('creatorCredit')}</p>
+            <CompanyDetails className="text-xs text-(--muted)" />
+          </div>
 
           <div className="flex items-center gap-4">
             <a
