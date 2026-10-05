@@ -201,7 +201,10 @@ export async function POST(req: NextRequest) {
     })
 
     const data = await parseUpstreamPayload(response)
-    return new NextResponse(JSON.stringify(data), {
+    // SECURITY: upstream 5xx bodies can carry stack traces or provider errors;
+    // 4xx validation messages (file too large, etc.) are safe and useful.
+    const body = response.status >= 500 ? { error: clientErrorMessage('server') } : data
+    return new NextResponse(JSON.stringify(body), {
       status: response.status,
       headers: {
         'Content-Type': 'application/json',
@@ -224,7 +227,11 @@ export async function GET(req: Request) {
   try {
     const { response } = await fetchParser('/health', { method: 'GET' })
     const data = await parseUpstreamPayload(response)
-    return new NextResponse(JSON.stringify(data), {
+    // SECURITY: this probe is unauthenticated, so expose only the status word,
+    // never the upstream body.
+    const status = (data as { status?: unknown })?.status
+    const minimal = { status: typeof status === 'string' ? status : response.ok ? 'ok' : 'error' }
+    return new NextResponse(JSON.stringify(minimal), {
       status: response.status,
       headers: { 'Content-Type': 'application/json', 'x-request-id': requestId },
     })

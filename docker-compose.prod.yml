@@ -27,7 +27,8 @@ services:
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
       RESUME_PARSER_SHARED_SECRET: ${RESUME_PARSER_SHARED_SECRET}
     ports:
-      - "8000:8000"
+      # Set PARSER_BIND=127.0.0.1 when a TLS reverse proxy fronts this service.
+      - "${PARSER_BIND:-0.0.0.0}:8000:8000"
     mem_limit: 512m
     cpus: "0.5"
     healthcheck:
@@ -43,7 +44,8 @@ services:
     restart: unless-stopped
     networks: [latex-net]
     ports:
-      - "3001:3001"
+      # Set LATEX_BIND=127.0.0.1 when a TLS reverse proxy fronts this service.
+      - "${LATEX_BIND:-0.0.0.0}:3001:3001"
     environment:
       PORT: 3001
       LATEX_SERVICE_SECRET: ${LATEX_SERVICE_SECRET}

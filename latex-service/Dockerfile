@@ -20,6 +20,9 @@ RUN npm install
 # Copy application
 COPY . .
 
+# Run as the unprivileged node user; jobs are written to /tmp.
+USER node
+
 EXPOSE 3001
 
 CMD ["node", "index.js"]
