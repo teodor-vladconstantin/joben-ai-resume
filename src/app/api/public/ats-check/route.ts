@@ -321,12 +321,14 @@ export async function POST(req: Request) {
         identifier: identity,
         limit: ATS_CHECK_RATE_LIMIT_PER_DAY,
         windowSeconds: 24 * 60 * 60,
+        failClosed: true,
       }),
       checkRouteRateLimit({
         name: 'public-ats-check',
         identifier: `device:${deviceId}`,
         limit: ATS_CHECK_RATE_LIMIT_PER_DAY,
         windowSeconds: 24 * 60 * 60,
+        failClosed: true,
       }),
     ])
 
