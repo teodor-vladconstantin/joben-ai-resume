@@ -49,6 +49,16 @@ describe('/api/resumes/export-latex', () => {
     ])
   })
 
+  it('neutralizes TeX ^^ notation in URLs', async () => {
+    const tex = await exportTex({
+      personal: { firstName: 'A', lastName: 'B', website: 'evil.com/a^^5cinput^^7b/etc/passwd^^7d' },
+      experience: [],
+    })
+    const hrefs = tex.match(/\\href\{[^}]*\}/g) ?? []
+    expect(hrefs).toEqual(['\\href{https://evil.com/a5cinput7b/etc/passwd7d}'])
+    expect(tex).not.toContain('^^')
+  })
+
   it('exports long bullets, all technologies and custom section titles without truncation', async () => {
     const longBullet = `Led ${'the migration of legacy services '.repeat(12)}to Kubernetes`
     const techs = Array.from({ length: 12 }, (_, i) => `Tech${i}`)

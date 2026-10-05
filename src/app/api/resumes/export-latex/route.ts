@@ -109,7 +109,9 @@ function normalizeContactText(url: string): string {
 // close the argument and let the rest run as TeX (e.g. \input{/proc/self/environ}),
 // so strip those outright and escape the two chars hyperref needs escaped.
 function sanitizeHrefUrl(url: string): string {
-  return normalizeLatexText(url).replace(/[\\{}\s]/g, '').replace(/[%#]/g, (char) => `\\${char}`)
+  // `^` is stripped too: TeX turns `^^5c` / `^^7b` into `\` / `{` at
+  // tokenization, which would rebuild the characters removed here.
+  return normalizeLatexText(url).replace(/[\\{}^\s]/g, '').replace(/[%#]/g, (char) => `\\${char}`)
 }
 
 function makeLatexLink(url: string, label: string): string {
