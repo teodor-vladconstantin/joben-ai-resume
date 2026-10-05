@@ -7,13 +7,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-app.use(express.json({ limit: '10mb' }));
-// Using a basic CORS since it's an internal microservice, it's open.
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+// Server-to-server only (called from the Next.js API route), so no CORS headers.
 
 const TMP_DIR = process.env.TMP_DIR || '/tmp';
 const LATEX_SERVICE_SECRET = process.env.LATEX_SERVICE_SECRET || '';
@@ -66,10 +60,16 @@ app.get('/health', (req, res) => {
     return res.status(200).json({ status: 'ok' });
 });
 
-app.post('/api/compile', (req, res) => {
+// Auth runs BEFORE the body is parsed so unauthenticated callers cannot make
+// the service buffer and parse a 10 MB JSON body.
+function requireAuth(req, res, next) {
     if (!isAuthorizedRequest(req)) {
         return res.status(401).json({ error: 'Unauthorized compile request' });
     }
+    next();
+}
+
+app.post('/api/compile', requireAuth, express.json({ limit: '10mb' }), (req, res) => {
 
     if (REQUIRE_SERVICE_AUTH && !LATEX_SERVICE_SECRET) {
         return res.status(503).json({ error: 'LaTeX service auth is not configured' });
@@ -118,11 +118,9 @@ app.post('/api/compile', (req, res) => {
                 });
             } else {
                 cleanupFiles(basePath);
-                res.status(500).json({ 
-                    error: 'Compilation failed', 
-                    details: error ? error.message : stderr,
-                    stdout: stdout
-                });
+                // Compiler output stays in the server log only; it can contain
+                // TeX source snippets and file paths.
+                res.status(500).json({ error: 'Compilation failed' });
             }
         });
     });
