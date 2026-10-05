@@ -91,6 +91,8 @@ export async function POST(request: Request) {
       .not('email', 'is', null)
       // Claimed = already turned into an account (possibly under another email).
       .is('claimed_by', null)
+      // Double opt-in: nurture only addresses whose owner confirmed.
+      .not('email_confirmed_at', 'is', null)
       .gte('created_at', minCreatedAt)
       .lte('created_at', maxCreatedAt)
       .limit(options.limit)

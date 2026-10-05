@@ -5,7 +5,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { capturePostHogEvent } from '@/lib/posthog-server'
-import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { sendAnonymousScanConfirmationIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
@@ -128,15 +128,11 @@ export async function POST(req: Request) {
       finalEmail = email
     }
 
-    await sendAnonymousScanReportEmailIfEligible({
+    // Double opt-in: the report is only sent after the address owner confirms.
+    await sendAnonymousScanConfirmationIfEligible({
       scanId,
       email: finalEmail,
       locale: toAnonScanEmailLocale(scan.locale),
-      analyticsDistinctId: scan.posthog_distinct_id ?? null,
-      overallScore: reportJson.data.overall_score,
-      grade: reportJson.data.grade,
-      categories: reportJson.data.categories,
-      issues: reportJson.data.issues,
     })
 
     // Only for visitors who accepted analytics cookies at scan time (see
@@ -149,7 +145,9 @@ export async function POST(req: Request) {
       })
     }
 
-    return jsonWithRequestId({ success: true, email: finalEmail }, 200, requestId)
+    // The stored address is deliberately not echoed back: the caller only
+    // proves knowledge of a scan id, not ownership of that address.
+    return jsonWithRequestId({ success: true }, 200, requestId)
   } catch (error) {
     logger.error('ATS check email top-level failure', {
       requestId,
