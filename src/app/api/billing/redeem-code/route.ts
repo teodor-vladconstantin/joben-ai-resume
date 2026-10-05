@@ -33,6 +33,8 @@ const PLACEHOLDER_CODE_VALUES = [
 // SECURITY: CLAUDE.md Critical #4 — burst protection + lockout against
 // brute-force redemption.
 const REDEEM_RATE_LIMIT_PER_HOUR = 5
+// Per-IP cap across ALL accounts, so rotating fresh accounts does not multiply guesses.
+const REDEEM_IP_RATE_LIMIT_PER_DAY = 20
 const REDEEM_LOCKOUT_THRESHOLD = 10
 const REDEEM_LOCKOUT_TTL_SECONDS = 24 * 60 * 60
 const REDEEM_FAIL_COUNTER_TTL_SECONDS = 24 * 60 * 60
@@ -140,6 +142,30 @@ export async function POST(req: Request) {
       )
     }
 
+    const ipLimit = await checkRouteRateLimit({
+      name: 'redeem-code-ip',
+      identifier: resolveRateLimitIdentity(req),
+      limit: REDEEM_IP_RATE_LIMIT_PER_DAY,
+      windowSeconds: 24 * 60 * 60,
+      failClosed: true,
+    })
+    if (!ipLimit.ok) {
+      logger.warn('Redeem code per-IP rate-limit hit', {
+        requestId,
+        route: '/api/billing/redeem-code',
+        userId,
+        retryAfter: ipLimit.retryAfter,
+      })
+      return new Response(JSON.stringify({ error: clientErrorMessage('rate_limit') }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(ipLimit.retryAfter),
+          'x-request-id': requestId,
+        },
+      })
+    }
+
     let rawBody: unknown
     try {
       rawBody = await req.json()
@@ -227,6 +253,27 @@ export async function POST(req: Request) {
       )
     }
 
+    // SECURITY: the code is a shared secret, so a leak is an unlimited free
+    // upgrade. REDEEM_CODE_MAX_REDEMPTIONS (optional) caps total redemptions.
+    const maxRedemptions = Number(process.env.REDEEM_CODE_MAX_REDEMPTIONS)
+    if (Number.isFinite(maxRedemptions) && maxRedemptions > 0) {
+      const { count, error: countError } = await supabase
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('lifetime_recruiting_code', LIFETIME_RECRUITING_CODE_ID)
+      if (countError || (count ?? 0) >= maxRedemptions) {
+        logger.error('Redeem code redemption cap reached or unverifiable', {
+          requestId,
+          route: '/api/billing/redeem-code',
+          userId,
+          count,
+          maxRedemptions,
+          error: countError?.message,
+        })
+        return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'Invalid code') }, 400, requestId)
+      }
+    }
+
     const clerkUser = await currentUser()
     // SECURITY: only a verified primary address may be written to users.email
     // (plan/god-mode checks trust it); otherwise leave the stored value alone.
@@ -260,7 +307,8 @@ export async function POST(req: Request) {
       )
     }
 
-    logger.info('Lifetime recruiting code redeemed', {
+    // error level so every redemption reaches the alert channel (Sentry/webhook).
+    logger.error('Lifetime recruiting code redeemed (audit alert)', {
       requestId,
       route: '/api/billing/redeem-code',
       userId,
