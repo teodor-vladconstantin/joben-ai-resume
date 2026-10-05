@@ -227,12 +227,16 @@ export async function POST(req: Request) {
     }
 
     const clerkUser = await currentUser()
-    const primaryEmail = clerkUser?.emailAddresses?.[0]?.emailAddress || null
+    // SECURITY: only a verified primary address may be written to users.email
+    // (plan/god-mode checks trust it); otherwise leave the stored value alone.
+    const primary = clerkUser?.primaryEmailAddress
+    const verifiedEmail =
+      primary?.verification?.status === 'verified' ? primary.emailAddress.trim().toLowerCase() : null
 
     const { error: updateError } = await supabase.from('users').upsert(
       {
         clerk_id: userId,
-        email: primaryEmail,
+        ...(verifiedEmail ? { email: verifiedEmail } : {}),
         plan: 'recruiting',
         lifetime_recruiting_unlocked: true,
         lifetime_recruiting_unlocked_at: new Date().toISOString(),
