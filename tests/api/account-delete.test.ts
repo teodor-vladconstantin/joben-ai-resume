@@ -73,8 +73,18 @@ const EXPECTED_DELETE_CALLS: Array<{ table: string; column: string }> = [
   { table: 'cover_letters', column: 'user_id' },
   { table: 'feedback', column: 'user_id' },
   { table: 'email_events', column: 'user_clerk_id' },
+  { table: 'product_events', column: 'user_clerk_id' },
+  { table: 'anonymous_scans', column: 'claimed_by' },
   { table: 'users', column: 'clerk_id' },
 ]
+
+function deleteRequest(body: unknown = { confirm: true }) {
+  return new Request('http://localhost/api/account/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
 
 describe('POST /api/account/delete', () => {
   beforeEach(() => {
@@ -90,7 +100,7 @@ describe('POST /api/account/delete', () => {
     authMock.mockResolvedValue({ userId: null })
     const { POST } = await import('@/app/api/account/delete/route')
 
-    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    const response = await POST(deleteRequest())
     expect(response.status).toBe(401)
   })
 
@@ -101,7 +111,7 @@ describe('POST /api/account/delete', () => {
     clerkClientMock.mockResolvedValue({ users: { deleteUser: deleteUserMock } })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    const response = await POST(deleteRequest())
     const payload = (await response.json()) as { success: boolean; data?: { deleted: boolean } }
 
     expect(response.status).toBe(200)
@@ -127,7 +137,7 @@ describe('POST /api/account/delete', () => {
     })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    const response = await POST(deleteRequest())
     const payload = (await response.json()) as { success: boolean }
 
     expect(response.status).toBe(200)
@@ -141,7 +151,7 @@ describe('POST /api/account/delete', () => {
     stripeCancelMock.mockResolvedValue({})
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    const response = await POST(deleteRequest())
     const payload = (await response.json()) as { success: boolean }
 
     expect(response.status).toBe(200)
@@ -155,7 +165,7 @@ describe('POST /api/account/delete', () => {
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
 
     const { POST } = await import('@/app/api/account/delete/route')
-    await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    await POST(deleteRequest())
 
     expect(stripeCancelMock).not.toHaveBeenCalled()
   })
@@ -164,10 +174,10 @@ describe('POST /api/account/delete', () => {
     authMock.mockResolvedValue({ userId: 'user_123' })
     const { deleteCalls } = mockSupabase({ stripeSubscriptionId: 'sub_abc123' })
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
-    stripeCancelMock.mockRejectedValue(new Error('No such subscription'))
+    stripeCancelMock.mockRejectedValue(Object.assign(new Error('No such subscription'), { code: 'resource_missing' }))
 
     const { POST } = await import('@/app/api/account/delete/route')
-    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+    const response = await POST(deleteRequest())
     const payload = (await response.json()) as { success: boolean; data?: { deleted: boolean } }
 
     expect(stripeCancelMock).toHaveBeenCalledWith('sub_abc123')
@@ -176,5 +186,29 @@ describe('POST /api/account/delete', () => {
     expect(payload.data?.deleted).toBe(true)
     // Deletion must still proceed despite the Stripe failure.
     expect(deleteCalls.length).toBe(EXPECTED_DELETE_CALLS.length)
+  })
+
+  it('aborts without deleting anything when Stripe cancel fails for another reason', async () => {
+    authMock.mockResolvedValue({ userId: 'user_123' })
+    const { deleteCalls } = mockSupabase({ stripeSubscriptionId: 'sub_abc123' })
+    clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
+    stripeCancelMock.mockRejectedValue(new Error('Stripe API unreachable'))
+
+    const { POST } = await import('@/app/api/account/delete/route')
+    const response = await POST(deleteRequest())
+
+    expect(response.status).toBe(502)
+    expect(deleteCalls).toHaveLength(0)
+  })
+
+  it('rejects a request without the explicit confirmation body', async () => {
+    authMock.mockResolvedValue({ userId: 'user_123' })
+    const { deleteCalls } = mockSupabase()
+
+    const { POST } = await import('@/app/api/account/delete/route')
+    const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
+
+    expect(response.status).toBe(400)
+    expect(deleteCalls).toHaveLength(0)
   })
 })
