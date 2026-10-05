@@ -62,6 +62,37 @@ describe('redeem code API', () => {
     expect(response.status).toBe(400)
   })
 
+  it('rejects a valid code once REDEEM_CODE_MAX_REDEMPTIONS is reached', async () => {
+    process.env.REDEEM_CODE_MAX_REDEMPTIONS = '2'
+    authMock.mockResolvedValue({ userId: 'user_123' })
+    const upsertMock = vi.fn().mockResolvedValue({ error: null })
+
+    createServerClientMock.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn((_cols: string, opts?: { head?: boolean }) => ({
+          eq: vi.fn(() =>
+            opts?.head
+              ? Promise.resolve({ count: 2, error: null })
+              : { maybeSingle: vi.fn().mockResolvedValue({ data: { lifetime_recruiting_unlocked: false }, error: null }) }
+          ),
+        })),
+        upsert: upsertMock,
+      })),
+    })
+
+    const { POST } = await import('@/app/api/billing/redeem-code/route')
+    const response = await POST(
+      new Request('http://localhost/api/billing/redeem-code', {
+        method: 'POST',
+        body: JSON.stringify({ code: 'private_test_redeem_code' }),
+      })
+    )
+    delete process.env.REDEEM_CODE_MAX_REDEMPTIONS
+
+    expect(response.status).toBe(400)
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
   it('activates recruiting lifetime for valid code', async () => {
     authMock.mockResolvedValue({ userId: 'user_123' })
     currentUserMock.mockResolvedValue({
