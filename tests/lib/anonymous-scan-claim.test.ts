@@ -7,7 +7,7 @@ const results: Array<{ data: unknown; error: unknown }> = []
 
 function builder() {
   const chain: Record<string, (...args: unknown[]) => unknown> = {}
-  for (const method of ['from', 'update', 'select', 'eq', 'is', 'order', 'limit']) {
+  for (const method of ['from', 'update', 'select', 'eq', 'is', 'or', 'order', 'limit']) {
     chain[method] = (...args: unknown[]) => {
       calls.push([method, args])
       return chain
@@ -38,6 +38,18 @@ describe('claimAnonymousScan', () => {
     expect(claim).toEqual({ scanId: SCAN, by: 'scan_id', analyticsDistinctId: 'ph-browser-1' })
     expect(calls).toContainEqual(['eq', ['id', SCAN]])
     expect(calls).toContainEqual(['is', ['claimed_by', null]])
+    // Address-bound scans need a matching verified email.
+    expect(calls).toContainEqual(['or', ['email.is.null,email.eq.a@b.ro']])
+  })
+
+  it('only claims address-less scans by id when the email is unverified', async () => {
+    const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
+    results.push({ data: { id: SCAN, posthog_distinct_id: null }, error: null })
+
+    await claimAnonymousScan({ userId: 'user_1', scanId: SCAN, email: 'a@b.ro', emailVerified: false })
+
+    expect(calls).toContainEqual(['is', ['email', null]])
+    expect(calls.some(([method]) => method === 'or')).toBe(false)
   })
 
   it('never claims by an unverified email', async () => {
