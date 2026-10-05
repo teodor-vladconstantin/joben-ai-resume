@@ -39,6 +39,7 @@ function makeSupabase(
 ) {
   const { webhookInsertError = null, users = {}, updateError = null } = options
   const insertCalls: unknown[] = []
+  const deleteCalls: string[] = []
   const updateCalls: Array<{ id: string; payload: Record<string, unknown> }> = []
 
   const fromMock = vi.fn((table: string) => {
@@ -48,6 +49,14 @@ function makeSupabase(
           insertCalls.push(row)
           return Promise.resolve({ error: webhookInsertError })
         }),
+        delete: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            eq: vi.fn((_column: string, value: string) => {
+              deleteCalls.push(value)
+              return Promise.resolve({ error: null })
+            }),
+          })),
+        })),
       }
     }
     if (table === 'users') {
@@ -69,7 +78,7 @@ function makeSupabase(
   })
 
   createClientMock.mockReturnValue({ from: fromMock })
-  return { insertCalls, updateCalls }
+  return { insertCalls, updateCalls, deleteCalls }
 }
 
 let eventCounter = 0
@@ -511,7 +520,7 @@ describe('POST /api/webhooks/stripe', () => {
     })
     constructEventMock.mockReturnValue(event)
     subscriptionsRetrieveMock.mockRejectedValue(new Error('internal secret db connection string leaked'))
-    makeSupabase()
+    const { deleteCalls } = makeSupabase()
 
     const { POST } = await import('@/app/api/webhooks/stripe/route')
     const response = await POST(makeRequest(event))
@@ -519,6 +528,8 @@ describe('POST /api/webhooks/stripe', () => {
 
     expect(response.status).toBe(500)
     expect(payload.error).not.toMatch(/secret|connection string/i)
+    // The claim is released so Stripe's retry is reprocessed, not ignored as a duplicate.
+    expect(deleteCalls).toEqual([event.id])
   })
 
   it('returns 500 when the plan-sync database update fails', async () => {
