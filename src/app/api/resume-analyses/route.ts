@@ -2,7 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
-import { resumeAnalysisCreateSchema, resumeAnalysisPatchSchema } from '@/lib/validation/schemas'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
+import { exceedsJsonBudget, resumeAnalysisCreateSchema, resumeAnalysisPatchSchema } from '@/lib/validation/schemas'
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
@@ -26,6 +27,20 @@ export async function POST(req: Request) {
 
     const body = parsed.data
     const status = body.status === 'applied' ? 'applied' : 'pending'
+
+    // SECURITY: cap the stored JSON blob (anti storage abuse) and burst-limit writes.
+    if (body.analysisJson && exceedsJsonBudget(body.analysisJson)) {
+      return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'Analysis payload is too large.') }, 413, requestId)
+    }
+    const limit = await checkRouteRateLimit({
+      name: 'resume-analyses-create',
+      identifier: resolveRateLimitIdentity(req, userId),
+      limit: 120,
+      windowSeconds: 3600,
+    })
+    if (!limit.ok) {
+      return jsonWithRequestId({ error: clientErrorMessage('rate_limit'), retryAfter: limit.retryAfter }, 429, requestId)
+    }
 
     const supabase = createServerClient()
 
