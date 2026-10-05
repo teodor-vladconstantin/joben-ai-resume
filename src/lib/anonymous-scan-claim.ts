@@ -20,7 +20,8 @@ type ClaimedRow = { id: string; posthog_distinct_id: string | null } | null
 
 // Links an anonymous ATS scan to a newly created account (Clerk webhook,
 // user.created). Scan id first: it came through the sign-up link, and scan
-// ids are unguessable. Otherwise the newest unclaimed scan with the same
+// ids are unguessable, but an address-bound scan also needs a matching
+// verified email. Otherwise the newest unclaimed scan with the same
 // email, only when Clerk verified that email, so nobody can read someone
 // else's scan by signing up with their address. `claimed_by is null` makes
 // both paths first-claim-wins. Never throws: a failed claim must not fail
@@ -31,13 +32,23 @@ export async function claimAnonymousScan(input: ClaimInput): Promise<ClaimResult
     const claimedAt = new Date().toISOString()
 
     if (input.scanId) {
-      const { data, error } = await supabase
+      // SECURITY: holding a scan id is not enough to take a scan that has an
+      // address attached. It must have no address, or the same one this
+      // account has verified. (Emails with filter-syntax characters are never
+      // interpolated into the PostgREST filter.)
+      const verifiedEmail =
+        input.emailVerified && input.email && /^[^s,()"]+$/.test(input.email) ? input.email : null
+
+      const base = supabase
         .from('anonymous_scans')
         .update({ claimed_by: input.userId, claimed_at: claimedAt })
         .eq('id', input.scanId)
         .is('claimed_by', null)
-        .select('id, posthog_distinct_id')
-        .maybeSingle()
+      const restricted = verifiedEmail
+        ? base.or(`email.is.null,email.eq.${verifiedEmail}`)
+        : base.is('email', null)
+
+      const { data, error } = await restricted.select('id, posthog_distinct_id').maybeSingle()
 
       if (error) throw new Error(error.message)
       const row = data as ClaimedRow
