@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
-import { useClerk } from '@clerk/nextjs'
+import { useClerk, useReverification } from '@clerk/nextjs'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -15,17 +15,21 @@ export function DeleteAccountButton() {
   const { signOut } = useClerk()
   const router = useRouter()
   const t = useTranslations('SettingsPage.dangerZone')
+  // Prompts for re-verification when the server answers with a Clerk reverification error.
+  const requestDelete = useReverification(() =>
+    fetch('/api/account/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirm: true }),
+    })
+  )
 
   const handleDelete = async () => {
     setDeleting(true)
     setError(null)
     try {
-      const response = await fetch('/api/account/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ confirm: true }),
-      })
-      if (!response.ok) {
+      const response = await requestDelete()
+      if (!response || !response.ok) {
         throw new Error('Deletion failed')
       }
       await signOut()

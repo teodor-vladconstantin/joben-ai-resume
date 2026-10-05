@@ -5,9 +5,14 @@ const clerkClientMock = vi.fn()
 const createServerClientMock = vi.fn()
 const stripeCancelMock = vi.fn()
 
+const reverificationErrorResponseMock = vi.fn(
+  () => new Response(JSON.stringify({ clerk_error: { type: 'forbidden', reason: 'reverification-error' } }), { status: 403 })
+)
+
 vi.mock('@clerk/nextjs/server', () => ({
   auth: authMock,
   clerkClient: clerkClientMock,
+  reverificationErrorResponse: reverificationErrorResponseMock,
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -105,7 +110,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('deletes all owned rows and the Clerk user on success', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     const { deleteCalls } = mockSupabase()
     const deleteUserMock = vi.fn().mockResolvedValue({})
     clerkClientMock.mockResolvedValue({ users: { deleteUser: deleteUserMock } })
@@ -130,7 +135,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('still deletes Supabase data even if Clerk deletion fails', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     mockSupabase()
     clerkClientMock.mockResolvedValue({
       users: { deleteUser: vi.fn().mockRejectedValue(new Error('clerk down')) },
@@ -145,7 +150,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('cancels the Stripe subscription when the user has one', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     mockSupabase({ stripeSubscriptionId: 'sub_abc123' })
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
     stripeCancelMock.mockResolvedValue({})
@@ -160,7 +165,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('does not call Stripe cancel when the user has no subscription', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     mockSupabase({ stripeSubscriptionId: null })
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
 
@@ -171,7 +176,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('still deletes data and returns success when Stripe cancel fails (e.g. already canceled)', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     const { deleteCalls } = mockSupabase({ stripeSubscriptionId: 'sub_abc123' })
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
     stripeCancelMock.mockRejectedValue(Object.assign(new Error('No such subscription'), { code: 'resource_missing' }))
@@ -189,7 +194,7 @@ describe('POST /api/account/delete', () => {
   })
 
   it('aborts without deleting anything when Stripe cancel fails for another reason', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     const { deleteCalls } = mockSupabase({ stripeSubscriptionId: 'sub_abc123' })
     clerkClientMock.mockResolvedValue({ users: { deleteUser: vi.fn().mockResolvedValue({}) } })
     stripeCancelMock.mockRejectedValue(new Error('Stripe API unreachable'))
@@ -202,13 +207,25 @@ describe('POST /api/account/delete', () => {
   })
 
   it('rejects a request without the explicit confirmation body', async () => {
-    authMock.mockResolvedValue({ userId: 'user_123' })
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => true })
     const { deleteCalls } = mockSupabase()
 
     const { POST } = await import('@/app/api/account/delete/route')
     const response = await POST(new Request('http://localhost/api/account/delete', { method: 'POST' }))
 
     expect(response.status).toBe(400)
+    expect(deleteCalls).toHaveLength(0)
+  })
+
+  it('asks for re-verification and deletes nothing when the session is not freshly verified', async () => {
+    authMock.mockResolvedValue({ userId: 'user_123', has: () => false })
+    const { deleteCalls } = mockSupabase()
+
+    const { POST } = await import('@/app/api/account/delete/route')
+    const response = await POST(deleteRequest())
+
+    expect(response.status).toBe(403)
+    expect(reverificationErrorResponseMock).toHaveBeenCalledWith('strict')
     expect(deleteCalls).toHaveLength(0)
   })
 })

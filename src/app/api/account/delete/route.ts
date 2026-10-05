@@ -1,4 +1,4 @@
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { auth, clerkClient, reverificationErrorResponse } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { apiError, apiSuccess } from '@/lib/api-response'
 import { getRequestId, logger } from '@/lib/logger'
@@ -26,9 +26,15 @@ function isConfirmed(body: unknown): boolean {
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req)
-  const { userId } = await auth()
+  const { userId, has } = await auth()
   if (!userId) {
     return apiError('You must be signed in.', 401, requestId)
+  }
+
+  // SECURITY: irreversible, so a hijacked or idle session is not enough:
+  // Clerk asks the user to re-verify (first factor within the last 10 min).
+  if (!has({ reverification: 'strict' })) {
+    return reverificationErrorResponse('strict')
   }
 
   // SECURITY: irreversible action. Requiring an explicit JSON confirmation
