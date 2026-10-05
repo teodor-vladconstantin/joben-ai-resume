@@ -25,6 +25,8 @@ if (missing.length > 0) {
 // tunnel (/monitoring), and Stripe. We keep `'unsafe-inline'` on script-src
 // because Next.js + Clerk bootstrap require inline scripts; tighten to
 // nonces in a future iteration if/when we drop those vendors.
+// 'unsafe-eval' is development-only. X-XSS-Protection is intentionally
+// omitted: it is deprecated and can introduce XSS in legacy browsers.
 //
 // Clerk supports a CNAME proxy (e.g. `clerk.joben.eu`) that does NOT match
 // the default `*.clerk.com` / `*.clerk.accounts.dev` wildcards. Production
@@ -46,7 +48,6 @@ const CLERK_PROXY_HOST = (() => {
 const SECURITY_HEADERS = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'X-XSS-Protection', value: '1; mode=block' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.stripe.com")' },
   {
@@ -71,7 +72,8 @@ const SECURITY_HEADERS = [
         'script-src',
         "'self'",
         "'unsafe-inline'",
-        "'unsafe-eval'",
+        // eval is only needed by the dev server (React Refresh); never in prod.
+        ...(process.env.NODE_ENV === 'production' ? [] : ["'unsafe-eval'"]),
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
         CLERK_PROXY_HOST,
