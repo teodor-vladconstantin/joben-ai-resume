@@ -5,6 +5,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { resolvePlanFromPriceId } from '@/lib/plans'
 import { getStripeClient } from '@/lib/stripe'
+import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -27,7 +28,7 @@ function isStaleEvent(lastProcessedAt: number | null | undefined, incomingEventC
   return typeof lastProcessedAt === 'number' && lastProcessedAt > incomingEventCreated
 }
 
-export async function POST(req: Request) {
+async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) {
   const requestId = getRequestId(req)
   if (!process.env.STRIPE_WEBHOOK_SECRET) {
     logger.error('STRIPE_WEBHOOK_SECRET missing', {
@@ -112,6 +113,8 @@ export async function POST(req: Request) {
     })
     return jsonWithRequestId({ error: 'Webhook Error: failed to claim event' }, 500, requestId)
   }
+
+  setClaim(claimCtx, supabase, 'stripe', event.id)
 
   const syncPlanFromSubscription = async (
     customerId: string,
@@ -458,4 +461,7 @@ export async function POST(req: Request) {
     eventType: event.type,
   })
   return jsonWithRequestId({ message: 'Webhook received' }, 200, requestId)
+}
+export async function POST(req: Request) {
+  return runWithClaimRelease((claimCtx) => handleStripeWebhook(req, claimCtx))
 }

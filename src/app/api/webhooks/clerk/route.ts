@@ -10,6 +10,7 @@ import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { claimAnonymousScan } from '@/lib/anonymous-scan-claim'
 import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
 import { OWNED_TABLES } from '@/app/api/account/delete/route'
+import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -18,7 +19,7 @@ function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
 
-export async function POST(req: Request) {
+async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
   const requestId = getRequestId(req)
   try {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
@@ -40,8 +41,14 @@ export async function POST(req: Request) {
       return jsonWithRequestId({ error: 'Missing svix headers' }, 400, requestId)
     }
 
-    const payload = await req.json()
-    const body = JSON.stringify(payload)
+    // Verify the exact raw bytes that were signed, not a re-serialized copy.
+    const body = await req.text()
+    let payload: unknown
+    try {
+      payload = JSON.parse(body)
+    } catch {
+      return jsonWithRequestId({ error: 'Invalid JSON payload' }, 400, requestId)
+    }
 
     const wh = new Webhook(WEBHOOK_SECRET)
     let evt: WebhookEvent
@@ -97,6 +104,8 @@ export async function POST(req: Request) {
       })
       return jsonWithRequestId({ error: 'Could not claim webhook event' }, 500, requestId)
     }
+
+    setClaim(claimCtx, supabase, 'clerk', svixId)
 
     // Handle user creation
     if (eventType === 'user.created') {
@@ -406,4 +415,7 @@ export async function POST(req: Request) {
     })
     return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
   }
+}
+export async function POST(req: Request) {
+  return runWithClaimRelease((claimCtx) => handleClerkWebhook(req, claimCtx))
 }
