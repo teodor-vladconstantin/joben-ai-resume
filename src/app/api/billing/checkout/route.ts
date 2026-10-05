@@ -102,6 +102,16 @@ export async function POST(req: Request) {
       )
     }
 
+    // Re-subscribing to the plan already held would create a second, parallel
+    // subscription (double billing).
+    if (plan === requestedPlan) {
+      return jsonWithRequestId(
+        { error: 'This plan is already active for your account.', alreadyActive: true, currentPlan: plan },
+        409,
+        requestId
+      )
+    }
+
     const stripePriceId = getPriceIdForPlan(requestedPlan)
     if (!isStripeConfigured() || !stripePriceId) {
       // SECURITY: CLAUDE.md Medium #6 — never leak which env vars are missing

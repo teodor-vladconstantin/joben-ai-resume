@@ -143,6 +143,16 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled()
   })
 
+  it('returns 409 instead of opening a second subscription when the user is already on Pro', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest())
+
+    expect(response.status).toBe(409)
+    expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
   it('returns 503 without leaking which var is missing when Stripe env is incomplete', async () => {
     delete process.env.STRIPE_SECRET_KEY
     const { POST } = await import('@/app/api/billing/checkout/route')
