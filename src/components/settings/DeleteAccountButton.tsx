@@ -20,7 +20,11 @@ export function DeleteAccountButton() {
     setDeleting(true)
     setError(null)
     try {
-      const response = await fetch('/api/account/delete', { method: 'POST' })
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: true }),
+      })
       if (!response.ok) {
         throw new Error('Deletion failed')
       }

@@ -10,7 +10,7 @@ import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { claimAnonymousScan } from '@/lib/anonymous-scan-claim'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { getContactEmail, getVerifiedPrimaryEmail } from '@/lib/security/clerk-email'
-import { OWNED_TABLES } from '@/app/api/account/delete/route'
+import { OTHER_OWNED_TABLES, OWNED_TABLES } from '@/app/api/account/delete/route'
 import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -385,6 +385,21 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
             userId: id,
             table,
             error: ownedRowsError.message,
+          })
+          return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+        }
+      }
+
+      for (const { table, column } of OTHER_OWNED_TABLES) {
+        const { error: otherRowsError } = await supabase.from(table).delete().eq(column, id)
+        if (otherRowsError) {
+          logger.error('Supabase owned-rows delete failed for user.deleted', {
+            requestId,
+            route: '/api/webhooks/clerk',
+            eventId: svixId,
+            userId: id,
+            table,
+            error: otherRowsError.message,
           })
           return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
         }

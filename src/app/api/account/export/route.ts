@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
   const supabase = createServerClient()
 
-  const [user, resumes, coverLetters, aiReviews, resumeAnalyses, feedback, emailEvents] = await Promise.all([
+  const [user, resumes, coverLetters, aiReviews, resumeAnalyses, feedback, emailEvents, productEvents, anonymousScans] = await Promise.all([
     supabase.from('users').select('*').eq('clerk_id', userId).maybeSingle(),
     supabase.from('resumes').select('*').eq('user_id', userId),
     supabase.from('cover_letters').select('*').eq('user_id', userId),
@@ -21,9 +21,11 @@ export async function GET(req: Request) {
     supabase.from('resume_analyses').select('*').eq('user_id', userId),
     supabase.from('feedback').select('*').eq('user_id', userId),
     supabase.from('email_events').select('*').eq('user_clerk_id', userId),
+    supabase.from('product_events').select('*').eq('user_clerk_id', userId),
+    supabase.from('anonymous_scans').select('*').eq('claimed_by', userId),
   ])
 
-  const firstError = [user, resumes, coverLetters, aiReviews, resumeAnalyses, feedback, emailEvents]
+  const firstError = [user, resumes, coverLetters, aiReviews, resumeAnalyses, feedback, emailEvents, productEvents, anonymousScans]
     .map((result) => result.error)
     .find(Boolean)
 
@@ -42,6 +44,8 @@ export async function GET(req: Request) {
     resumeAnalyses: resumeAnalyses.data,
     feedback: feedback.data,
     emailEvents: emailEvents.data,
+    productEvents: productEvents.data,
+    anonymousScans: anonymousScans.data,
   }
 
   const filename = `joben-data-export-${new Date().toISOString().slice(0, 10)}.json`
