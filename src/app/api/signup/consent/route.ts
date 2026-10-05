@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       identifier: identity,
       limit: SIGNUP_CONSENT_RATE_LIMIT_PER_HOUR,
       windowSeconds: 3600,
+      failClosed: true,
     })
     if (!limit.ok) {
       logger.warn('Signup consent rate-limit hit', { requestId, route: '/api/signup/consent', retryAfter: limit.retryAfter })

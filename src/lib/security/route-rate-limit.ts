@@ -18,6 +18,12 @@ export type RouteRateLimitOptions = {
   limit: number
   /** Window length in seconds. */
   windowSeconds: number
+  /**
+   * When true, a missing/failing Redis denies the request instead of allowing
+   * it. Use for unauthenticated or cost-bearing endpoints where a Redis outage
+   * must not turn into unlimited access.
+   */
+  failClosed?: boolean
 }
 
 export type RouteRateLimitResult = {
@@ -34,12 +40,24 @@ const FAILSAFE_RESULT: RouteRateLimitResult = {
   retryAfter: 0,
 }
 
+const FAIL_CLOSED_RETRY_AFTER_SECONDS = 60
+
+function failureResult(opts: RouteRateLimitOptions): RouteRateLimitResult {
+  if (!opts.failClosed) return FAILSAFE_RESULT
+  return {
+    ok: false,
+    remaining: 0,
+    resetAt: Math.floor(Date.now() / 1000) + FAIL_CLOSED_RETRY_AFTER_SECONDS,
+    retryAfter: FAIL_CLOSED_RETRY_AFTER_SECONDS,
+  }
+}
+
 export async function checkRouteRateLimit(opts: RouteRateLimitOptions): Promise<RouteRateLimitResult> {
   const redis = getRedisClient()
   if (!redis) {
     // Degraded mode: allow the request but log nothing here (callers may
     // log if they care). We do not want a missing Redis to block users.
-    return FAILSAFE_RESULT
+    return failureResult(opts)
   }
 
   const window = Math.max(1, Math.floor(opts.windowSeconds))
@@ -55,7 +73,7 @@ export async function checkRouteRateLimit(opts: RouteRateLimitOptions): Promise<
       await redis.expire(key, window + 1)
     }
   } catch {
-    return FAILSAFE_RESULT
+    return failureResult(opts)
   }
 
   const resetAt = (bucket + 1) * window
@@ -99,14 +117,14 @@ export async function bumpCounter(key: string, ttlSeconds: number): Promise<numb
   }
 }
 
-export async function isLocked(key: string): Promise<boolean> {
+export async function isLocked(key: string, failClosed = false): Promise<boolean> {
   const redis = getRedisClient()
-  if (!redis) return false
+  if (!redis) return failClosed
   try {
     const value = await redis.get(key)
     return value !== null && value !== undefined
   } catch {
-    return false
+    return failClosed
   }
 }
 

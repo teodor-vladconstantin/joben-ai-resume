@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     }
 
     // SECURITY: respect any standing 24h lockout from previous brute-force.
-    if (await isLocked(lockKey(userId))) {
+    if (await isLocked(lockKey(userId), true)) {
       logger.warn('Redeem code attempted while locked', {
         requestId,
         route: '/api/billing/redeem-code',
@@ -112,6 +112,7 @@ export async function POST(req: Request) {
       identifier: resolveRateLimitIdentity(req, userId),
       limit: REDEEM_RATE_LIMIT_PER_HOUR,
       windowSeconds: 3600,
+      failClosed: true,
     })
     if (!limit.ok) {
       logger.warn('Redeem code rate-limit hit', {

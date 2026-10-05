@@ -9,6 +9,15 @@ vi.mock('@clerk/nextjs/server', () => ({
   currentUser: currentUserMock,
 }))
 
+// Redis-backed limiter/lockout is fail-closed; these tests run without Redis.
+vi.mock('@/lib/security/route-rate-limit', () => ({
+  checkRouteRateLimit: async () => ({ ok: true, remaining: 5, resetAt: 0, retryAfter: 0 }),
+  isLocked: async () => false,
+  bumpCounter: async () => 0,
+  setLock: async () => undefined,
+  resolveRateLimitIdentity: () => 'u:test',
+}))
+
 vi.mock('@/lib/supabase/server', () => ({
   createServerClient: createServerClientMock,
 }))

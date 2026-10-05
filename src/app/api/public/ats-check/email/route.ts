@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       identifier: identity,
       limit: EMAIL_CAPTURE_RATE_LIMIT_PER_DAY,
       windowSeconds: 24 * 60 * 60,
+      failClosed: true,
     })
 
     if (!limit.ok) {
