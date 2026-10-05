@@ -308,7 +308,8 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
 
         if (user?.lifetime_recruiting_unlocked) {
           updatePayload.plan = 'recruiting'
-        } else if (planId) {
+        } else if (planId === 'pro' || planId === 'recruiting') {
+          // Only known paid plans: never write arbitrary metadata into users.plan.
           updatePayload.plan = planId
         } else if (typeof session.subscription === 'string') {
           updatePayload.plan = 'pro'
