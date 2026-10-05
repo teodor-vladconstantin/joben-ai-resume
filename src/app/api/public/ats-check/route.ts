@@ -17,7 +17,7 @@ import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
-import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
+import { sendAnonymousScanConfirmationIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
@@ -436,21 +436,14 @@ export async function POST(req: Request) {
         })
 
         if (scanId && scanEmail) {
+          // Double opt-in: only a confirmation link goes out now; the report and
+          // any nurture follow once the address owner confirms (see /confirm).
           // Awaited (not fire-and-forget): a serverless function is not
           // guaranteed to keep running after it returns a response, so an
           // un-awaited promise here could get killed mid-send. Failures
           // inside are still non-blocking for the visitor, they're caught
           // and logged, never thrown, matching storeAnonymousScan above.
-          await sendAnonymousScanReportEmailIfEligible({
-            scanId,
-            email: scanEmail,
-            locale,
-            analyticsDistinctId: browserDistinctId,
-            overallScore: typedResult.data.overall_score,
-            grade: typedResult.data.grade,
-            categories: typedResult.data.categories,
-            issues: typedResult.data.issues,
-          })
+          await sendAnonymousScanConfirmationIfEligible({ scanId, email: scanEmail, locale })
         }
       } catch (error) {
         // Non-blocking, the visitor still gets their score even if this fails.

@@ -488,3 +488,47 @@ export async function sendRateLimitEmail(input: {
 </div>`,
   })
 }
+
+const CONFIRM_COPY: Record<AnonScanEmailLocale, {
+  subject: string
+  heading: string
+  body: string
+  cta: string
+  ignore: string
+}> = {
+  en: {
+    subject: 'Confirm your email to get your ATS score report',
+    heading: 'One click to get your report.',
+    body: 'Someone asked for a free ATS score report to be sent to this address on joben.eu. Confirm it is yours and we will send the report.',
+    cta: 'Confirm and send my report',
+    ignore: 'If this was not you, ignore this email. Nothing else will be sent.',
+  },
+  ro: {
+    subject: 'Confirmă emailul ca să primești raportul scorului ATS',
+    heading: 'Un singur click pentru raportul tău.',
+    body: 'Cineva a cerut trimiterea unui raport gratuit al scorului ATS pe această adresă, pe joben.eu. Confirmă că este adresa ta și îți trimitem raportul.',
+    cta: 'Confirmă și trimite-mi raportul',
+    ignore: 'Dacă nu ai fost tu, ignoră acest email. Nu se va trimite nimic altceva.',
+  },
+}
+
+export async function sendAnonymousScanConfirmEmail(input: {
+  to: string
+  confirmUrl: string
+  locale: AnonScanEmailLocale
+}): Promise<EmailResult> {
+  const copy = CONFIRM_COPY[input.locale]
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: copy.subject,
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
+  <p style="margin:0 0 18px 0;">${copy.body}</p>
+  ${anonCtaButton(input.confirmUrl, copy.cta)}
+  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.ignore}</p>
+</div>`,
+  })
+}

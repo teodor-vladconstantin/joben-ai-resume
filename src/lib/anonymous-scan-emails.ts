@@ -1,5 +1,11 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { sendAnonymousScanReportEmail, type AnonScanEmailLocale, type AnonScanEmailType } from '@/lib/resend'
+import {
+  sendAnonymousScanConfirmEmail,
+  sendAnonymousScanReportEmail,
+  type AnonScanEmailLocale,
+  type AnonScanEmailType,
+} from '@/lib/resend'
+import { signScanConfirmToken } from '@/lib/anonymous-scan-confirm'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { logger } from '@/lib/logger'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
@@ -123,6 +129,71 @@ export async function sendAnonymousScanReportEmailIfEligible(input: ScanReportIn
   } catch (error) {
     logger.warn('Anonymous scan report email send failed', {
       source: 'sendAnonymousScanReportEmailIfEligible',
+      scanId: input.scanId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+}
+
+const ANON_SCAN_CONFIRM_EMAIL_TYPE = 'anon_scan_confirm'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+// Double opt-in: the address typed into the ATS checker only receives this
+// confirmation link (no report, no nurture) until its owner clicks it.
+// Idempotent per scan through the same email_events claim lock as above.
+export async function sendAnonymousScanConfirmationIfEligible(input: {
+  scanId: string
+  email: string
+  locale: AnonScanEmailLocale
+}): Promise<void> {
+  if (isDisposableEmailDomain(input.email)) return
+
+  const token = signScanConfirmToken(input.scanId, input.email)
+  if (!token) {
+    logger.error('Anonymous scan confirmation blocked: EMAIL_UNSUBSCRIBE_SECRET is not configured', {
+      source: 'sendAnonymousScanConfirmationIfEligible',
+    })
+    return
+  }
+
+  try {
+    const supabase = createServerClient()
+    const sourceEventId = `anon-scan-confirm:${input.scanId}`
+
+    const { error: lockError } = await supabase.from('email_events').insert({
+      user_clerk_id: `anon:${input.scanId}`,
+      email: input.email,
+      email_type: ANON_SCAN_CONFIRM_EMAIL_TYPE,
+      status: 'processing',
+      source_event_id: sourceEventId,
+      metadata: { source: 'anonymous_scan_confirm', scanId: input.scanId },
+    })
+
+    if (lockError) {
+      if (!isDuplicateError(lockError)) {
+        logger.warn('Anonymous scan confirmation lock failed', {
+          source: 'sendAnonymousScanConfirmationIfEligible',
+          scanId: input.scanId,
+          error: lockError.message,
+        })
+      }
+      return
+    }
+
+    const confirmUrl = `${appUrl}/api/public/ats-check/confirm?scanId=${encodeURIComponent(input.scanId)}&token=${token}`
+    const result = await sendAnonymousScanConfirmEmail({ to: input.email, confirmUrl, locale: input.locale })
+
+    await supabase
+      .from('email_events')
+      .update({
+        status: result.success ? (result.suppressed ? 'suppressed' : 'sent') : 'failed',
+        provider_id: result.providerId || null,
+        error: result.error || null,
+      })
+      .eq('source_event_id', sourceEventId)
+  } catch (error) {
+    logger.warn('Anonymous scan confirmation send failed', {
+      source: 'sendAnonymousScanConfirmationIfEligible',
       scanId: input.scanId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
