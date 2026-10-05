@@ -8,7 +8,8 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { aliasPostHogDistinctId, capturePostHogEvent } from '@/lib/posthog-server'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { claimAnonymousScan } from '@/lib/anonymous-scan-claim'
-import { isDisposableEmailDomain, normalizeEmail } from '@/lib/security/disposable-email'
+import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
+import { getContactEmail, getVerifiedPrimaryEmail } from '@/lib/security/clerk-email'
 import { OWNED_TABLES } from '@/app/api/account/delete/route'
 import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
@@ -109,10 +110,12 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
 
     // Handle user creation
     if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const primaryEmail = normalizeEmail(email_addresses?.[0]?.email_address)
+    const { id, first_name, last_name } = evt.data
+    // SECURITY: only Clerk's verified primary address is stored/trusted;
+    // plan and "god mode" checks key off users.email.
+    const primaryEmail = getVerifiedPrimaryEmail(evt.data)
 
-    if (isDisposableEmailDomain(primaryEmail)) {
+    if (isDisposableEmailDomain(getContactEmail(evt.data))) {
       logger.error('Blocked signup: disposable email domain', {
         requestId,
         route: '/api/webhooks/clerk',
@@ -142,7 +145,7 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
       return jsonWithRequestId({ message: 'Signup blocked' }, 200, requestId)
     }
 
-    if (email_addresses?.[0]?.verification?.status !== 'verified') {
+    if (!primaryEmail) {
       logger.warn('Signup completed with unverified email', {
         requestId,
         route: '/api/webhooks/clerk',
@@ -238,7 +241,7 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
       userId: id,
       scanId: atsAttribution?.scanId ?? null,
       email: primaryEmail || null,
-      emailVerified: email_addresses?.[0]?.verification?.status === 'verified',
+      emailVerified: Boolean(primaryEmail),
     })
     if (claim) {
       await capturePostHogEvent({
@@ -335,15 +338,17 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
 
     // Handle user updates
     if (eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const primaryEmail = normalizeEmail(email_addresses?.[0]?.email_address)
+    const { id, first_name, last_name } = evt.data
+    const primaryEmail = getVerifiedPrimaryEmail(evt.data)
 
     const { error } = await supabase
       .from('users')
       .upsert(
         {
           clerk_id: id,
-          email: primaryEmail,
+          // Omitted (not nulled) while the primary address is unverified so a
+          // previously verified address is kept.
+          ...(primaryEmail ? { email: primaryEmail } : {}),
           first_name: first_name,
           last_name: last_name,
         },

@@ -56,7 +56,7 @@ describe('redeem code API', () => {
   it('activates recruiting lifetime for valid code', async () => {
     authMock.mockResolvedValue({ userId: 'user_123' })
     currentUserMock.mockResolvedValue({
-      emailAddresses: [{ emailAddress: 'user@example.com' }],
+      primaryEmailAddress: { emailAddress: 'user@example.com', verification: { status: 'verified' } },
     })
 
     const maybeSingleMock = vi.fn().mockResolvedValue({
