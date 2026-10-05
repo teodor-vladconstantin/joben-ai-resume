@@ -6,6 +6,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { parseAdminUserIds } from '@/lib/security/admin'
 import { env } from '@/lib/env'
 import { getRequestId, jsonWithRequestId } from '@/lib/logger'
+import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 
 export const runtime = 'nodejs'
 
@@ -62,6 +63,20 @@ export async function GET(req: Request) {
     const { userId } = await auth()
     const admins = parseAdminUserIds()
     const isAdmin = Boolean(userId && admins.has(userId))
+
+    // SECURITY: each call runs a DB probe, so unauthenticated callers are
+    // throttled (fail-open, uptime monitors must keep working).
+    if (!isAdmin) {
+      const limit = await checkRouteRateLimit({
+        name: 'health',
+        identifier: resolveRateLimitIdentity(req),
+        limit: 60,
+        windowSeconds: 60,
+      })
+      if (!limit.ok) {
+        return jsonWithRequestId({ status: 'degraded' }, 429, requestId)
+      }
+    }
 
     const isProduction = process.env.NODE_ENV === 'production'
     const supabase = createServerClient()

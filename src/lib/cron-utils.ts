@@ -5,6 +5,7 @@
  * stays in each route because the cohorts and eligibility rules differ.
  */
 
+import { timingSafeEqual } from 'node:crypto'
 import { cronOptionsQuerySchema } from '@/lib/validation/schemas'
 
 export type CronCandidateUser = {
@@ -43,6 +44,12 @@ export function parseCronOptions(request: Request): CronOptions {
  * `x-cron-secret` header. Identical across all cron routes that authenticate
  * this way.
  */
+function safeEqual(a: string, b: string): boolean {
+  const left = Buffer.from(a)
+  const right = Buffer.from(b)
+  return left.length === right.length && timingSafeEqual(left, right)
+}
+
 export function isAuthorizedCronRequest(request: Request): boolean {
   const cronSecret = process.env.CRON_SECRET
   if (!cronSecret) return false
@@ -51,7 +58,7 @@ export function isAuthorizedCronRequest(request: Request): boolean {
   const tokenFromBearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
   const tokenFromHeader = request.headers.get('x-cron-secret') || ''
 
-  return tokenFromBearer === cronSecret || tokenFromHeader === cronSecret
+  return safeEqual(tokenFromBearer, cronSecret) || safeEqual(tokenFromHeader, cronSecret)
 }
 
 /** Postgres unique-violation code, used to detect an already-claimed email_events lock row. */
