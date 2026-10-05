@@ -78,3 +78,12 @@ cleanup-reports/
 
 # Per-user Claude Code settings (permissions allowlist), never shared
 .claude/settings.local.json
+
+# local tooling, scratch payloads and bytecode (may contain personal data)
+.tools/*.tar.gz
+.tools/*_parsed*.json
+/payload*.json
+*.tar.gz
+__pycache__/
+*.pyc
+.env*.bak
