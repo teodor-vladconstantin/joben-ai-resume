@@ -8,6 +8,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { hasExpectedSignature } from '@/lib/security/file-signature'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
 import { outputLanguageRule, RESUME_LANGUAGE_RULE, withCurrentDateContext } from '@/lib/ai-system-prompt'
@@ -262,6 +263,15 @@ export async function POST(req: Request) {
     // variables for the duration of this single request, and is dropped
     // (reference cleared) as soon as we're done with each stage.
     let fileBytes: Uint8Array | null = new Uint8Array(await file.arrayBuffer())
+    if (!hasExpectedSignature(fileBytes, extension)) {
+      return withDeviceCookie(
+        jsonWithRequestId(
+          { error: clientErrorMessage('invalid_input', 'The file content does not match its type.') },
+          415,
+          requestId
+        )
+      )
+    }
     let rawText: string
     try {
       rawText = extension === '.docx'

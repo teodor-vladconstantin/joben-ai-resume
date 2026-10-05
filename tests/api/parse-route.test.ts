@@ -12,7 +12,7 @@ vi.mock('@clerk/nextjs/server', () => ({
 
 function buildUploadRequest(): Request {
   const formData = new FormData()
-  formData.append('file', new Blob(['dummy pdf bytes'], { type: 'application/pdf' }), 'resume.pdf')
+  formData.append('file', new Blob(['%PDF-1.4 dummy pdf bytes'], { type: 'application/pdf' }), 'resume.pdf')
 
   return new Request('http://localhost/api/parse', {
     method: 'POST',

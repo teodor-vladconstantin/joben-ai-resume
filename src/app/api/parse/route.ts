@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { fileHasExpectedSignature } from '@/lib/security/file-signature'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 
 export const maxDuration = 60
@@ -192,6 +193,10 @@ export async function POST(req: NextRequest) {
 
   if (file.type && !ALLOWED_MIME_TYPES.has(file.type)) {
     return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'Unsupported file type.') }, 415, requestId)
+  }
+
+  if (!(await fileHasExpectedSignature(file, extension))) {
+    return jsonWithRequestId({ error: clientErrorMessage('invalid_input', 'The file content does not match its type.') }, 415, requestId)
   }
 
   try {
