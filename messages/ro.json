@@ -24,7 +24,15 @@
   "Common": {
     "home": "Acasă",
     "bestValue": "Cea Mai Bună Ofertă",
-    "joben": "Joben"
+    "joben": "Joben",
+    "backToHome": "Înapoi la pagina principală",
+    "theme": "Temă",
+    "toggleTheme": "Schimbă tema",
+    "switchToLight": "Comută pe tema luminoasă",
+    "switchToDark": "Comută pe tema întunecată",
+    "switchToRomanian": "Comută în limba română",
+    "switchToEnglish": "Comută în limba engleză",
+    "lastUpdated": "Ultima actualizare"
   },
   "Nav": {
     "aiResumeBuilder": "Editor CV AI",
@@ -617,7 +625,7 @@
       "metaTitle": "Politica de Confidențialitate | Joben, generator de CV-uri cu AI",
       "metaDescription": "Citește politica de confidențialitate Joben. Află cum generatorul nostru gratuit de CV-uri cu AI gestionează, protejează și procesează datele tale personale.",
       "heading": "Politica de Confidențialitate",
-      "lastUpdated": "2 octombrie 2026",
+      "lastUpdated": "7 octombrie 2026",
       "intro": "Această politică descrie modul în care gestionăm informațiile tale atunci când folosești Joben.",
       "breadcrumbLabel": "Politica de Confidențialitate",
       "footerPrefix": "Citește ",
@@ -642,7 +650,7 @@
         },
         {
           "title": "5. Subprocesatori",
-          "content": "Partajăm date cu următorii furnizori, fiecare acționând ca persoană împuternicită de operator conform propriului acord de procesare a datelor: Anthropic (procesare AI a textului din CV, SUA), Stripe (procesarea plăților, global/SUA), Resend (livrarea e-mailurilor tranzacționale, SUA), PostHog (analiză de produs, instanță găzduită în UE, doar cu consimțământ), Upstash (cache pentru limitarea ratei de cereri, SUA), Vercel (găzduirea aplicației, global/SUA), Sentry (monitorizarea erorilor, instanță găzduită în UE). Baza noastră de date principală (Supabase/Postgres) este găzduită pe propria infrastructură, deci nu este un subprocesator terț."
+          "content": "Partajăm date cu următorii furnizori, fiecare acționând ca persoană împuternicită de operator conform propriului acord de procesare a datelor: Anthropic (procesare AI a textului din CV, SUA), Stripe (procesarea plăților, global/SUA), Resend (livrarea e-mailurilor tranzacționale, SUA), PostHog (analiză de produs, instanță găzduită în UE, doar cu consimțământ), Upstash (cache pentru limitarea ratei de cereri, SUA), Vercel (găzduirea aplicației, global/SUA), Sentry (monitorizarea erorilor, instanță găzduită în UE), Supabase (găzduirea bazei de date și stocarea datelor)."
         },
         {
           "title": "6. Temeiuri legale",
@@ -1291,6 +1299,48 @@
       "strengths": "Puncte Forte",
       "noStrengthsReturned": "Nu au fost returnate puncte forte.",
       "categoryInsights": "Detalii pe Categorii"
+    }
+  },
+  "SignIn": {
+    "eyebrow": "Autentificare",
+    "heading": "Continuă în Joben",
+    "subheading": "Autentifică-te în cont ca să continui."
+  },
+  "ErrorPages": {
+    "error": {
+      "title": "Ceva nu a mers bine",
+      "description": "A apărut o eroare neașteptată. Dacă se repetă, reîncarcă pagina sau contactează suportul.",
+      "retry": "Încearcă din nou"
+    },
+    "notFound": {
+      "title": "Pagina nu a fost găsită",
+      "description": "Pagina pe care o cauți nu există sau a fost mutată.",
+      "cta": "Mergi la dashboard"
+    }
+  },
+  "Feedback": {
+    "metaTitle": "Feedback | Joben",
+    "metaDescription": "Spune-ne ce crezi și ajută-ne să modelăm Joben în perioada beta.",
+    "eyebrow": "Feedback beta",
+    "heading": "Ajută-ne să îmbunătățim Joben",
+    "intro": "Joben este în beta. Feedback-ul tău influențează direct ce construim în continuare.",
+    "thanks": "Mulțumim! Feedback-ul tău a fost înregistrat.",
+    "already": "Ai lăsat deja feedback, mulțumim!",
+    "fillAll": "Completează toate câmpurile înainte de a trimite.",
+    "likesLabel": "Ce îți place la Joben?",
+    "likesPlaceholder": "Spune-ne ce funcționează bine…",
+    "improvementsLabel": "Ce ar trebui îmbunătățit?",
+    "improvementsPlaceholder": "Ce ar face Joben mai bun?",
+    "npsLabel": "Cât de probabil este să recomanzi Joben unui prieten?",
+    "npsAria": "Scor de recomandare de la 0 la 10",
+    "notLikely": "Puțin probabil",
+    "veryLikely": "Foarte probabil",
+    "emailLabel": "Email",
+    "submit": "Trimite feedback",
+    "submitting": "Se trimite…",
+    "errors": {
+      "signIn": "Trebuie să fii autentificat ca să lași feedback.",
+      "generic": "Ceva nu a mers bine. Încearcă din nou."
     }
   }
 }

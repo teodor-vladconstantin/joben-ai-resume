@@ -12,6 +12,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const { isLoaded, isSignedIn } = useAuth()
   const tNav = useTranslations('Nav')
+  const tCommon = useTranslations('Common')
   const tDashboard = useTranslations('Dashboard')
 
   const NAV_ITEMS = [
@@ -64,7 +65,7 @@ export function Sidebar() {
       </nav>
 
       <div className="flex items-center justify-between border-t border-(--border) px-5 py-4">
-        <span className="text-xs text-(--muted)">Theme</span>
+        <span className="text-xs text-(--muted)">{tCommon('theme')}</span>
         <ThemeToggle />
       </div>
     </aside>

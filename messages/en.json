@@ -24,7 +24,15 @@
   "Common": {
     "home": "Home",
     "bestValue": "Best Value",
-    "joben": "Joben"
+    "joben": "Joben",
+    "backToHome": "Back to home",
+    "theme": "Theme",
+    "toggleTheme": "Toggle theme",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "switchToRomanian": "Switch to Romanian",
+    "switchToEnglish": "Switch to English",
+    "lastUpdated": "Last updated"
   },
   "Nav": {
     "aiResumeBuilder": "AI Resume Builder",
@@ -617,7 +625,7 @@
       "metaTitle": "Privacy Policy | Joben AI Resume Builder",
       "metaDescription": "Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.",
       "heading": "Privacy Policy",
-      "lastUpdated": "October 2, 2026",
+      "lastUpdated": "October 7, 2026",
       "intro": "This policy describes how we handle your information when you use Joben.",
       "breadcrumbLabel": "Privacy Policy",
       "footerPrefix": "Read our ",
@@ -642,7 +650,7 @@
         },
         {
           "title": "5. Sub-Processors",
-          "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance). Our core database (Supabase/Postgres) is self-hosted on our own infrastructure, so it is not a third-party sub-processor."
+          "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance), Supabase (database hosting and data storage)."
         },
         {
           "title": "6. Legal Bases",
@@ -1291,6 +1299,48 @@
       "strengths": "Strengths",
       "noStrengthsReturned": "No strengths returned.",
       "categoryInsights": "Category Insights"
+    }
+  },
+  "SignIn": {
+    "eyebrow": "Sign in",
+    "heading": "Continue to Joben",
+    "subheading": "Sign in to your account to keep building."
+  },
+  "ErrorPages": {
+    "error": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. If this keeps happening, please refresh the page or contact support.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or was moved.",
+      "cta": "Go to dashboard"
+    }
+  },
+  "Feedback": {
+    "metaTitle": "Feedback | Joben",
+    "metaDescription": "Share your feedback and help shape Joben during the beta.",
+    "eyebrow": "Beta feedback",
+    "heading": "Help us improve Joben",
+    "intro": "Joben is in beta. Your feedback directly shapes what we build next.",
+    "thanks": "Thank you! Your feedback has been recorded.",
+    "already": "You've already left feedback, thank you!",
+    "fillAll": "Please fill in every field before submitting.",
+    "likesLabel": "What do you like about Joben?",
+    "likesPlaceholder": "Tell us what's working well…",
+    "improvementsLabel": "What should be improved?",
+    "improvementsPlaceholder": "What would make Joben better?",
+    "npsLabel": "How likely are you to recommend Joben to a friend?",
+    "npsAria": "Recommendation score from 0 to 10",
+    "notLikely": "Not likely",
+    "veryLikely": "Very likely",
+    "emailLabel": "Email",
+    "submit": "Submit feedback",
+    "submitting": "Submitting…",
+    "errors": {
+      "signIn": "You must be signed in to leave feedback.",
+      "generic": "Something went wrong. Please try again."
     }
   }
 }
