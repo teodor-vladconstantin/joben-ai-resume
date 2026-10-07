@@ -144,6 +144,9 @@ export async function POST(req: NextRequest) {
     identifier: resolveRateLimitIdentity(req, userId),
     limit: PARSE_RATE_LIMIT_PER_HOUR,
     windowSeconds: 3600,
+    // Each parse bills LlamaParse and Anthropic, so a Redis outage must not mean unlimited uploads.
+    // Production only: local dev and CI run without Upstash.
+    failClosed: process.env.NODE_ENV === 'production',
   })
 
   if (!limit.ok) {

@@ -39,7 +39,14 @@ export type Message = Anthropic.Message
 
 export interface RateLimitError {
   error: string
-  limitType: 'tokens' | 'hard_cap' | 'feature' | 'blocked' | 'input_too_long' | 'provider_unavailable'
+  limitType:
+    | 'tokens'
+    | 'hard_cap'
+    | 'feature'
+    | 'blocked'
+    | 'input_too_long'
+    | 'provider_unavailable'
+    | 'service_unavailable'
   feature?: Feature
   used?: number
   limit?: number
@@ -173,6 +180,18 @@ export async function callAnthropicWithLimits(params: {
 
   const tokenReserve = await checkAndReserveTokens(params.userId, params.plan, estimatedInputTokens)
   if (!tokenReserve.allowed) {
+    // Quota backend down (not a quota hit): no limit-hit record, no upgrade nudge.
+    if (tokenReserve.limitType === 'unavailable') {
+      throw new RateLimitExceededError(
+        {
+          error: 'AI features are temporarily unavailable. Please try again in a few minutes.',
+          limitType: 'service_unavailable',
+          resetAt,
+        },
+        503,
+      )
+    }
+
     const limitType = tokenReserve.limitType || 'tokens'
     await recordLimitHit(params.userId, limitType)
 

@@ -62,7 +62,20 @@ async function sendEmail(input: {
     return { success: false, error: 'EMAIL_UNSUBSCRIBE_SECRET is not configured.' }
   }
 
-  if (await isEmailSuppressed(input.to)) {
+  let suppressed: boolean
+  try {
+    suppressed = await isEmailSuppressed(input.to)
+  } catch (error) {
+    // Cannot confirm the recipient has not opted out: do not send, and report a
+    // failure so cron callers retry on their next run.
+    logger.warn('Email suppression check unavailable; not sending', {
+      source: 'sendEmail',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return { success: false, error: 'Email suppression check is unavailable.' }
+  }
+
+  if (suppressed) {
     // Not a failure: the recipient opted out, so "not delivered" is the
     // correct outcome, not something callers should retry or alert on.
     return { success: true, suppressed: true }

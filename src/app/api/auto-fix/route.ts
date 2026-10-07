@@ -200,6 +200,19 @@ ${improvementsText}`
 
     const tokenReserve = await checkAndReserveTokens(userId, plan, estimatedInputTokens)
     if (!tokenReserve.allowed) {
+      if (tokenReserve.limitType === 'unavailable') {
+        return jsonWithRequestId(
+          {
+            allowed: false,
+            error: 'AI features are temporarily unavailable. Please try again in a few minutes.',
+            limitType: 'service_unavailable',
+            estimatedInputTokens,
+          },
+          503,
+          requestId
+        )
+      }
+
       const limitType = tokenReserve.limitType || 'tokens'
 
       if (!dryRun) {
