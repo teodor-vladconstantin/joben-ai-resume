@@ -385,6 +385,10 @@
         "label": "Despre"
       },
       {
+        "href": "/contact",
+        "label": "Contact"
+      },
+      {
         "href": "/pricing",
         "label": "Prețuri"
       },
@@ -423,6 +427,18 @@
     "intro": "Joben e un editor de CV cu inteligență artificială, construit pentru candidații care vor să treacă de filtrele ATS și să ajungă la interviu. Evaluăm CV-uri, rescriem punctele slabe și generăm scrisori de intenție adaptate fiecărei aplicații.",
     "contactHeading": "Contact",
     "contactBody": "Întrebări, feedback sau o solicitare legată de datele tale? Ne găsești la {email}."
+  },
+  "Contact": {
+    "metaTitle": "Contact Joben | Joben",
+    "metaDescription": "Cum ajungi la echipa Joben: întrebări generale, facturare, solicitări privind datele și detaliile companiei.",
+    "heading": "Contact Joben",
+    "intro": "Joben e un editor de CV și scrisori de intenție cu inteligență artificială, operat de o companie înregistrată în România. Scrie-ne despre cum funcționează produsul, o problemă cu contul sau abonamentul, feedback pentru o funcție sau o solicitare privind datele tale personale. Mesajele ajung într-o căsuță de email citită de echipă.",
+    "generalHeading": "Întrebări generale și suport",
+    "generalBody": "Pentru întrebări despre produs, ajutor cu contul, facturare și feedback, scrie-ne la {email}. Include adresa de email a contului Joben și o scurtă descriere a ce făceai, ca să putem verifica rapid.",
+    "privacyHeading": "Confidențialitate și solicitări privind datele",
+    "privacyBody": "Pentru acces, export, corectare sau ștergere a datelor tale personale, sau pentru întrebări despre prelucrarea lor, scrie-ne la {email}. Din pagina de setări poți exporta sau șterge singur contul după ce te-ai autentificat.",
+    "companyHeading": "Detalii companie",
+    "companyBody": "Joben este operat de {legalName}, CUI {cui}, nr. Reg. Com. {regCom}. Sediul social: {address}."
   },
   "Grade": {
     "labels": {
