@@ -1,4 +1,4 @@
-import { siteConfig } from '@/lib/content'
+import { siteConfig, company } from '@/lib/content'
 
 // Standalone Organization entity for the @graph, referenced by @id from
 // WebSite.publisher and any other node that needs it, instead of duplicating
@@ -11,7 +11,17 @@ export function organizationJsonLd() {
     '@type': 'Organization',
     '@id': `${siteConfig.url}/#organization`,
     name: siteConfig.name,
+    legalName: company.legalName,
+    description: siteConfig.description,
     url: siteConfig.url,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Str. Centrală nr. 169, sat Mărăcineni',
+      addressLocality: 'Mărăcineni',
+      addressRegion: 'Buzău',
+      postalCode: '127325',
+      addressCountry: 'RO',
+    },
     logo: {
       '@type': 'ImageObject',
       url: `${siteConfig.url}/jobeneu_logo.jpg`,
@@ -24,7 +34,7 @@ export function organizationJsonLd() {
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'privacy@joben.eu',
+      email: company.email,
       contactType: 'customer support',
     },
   }

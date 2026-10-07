@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { ro: '', en: '' },
     { ro: '/pricing', en: '/pricing' },
     { ro: '/about', en: '/about' },
+    { ro: '/contact', en: '/contact' },
     { ro: '/privacy', en: '/privacy' },
     { ro: '/terms', en: '/terms' },
     { ro: '/sign-in', en: '/sign-in' },
@@ -26,9 +27,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { ro: '/free-ats-checker', en: '/free-ats-checker' },
     { ro: '/cookies', en: '/cookies' },
   ];
-  const priorities = [1.0, 0.9, 0.5, 0.3, 0.3, 0.5, 0.8, 0.7, 0.8, 0.3];
+  const priorities = [1.0, 0.9, 0.5, 0.5, 0.3, 0.3, 0.5, 0.8, 0.7, 0.8, 0.3];
   const frequencies: MetadataRoute.Sitemap[number]['changeFrequency'][] = [
-    'weekly', 'weekly', 'monthly', 'yearly', 'yearly', 'monthly', 'monthly', 'monthly', 'monthly', 'yearly',
+    'weekly', 'weekly', 'monthly', 'monthly', 'yearly', 'yearly', 'monthly', 'monthly', 'monthly', 'monthly', 'yearly',
   ];
 
   const entries: MetadataRoute.Sitemap = []

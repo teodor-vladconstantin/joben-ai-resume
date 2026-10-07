@@ -159,6 +159,18 @@ export type Messages = {
     contactHeading: string
     contactBody: string // {email}
   }
+  Contact: {
+    metaTitle: string
+    metaDescription: string
+    heading: string
+    intro: string
+    generalHeading: string
+    generalBody: string // {email}
+    privacyHeading: string
+    privacyBody: string // {email}
+    companyHeading: string
+    companyBody: string // {legalName} {cui} {regCom} {address}
+  }
   Grade: {
     labels: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
     descriptions: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
