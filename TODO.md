@@ -1,4 +1,10 @@
 ## Active
+- [DONE] 2026-10-07 Audit de securitate (22 commituri H2-H4, M1-M8, L1-L9) pe `main` (`234b631`, Next 16.3.8).
+  VM Oracle redeploy (M7): latex-service (auth înaintea body parser, fără CORS, fără stdout în erori, user non-root),
+  resume-parser (user non-root, fastapi 0.115.14, python-multipart 0.0.20), compose cu `PARSER_BIND`/`LATEX_BIND`.
+  Rollback disponibil pe VM (backup folder + imagini `:prev`). Verificat: containere healthy, ambele servicii 401
+  fără secret, fără header CORS, `joben.eu/api/health` ok. `npm ci` obligatoriu local după `npm audit fix`
+  (lockfile mută `@posthog/core` la 1.55.3; un node_modules vechi dă eroare tsc la `shutdown`).
 - [DONE] 2026-10-07 Migrarea `20261005120000_add_anonymous_scans_email_confirmed.sql` (double opt-in, audit M1)
   aplicată pe producție (ResumeAIMax) din SQL Editor; verificat prin `information_schema.columns`: `email_confirmed_at`
   (timestamptz), `locale`, `claimed_by`, `posthog_distinct_id` prezente în `anonymous_scans`.
