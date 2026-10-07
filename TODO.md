@@ -1,4 +1,11 @@
 ## Active
+- [DONE] 2026-10-07 Migrarea `20261005120000_add_anonymous_scans_email_confirmed.sql` (double opt-in, audit M1)
+  aplicată pe producție (ResumeAIMax) din SQL Editor; verificat prin `information_schema.columns`: `email_confirmed_at`
+  (timestamptz), `locale`, `claimed_by`, `posthog_distinct_id` prezente în `anonymous_scans`.
+- [DONE] 2026-10-07 Setup Claude Code din claude-automation-recommender: hooks `.claude/hooks/` (protect-files:
+  blochează `.env*`, package-lock, migrații comise; lint-file: eslint pe src/**/*.ts(x) editat), agenți
+  security-reviewer + migration-reviewer, skills new-migration + pre-pr-check, `.mcp.json` (context7, Supabase
+  read-only, necesită login OAuth). Agent Reach instalat (`uv tool`), fără `--system`. Strix omis (fără cheie LLM).
 - [IN PROGRESS] 2026-09-29 Deploy `feat/ats-funnel`: migrările aplicate de user; preview verificat (scan RO,
   email RO + UTM, rând cu locale/posthog_distinct_id, evenimente PostHog pe o singură persoană, refuz cookie =
   zero evenimente). Rămas: backfill `users` (Clerk 30 vs 16) cu `scripts/backfill-clerk-users.mjs` (cheie
