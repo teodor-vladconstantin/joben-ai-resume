@@ -8,5 +8,16 @@
       "path": "/api/cron/inactivity-3d",
       "schedule": "0 9 * * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/((?!api/|_next/).*)",
+      "headers": [
+        {
+          "key": "Vary",
+          "value": "Accept"
+        }
+      ]
+    }
   ]
 }
