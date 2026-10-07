@@ -1,4 +1,11 @@
 ## Active
+- [DONE] 2026-10-07 Fail-open la Redis/Supabase restrâns (RUNBOOK §5 actualizat): AI pe planul free refuzat cu 503
+  `service_unavailable` când Redis dă eroare (planurile plătite rămân fail-open; fără Upstash în dev/CI nimic nu
+  se schimbă); `/api/parse` fail-closed în producție; `isEmailSuppressed` aruncă la eroare, iar `sendEmail`
+  întoarce `success:false` (cronurile reîncearcă) în loc să trimită către un posibil dezabonat. Teste noi:
+  `tests/lib/redis-fail-closed.test.ts`, `tests/lib/email-suppression.test.ts`, caz nou în anthropic-with-limits.
+  - Lăsat deliberat: `checkFeatureLimit`, contoarele și `isLocked` rămân fail-open (nu costă AI direct; AI-ul e
+    oprit de `checkAndReserveTokens`); contorul `cvs` e cumulativ prin design (reconciliat cu DB).
 - [DONE] 2026-10-07 Curățenie după citirea integrală a codului (un singur commit): regex `[^\s,()"]` în
   `anonymous-scan-claim.ts` (adresele cu litera "s" nu se revendicau după email; 2 teste noi); politica de
   confidențialitate numește Supabase subprocesator (nu mai scrie "self-hosted"), data actualizată la 7 oct 2026;

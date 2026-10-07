@@ -183,7 +183,11 @@ after a rollback.
 ### 5) Rate limiting degraded or bypass risk
 1. Confirm `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set and valid.
 2. Verify health check shows `rateLimitBackend=ok`.
-3. By design, `src/lib/ratelimit.ts` and `src/lib/security/route-rate-limit.ts` **fail open** when Redis is unreachable — a deliberate availability tradeoff (a missing/degraded Redis must not lock users out of the product), not a bug. The one deliberate exception is `/api/signup/consent`, which fails **closed** (503) on missing Redis, since it is a low-traffic, abuse-specific gate rather than an AI-quota hot path.
+3. By design, `src/lib/ratelimit.ts` and `src/lib/security/route-rate-limit.ts` **fail open** when Redis is unreachable for paying users: a degraded Redis must not lock them out of the product. These paths fail **closed** instead:
+   - Free-plan AI calls: `checkAndReserveTokens` returns `limitType: 'unavailable'` and the route answers 503 "AI features are temporarily unavailable" (no limit-hit record, no upgrade prompt). Free accounts are the abuse vector and carry no revenue, so an outage must not mean unmetered Anthropic spend.
+   - Routes that pass `failClosed: true` to `checkRouteRateLimit`: `/api/signup/consent`, the public ATS checker, `/api/billing/redeem-code` and, in production only, `/api/parse` (each parse bills LlamaParse and Anthropic).
+   - Outgoing email: `isEmailSuppressed` throws when the Supabase lookup fails and `sendEmail` returns `success: false` (crons retry), so an unsubscribed address is never mailed because of an outage.
+   An unset Upstash env (local dev/CI) still allows everything; only runtime errors trigger the fail-closed paths.
 4. `/api/cron/redis-health` pushes a `logger.error` (→ Sentry) when Upstash is unreachable, so a Redis outage is now alerted instead of silently degrading quota enforcement — but it needs an external scheduler to actually fire on Vercel Hobby (see "Cron Operations" above). Check Sentry for `Upstash Redis health check failed` if you suspect an outage went unnoticed, and confirm the external scheduler is still active if alerts have gone quiet for a suspiciously long time.
 5. Restore Redis connectivity before reopening traffic; there is no need to change the fail-open code path to recover — it self-heals once Redis is reachable again.
 

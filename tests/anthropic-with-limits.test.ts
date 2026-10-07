@@ -158,6 +158,31 @@ describe('callAnthropicWithLimits', () => {
     expect(createMessageMock).not.toHaveBeenCalled()
   })
 
+  it('returns a 503 service_unavailable (no limit hit, no upgrade nudge) when the quota backend is down', async () => {
+    checkAndReserveTokensMock.mockResolvedValueOnce({
+      allowed: false,
+      limitType: 'unavailable',
+    })
+
+    const { callAnthropicWithLimits } = await import('@/lib/anthropic-with-limits')
+
+    await expect(
+      callAnthropicWithLimits({
+        userId: 'user_5',
+        plan: 'free',
+        inputText: 'short input',
+        messages: [{ role: 'user', content: 'hello' }],
+        system: 'sys',
+      })
+    ).rejects.toMatchObject({
+      status: 503,
+      payload: { limitType: 'service_unavailable' },
+    })
+
+    expect(recordLimitHitMock).not.toHaveBeenCalled()
+    expect(createMessageMock).not.toHaveBeenCalled()
+  })
+
   it('records usage and increments feature on success', async () => {
     const { callAnthropicWithLimits } = await import('@/lib/anthropic-with-limits')
 

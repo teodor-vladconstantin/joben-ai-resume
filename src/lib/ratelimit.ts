@@ -266,7 +266,7 @@ export async function checkAndReserveTokens(
   userId: string,
   plan: Plan,
   estimatedInputTokens: number
-): Promise<{ allowed: boolean; reason?: string; limitType?: 'tokens' | 'hard_cap' }> {
+): Promise<{ allowed: boolean; reason?: string; limitType?: 'tokens' | 'hard_cap' | 'unavailable' }> {
   if (!redis) {
     return { allowed: true }
   }
@@ -301,12 +301,23 @@ export async function checkAndReserveTokens(
 
     return { allowed: true }
   } catch (error) {
-    logRedisFailure('Token reserve check failed; allowing request (fail-open)', {
-      userId,
-      plan,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    })
-    return { allowed: true }
+    // Free accounts are the abuse vector and carry no revenue, so a Redis
+    // outage must not turn into unmetered AI spend for them. Paid plans stay
+    // fail-open (their per-call input cap still applies).
+    const failClosed = plan === 'free'
+    logRedisFailure(
+      failClosed
+        ? 'Token reserve check failed; denying free-plan request (fail-closed)'
+        : 'Token reserve check failed; allowing request (fail-open)',
+      {
+        userId,
+        plan,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
+    )
+    return failClosed
+      ? { allowed: false, reason: 'Rate limit backend unavailable', limitType: 'unavailable' }
+      : { allowed: true }
   }
 }
 
