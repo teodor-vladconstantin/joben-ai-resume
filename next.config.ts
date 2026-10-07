@@ -46,6 +46,8 @@ const CLERK_PROXY_HOST = (() => {
 })()
 
 const SECURITY_HEADERS = [
+  // Pages and the Markdown variant share URLs (see src/proxy.ts), so caches must key on Accept.
+  { key: 'Vary', value: 'Accept' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },

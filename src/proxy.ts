@@ -1,6 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import createMiddleware from 'next-intl/middleware'
+import { NextResponse } from 'next/server'
 import { routing } from '@/i18n/routing'
+import { resolveMarkdownTarget, wantsMarkdown } from '@/lib/agent-markdown'
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -19,7 +21,7 @@ const isProtectedRoute = createRouteMatcher([
 // /monitoring is Sentry's tunnel (tunnelRoute in next.config.ts) — with
 // localePrefix: 'always', next-intl was prefixing both to /ro/..., which
 // neither rewrite matches anymore, so every request 404'd.
-const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)'])
+const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
@@ -30,7 +32,18 @@ export default clerkMiddleware(async (auth, req) => {
     return
   }
 
-  return intlMiddleware(req)
+  if (req.method === 'GET' && wantsMarkdown(req.headers.get('accept'))) {
+    const target = resolveMarkdownTarget(req.nextUrl.pathname)
+    if (target) {
+      const url = req.nextUrl.clone()
+      url.pathname = target.kind === 'home' ? `/md/home-${target.locale}` : '/md/not-found'
+      return NextResponse.rewrite(url)
+    }
+  }
+
+  const res = intlMiddleware(req)
+  res.headers.append('Vary', 'Accept')
+  return res
 })
 
 export const config = {

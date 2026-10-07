@@ -155,12 +155,12 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
 
                   <div className="mt-2 space-y-2.5 text-[10.5px] leading-relaxed" suppressHydrationWarning>
                     <section suppressHydrationWarning>
-                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.summaryHeading}</h4>
+                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.summaryHeading}</div>
                       <p className="mt-1 text-[#374151]">{mock.summary}</p>
                     </section>
 
                     <section suppressHydrationWarning>
-                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.experienceHeading}</h4>
+                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.experienceHeading}</div>
 
                       <div className="mt-1" suppressHydrationWarning>
                         <div className="flex justify-between gap-3" suppressHydrationWarning>
@@ -186,12 +186,12 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                     </section>
 
                     <section suppressHydrationWarning>
-                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.educationHeading}</h4>
+                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.educationHeading}</div>
                       <p className="mt-1 text-[#374151]">{mock.education}</p>
                     </section>
 
                     <section suppressHydrationWarning>
-                      <h4 className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.skillsHeading}</h4>
+                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.skillsHeading}</div>
                       <p className="mt-1 text-[#374151]">{mock.skills}</p>
                     </section>
                   </div>
