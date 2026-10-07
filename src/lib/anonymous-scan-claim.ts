@@ -37,7 +37,7 @@ export async function claimAnonymousScan(input: ClaimInput): Promise<ClaimResult
       // account has verified. (Emails with filter-syntax characters are never
       // interpolated into the PostgREST filter.)
       const verifiedEmail =
-        input.emailVerified && input.email && /^[^s,()"]+$/.test(input.email) ? input.email : null
+        input.emailVerified && input.email && /^[^\s,()"]+$/.test(input.email) ? input.email : null
 
       const base = supabase
         .from('anonymous_scans')

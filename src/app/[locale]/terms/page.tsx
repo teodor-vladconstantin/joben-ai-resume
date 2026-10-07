@@ -68,7 +68,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
         <header className="mb-8 pb-8 border-b border-(--border)">
           <h1 className="text-3xl font-bold text-(--foreground)">{terms.heading}</h1>
-          <p className="mt-2 font-mono text-xs text-(--muted)">Last updated: {terms.lastUpdated}</p>
+          <p className="mt-2 font-mono text-xs text-(--muted)">{t('lastUpdated')}: {terms.lastUpdated}</p>
           <p className="mt-4 text-(--muted)">{terms.intro}</p>
           <CompanyDetails className="mt-4 text-sm text-(--muted)" />
         </header>

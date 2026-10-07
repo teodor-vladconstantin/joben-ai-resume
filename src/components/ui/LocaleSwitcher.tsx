@@ -1,10 +1,11 @@
 "use client"
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 
 export function LocaleSwitcher({ className = '' }: { className?: string }) {
+  const t = useTranslations('Common')
   const pathname = usePathname()
   const locale = useLocale()
   const other = routing.locales.find((l) => l !== locale) ?? routing.locales[0]
@@ -13,7 +14,7 @@ export function LocaleSwitcher({ className = '' }: { className?: string }) {
     <Link
       href={pathname}
       locale={other}
-      aria-label={`Switch to ${other === 'ro' ? 'Romanian' : 'English'}`}
+      aria-label={other === 'ro' ? t('switchToRomanian') : t('switchToEnglish')}
       className={`inline-flex h-8 items-center px-1 text-sm font-medium text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground) ${className}`.trim()}
     >
       {other.toUpperCase()}

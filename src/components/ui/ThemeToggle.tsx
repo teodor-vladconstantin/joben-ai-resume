@@ -3,8 +3,10 @@
 import * as React from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useTranslations } from 'next-intl'
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
+  const t = useTranslations('Common')
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
@@ -16,7 +18,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
     <button
       type="button"
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      aria-label={mounted ? (resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode') : 'Toggle theme'}
+      aria-label={mounted ? (resolvedTheme === 'dark' ? t('switchToLight') : t('switchToDark')) : t('toggleTheme')}
       className={`inline-flex h-8 w-8 items-center justify-center text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground) ${className}`.trim()}
     >
       {mounted ? (

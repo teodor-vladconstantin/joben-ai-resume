@@ -14,10 +14,11 @@ const feedbackSchema = z.object({
   nps: z.number().int().min(0).max(10),
 })
 
+// Errors are returned as codes; the form maps them to localized copy.
 export type FeedbackResult =
   | { status: 'success' }
   | { status: 'already' }
-  | { status: 'error'; message: string }
+  | { status: 'error'; code: 'signIn' | 'invalid' | 'generic' }
 
 export async function submitFeedback(input: {
   likes: string
@@ -27,12 +28,12 @@ export async function submitFeedback(input: {
   // Never trust the client for identity — re-derive user + email from Clerk.
   const { userId } = await auth()
   if (!userId) {
-    return { status: 'error', message: 'You must be signed in to leave feedback.' }
+    return { status: 'error', code: 'signIn' }
   }
 
   const parsed = feedbackSchema.safeParse(input)
   if (!parsed.success) {
-    return { status: 'error', message: 'Please fill in every field before submitting.' }
+    return { status: 'error', code: 'invalid' }
   }
 
   const user = await currentUser()
@@ -66,7 +67,7 @@ export async function submitFeedback(input: {
       userId,
       error: error.message,
     })
-    return { status: 'error', message: 'Something went wrong. Please try again.' }
+    return { status: 'error', code: 'generic' }
   }
 
   return { status: 'success' }

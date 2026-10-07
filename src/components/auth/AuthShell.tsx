@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
@@ -11,6 +12,8 @@ export interface AuthShellProps {
 }
 
 export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellProps) {
+  const t = useTranslations('Common')
+
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16" suppressHydrationWarning>
       <div className="w-full max-w-md">
@@ -30,7 +33,7 @@ export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellP
         </Card>
 
         <div className="mt-6 text-xs text-(--muted)">
-          <Link href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; Back to home</Link>
+          <Link href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; {t('backToHome')}</Link>
         </div>
       </div>
     </div>

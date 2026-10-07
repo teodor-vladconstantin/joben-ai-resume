@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         '/*/ai-review/',
         '/*/settings/',
         '/*/feedback/',
-        '/*/sentry-example-page/',
       ],
     },
     sitemap: `${siteConfig.url}/sitemap.xml`,

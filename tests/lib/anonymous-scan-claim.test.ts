@@ -72,6 +72,25 @@ describe('claimAnonymousScan', () => {
     expect(calls).toContainEqual(['eq', ['email', 'a@b.ro']])
   })
 
+  it('matches by email for addresses containing the letter s', async () => {
+    const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
+    results.push({ data: { id: SCAN }, error: null }, { data: { id: SCAN, posthog_distinct_id: null }, error: null })
+
+    const claim = await claimAnonymousScan({ userId: 'user_1', scanId: null, email: 'ioana.stan@gmail.com', emailVerified: true })
+
+    expect(claim).toEqual({ scanId: SCAN, by: 'email', analyticsDistinctId: null })
+    expect(calls).toContainEqual(['eq', ['email', 'ioana.stan@gmail.com']])
+  })
+
+  it('never interpolates an email with filter-syntax characters into the scan-id filter', async () => {
+    const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
+    results.push({ data: { id: SCAN, posthog_distinct_id: null }, error: null })
+
+    await claimAnonymousScan({ userId: 'user_1', scanId: SCAN, email: 'a,b@x.ro', emailVerified: true })
+
+    expect(calls.some(([method]) => method === 'or')).toBe(false)
+  })
+
   it('does not fall back to email when the scan id is already claimed and the email is unverified', async () => {
     const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
     results.push({ data: null, error: null })

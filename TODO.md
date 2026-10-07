@@ -1,4 +1,13 @@
 ## Active
+- [DONE] 2026-10-07 Curățenie după citirea integrală a codului (un singur commit): regex `[^\s,()"]` în
+  `anonymous-scan-claim.ts` (adresele cu litera "s" nu se revendicau după email; 2 teste noi); politica de
+  confidențialitate numește Supabase subprocesator (nu mai scrie "self-hosted"), data actualizată la 7 oct 2026;
+  texte RO/EN pentru error, not-found, feedback (acțiunea întoarce coduri, nu mesaje), sign-in, AuthShell,
+  Sidebar, ThemeToggle, LocaleSwitcher, "Last updated" din paginile legale; șterse fișiere moarte (`parser.py`,
+  `data/skills.json`, `kong.yml`, compose-ul vechi al parser-ului, pagina și ruta Sentry example).
+  - Netratat: vizualurile din landing și titlurile template-ului Harvard rămân în engleză; tipul `Messages`
+    din `src/i18n/messages.ts` încă omite namespace-uri; `ratelimit.ts` eșuează deschis la Redis căzut; regiunea
+    Supabase nu e menționată în politică (de confirmat).
 - [DONE] 2026-10-07 Audit de securitate (22 commituri H2-H4, M1-M8, L1-L9) pe `main` (`234b631`, Next 16.3.8).
   VM Oracle redeploy (M7): latex-service (auth înaintea body parser, fără CORS, fără stdout în erori, user non-root),
   resume-parser (user non-root, fastapi 0.115.14, python-multipart 0.0.20), compose cu `PARSER_BIND`/`LATEX_BIND`.

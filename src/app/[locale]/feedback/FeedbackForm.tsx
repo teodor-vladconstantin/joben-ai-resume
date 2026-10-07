@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { buttonVariants } from '@/components/ui/Button'
 import { submitFeedback, type FeedbackResult } from './actions'
 
 const NPS_SCALE = Array.from({ length: 11 }, (_, i) => i) // 0..10
 
 export function FeedbackForm({ email }: { email: string }) {
+  const t = useTranslations('Feedback')
   const [likes, setLikes] = useState('')
   const [improvements, setImprovements] = useState('')
   const [nps, setNps] = useState<number | null>(null)
@@ -17,11 +19,11 @@ export function FeedbackForm({ email }: { email: string }) {
   // Post-submit terminal states.
   if (result === 'success') {
     return (
-      <ConfirmationCard message="Thank you! Your feedback has been recorded." />
+      <ConfirmationCard message={t('thanks')} />
     )
   }
   if (result === 'already') {
-    return <ConfirmationCard message="You've already left feedback, thank you!" />
+    return <ConfirmationCard message={t('already')} />
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -29,14 +31,14 @@ export function FeedbackForm({ email }: { email: string }) {
     setError(null)
 
     if (!likes.trim() || !improvements.trim() || nps === null) {
-      setError('Please fill in every field before submitting.')
+      setError(t('fillAll'))
       return
     }
 
     startTransition(async () => {
       const res = await submitFeedback({ likes, improvements, nps })
       if (res.status === 'error') {
-        setError(res.message)
+        setError(res.code === 'signIn' ? t('errors.signIn') : res.code === 'invalid' ? t('fillAll') : t('errors.generic'))
         return
       }
       setResult(res.status)
@@ -45,7 +47,7 @@ export function FeedbackForm({ email }: { email: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <Field label="What do you like about Joben?" htmlFor="likes">
+      <Field label={t('likesLabel')} htmlFor="likes">
         <textarea
           id="likes"
           required
@@ -53,11 +55,11 @@ export function FeedbackForm({ email }: { email: string }) {
           onChange={(e) => setLikes(e.target.value)}
           rows={4}
           className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
-          placeholder="Tell us what's working well…"
+          placeholder={t('likesPlaceholder')}
         />
       </Field>
 
-      <Field label="What should be improved?" htmlFor="improvements">
+      <Field label={t('improvementsLabel')} htmlFor="improvements">
         <textarea
           id="improvements"
           required
@@ -65,12 +67,12 @@ export function FeedbackForm({ email }: { email: string }) {
           onChange={(e) => setImprovements(e.target.value)}
           rows={4}
           className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
-          placeholder="What would make Joben better?"
+          placeholder={t('improvementsPlaceholder')}
         />
       </Field>
 
-      <Field label="How likely are you to recommend Joben to a friend?" htmlFor="nps">
-        <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Recommendation score from 0 to 10">
+      <Field label={t('npsLabel')} htmlFor="nps">
+        <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('npsAria')}>
           {NPS_SCALE.map((value) => {
             const selected = nps === value
             return (
@@ -92,12 +94,12 @@ export function FeedbackForm({ email }: { email: string }) {
           })}
         </div>
         <div className="mt-1.5 flex justify-between text-xs text-(--muted)">
-          <span>Not likely</span>
-          <span>Very likely</span>
+          <span>{t('notLikely')}</span>
+          <span>{t('veryLikely')}</span>
         </div>
       </Field>
 
-      <Field label="Email" htmlFor="email">
+      <Field label={t('emailLabel')} htmlFor="email">
         <input
           id="email"
           type="email"
@@ -118,7 +120,7 @@ export function FeedbackForm({ email }: { email: string }) {
         disabled={isPending}
         className={`${buttonVariants('primary', 'md')} w-full disabled:opacity-60`}
       >
-        {isPending ? 'Submitting…' : 'Submit feedback'}
+        {isPending ? t('submitting') : t('submit')}
       </button>
     </form>
   )

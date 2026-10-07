@@ -102,7 +102,7 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
         <header className="mb-8 pb-8 border-b border-(--border)">
           <h1 className="text-3xl font-bold text-(--foreground)">{cookies.heading}</h1>
-          <p className="mt-2 font-mono text-xs text-(--muted)">Last updated: {cookies.lastUpdated}</p>
+          <p className="mt-2 font-mono text-xs text-(--muted)">{t('lastUpdated')}: {cookies.lastUpdated}</p>
           <p className="mt-4 text-(--muted)">{cookies.intro}</p>
           <CompanyDetails className="mt-4 text-sm text-(--muted)" />
         </header>
