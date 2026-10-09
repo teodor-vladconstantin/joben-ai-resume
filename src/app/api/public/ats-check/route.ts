@@ -33,7 +33,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
   timeout: ANTHROPIC_TIMEOUT_MS,
 })
-const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001'
+const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5'
 
 // SECURITY: align with the in-builder upload guard (5 MB). Both formats are
 // extracted locally (pdfjs-dist / mammoth), never routed through the paid
