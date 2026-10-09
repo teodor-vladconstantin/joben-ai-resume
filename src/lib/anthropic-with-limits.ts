@@ -113,8 +113,9 @@ async function createMessage(
   return anthropic.messages.create({
     model,
     max_tokens: input.maxTokens,
-    // 0: scores stay stable across re-runs and rewrites stick closer to the source text.
-    temperature: 0,
+    // Haiku 5.5 rejects sampling params (temperature etc.) and thinks by default;
+    // disabled keeps the old latency and token budget, and Haiku 4.5 (fallback) accepts it too.
+    thinking: { type: 'disabled' },
     system,
     stream: false,
     messages: input.messages,
