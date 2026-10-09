@@ -1,4 +1,13 @@
 ## Active
+- [DONE] 2026-10-09 Model Claude: Haiku 4.5 → `claude-haiku-5-5` (app, ATS checker public, resume-parser).
+  Fallback app: `claude-haiku-4-5-20251001` (era `claude-3-haiku`); parser rămâne pe `claude-sonnet-5`.
+  - Breaking găsit în producție: Haiku 5.5 dă 400 la `temperature` ("deprecated for this model") și gândește
+    implicit. Fix: `temperature` scos, `thinking: { type: 'disabled' }` (acceptat și de fallback-uri);
+    `max_tokens` +30% pentru tokenizer-ul nou (ATS 800→1100, `maxOutputTokensPerCall` 2000→2600).
+  - Verificat: API real pe toate 3 modelele; prompt ATS pe Haiku 5.5 → JSON valid, 2.5s; parser pe VM Oracle
+    reconstruit + parse real OK (~10s); Vercel Ready fără erori de model; 205 teste API/lib verzi.
+  - Rollback VM: `~/main.py.bak-20261009` + imaginea `joben-resume-parser:prev-20261009`.
+  - Rămas: un scan ATS real pe joben.eu (limita 1/zi pe IP consumată în timpul testării).
 - [DONE] 2026-10-07 Fail-open la Redis/Supabase restrâns (RUNBOOK §5 actualizat): AI pe planul free refuzat cu 503
   `service_unavailable` când Redis dă eroare (planurile plătite rămân fail-open; fără Upstash în dev/CI nimic nu
   se schimbă); `/api/parse` fail-closed în producție; `isEmailSuppressed` aruncă la eroare, iar `sendEmail`
