@@ -21,8 +21,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
   timeout: ANTHROPIC_TIMEOUT_MS,
 })
-const primaryClaudeModel = 'claude-haiku-4-5-20251001'
-const fallbackClaudeModel = 'claude-3-haiku-20240307'
+const primaryClaudeModel = 'claude-haiku-5-5'
+const fallbackClaudeModel = 'claude-haiku-4-5-20251001'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel
 
 const FEATURE_LABEL: Record<Feature, string> = {
