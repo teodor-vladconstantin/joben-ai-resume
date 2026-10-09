@@ -1343,7 +1343,8 @@ def extract_resume_json_with_claude(raw_text: str, deadline: Optional[float] = N
         with anthropic_client.messages.stream(
             model=model,
             max_tokens=CLAUDE_MAX_OUTPUT_TOKENS,
-            temperature=0,
+            # Haiku 5.5 rejects temperature; thinking off keeps the stream-gap timeout safe.
+            thinking={"type": "disabled"},
             system=RESUME_EXTRACTION_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_message}],
         ) as stream:
