@@ -25,7 +25,14 @@ const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/inges
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect()
+    // Redirect to our own embedded sign-in page, not Clerk's hosted portal.
+    const { userId } = await auth()
+    if (!userId) {
+      const locale = req.nextUrl.pathname.split('/')[1]
+      const url = new URL(`/${locale}/sign-in`, req.url)
+      url.searchParams.set('redirect_url', req.nextUrl.pathname + req.nextUrl.search)
+      return NextResponse.redirect(url)
+    }
   }
 
   if (isUnlocalizedRoute(req)) {
