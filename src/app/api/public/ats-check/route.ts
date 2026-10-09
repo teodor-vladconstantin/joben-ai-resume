@@ -52,7 +52,8 @@ const ATS_CHECK_RATE_LIMIT_PER_DAY = 1
 const MAX_RESUME_CHARS = 20_000
 const MIN_RESUME_CHARS = 100
 // 500 occasionally cut the JSON off mid-issue, turning a paid scan into a 502.
-const MAX_OUTPUT_TOKENS = 800
+// 1100: Haiku 5.5's tokenizer counts the same text as ~30% more tokens.
+const MAX_OUTPUT_TOKENS = 1100
 
 // SECURITY: IP-only limiting is trivially bypassed with a VPN/proxy rotation.
 // A random per-browser cookie survives an IP change, so a request is only
@@ -373,8 +374,8 @@ export async function POST(req: Request) {
       const message = await anthropic.messages.create({
         model,
         max_tokens: MAX_OUTPUT_TOKENS,
-        // 0: the same CV should get the same score on a re-scan.
-        temperature: 0,
+        // Haiku 5.5 rejects temperature; thinking off keeps the old latency and token budget.
+        thinking: { type: 'disabled' },
         system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT + outputLanguageRule(String(formData.get('locale') || ''))),
         messages: [{ role: 'user', content: `Resume:\n${safeResumeText}` }],
       })
