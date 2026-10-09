@@ -1208,7 +1208,7 @@ parser = LlamaParse(
 # hanging Anthropic API. Keep the same model, just fail fast enough that a
 # real 502 reaches the client instead of the connection getting aborted.
 anthropic_client = Anthropic(api_key=anthropic_api_key, timeout=18.0, max_retries=1)
-CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-4-5-20251001"
+CLAUDE_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-5-5"
 CLAUDE_FALLBACK_MODEL = "claude-sonnet-5"
 CLAUDE_MAX_OUTPUT_TOKENS = 16000
 # Next.js /api/parse aborts the upstream fetch at 55s; finish (or fail with a
