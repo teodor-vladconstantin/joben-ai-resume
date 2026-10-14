@@ -4,6 +4,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { resolvePlanFromPriceId } from '@/lib/plans'
+import { extendExpiry } from '@/lib/referral'
 import { getStripeClient } from '@/lib/stripe'
 import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
@@ -254,7 +255,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
       if (userId) {
         const { data: user, error: userLookupError } = await supabase
           .from('users')
-          .select('id, stripe_last_event_created, lifetime_recruiting_unlocked')
+          .select('id, plan, pro_expires_at, stripe_last_event_created, lifetime_recruiting_unlocked')
           .eq('clerk_id', userId)
           .maybeSingle()
 
@@ -301,6 +302,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
 
         const updatePayload: {
           plan?: string
+          pro_expires_at?: string
           stripe_customer_id?: string
           stripe_subscription_id?: string
           stripe_last_event_created?: number
@@ -308,6 +310,22 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
 
         if (user?.lifetime_recruiting_unlocked) {
           updatePayload.plan = 'recruiting'
+        } else if (planId === 'pass_14d') {
+          if (session.payment_status !== 'paid') {
+            // Only card payments are enabled; anything unpaid is not granted.
+            logger.warn('Pass checkout completed without paid status', {
+              requestId,
+              route: '/api/webhooks/stripe',
+              userId,
+              eventId: event.id,
+              paymentStatus: session.payment_status,
+            })
+            return jsonWithRequestId({ message: 'Pass not paid yet' }, 200, requestId)
+          }
+          // Stacks on an active pass/referral grant; plan only lifted from free
+          // (getUserPlan reads pro_expires_at for non-subscribers).
+          if (!user?.plan || user.plan === 'free') updatePayload.plan = 'pro'
+          updatePayload.pro_expires_at = extendExpiry(user?.pro_expires_at, 14)
         } else if (planId === 'pro' || planId === 'recruiting') {
           // Only known paid plans: never write arbitrary metadata into users.plan.
           updatePayload.plan = planId

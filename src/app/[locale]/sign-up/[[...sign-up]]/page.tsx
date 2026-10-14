@@ -64,12 +64,19 @@ function writeStorage(storage: 'local' | 'session', key: string, value: string |
   }
 }
 
-// Read back in the Clerk webhook: consentToken (ToS acceptance) and
-// atsSource/atsScanId (signup_completed properties, scan claim). User-editable,
-// so the webhook re-validates everything.
+// Set by src/proxy.ts from a ?ref= link.
+function readReferralCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)jb_ref=([A-Z0-9_-]{1,30})(?:;|$)/)
+  return match ? match[1] : null
+}
+
+// Read back in the Clerk webhook: consentToken (ToS acceptance),
+// atsSource/atsScanId (signup_completed properties, scan claim) and ref
+// (referral code). User-editable, so the webhook re-validates everything.
 function buildUnsafeMetadata(
   consentToken: string | null,
-  attribution: AtsSignupAttribution | null
+  attribution: AtsSignupAttribution | null,
+  referralCode: string | null
 ): Record<string, string> | undefined {
   const metadata: Record<string, string> = {}
   if (consentToken) metadata.consentToken = consentToken
@@ -77,6 +84,7 @@ function buildUnsafeMetadata(
     metadata.atsSource = attribution.source
     if (attribution.scanId) metadata.atsScanId = attribution.scanId
   }
+  if (referralCode) metadata.ref = referralCode
   return Object.keys(metadata).length > 0 ? metadata : undefined
 }
 
@@ -102,6 +110,7 @@ function SignUpContent() {
   const [submitting, setSubmitting] = useState(false)
   const [consentToken, setConsentToken] = useState<string | null>(null)
   const [attribution, setAttribution] = useState<AtsSignupAttribution | null>(null)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
 
   // Records the acceptance server-side (signup_consents row, same as before)
   // and only then shows Clerk's form, so the token is in unsafeMetadata from
@@ -154,6 +163,7 @@ function SignUpContent() {
       }
     }
     setAttribution(current)
+    setReferralCode(readReferralCookie())
 
     // Ticked within the last 30 minutes (another tab, an earlier Clerk step,
     // the OAuth round trip): reuse that acceptance and its token, no new
@@ -178,7 +188,7 @@ function SignUpContent() {
       path={`/${locale}/sign-up`}
       signInUrl={`/${locale}/sign-in`}
       fallbackRedirectUrl={returnBackUrl}
-      unsafeMetadata={buildUnsafeMetadata(consentToken, attribution)}
+      unsafeMetadata={buildUnsafeMetadata(consentToken, attribution, referralCode)}
     />
   )
 

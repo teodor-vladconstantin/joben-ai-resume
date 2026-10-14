@@ -12,6 +12,7 @@ import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { getContactEmail, getVerifiedPrimaryEmail } from '@/lib/security/clerk-email'
 import { OTHER_OWNED_TABLES, OWNED_TABLES } from '@/app/api/account/delete/route'
 import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
+import { processReferralAttribution } from '@/lib/referral'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -219,6 +220,27 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
         error: error.message,
       })
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+    }
+
+    // Referral link (jb_ref cookie, copied into unsafeMetadata by the sign-up
+    // page). Rewards only for a verified, non-disposable email (checked above).
+    const referralCodeParam = typeof evt.data.unsafe_metadata?.ref === 'string'
+      ? evt.data.unsafe_metadata.ref
+      : null
+
+    if (referralCodeParam && primaryEmail) {
+      try {
+        await processReferralAttribution({
+          newUserId: id,
+          referralCode: referralCodeParam,
+        })
+      } catch (refErr) {
+        logger.warn('Failed to process referral attribution in clerk webhook', {
+          requestId,
+          userId: id,
+          error: refErr instanceof Error ? refErr.message : 'Unknown error',
+        })
+      }
     }
 
     // Set by the sign-up page when the visit came from the free ATS checker

@@ -24,8 +24,10 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('@/lib/plans', () => ({
   getUserPlan: getUserPlanMock,
   getEmailHintFromSessionClaims: getEmailHintFromSessionClaimsMock,
-  getPriceIdForPlan: (plan: 'pro' | 'recruiting') =>
-    plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID,
+  getPriceIdForPlan: (plan: 'pro' | 'recruiting' | 'pass_14d') =>
+    plan === 'pass_14d'
+      ? undefined
+      : plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID,
 }))
 
 vi.mock('@/lib/security/route-rate-limit', () => ({
@@ -153,6 +155,43 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled()
   })
 
+  it('returns 409 for the 14-day pass when the user already has a subscription', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    createServerClientMock.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1' },
+              error: null,
+            }),
+          })),
+        })),
+      })),
+    })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'pass_14d' }))
+
+    expect(response.status).toBe(409)
+    expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it('sells the 14-day pass as a one-time 39 RON payment', async () => {
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'pass_14d' }))
+
+    expect(response.status).toBe(200)
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'payment',
+        line_items: [expect.objectContaining({ price_data: expect.objectContaining({ currency: 'ron', unit_amount: 3900 }) })],
+        metadata: expect.objectContaining({ planId: 'pass_14d' }),
+      })
+    )
+  })
+
   it('returns 503 without leaking which var is missing when Stripe env is incomplete', async () => {
     delete process.env.STRIPE_SECRET_KEY
     const { POST } = await import('@/app/api/billing/checkout/route')
@@ -187,7 +226,7 @@ describe('POST /api/billing/checkout', () => {
         mode: 'subscription',
         line_items: [{ price: 'price_dummy', quantity: 1 }],
         success_url: 'https://app.example.com/ro/dashboard?upgrade=success',
-        cancel_url: 'https://app.example.com/ro/dashboard?upgrade=cancelled',
+        cancel_url: 'https://app.example.com/ro/pricing?upgrade=cancelled',
         metadata: { userId: 'user_123', planId: 'pro' },
         customer: 'cus_existing',
         customer_email: undefined,

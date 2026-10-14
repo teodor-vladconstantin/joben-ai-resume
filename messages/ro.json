@@ -206,6 +206,24 @@
         "cta": "Începe Gratuit"
       },
       {
+        "name": "Pass Interviu (14 Zile)",
+        "description": "Ideal pentru sprint-ul de aplicare și interviuri din următoarele 2 săptămâni.",
+        "price": "39 RON",
+        "pricePeriod": "/plată unică",
+        "features": [
+          "Acces complet Pro timp de 14 zile",
+          "Plată unică, fără abonament recurent",
+          "Raport complet verificare ATS & corecții",
+          "Exporturi PDF nelimitate optimizate ATS",
+          "Rescrieri AI de puncte și adaptare CV",
+          "Scrisori de intenție AI nelimitate"
+        ],
+        "excludedFeatures": [
+          "Nu se reînnoiește automat"
+        ],
+        "cta": "Ia Pass-ul (39 RON)"
+      },
+      {
         "name": "Pro",
         "description": "Pentru cei care caută activ un job și aplică constant.",
         "price": "59 RON",

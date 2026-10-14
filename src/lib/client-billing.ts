@@ -1,7 +1,7 @@
 import posthog from 'posthog-js'
 import type { AppLocale } from '@/i18n/routing'
 
-export type PaidPlan = 'pro' | 'recruiting'
+export type PaidPlan = 'pro' | 'recruiting' | 'pass_14d'
 
 export async function startCheckout(plan: PaidPlan, locale: AppLocale) {
   // Captured here (click time) rather than only on the server, so we still
@@ -28,6 +28,10 @@ export async function startCheckout(plan: PaidPlan, locale: AppLocale) {
 
 export async function startProCheckout(locale: AppLocale) {
   return startCheckout('pro', locale)
+}
+
+export async function startPass14dCheckout(locale: AppLocale) {
+  return startCheckout('pass_14d', locale)
 }
 
 export async function startBillingPortal(locale: AppLocale) {
