@@ -22,7 +22,9 @@ function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' 
   }
 
   const priceId = subscription.items?.data?.[0]?.price?.id
-  return resolvePlanFromPriceId(priceId) ?? 'pro'
+  const plan = resolvePlanFromPriceId(priceId)
+  // A pass is a one-time payment, never a subscription item.
+  return plan === 'recruiting' ? 'recruiting' : 'pro'
 }
 
 function isStaleEvent(lastProcessedAt: number | null | undefined, incomingEventCreated: number): boolean {
