@@ -1,10 +1,15 @@
 ## Active
-- [IN PROGRESS] 2026-10-14 (seara) Growth rework după audit, NECOMMITAT pe feat/agent-readiness: /verificare-cv șters
-  (301 -> /free-ats-checker, singurul lead magnet, Haiku), /cv unit în /resume-examples (301), pass 14d reparat
-  (refund/dispută, retragere, TVA neplătitor), referral 3/30 zile + 10 total + email RO/EN (locale în Clerk
-  unsafeMetadata). tsc/lint curate, 351 teste verzi, `npm run build` OK.
-  - RĂMAS: rezultate 2 auditori finali (billing/referral, SEO/i18n); commit; preview + test manual RO/EN;
-    user: ToS URL în Stripe Dashboard (https://joben.eu/ro/terms) înainte de merge în main; apoi social listening.
+- [IN PROGRESS] 2026-10-15 Growth (preview verificat, NEMERGED în main): commit-uri b12a316 + 1fe1173 pe
+  feat/agent-readiness. /free-ats-checker (Haiku) e singurul lead magnet; /verificare-cv și /cv redirect 301.
+  Pass 14d, referral (3/30 zile, 10 total, email RO/EN), SEO pe resume-examples + scrisoare-intentie. tsc/lint curate,
+  367 teste, build Vercel Ready; smoke test preview OK (pagini, redirecturi, 401 la webhook cu secretul vechi, scanare
+  PDF reală cu potrivire pe rol). Bug prins doar pe Vercel: pdf.worker.mjs lipsea pentru ats-fast-check (acum în
+  outputFileTracingIncludes + test de gardă).
+  - RĂMAS (user): 1) Stripe Dashboard > Settings > Public details: URL termeni https://joben.eu/ro/terms (altfel
+    checkout-ul pass-ului eșuează); 2) aplică migrările 20261014* în SQL Editor ÎNAINTE de merge (altfel getUserPlan
+    dă free tuturor); 3) test manual în Stripe test mode: cumpărare pass, refund, cod 100%; link ?ref= cu cont nou.
+  - Cunoscut/neînchis: ștergerea contului resetează contoarele de plafon referral; CI/CD nu e recunoscut în
+    potrivirea pe rol; URL EN de scrisori e în română. Social listening rămâne ultimul (texte + disclosure).
 - [IN PROGRESS] 2026-10-14 Growth: 5 sisteme (commit `86491e1` pe feat/agent-readiness, PROGRESS.md). Review de
   securitate făcut și reparat înainte de livrare (secret hardcodat, RLS public pe social_leads, farming referral,
   rate limit scanner, suprascriere plan recruiting). tsc/lint curate, 317 teste verzi.
