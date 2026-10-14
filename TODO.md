@@ -1,4 +1,10 @@
 ## Active
+- [IN PROGRESS] 2026-10-14 Growth: 5 sisteme (commit `86491e1` pe feat/agent-readiness, PROGRESS.md). Review de
+  securitate făcut și reparat înainte de livrare (secret hardcodat, RLS public pe social_leads, farming referral,
+  rate limit scanner, suprascriere plan recruiting). tsc/lint curate, 317 teste verzi.
+  - RĂMAS (user): 1) aplică ÎNTÂI cele 2 migrări 20261014* în SQL Editor (fără ele getUserPlan dă 'free' tuturor);
+    2) Vercel prod: SOCIAL_LISTENING_WEBHOOK_SECRET (+ opțional TELEGRAM_BOT_TOKEN/CHAT_ID, DISCORD_WEBHOOK_URL);
+    3) merge în main. Cron `pass-expiration` nu e programat (redundant: getUserPlan verifică expirarea).
 - [DONE] 2026-10-09 Model Claude: Haiku 4.5 → `claude-haiku-5-5` (app, ATS checker public, resume-parser).
   Fallback app: `claude-haiku-4-5-20251001` (era `claude-3-haiku`); parser rămâne pe `claude-sonnet-5`.
   - Breaking găsit în producție: Haiku 5.5 dă 400 la `temperature` ("deprecated for this model") și gândește
