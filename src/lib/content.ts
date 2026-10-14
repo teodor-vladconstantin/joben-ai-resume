@@ -21,17 +21,20 @@ export const company = {
 // needing a CMS or a database write on every deploy.
 export const BUILD_TIME = new Date().toISOString();
 
+// 14-day pass price in bani (39.00 RON). Used for the Stripe price_data
+// fallback; tests/lib/pass-price.test.ts keeps the "39 RON" copy in sync.
+export const PASS_14D_PRICE_BANI = 3900
+
 // Non-text plan behavior, kept locale-independent. Merge by array index with
 // the translated `Pricing.plans` array from messages/{locale}.json, which
-// holds the same 3 plans (Free, Pro, Recruiting) in the same order.
+// holds the same 4 plans (Free, Pass 14 days, Pro, Recruiting) in the same
+// order. Badges are translated copy, so they live in messages (plan.badge).
 export const pricingPlanMeta: {
   planId: 'pro' | 'recruiting' | 'pass_14d' | undefined
   isPrimary: boolean
-  isBestValue: boolean
-  badge?: string
 }[] = [
-  { planId: undefined, isPrimary: false, isBestValue: false },
-  { planId: 'pass_14d', isPrimary: false, isBestValue: true, badge: 'Popular pentru Interviuri' },
-  { planId: 'pro', isPrimary: true, isBestValue: false },
-  { planId: 'recruiting', isPrimary: false, isBestValue: false },
+  { planId: undefined, isPrimary: false },
+  { planId: 'pass_14d', isPrimary: false },
+  { planId: 'pro', isPrimary: true },
+  { planId: 'recruiting', isPrimary: false },
 ]

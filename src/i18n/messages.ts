@@ -75,6 +75,7 @@ export type Messages = {
   Pricing: {
     heading: string
     subheading: string
+    vatNote: string
     plans: {
       name: string
       description: string
@@ -83,6 +84,7 @@ export type Messages = {
       features: string[]
       excludedFeatures: string[]
       cta: string
+      badge?: string
     }[]
   }
   AtsChecker: {

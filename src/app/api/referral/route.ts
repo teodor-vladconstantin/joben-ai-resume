@@ -14,6 +14,8 @@ export async function GET(req: Request) {
     }
 
     const info = await getUserReferralInfo(userId)
+    // Just signed up: the Clerk webhook has not created the users row yet.
+    if (!info) return jsonWithRequestId({ pending: true }, 200, requestId)
     return jsonWithRequestId({ success: true, ...info }, 200, requestId)
   } catch (error) {
     logger.error('Failed to get referral info', {

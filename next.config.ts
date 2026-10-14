@@ -1,6 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next'
+import { SEO_JOBS } from './src/data/seo-jobs'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -170,6 +171,27 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: SECURITY_HEADERS,
       },
+    ]
+  },
+  // /cv/{slug} was merged into /resume-examples/{role}. Every slug (ro or en)
+  // under either locale 301s to that locale's matching role page; anything
+  // else under /cv falls through to the hub.
+  async redirects() {
+    const cvRedirects = SEO_JOBS.flatMap((job) =>
+      (['ro', 'en'] as const).flatMap((locale) =>
+        [...new Set([job.slug.ro, job.slug.en])].map((slug) => ({
+          source: `/${locale}/cv/${slug}`,
+          destination: `/${locale}/resume-examples/${job.resumeRoleSlug[locale]}`,
+          statusCode: 301 as const,
+        }))
+      )
+    )
+    return [
+      ...cvRedirects,
+      { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
+      // The instant checker was folded into the single ATS checker (lead magnet).
+      { source: '/:locale(ro|en)/verificare-cv', destination: '/:locale/free-ats-checker', statusCode: 301 as const },
+      { source: '/verificare-cv', destination: '/ro/free-ats-checker', statusCode: 301 as const },
     ]
   },
   async rewrites() {

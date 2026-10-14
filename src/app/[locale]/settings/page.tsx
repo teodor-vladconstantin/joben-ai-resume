@@ -40,9 +40,17 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
   const supabase = createServerClient()
   const { data: profile } = await supabase
     .from('users')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, stripe_subscription_id, pro_expires_at')
     .eq('clerk_id', userId)
     .maybeSingle()
+
+  // Pass or referral grant: Pro without a subscription, until pro_expires_at.
+  const grantExpiresAt =
+    !profile?.stripe_subscription_id && plan === 'pro' && profile?.pro_expires_at
+      ? new Date(profile.pro_expires_at)
+      : null
+  const hasStripeCustomer = Boolean(profile?.stripe_customer_id)
+  const dateFormatter = new Intl.DateTimeFormat(locale === 'ro' ? 'ro-RO' : 'en-GB', { dateStyle: 'long' })
 
   return (
     <div className="min-h-screen flex">
@@ -97,10 +105,19 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                   </div>
                   <Badge variant="solid">{PLAN_DEFINITIONS[plan].label}</Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-(--muted)">{t('billing.subscription')}</div>
-                  <ManageBillingButton hasStripeCustomer={Boolean(profile?.stripe_customer_id)} />
-                </div>
+                {grantExpiresAt ? (
+                  <p className="text-sm text-(--foreground)">
+                    {t('billing.grantActiveUntil', { date: dateFormatter.format(grantExpiresAt) })}
+                  </p>
+                ) : null}
+                {hasStripeCustomer || plan !== 'recruiting' ? (
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-(--muted)">
+                      {profile?.stripe_subscription_id ? t('billing.subscription') : t('billing.plan')}
+                    </div>
+                    <ManageBillingButton hasStripeCustomer={hasStripeCustomer} />
+                  </div>
+                ) : null}
               </div>
             </div>
 

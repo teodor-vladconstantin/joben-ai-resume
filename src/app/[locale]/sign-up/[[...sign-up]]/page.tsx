@@ -14,6 +14,7 @@ import {
   readAtsSignupAttribution,
   type AtsSignupAttribution,
 } from '@/lib/ats-attribution'
+import { readReferralCookie } from '@/lib/referral-shared'
 import type { AppLocale } from '@/i18n/routing'
 
 // The acceptance (with its signup_consents token) is kept in localStorage so
@@ -64,28 +65,24 @@ function writeStorage(storage: 'local' | 'session', key: string, value: string |
   }
 }
 
-// Set by src/proxy.ts from a ?ref= link.
-function readReferralCookie(): string | null {
-  const match = document.cookie.match(/(?:^|;\s*)jb_ref=([A-Z0-9_-]{1,30})(?:;|$)/)
-  return match ? match[1] : null
-}
-
 // Read back in the Clerk webhook: consentToken (ToS acceptance),
-// atsSource/atsScanId (signup_completed properties, scan claim) and ref
-// (referral code). User-editable, so the webhook re-validates everything.
+// atsSource/atsScanId (signup_completed properties, scan claim), ref
+// (referral code) and locale (language of account emails, see
+// src/lib/user-locale.ts). User-editable, so the server re-validates everything.
 function buildUnsafeMetadata(
+  locale: AppLocale,
   consentToken: string | null,
   attribution: AtsSignupAttribution | null,
   referralCode: string | null
-): Record<string, string> | undefined {
-  const metadata: Record<string, string> = {}
+): Record<string, string> {
+  const metadata: Record<string, string> = { locale }
   if (consentToken) metadata.consentToken = consentToken
   if (attribution) {
     metadata.atsSource = attribution.source
     if (attribution.scanId) metadata.atsScanId = attribution.scanId
   }
   if (referralCode) metadata.ref = referralCode
-  return Object.keys(metadata).length > 0 ? metadata : undefined
+  return metadata
 }
 
 function sanitizeReturnBackUrl(value: string | null, fallback: string): string {
@@ -188,7 +185,7 @@ function SignUpContent() {
       path={`/${locale}/sign-up`}
       signInUrl={`/${locale}/sign-in`}
       fallbackRedirectUrl={returnBackUrl}
-      unsafeMetadata={buildUnsafeMetadata(consentToken, attribution, referralCode)}
+      unsafeMetadata={buildUnsafeMetadata(locale, consentToken, attribution, referralCode)}
     />
   )
 

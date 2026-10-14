@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/Button'
-import { startBillingPortal, startProCheckout } from '@/lib/client-billing'
+import { checkoutErrorKey, startBillingPortal, startProCheckout } from '@/lib/client-billing'
 import type { AppLocale } from '@/i18n/routing'
 
 type ManageBillingButtonProps = {
@@ -26,7 +26,7 @@ export function ManageBillingButton({ hasStripeCustomer }: ManageBillingButtonPr
         await startProCheckout(locale)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('somethingWentWrong'))
+      setError(hasStripeCustomer ? t('couldNotOpenPortal') : t(checkoutErrorKey(err)))
       setLoading(false)
     }
   }

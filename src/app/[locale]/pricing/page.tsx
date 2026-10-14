@@ -126,12 +126,10 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
             return (
               <div
                 key={index}
-                className={`flex flex-col p-6 ${meta.isBestValue ? 'bg-(--accent-muted)' : ''}`}
+                className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-(--accent-muted)' : ''}`}
               >
-                {meta.badge ? (
-                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{meta.badge}</p>
-                ) : meta.isBestValue ? (
-                  <p className="mb-4 font-mono text-(length:--text-label) text-(--foreground)">{Common.bestValue}</p>
+                {plan.badge ? (
+                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{plan.badge}</p>
                 ) : null}
 
                 <h3 className="text-xl font-semibold text-(--foreground)">{plan.name}</h3>
@@ -157,12 +155,13 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                 <PlanCta
                   label={plan.cta}
                   plan={meta.planId}
-                  className={`w-full text-center ${buttonVariants(meta.isBestValue || meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
+                  className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
                 />
               </div>
             )
           })}
         </div>
+        <p className="mt-4 text-xs text-(--muted)">{pricing.vatNote}</p>
       </main>
     </div>
   )

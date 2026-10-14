@@ -32,9 +32,45 @@ describe('analyzeResumeTextLightweight', () => {
     expect(result.hasPhone).toBe(true)
     expect(result.hasLinkedIn).toBe(true)
     expect(result.metricsFoundCount).toBeGreaterThanOrEqual(2)
-    expect(result.visibleIssues.length).toBe(3)
-    expect(result.lockedIssuesCount).toBe(7)
     expect(result.categories.ats_formatting.score).toBeGreaterThan(15)
+    const ids = result.issues.map((i) => i.id)
+    expect(ids).not.toContain('missing_email')
+    expect(ids).not.toContain('missing_linkedin')
+    expect(ids).not.toContain('missing_skills_section')
+    expect(ids).not.toContain('lack_of_metrics')
+  })
+
+  it('only reports issues that are actually present (no placeholders)', () => {
+    const withLanguages = `
+      Experience
+      Led a team of 5 people and increased sales by 20% in 2021 and 2022.
+      Skills: Excel
+      Languages: English C1, German B2
+      Certifications: PMP
+    `
+    const ids = analyzeResumeTextLightweight(withLanguages).issues.map((i) => i.id)
+    expect(ids).not.toContain('missing_languages')
+    expect(ids).not.toContain('missing_certifications')
+    expect(ids).not.toContain('missing_experience_section')
+  })
+
+  it('counts "Am <verb>" as an action verb and flags repeated generic starts', () => {
+    const text = [
+      'Am coordonat echipa',
+      'Am implementat fluxul',
+      'Responsabil cu rapoartele',
+      'Am lucrat la facturi',
+    ].join('\n')
+    const result = analyzeResumeTextLightweight(text)
+    const passive = result.issues.find((i) => i.id === 'passive_verbs')
+    expect(passive?.params?.count).toBe(2)
+    expect(result.issues.find((i) => i.id === 'generic_verbs')?.params?.count).toBe(2)
+  })
+
+  it('sorts issues by severity, critical first', () => {
+    const { issues } = analyzeResumeTextLightweight('Vasile\nAm lucrat la diverse firme.')
+    const ranks = issues.map((i) => ({ critical: 0, warning: 1, info: 2 })[i.severity])
+    expect(ranks).toEqual([...ranks].sort((a, b) => a - b))
   })
 
   it('detects missing sections and generates actionable issues for poor resumes', () => {
@@ -51,6 +87,6 @@ describe('analyzeResumeTextLightweight', () => {
     expect(result.grade).toBe('Poor')
     expect(result.hasLinkedIn).toBe(false)
     expect(result.hasEmail).toBe(false)
-    expect(result.visibleIssues.length).toBe(3)
+    expect(result.issues.map((i) => i.id)).toContain('missing_email')
   })
 })

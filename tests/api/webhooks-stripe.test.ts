@@ -5,14 +5,21 @@ const subscriptionsRetrieveMock = vi.fn()
 const subscriptionsListMock = vi.fn()
 const capturePostHogEventMock = vi.fn()
 const createClientMock = vi.fn()
+const checkoutSessionsListMock = vi.fn()
+const invalidatePlanCacheMock = vi.fn()
 
 vi.mock('stripe', () => ({
   default: vi.fn().mockImplementation(function StripeMock() {
     return {
       webhooks: { constructEvent: constructEventMock },
       subscriptions: { retrieve: subscriptionsRetrieveMock, list: subscriptionsListMock },
+      checkout: { sessions: { list: checkoutSessionsListMock } },
     }
   }),
+}))
+
+vi.mock('@/lib/ratelimit', () => ({
+  invalidatePlanCache: invalidatePlanCacheMock,
 }))
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -26,6 +33,8 @@ vi.mock('@/lib/posthog-server', () => ({
 type UserRow = {
   id: string
   clerk_id?: string
+  plan?: string
+  pro_expires_at?: string | null
   stripe_last_event_created?: number | null
   lifetime_recruiting_unlocked?: boolean
 }
@@ -105,6 +114,8 @@ describe('POST /api/webhooks/stripe', () => {
     subscriptionsListMock.mockReset()
     capturePostHogEventMock.mockReset()
     createClientMock.mockReset()
+    checkoutSessionsListMock.mockReset()
+    invalidatePlanCacheMock.mockReset()
 
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_dummy'
     process.env.STRIPE_SECRET_KEY = 'sk_test_dummy'
@@ -497,6 +508,111 @@ describe('POST /api/webhooks/stripe', () => {
 
     expect(subscriptionsListMock).toHaveBeenCalledWith({ customer: 'cus_1', status: 'all', limit: 1 })
     expect(updateCalls[0]?.payload.plan).toBe('free')
+  })
+
+  describe('14-day pass', () => {
+    const DAY_MS = 24 * 60 * 60 * 1000
+
+    it('paid checkout extends pro_expires_at by 14 days, even for an "old" event', async () => {
+      const event = makeEvent(
+        'checkout.session.completed',
+        { metadata: { userId: 'user_1', planId: 'pass_14d' }, mode: 'payment', payment_status: 'paid', customer: 'cus_1' },
+        1000
+      )
+      constructEventMock.mockReturnValue(event)
+      const { updateCalls } = makeSupabase({
+        users: { user_1: { id: 'row_1', plan: 'free', pro_expires_at: null, stripe_last_event_created: 5000 } },
+      })
+
+      const before = Date.now()
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      const response = await POST(makeRequest(event))
+
+      expect(response.status).toBe(200)
+      expect(updateCalls).toHaveLength(1)
+      const payload = updateCalls[0].payload
+      expect(payload.plan).toBe('pro')
+      expect(payload).not.toHaveProperty('stripe_last_event_created')
+      const expiresMs = new Date(payload.pro_expires_at as string).getTime()
+      expect(expiresMs).toBeGreaterThanOrEqual(before + 14 * DAY_MS)
+      expect(expiresMs).toBeLessThanOrEqual(Date.now() + 14 * DAY_MS)
+      expect(invalidatePlanCacheMock).toHaveBeenCalledWith('user_1')
+      expect(capturePostHogEventMock).toHaveBeenCalledWith(
+        expect.objectContaining({ distinctId: 'user_1', event: 'payment_completed' })
+      )
+    })
+
+    it('unpaid checkout grants nothing and records no payment', async () => {
+      const event = makeEvent('checkout.session.completed', {
+        metadata: { userId: 'user_1', planId: 'pass_14d' },
+        mode: 'payment',
+        payment_status: 'unpaid',
+      })
+      constructEventMock.mockReturnValue(event)
+      const { updateCalls } = makeSupabase({
+        users: { user_1: { id: 'row_1', plan: 'free', pro_expires_at: null, stripe_last_event_created: 0 } },
+      })
+
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      const response = await POST(makeRequest(event))
+
+      expect(response.status).toBe(200)
+      expect(updateCalls).toHaveLength(0)
+      expect(capturePostHogEventMock).not.toHaveBeenCalled()
+    })
+
+    it.each(['charge.refunded', 'charge.dispute.created'])('%s revokes 14 days of the pass', async (type) => {
+      const current = new Date(Date.now() + 20 * DAY_MS).toISOString()
+      const event = makeEvent(type, { payment_intent: 'pi_1', customer: 'cus_1', refunded: true })
+      constructEventMock.mockReturnValue(event)
+      checkoutSessionsListMock.mockResolvedValue({
+        data: [{ mode: 'payment', metadata: { userId: 'user_1', planId: 'pass_14d' } }],
+      })
+      const { updateCalls } = makeSupabase({
+        users: { user_1: { id: 'row_1', pro_expires_at: current } },
+      })
+
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      const response = await POST(makeRequest(event))
+
+      expect(response.status).toBe(200)
+      expect(checkoutSessionsListMock).toHaveBeenCalledWith({ payment_intent: 'pi_1', limit: 1 })
+      expect(updateCalls).toEqual([
+        { id: 'row_1', payload: { pro_expires_at: new Date(new Date(current).getTime() - 14 * DAY_MS).toISOString() } },
+      ])
+      expect(invalidatePlanCacheMock).toHaveBeenCalledWith('user_1')
+      expect(subscriptionsListMock).not.toHaveBeenCalled()
+    })
+
+    it('refund revocation never sets the expiry before now', async () => {
+      const current = new Date(Date.now() + 3 * DAY_MS).toISOString()
+      const event = makeEvent('charge.refunded', { payment_intent: 'pi_1', refunded: true })
+      constructEventMock.mockReturnValue(event)
+      checkoutSessionsListMock.mockResolvedValue({
+        data: [{ mode: 'payment', metadata: { userId: 'user_1', planId: 'pass_14d' } }],
+      })
+      const { updateCalls } = makeSupabase({ users: { user_1: { id: 'row_1', pro_expires_at: current } } })
+
+      const before = Date.now()
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      await POST(makeRequest(event))
+
+      const revokedMs = new Date(updateCalls[0].payload.pro_expires_at as string).getTime()
+      expect(revokedMs).toBeGreaterThanOrEqual(before)
+      expect(revokedMs).toBeLessThanOrEqual(Date.now())
+    })
+
+    it('a partial refund does not revoke the pass', async () => {
+      const event = makeEvent('charge.refunded', { payment_intent: 'pi_1', refunded: false })
+      constructEventMock.mockReturnValue(event)
+      const { updateCalls } = makeSupabase()
+
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      await POST(makeRequest(event))
+
+      expect(checkoutSessionsListMock).not.toHaveBeenCalled()
+      expect(updateCalls).toHaveLength(0)
+    })
   })
 
   it('ignores unhandled event types without touching the database', async () => {

@@ -211,6 +211,20 @@ export function getRedisClient(): Redis | null {
   return redis
 }
 
+// Call after any write to users.plan / pro_expires_at / stripe_subscription_id
+// so usage meters reflect the change immediately. Best-effort.
+export async function invalidatePlanCache(userId: string): Promise<void> {
+  if (!redis) return
+  try {
+    await redis.del(`plan:${userId}`)
+  } catch (error) {
+    logRedisFailure('Could not invalidate plan cache', {
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+}
+
 // Cached wrapper around @/lib/plans's getUserPlan(), which stays the single
 // source of truth for DB resolution + GOD_MODE_EMAILS + lifetime_recruiting
 // override. Previously this function duplicated that entire resolution body
