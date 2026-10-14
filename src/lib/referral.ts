@@ -21,6 +21,9 @@ export {
 } from '@/lib/referral-shared'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+// A referral can only be claimed by an account created within this window
+// (covers a slow email verification, blocks existing accounts).
+const REFERRAL_CLAIM_WINDOW_DAYS = 7
 // No 0/O/1/I so codes survive being read aloud or retyped.
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -149,6 +152,19 @@ export async function processReferralAttribution(input: {
   if (existingError) throw new Error(`referral claim lookup failed: ${existingError.message}`)
   if (existing) {
     return { success: false, message: 'User already attributed to a referral.' }
+  }
+
+  // unsafe_metadata.ref is client-editable and the Clerk webhook also runs on
+  // user.updated, so only brand-new accounts may claim a referral.
+  const { data: referred, error: referredError } = await supabase
+    .from('users')
+    .select('created_at')
+    .eq('clerk_id', input.newUserId)
+    .maybeSingle()
+  if (referredError) throw new Error(`referred user lookup failed: ${referredError.message}`)
+  const createdAtMs = referred?.created_at ? new Date(referred.created_at).getTime() : NaN
+  if (!Number.isFinite(createdAtMs) || Date.now() - createdAtMs > REFERRAL_CLAIM_WINDOW_DAYS * DAY_MS) {
+    return { success: false, message: 'Account is too old to claim a referral.' }
   }
 
   const { data: referrer, error: referrerError } = await supabase

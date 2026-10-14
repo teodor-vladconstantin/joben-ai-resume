@@ -114,15 +114,11 @@ export async function POST(req: Request) {
     const isPass = requestedPlan === 'pass_14d'
 
     // Recruiting (subscription, lifetime or god mode) covers everything.
-    // Re-subscribing to the plan already held would create a second, parallel
-    // subscription (double billing); a pass/referral grant is Pro without a
-    // subscription, so those users can still subscribe. A pass on top of a
-    // subscription buys nothing. (A pass during an active pass/referral grant
-    // is fine: the webhook extends it.)
-    if (
-      plan === 'recruiting' ||
-      (hasSubscription && (isPass || plan === requestedPlan))
-    ) {
+    // Any checkout on top of an active subscription would open a second,
+    // parallel subscription (double billing) or a pass that buys nothing;
+    // plan changes go through the billing portal. A pass/referral grant is Pro
+    // without a subscription, so those users can still subscribe or extend.
+    if (plan === 'recruiting' || hasSubscription) {
       return jsonWithRequestId({ error: 'already_active', currentPlan: plan }, 409, requestId)
     }
 

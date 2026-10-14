@@ -258,7 +258,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
             <p className="text-(--muted)">{home.pricingTeaserSubheading}</p>
           </div>
 
-          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0" suppressHydrationWarning>
+          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x" suppressHydrationWarning>
             {pricing.plans.map((plan, index) => {
               const meta = pricingPlanMeta[index]
               return (

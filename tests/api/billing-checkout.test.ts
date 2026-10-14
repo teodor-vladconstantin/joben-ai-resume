@@ -170,6 +170,28 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled()
   })
 
+  it('returns 409 for a Recruiting checkout while a Pro subscription is active (upgrade via the portal)', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1' })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'recruiting' }))
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ error: 'already_active' })
+    expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it('lets a pass or referral holder subscribe to Recruiting', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: null })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'recruiting' }))
+
+    expect(response.status).toBe(200)
+  })
+
   it('lets a pass or referral holder (Pro without a subscription) subscribe to Pro', async () => {
     getUserPlanMock.mockResolvedValue('pro')
     mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: null })

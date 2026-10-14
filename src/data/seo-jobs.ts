@@ -114,7 +114,7 @@ export const SEO_JOBS: SeoJob[] = [
         ro: ['Atenție riguroasă la detalii', 'Integritate și confidențialitate', 'Organizare și respectare termene limită', 'Comunicare clară cu autoritățile fiscale (ANAF)'],
         en: ['Attention to detail', 'Integrity & confidentiality', 'Strict deadline adherence', 'Clear audit & regulatory communication'],
       },
-      tools: ['SAGA C', 'Charisma ERP', 'SAP FI/CO', 'Excel avansat (VLOOKUP, Pivot, XLOOKUP)', 'WinMentor', 'NextUp'],
+      tools: ['SAGA C', 'Charisma ERP', 'SAP FI/CO', 'Excel / VLOOKUP / Pivot', 'WinMentor', 'NextUp'],
       certifications: {
         ro: ['Membru CECCAR (Contabil Autorizat / Expert Contabil)', 'Inspector Salarii', 'Curs Contabilitate IFRS'],
         en: ['ACCA / CECCAR Certified Accountant', 'Payroll Specialist Certification', 'IFRS Standards Course'],
@@ -220,7 +220,7 @@ export const SEO_JOBS: SeoJob[] = [
         },
         strong: {
           ro: 'Am coordonat 4 proiecte software simultane (buget total 650k EUR) cu o echipă multidisciplinară de 16 specialiști, livrând toate produsele cu 2 săptămâni înainte de termen și crescând marja de profitabilitate cu 14%.',
-          en: 'Directed 4 concurrent enterprise software projects ($650K total budget) with a 16-person cross-functional team, delivering all releases 2 weeks ahead of deadline while boosting project margin by 14%.',
+          en: 'Directed 4 concurrent enterprise software projects (650K EUR total budget) with a 16-person cross-functional team, delivering all releases 2 weeks ahead of deadline while boosting project margin by 14%.',
         },
       },
     ],
@@ -354,7 +354,7 @@ export const SEO_JOBS: SeoJob[] = [
         },
         strong: {
           ro: 'Am generat 1.8 milioane RON în venituri noi B2B într-un an, depășind targetul anual cu 34% prin semnarea a 28 de clienți corporate cheie și optimizarea ciclului de vânzare de la 60 la 35 de zile.',
-          en: 'Generated 1.8M RON in net-new B2B pipeline, exceeding annual quota by 34% by closing 28 key enterprise accounts and compressing average sales cycle from 60 down to 35 days.',
+          en: 'Generated 1.8M RON in net-new B2B revenue, exceeding annual quota by 34% by closing 28 key enterprise accounts and compressing average sales cycle from 60 down to 35 days.',
         },
       },
     ],
@@ -399,8 +399,10 @@ export function calculateJobKeywordMatch(
   job: SeoJob,
   locale: AppLocale = 'ro'
 ): { matchPercentage: number; foundKeywords: string[]; missingKeywords: string[] } {
-  const lowerText = text.toLowerCase()
   const other: AppLocale = locale === 'ro' ? 'en' : 'ro'
+  // Whole-word match: "Git" must not hit "digital", "React" must not hit "reactive".
+  const containsTerm = (term: string) =>
+    new RegExp(`(?<![\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'iu').test(text)
   const entries: { keyword: string; alternatives: string[] }[] = [
     ...(['hardSkills', 'softSkills'] as const).flatMap((group) =>
       job.keywords[group][locale].map((keyword, i) => ({
@@ -414,7 +416,7 @@ export function calculateJobKeywordMatch(
   const foundKeywords: string[] = []
   const missingKeywords: string[] = []
   for (const { keyword, alternatives } of entries) {
-    if (alternatives.some((alt) => lowerText.includes(alt))) foundKeywords.push(keyword)
+    if (alternatives.some(containsTerm)) foundKeywords.push(keyword)
     else missingKeywords.push(keyword)
   }
 

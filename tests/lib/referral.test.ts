@@ -57,7 +57,14 @@ describe('Bilateral Referral System Logic', () => {
 })
 
 // Minimal in-memory stand-in for the Supabase query chains processReferralAttribution uses.
-type UserRow = { clerk_id: string; email?: string; plan: string; pro_expires_at: string | null; referral_code: string | null }
+type UserRow = {
+  clerk_id: string
+  email?: string
+  plan: string
+  pro_expires_at: string | null
+  referral_code: string | null
+  created_at: string
+}
 type ReferralRow = { referrer_id: string; referred_user_id: string; status: string; reward_days_granted: number; created_at: string }
 type Op = { table: string; kind: 'select' | 'insert' | 'update' | 'delete'; payload?: Record<string, unknown>; filters: Record<string, unknown>; gte: Record<string, string>; count: boolean }
 type Result = { data?: unknown; error?: { message: string; code?: string } | null; count?: number }
@@ -116,9 +123,17 @@ function fakeDb(users: UserRow[], referrals: ReferralRow[], failUpdateFor?: stri
 }
 
 function seed() {
+  const now = new Date().toISOString()
   const users: UserRow[] = [
-    { clerk_id: 'referrer', email: 'ref@example.com', plan: 'free', pro_expires_at: null, referral_code: 'JOBEN-AAAA2222' },
-    { clerk_id: 'newbie', plan: 'free', pro_expires_at: null, referral_code: null },
+    {
+      clerk_id: 'referrer',
+      email: 'ref@example.com',
+      plan: 'free',
+      pro_expires_at: null,
+      referral_code: 'JOBEN-AAAA2222',
+      created_at: new Date(Date.now() - 90 * DAY).toISOString(),
+    },
+    { clerk_id: 'newbie', plan: 'free', pro_expires_at: null, referral_code: null, created_at: now },
   ]
   return { users, referrals: [] as ReferralRow[] }
 }
@@ -161,6 +176,19 @@ describe('processReferralAttribution', () => {
 
     expect(result).toMatchObject({ success: true, status: 'capped', referrerRewardDays: 0 })
     expect(sendReferralRewardEmailMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects an account older than 7 days, so existing users cannot self-claim', async () => {
+    const { users, referrals } = seed()
+    const newbie = users.find((u) => u.clerk_id === 'newbie')!
+    newbie.created_at = new Date(Date.now() - 30 * DAY).toISOString()
+    createServerClientMock.mockReturnValue(fakeDb(users, referrals))
+
+    const result = await processReferralAttribution({ newUserId: 'newbie', referralCode: 'JOBEN-AAAA2222' })
+
+    expect(result.success).toBe(false)
+    expect(referrals).toHaveLength(0)
+    expect(users.every((u) => u.pro_expires_at === null)).toBe(true)
   })
 
   it('a failed reward email does not fail the attribution', async () => {

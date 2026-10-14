@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import posthog from 'posthog-js'
 import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Loader2, RotateCcw, Sparkles, Upload } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { Card } from '@/components/ui/Card'
@@ -60,6 +61,8 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
       formData.append('file', file)
       formData.append('jobSlug', jobSlug)
       formData.append('locale', locale)
+      const distinctId = posthog.get_distinct_id?.()
+      if (distinctId) formData.append('distinctId', distinctId)
       const response = await fetch('/api/public/ats-fast-check', { method: 'POST', body: formData })
       const data = (await response.json().catch(() => ({}))) as {
         result?: FastAtsAnalysisResult

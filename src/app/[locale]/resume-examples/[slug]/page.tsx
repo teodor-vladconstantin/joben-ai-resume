@@ -63,7 +63,7 @@ export async function generateMetadata({
       description,
       url: `/${locale}/resume-examples/${role.slug[locale]}`,
       siteName: 'Joben',
-      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${role.title[locale]} Resume Examples, Joben` }],
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${role.title[locale]} | Joben` }],
       locale: locale === 'ro' ? 'ro_RO' : 'en_US',
       type: 'website',
     },

@@ -7,7 +7,6 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Eyebrow } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
-import { SeoAtsScanWidget } from '@/components/seo/SeoAtsScanWidget'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
 import { routing, type AppLocale } from '@/i18n/routing'
@@ -127,8 +126,6 @@ export default async function SeoScrisoareIntentiePage({ params }: PageProps) {
             </span>
           </div>
         </div>
-
-        <SeoAtsScanWidget jobSlug={job.slug[locale]} jobTitle={role} />
 
         <Card radius="lg" className="p-8 space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-(--border)">

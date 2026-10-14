@@ -113,4 +113,12 @@ describe('calculateJobKeywordMatch', () => {
     expect(calculateJobKeywordMatch('company coordination', accountant, 'ro').foundKeywords).not.toContain('SAP FI/CO')
     expect(calculateJobKeywordMatch('Lucrez în SAP FI zilnic.', accountant, 'ro').foundKeywords).toContain('SAP FI/CO')
   })
+
+  it('matches whole words only', () => {
+    const match = calculateJobKeywordMatch('Digital marketing, legitimate and reactive teams.', job, 'ro')
+    expect(match.foundKeywords).not.toContain('Git')
+    expect(match.foundKeywords).not.toContain('React')
+    const real = calculateJobKeywordMatch('Stack: React, Git, Node.js.', job, 'ro')
+    expect(real.foundKeywords).toEqual(expect.arrayContaining(['React', 'Git', 'Node.js']))
+  })
 })
