@@ -292,11 +292,18 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
             eventId: event.id,
             eventType: event.type,
           })
+          // A one-time payment has no later subscription event to repair the
+          // grant, so fail the webhook: the claim is released and Stripe retries
+          // until the Clerk webhook has created the users row.
+          if (planId === 'pass_14d') {
+            return jsonWithRequestId({ error: 'Webhook Error: user not synced yet' }, 500, requestId)
+          }
         }
 
         const isPass = planId === 'pass_14d'
-        if (isPass && session.payment_status !== 'paid') {
-          // Only card payments are enabled; anything unpaid is not granted.
+        // no_payment_required: a 100% promotion code. Only card payments are
+        // enabled; anything unpaid is not granted.
+        if (isPass && session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
           logger.warn('Pass checkout completed without paid status', {
             requestId,
             route: '/api/webhooks/stripe',
@@ -475,7 +482,12 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         )
         const passUserId = passSession?.metadata?.userId
         if (passSession) passRevoked = true
-        if (passUserId) {
+        // A refund followed by a dispute (or repeated events) for the same
+        // payment revokes once: the PaymentIntent records the revocation.
+        const alreadyRevoked = passUserId
+          ? (await stripe.paymentIntents.retrieve(paymentIntentId)).metadata?.pass_revoked === 'true'
+          : false
+        if (passUserId && !alreadyRevoked) {
           const { data: user, error: lookupError } = await supabase
             .from('users')
             .select('id, pro_expires_at')
@@ -505,6 +517,18 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
               return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
             }
             await invalidatePlanCache(passUserId)
+            // Best-effort: failing here must not make Stripe retry, which
+            // would revoke the same days a second time.
+            try {
+              await stripe.paymentIntents.update(paymentIntentId, { metadata: { pass_revoked: 'true' } })
+            } catch (markError) {
+              logger.error('Could not mark pass revocation on PaymentIntent', {
+                requestId,
+                route: '/api/webhooks/stripe',
+                eventId: event.id,
+                error: markError instanceof Error ? markError.message : 'Unknown error',
+              })
+            }
             logger.info('Pass revoked after refund/dispute', {
               requestId,
               route: '/api/webhooks/stripe',

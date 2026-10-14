@@ -17,6 +17,8 @@ import { processReferralAttribution } from '@/lib/referral'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+const REFERRAL_UPDATE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+
 function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
@@ -398,8 +400,14 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
     }
 
     // Email verified after user.created (or the first attempt failed): a
-    // no-op once the referral is claimed.
-    if (!(await attributeReferral(id, evt.data.unsafe_metadata?.ref, primaryEmail, { requestId, eventId: svixId }))) {
+    // no-op once the referral is claimed. Only for recently created accounts,
+    // so an existing account cannot claim a referral by editing
+    // unsafeMetadata.ref (user-writable from the browser).
+    const isRecentSignup = Date.now() - evt.data.created_at < REFERRAL_UPDATE_WINDOW_MS
+    if (
+      isRecentSignup &&
+      !(await attributeReferral(id, evt.data.unsafe_metadata?.ref, primaryEmail, { requestId, eventId: svixId }))
+    ) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
   }

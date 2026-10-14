@@ -62,8 +62,13 @@ export async function POST(req: Request) {
       return errorResponse('invalid_input', 400, requestId)
     }
 
+    // The only caller is the role-page widget, which always names a role from
+    // src/data/seo-jobs.ts; the response is a real keyword match against it.
+    const jobSlug = formData.get('jobSlug')
+    const locale: AppLocale = formData.get('locale') === 'en' ? 'en' : 'ro'
+    const job = typeof jobSlug === 'string' && jobSlug ? getSeoJobBySlug(jobSlug, locale) : undefined
     const file = formData.get('file')
-    if (!(file instanceof File) || file.size === 0) {
+    if (!job || !(file instanceof File) || file.size === 0) {
       return errorResponse('invalid_input', 400, requestId)
     }
     if (file.size > MAX_UPLOAD_BYTES) {
@@ -105,26 +110,25 @@ export async function POST(req: Request) {
     }
 
     const analysis = analyzeResumeTextLightweight(rawText)
-
-    // Optional: real keyword match against a role from src/data/seo-jobs.ts.
-    const jobSlug = formData.get('jobSlug')
-    const locale: AppLocale = formData.get('locale') === 'en' ? 'en' : 'ro'
-    const job = typeof jobSlug === 'string' && jobSlug ? getSeoJobBySlug(jobSlug, locale) : undefined
-    const keywordMatch = job ? calculateJobKeywordMatch(rawText, job, locale) : null
+    const keywordMatch = calculateJobKeywordMatch(rawText, job, locale)
     rawText = ''
 
+    // Only analytics for visitors whose browser sent its PostHog id; no shared
+    // catch-all id that would merge every anonymous visitor into one person.
     const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
-    await capturePostHogEvent({
-      distinctId: browserDistinctId ?? 'anon:fast_scan',
-      event: 'fast_ats_check_completed',
-      properties: {
-        score: analysis.overallScore,
-        grade: analysis.grade,
-        issuesCount: analysis.issues.length,
-        ...(browserDistinctId ? { wordCount: analysis.wordCount } : {}),
-        ...(keywordMatch ? { jobMatch: keywordMatch.matchPercentage } : {}),
-      },
-    })
+    if (browserDistinctId) {
+      await capturePostHogEvent({
+        distinctId: browserDistinctId,
+        event: 'fast_ats_check_completed',
+        properties: {
+          score: analysis.overallScore,
+          grade: analysis.grade,
+          issuesCount: analysis.issues.length,
+          jobSlug: job.slug.en,
+          jobMatch: keywordMatch.matchPercentage,
+        },
+      })
+    }
 
     return jsonWithRequestId({ success: true, result: analysis, keywordMatch }, 200, requestId)
   } catch (error) {

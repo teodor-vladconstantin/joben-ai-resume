@@ -120,7 +120,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
           </p>
         </div>
 
-        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0">
+        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
           {pricing.plans.map((plan, index) => {
             const meta = pricingPlanMeta[index]
             return (

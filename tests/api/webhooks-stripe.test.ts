@@ -7,6 +7,8 @@ const capturePostHogEventMock = vi.fn()
 const createClientMock = vi.fn()
 const checkoutSessionsListMock = vi.fn()
 const invalidatePlanCacheMock = vi.fn()
+const paymentIntentsRetrieveMock = vi.fn()
+const paymentIntentsUpdateMock = vi.fn()
 
 vi.mock('stripe', () => ({
   default: vi.fn().mockImplementation(function StripeMock() {
@@ -14,6 +16,7 @@ vi.mock('stripe', () => ({
       webhooks: { constructEvent: constructEventMock },
       subscriptions: { retrieve: subscriptionsRetrieveMock, list: subscriptionsListMock },
       checkout: { sessions: { list: checkoutSessionsListMock } },
+      paymentIntents: { retrieve: paymentIntentsRetrieveMock, update: paymentIntentsUpdateMock },
     }
   }),
 }))
@@ -116,6 +119,8 @@ describe('POST /api/webhooks/stripe', () => {
     createClientMock.mockReset()
     checkoutSessionsListMock.mockReset()
     invalidatePlanCacheMock.mockReset()
+    paymentIntentsRetrieveMock.mockReset().mockResolvedValue({ id: 'pi_1', metadata: {} })
+    paymentIntentsUpdateMock.mockReset().mockResolvedValue({})
 
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_dummy'
     process.env.STRIPE_SECRET_KEY = 'sk_test_dummy'
@@ -600,6 +605,68 @@ describe('POST /api/webhooks/stripe', () => {
       const revokedMs = new Date(updateCalls[0].payload.pro_expires_at as string).getTime()
       expect(revokedMs).toBeGreaterThanOrEqual(before)
       expect(revokedMs).toBeLessThanOrEqual(Date.now())
+    })
+
+    it('a 100% promo code (no_payment_required) still grants the pass', async () => {
+      const event = makeEvent('checkout.session.completed', {
+        metadata: { userId: 'user_1', planId: 'pass_14d' },
+        mode: 'payment',
+        payment_status: 'no_payment_required',
+      })
+      constructEventMock.mockReturnValue(event)
+      const { updateCalls } = makeSupabase({
+        users: { user_1: { id: 'row_1', plan: 'free', pro_expires_at: null, stripe_last_event_created: 0 } },
+      })
+
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      const response = await POST(makeRequest(event))
+
+      expect(response.status).toBe(200)
+      expect(updateCalls[0]?.payload).toMatchObject({ plan: 'pro', pro_expires_at: expect.any(String) })
+    })
+
+    it('a paid pass for a users row that does not exist yet answers 500 so Stripe retries', async () => {
+      const event = makeEvent('checkout.session.completed', {
+        metadata: { userId: 'user_missing', planId: 'pass_14d' },
+        mode: 'payment',
+        payment_status: 'paid',
+      })
+      constructEventMock.mockReturnValue(event)
+      const { updateCalls, deleteCalls } = makeSupabase({ users: {} })
+
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      const response = await POST(makeRequest(event))
+
+      expect(response.status).toBe(500)
+      expect(updateCalls).toHaveLength(0)
+      expect(deleteCalls).toEqual([event.id])
+    })
+
+    it('marks the PaymentIntent after revoking, and a later dispute on it revokes nothing', async () => {
+      const current = new Date(Date.now() + 20 * DAY_MS).toISOString()
+      checkoutSessionsListMock.mockResolvedValue({
+        data: [{ mode: 'payment', metadata: { userId: 'user_1', planId: 'pass_14d' } }],
+      })
+
+      const refund = makeEvent('charge.refunded', { payment_intent: 'pi_1', refunded: true })
+      constructEventMock.mockReturnValue(refund)
+      const first = makeSupabase({ users: { user_1: { id: 'row_1', pro_expires_at: current } } })
+      let { POST } = await import('@/app/api/webhooks/stripe/route')
+      await POST(makeRequest(refund))
+      expect(first.updateCalls).toHaveLength(1)
+      expect(paymentIntentsUpdateMock).toHaveBeenCalledWith('pi_1', { metadata: { pass_revoked: 'true' } })
+
+      paymentIntentsRetrieveMock.mockResolvedValue({ id: 'pi_1', metadata: { pass_revoked: 'true' } })
+      const dispute = makeEvent('charge.dispute.created', { payment_intent: 'pi_1' })
+      constructEventMock.mockReturnValue(dispute)
+      const second = makeSupabase({ users: { user_1: { id: 'row_1', pro_expires_at: current } } })
+      vi.resetModules()
+      ;({ POST } = await import('@/app/api/webhooks/stripe/route'))
+      const response = await POST(makeRequest(dispute))
+
+      expect(response.status).toBe(200)
+      expect(second.updateCalls).toHaveLength(0)
+      expect(subscriptionsListMock).not.toHaveBeenCalled()
     })
 
     it('a partial refund does not revoke the pass', async () => {
