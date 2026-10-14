@@ -11,7 +11,7 @@
   ],
   "headers": [
     {
-      "source": "/((?!api/|_next/).*)",
+      "source": "/:path*",
       "headers": [
         {
           "key": "Vary",
