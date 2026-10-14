@@ -5,9 +5,12 @@
   367 teste, build Vercel Ready; smoke test preview OK (pagini, redirecturi, 401 la webhook cu secretul vechi, scanare
   PDF reală cu potrivire pe rol). Bug prins doar pe Vercel: pdf.worker.mjs lipsea pentru ats-fast-check (acum în
   outputFileTracingIncludes + test de gardă).
+  - 2026-10-15: a4ac2d9 (copy onest pt abonați, Setări upgrade pt pass, teste noi). tsc/lint curate, 371 teste,
+    build local + Vercel Ready; preview re-verificat (pagini RO/EN, 301-uri, sitemap, cookie ref, webhook 401,
+    scanare PDF reală pe rol). Migrările 20261014* SUNT DEJA aplicate în prod (verificat pe vdgjx...).
   - RĂMAS (user): 1) Stripe Dashboard > Settings > Public details: URL termeni https://joben.eu/ro/terms (altfel
-    checkout-ul pass-ului eșuează); 2) aplică migrările 20261014* în SQL Editor ÎNAINTE de merge (altfel getUserPlan
-    dă free tuturor); 3) test manual în Stripe test mode: cumpărare pass, refund, cod 100%; link ?ref= cu cont nou.
+    checkout-ul pass-ului eșuează); 2) test manual în Stripe test mode: cumpărare pass, refund, cod 100%; link ?ref=
+    cu cont nou (email RO/EN la referent); 3) merge în main. ATENȚIE: o singură sesiune Claude pe repo odată.
   - Cunoscut/neînchis: ștergerea contului resetează contoarele de plafon referral; CI/CD nu e recunoscut în
     potrivirea pe rol; URL EN de scrisori e în română. Social listening rămâne ultimul (texte + disclosure).
 - [IN PROGRESS] 2026-10-14 Growth: 5 sisteme (commit `86491e1` pe feat/agent-readiness, PROGRESS.md). Review de
