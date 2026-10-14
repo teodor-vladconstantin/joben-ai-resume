@@ -1,145 +1,200 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import {
-  Users,
-  Copy,
-  Check,
-  Gift,
-  Share2,
-  ExternalLink,
-  Loader2,
-  Sparkles,
-} from 'lucide-react'
-import { Card } from '@/components/ui/Card'
+import { useFormatter, useTranslations } from 'next-intl'
+import { Check, Copy, ExternalLink, Gift, Loader2 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/Button'
+import {
+  MAX_REWARDED_REFERRALS_PER_30D,
+  MAX_REWARDED_REFERRALS_TOTAL,
+  REFERRED_REWARD_DAYS,
+  REFERRER_REWARD_DAYS,
+} from '@/lib/referral-shared'
 
 interface ReferralInfo {
-  referralCode: string
   referralCount: number
   referralCredits: number
   referralLink: string
+  proExpiresAt: string | null
 }
 
-export function ReferralCard() {
-  const [data, setData] = useState<ReferralInfo | null>(null)
-  const [loading, setLoading] = useState(true)
+type ReferralResponse = Partial<ReferralInfo> & { success?: boolean; pending?: boolean }
+
+type CardState =
+  | { kind: 'loading' }
+  | { kind: 'pending' }
+  | { kind: 'error' }
+  | { kind: 'ready'; info: ReferralInfo; proUntil: Date | null }
+
+// Right after sign-up the Clerk webhook may not have created the users row
+// yet (API answers {pending:true}): retry a couple of times, then say so.
+const RETRY_DELAYS_MS = [2000, 5000]
+
+export function ReferralCard({ className = '' }: { className?: string }) {
+  const t = useTranslations('Referral')
+  const format = useFormatter()
+  const [state, setState] = useState<CardState>({ kind: 'loading' })
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    fetch('/api/referral')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (json?.success) {
-          setData(json)
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const load = async (attempt: number): Promise<void> => {
+      let json: ReferralResponse | null = null
+      try {
+        const res = await fetch('/api/referral')
+        json = res.ok ? ((await res.json()) as ReferralResponse) : null
+      } catch {
+        json = null
+      }
+      if (cancelled) return
+
+      if (json?.pending) {
+        if (attempt < RETRY_DELAYS_MS.length) {
+          timer = setTimeout(() => void load(attempt + 1), RETRY_DELAYS_MS[attempt])
+        } else {
+          setState({ kind: 'pending' })
         }
-      })
-      .catch(() => null)
-      .finally(() => setLoading(false))
+        return
+      }
+      if (!json?.success || !json.referralLink) {
+        setState({ kind: 'error' })
+        return
+      }
+
+      const info: ReferralInfo = {
+        referralCount: json.referralCount ?? 0,
+        referralCredits: json.referralCredits ?? 0,
+        referralLink: json.referralLink,
+        proExpiresAt: json.proExpiresAt ?? null,
+      }
+      const expiry = info.proExpiresAt ? new Date(info.proExpiresAt) : null
+      const proUntil = expiry && expiry.getTime() > Date.now() ? expiry : null
+      setState({ kind: 'ready', info, proUntil })
+    }
+
+    void load(0)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [])
 
-  function handleCopy() {
-    if (!data?.referralLink) return
-    navigator.clipboard.writeText(data.referralLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2500)
-  }
+  const boxClass = `bg-(--surface) p-6 border border-(--border) ${className}`
 
-  const shareText = encodeURIComponent(
-    'Am găsit Joben.eu – un editor excelent de CV-uri cu AI care îți verifică și optimizează CV-ul pentru filtrele ATS. Dacă te înscrii prin link-ul meu primești 3 zile de acces Pro gratuit:'
-  )
-  const encodedUrl = encodeURIComponent(data?.referralLink || 'https://joben.eu/?ref=PRO')
+  if (state.kind === 'error') return null
 
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodedUrl}`
-  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
-
-  if (loading) {
+  if (state.kind === 'loading') {
     return (
-      <Card radius="lg" className="p-6 text-center">
-        <Loader2 className="h-5 w-5 animate-spin mx-auto text-(--muted)" />
-      </Card>
+      <div className={`${boxClass} flex justify-center`} role="status" aria-label={t('loading')}>
+        <Loader2 className="h-5 w-5 animate-spin text-(--muted)" />
+      </div>
     )
   }
 
-  const fallbackLink = typeof window !== 'undefined' ? `${window.location.origin}/?ref=FREEPRO` : 'https://joben.eu/?ref=FREEPRO'
-  const activeLink = data?.referralLink || fallbackLink
-  const count = data?.referralCount ?? 0
-  const daysWon = count * 7
+  if (state.kind === 'pending') {
+    return (
+      <div className={boxClass}>
+        <h3 className="text-lg font-bold text-(--foreground) mb-2">{t('title')}</h3>
+        <p className="text-sm text-(--muted)">{t('pending')}</p>
+      </div>
+    )
+  }
+
+  const { info, proUntil } = state
+  const encodedUrl = encodeURIComponent(info.referralLink)
+  const shareText = encodeURIComponent(t('shareText', { friendDays: REFERRED_REWARD_DAYS }))
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodedUrl}`
+  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
+
+  function handleCopy() {
+    navigator.clipboard
+      .writeText(info.referralLink)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2500)
+      })
+      .catch(() => undefined)
+  }
 
   return (
-    <Card elevated radius="lg" className="p-6 sm:p-8 space-y-6 border border-emerald-500/30 bg-emerald-500/5">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-            <Gift className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-(--foreground)">Recomandă Joben și Primești Zile Pro Gratuit</h3>
+    <section className={`${boxClass} space-y-5`} aria-labelledby="referral-card-title">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <Gift className="h-5 w-5 mt-1 shrink-0 text-(--accent)" aria-hidden="true" />
+          <div className="space-y-1">
+            <h3 id="referral-card-title" className="text-lg font-bold text-(--foreground)">{t('title')}</h3>
+            <p className="text-sm text-(--muted)">
+              {t('description', { referrerDays: REFERRER_REWARD_DAYS, friendDays: REFERRED_REWARD_DAYS })}
+            </p>
             <p className="text-xs text-(--muted)">
-              Pentru fiecare prieten care își creează cont, tu primești <strong className="text-(--foreground)">7 zile Pro</strong>, iar el primește <strong className="text-(--foreground)">3 zile Pro cadou</strong>!
+              {t('conditions', {
+                maxTotal: MAX_REWARDED_REFERRALS_TOTAL,
+                maxMonthly: MAX_REWARDED_REFERRALS_PER_30D,
+                friendDays: REFERRED_REWARD_DAYS,
+              })}
             </p>
           </div>
         </div>
 
-        <div className="px-3 py-1.5 rounded-lg bg-(--surface) border border-(--border) text-right shrink-0">
-          <p className="text-[10px] text-(--muted) uppercase font-mono">Prieteni Invitați</p>
-          <p className="text-sm font-bold text-emerald-500 font-mono">
-            {count} ({daysWon} zile câștigate)
-          </p>
-        </div>
+        <dl className="shrink-0 text-left sm:text-right">
+          <dt className="text-xs text-(--muted)">{t('invitedLabel')}</dt>
+          <dd className="font-mono tabular-nums text-sm font-bold text-(--foreground)">
+            {info.referralCount} · {t('daysEarned', { days: info.referralCredits })}
+          </dd>
+        </dl>
       </div>
 
-      {/* Copy link box */}
+      {proUntil ? (
+        <p className="text-sm text-(--foreground) border-l-2 border-(--accent) pl-2">
+          {t('proUntil', { date: format.dateTime(proUntil, { dateStyle: 'long' }) })}
+        </p>
+      ) : null}
+
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-(--foreground)">Link-ul tău unic de recomandare:</label>
+        <label htmlFor="referral-link" className="text-xs font-semibold text-(--foreground)">{t('linkLabel')}</label>
         <div className="flex items-center gap-2">
           <input
+            id="referral-link"
             type="text"
             readOnly
-            value={activeLink}
-            className="w-full px-3.5 py-2 text-xs font-mono rounded-lg border border-(--border) bg-(--surface) text-(--foreground) focus:outline-none"
+            value={info.referralLink}
+            onFocus={(event) => event.currentTarget.select()}
+            className="w-full px-3 py-2 text-xs font-mono border border-(--border) bg-(--surface-elevated) text-(--foreground) focus:outline-none focus:border-(--accent)"
           />
           <button
+            type="button"
             onClick={handleCopy}
-            className={`shrink-0 ${buttonVariants('primary', 'sm')} text-xs font-semibold flex items-center gap-1.5`}
+            className={`shrink-0 ${buttonVariants('primary', 'sm')} text-xs font-semibold inline-flex items-center gap-1.5`}
           >
-            {copied ? (
-              <>
-                <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Copiat!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" />
-                <span>Copiază</span>
-              </>
-            )}
+            {copied ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
+            <span aria-live="polite">{copied ? t('copied') : t('copy')}</span>
           </button>
         </div>
       </div>
 
-      {/* Quick Share Buttons */}
-      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-(--border)">
-        <span className="text-xs text-(--muted) mr-1">Distribuie rapid pe:</span>
+      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-(--border)">
+        <span className="text-xs text-(--muted) mr-1">{t('shareLabel')}</span>
         <a
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+          className={`${buttonVariants('secondary', 'sm')} text-xs inline-flex items-center gap-1.5`}
         >
-          <span>WhatsApp</span>
-          <ExternalLink className="h-3 w-3" />
+          WhatsApp
+          <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </a>
         <a
           href={linkedinUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 rounded-lg bg-[#0077b5] hover:bg-[#006097] text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+          className={`${buttonVariants('secondary', 'sm')} text-xs inline-flex items-center gap-1.5`}
         >
-          <span>LinkedIn</span>
-          <ExternalLink className="h-3 w-3" />
+          LinkedIn
+          <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </a>
       </div>
-    </Card>
+    </section>
   )
 }

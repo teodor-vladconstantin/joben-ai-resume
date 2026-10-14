@@ -22,7 +22,7 @@ export function generateHelpfulResponseDraft(lead: SocialLead): string {
     `Iată 2 sfaturi rapide care fac o diferență majoră:\n` +
     `1. Înlocuiește descrierile pasive ale sarcinilor cu realizări măsurabile (adaugă cifre, procente sau unelte exacte: ex. „Crescut vânzările cu 20%”, „Redus timpul de procesare”).\n` +
     `2. Folosește o structură standard pe o singură coloană fără grafice sau pictograme, care adesea corup ordinea textului la extragere.\n\n` +
-    `Dacă vrei să vezi exact cum îți este citit CV-ul de un parser ATS real și să verifici ce erori critice ai, poți rula o scanare gratuită fără cont pe https://joben.eu/verificare-cv.\n\n` +
+    `Dacă vrei să vezi exact cum îți este citit CV-ul de un parser ATS real și să verifici ce erori critice ai, poți rula o scanare gratuită fără cont pe https://joben.eu/ro/free-ats-checker.\n\n` +
     `Mult succes la interviuri!`
   )
 }

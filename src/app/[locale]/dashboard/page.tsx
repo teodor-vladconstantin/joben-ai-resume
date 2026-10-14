@@ -18,7 +18,9 @@ import { selectAtsScanCardState } from '@/lib/ats-scan-card'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
 import { RedeemCodeCard } from '@/components/dashboard/RedeemCodeCard'
+import { ReferralCard } from '@/components/referral/ReferralCard'
 import { getUserPlan } from '@/lib/plans'
+import { createServerClient } from '@/lib/supabase/server'
 import type { AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
 
@@ -40,8 +42,31 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }
 }
 
-export default async function DashboardPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
+// Shown after returning from a 14-day pass checkout (?upgrade=success&pass=14d).
+// The webhook may land a moment after the redirect, hence the pending copy.
+async function getPassNoticeText(userId: string, locale: AppLocale): Promise<string> {
+  const t = await getTranslations({ locale, namespace: 'Billing' })
+  const { data } = await createServerClient()
+    .from('users')
+    .select('pro_expires_at')
+    .eq('clerk_id', userId)
+    .maybeSingle()
+  const expiresAt = data?.pro_expires_at ? new Date(data.pro_expires_at) : null
+  if (!expiresAt || expiresAt.getTime() <= Date.now()) return t('passPending')
+  return t('passSuccess', {
+    date: new Intl.DateTimeFormat(locale === 'ro' ? 'ro-RO' : 'en-GB', { dateStyle: 'long' }).format(expiresAt),
+  })
+}
+
+export default async function DashboardPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: AppLocale }>
+  searchParams: Promise<{ upgrade?: string; pass?: string }>
+}) {
   const { locale } = await params
+  const { upgrade, pass } = await searchParams
   const messages = (await getMessages({ locale })) as unknown as Messages
   const d = messages.Dashboard
   const tGrade = await getTranslations({ locale, namespace: 'Grade' })
@@ -56,6 +81,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   const currentPlan = user?.id
     ? await getUserPlan(user.id, userEmailHint)
     : 'free'
+
+  const passNoticeText =
+    upgrade === 'success' && pass === '14d' && user?.id ? await getPassNoticeText(user.id, locale) : null
 
   const stats = await getUserDashboardStats(userId)
   const recentDocs = await getRecentDocuments(userId)
@@ -115,6 +143,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             <p className="text-(--muted)">{d.subGreeting}</p>
           </div>
 
+          {passNoticeText ? (
+            <p role="status" className="mb-8 border-l-2 border-(--accent) bg-(--surface) px-4 py-3 text-sm text-(--foreground)">
+              {passNoticeText}
+            </p>
+          ) : null}
           {atsScanCard.kind === 'card' && <AtsScanCard scan={atsScanCard.scan} locale={locale} />}
           {atsScanCard.kind === 'pending' && <AtsScanCardPending />}
           <ProfileCompletion stats={stats} />
@@ -201,6 +234,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             {!isNewUser && <WeeklyGoals stats={stats} />}
             <QuickTip isNewUser={isNewUser} />
           </div>
+
+          <ReferralCard className="mt-8" />
 
           <RecentDocuments recentDocs={recentDocs} />
         </main>

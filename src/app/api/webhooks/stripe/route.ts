@@ -4,12 +4,21 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
 import { resolvePlanFromPriceId } from '@/lib/plans'
+import { invalidatePlanCache } from '@/lib/ratelimit'
 import { extendExpiry } from '@/lib/referral'
 import { getStripeClient } from '@/lib/stripe'
 import { runWithClaimRelease, setClaim, type WebhookClaimContext } from '@/lib/webhook-claim'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+const PASS_DAYS = 14
+const DAY_MS = 24 * 60 * 60 * 1000
+
+// Revoking a refunded/disputed pass: take its days back, never past now.
+function revokePassExpiry(current: string, now = Date.now()): string {
+  return new Date(Math.max(now, new Date(current).getTime() - PASS_DAYS * DAY_MS)).toISOString()
+}
 
 function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
@@ -190,6 +199,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         })
         return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
       }
+      if (user.clerk_id) await invalidatePlanCache(user.clerk_id)
 
       logger.info('Skipped stripe plan downgrade due to lifetime recruiting override', {
         requestId,
@@ -236,6 +246,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
       })
       return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
     }
+    if (user.clerk_id) await invalidatePlanCache(user.clerk_id)
 
     if (paymentCapture && user.clerk_id) {
       await capturePostHogEvent({
@@ -283,7 +294,22 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
           })
         }
 
-        if (user && isStaleEvent(user.stripe_last_event_created, eventCreated)) {
+        const isPass = planId === 'pass_14d'
+        if (isPass && session.payment_status !== 'paid') {
+          // Only card payments are enabled; anything unpaid is not granted.
+          logger.warn('Pass checkout completed without paid status', {
+            requestId,
+            route: '/api/webhooks/stripe',
+            userId,
+            eventId: event.id,
+            paymentStatus: session.payment_status,
+          })
+          return jsonWithRequestId({ message: 'Pass not paid yet' }, 200, requestId)
+        }
+
+        // A pass is additive (the webhook_events claim already blocks replays),
+        // so subscription event ordering does not apply to it.
+        if (user && !isPass && isStaleEvent(user.stripe_last_event_created, eventCreated)) {
           logger.info('Stale Stripe checkout event ignored', {
             requestId,
             route: '/api/webhooks/stripe',
@@ -312,22 +338,11 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
 
         if (user?.lifetime_recruiting_unlocked) {
           updatePayload.plan = 'recruiting'
-        } else if (planId === 'pass_14d') {
-          if (session.payment_status !== 'paid') {
-            // Only card payments are enabled; anything unpaid is not granted.
-            logger.warn('Pass checkout completed without paid status', {
-              requestId,
-              route: '/api/webhooks/stripe',
-              userId,
-              eventId: event.id,
-              paymentStatus: session.payment_status,
-            })
-            return jsonWithRequestId({ message: 'Pass not paid yet' }, 200, requestId)
-          }
+        } else if (isPass) {
           // Stacks on an active pass/referral grant; plan only lifted from free
           // (getUserPlan reads pro_expires_at for non-subscribers).
           if (!user?.plan || user.plan === 'free') updatePayload.plan = 'pro'
-          updatePayload.pro_expires_at = extendExpiry(user?.pro_expires_at, 14)
+          updatePayload.pro_expires_at = extendExpiry(user?.pro_expires_at, PASS_DAYS)
         } else if (planId === 'pro' || planId === 'recruiting') {
           // Only known paid plans: never write arbitrary metadata into users.plan.
           updatePayload.plan = planId
@@ -341,7 +356,9 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         if (typeof session.subscription === 'string') {
           updatePayload.stripe_subscription_id = session.subscription
         }
-        updatePayload.stripe_last_event_created = eventCreated
+        // A pass must not advance the subscription ordering watermark, or a
+        // delayed older subscription event would be dropped as stale.
+        if (!isPass) updatePayload.stripe_last_event_created = eventCreated
 
         if (user && Object.keys(updatePayload).length > 0) {
           const { error } = await supabase
@@ -360,6 +377,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
             })
             return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
           }
+          await invalidatePlanCache(userId)
         }
       }
     }
@@ -443,8 +461,64 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
       }
     }
 
-    // Handle refunds by re-checking the latest subscription state for that customer.
-    if (event.type === 'charge.refunded') {
+    // A fully refunded or disputed pass payment takes the pass days back.
+    let passRevoked = false
+    if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
+      const source = event.data.object as Stripe.Charge | Stripe.Dispute
+      const paymentIntent = source.payment_intent
+      const paymentIntentId = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id
+      const fullyRefunded = event.type !== 'charge.refunded' || (source as Stripe.Charge).refunded
+      if (paymentIntentId && fullyRefunded) {
+        const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntentId, limit: 1 })
+        const passSession = sessions.data.find(
+          (s) => s.mode === 'payment' && s.metadata?.planId === 'pass_14d'
+        )
+        const passUserId = passSession?.metadata?.userId
+        if (passSession) passRevoked = true
+        if (passUserId) {
+          const { data: user, error: lookupError } = await supabase
+            .from('users')
+            .select('id, pro_expires_at')
+            .eq('clerk_id', passUserId)
+            .maybeSingle()
+          if (lookupError) {
+            logger.error('Stripe pass revocation user lookup failed', {
+              requestId,
+              route: '/api/webhooks/stripe',
+              eventId: event.id,
+              error: lookupError.message,
+            })
+            return jsonWithRequestId({ error: 'Webhook Error: database lookup failed' }, 500, requestId)
+          }
+          if (user?.pro_expires_at) {
+            const { error } = await supabase
+              .from('users')
+              .update({ pro_expires_at: revokePassExpiry(user.pro_expires_at) })
+              .eq('id', user.id)
+            if (error) {
+              logger.error('Stripe pass revocation failed', {
+                requestId,
+                route: '/api/webhooks/stripe',
+                eventId: event.id,
+                error: error.message,
+              })
+              return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
+            }
+            await invalidatePlanCache(passUserId)
+            logger.info('Pass revoked after refund/dispute', {
+              requestId,
+              route: '/api/webhooks/stripe',
+              eventId: event.id,
+              eventType: event.type,
+              userId: passUserId,
+            })
+          }
+        }
+      }
+    }
+
+    // Handle subscription refunds by re-checking the latest subscription state for that customer.
+    if (event.type === 'charge.refunded' && !passRevoked) {
       const charge = event.data.object as Stripe.Charge
       if (typeof charge.customer === 'string') {
         const subscriptions = await stripe.subscriptions.list({

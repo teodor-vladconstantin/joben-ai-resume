@@ -1,4 +1,10 @@
 ## Active
+- [IN PROGRESS] 2026-10-14 (seara) Growth rework după audit, NECOMMITAT pe feat/agent-readiness: /verificare-cv șters
+  (301 -> /free-ats-checker, singurul lead magnet, Haiku), /cv unit în /resume-examples (301), pass 14d reparat
+  (refund/dispută, retragere, TVA neplătitor), referral 3/30 zile + 10 total + email RO/EN (locale în Clerk
+  unsafeMetadata). tsc/lint curate, 351 teste verzi, `npm run build` OK.
+  - RĂMAS: rezultate 2 auditori finali (billing/referral, SEO/i18n); commit; preview + test manual RO/EN;
+    user: ToS URL în Stripe Dashboard (https://joben.eu/ro/terms) înainte de merge în main; apoi social listening.
 - [IN PROGRESS] 2026-10-14 Growth: 5 sisteme (commit `86491e1` pe feat/agent-readiness, PROGRESS.md). Review de
   securitate făcut și reparat înainte de livrare (secret hardcodat, RLS public pe social_leads, farming referral,
   rate limit scanner, suprascriere plan recruiting). tsc/lint curate, 317 teste verzi.

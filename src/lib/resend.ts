@@ -545,3 +545,66 @@ export async function sendAnonymousScanConfirmEmail(input: {
 </div>`,
   })
 }
+
+const REFERRAL_REWARD_COPY: Record<AnonScanEmailLocale, {
+  subject: (days: number) => string
+  heading: string
+  body: (days: number, date: string) => string
+  remaining: (count: number) => string
+  limitReached: string
+  cta: string
+  footer: string
+  dateLocale: string
+}> = {
+  ro: {
+    subject: (days) => `Ai primit ${days} zile Pro pe Joben`,
+    heading: 'Un prieten s-a alăturat prin linkul tău',
+    body: (days, date) => `Ți-am adăugat ${days} zile de acces Pro. Contul tău are Pro până pe ${date}.`,
+    remaining: (count) =>
+      count === 1 ? 'Mai poți primi recompensă pentru încă un prieten.' : `Mai poți primi recompense pentru încă ${count} prieteni.`,
+    limitReached: 'Ai atins numărul maxim de recompense din programul de recomandare. Mulțumim că ai recomandat Joben.',
+    cta: 'Deschide dashboard-ul',
+    footer: 'Primești acest email pentru că un prieten și-a creat cont Joben prin linkul tău de recomandare.',
+    dateLocale: 'ro-RO',
+  },
+  en: {
+    subject: (days) => `You earned ${days} days of Joben Pro`,
+    heading: 'A friend joined through your link',
+    body: (days, date) => `We added ${days} days of Pro access. Your account has Pro until ${date}.`,
+    remaining: (count) =>
+      count === 1 ? 'You can earn a reward for one more friend.' : `You can earn rewards for ${count} more friends.`,
+    limitReached: 'You have reached the maximum number of referral rewards. Thank you for recommending Joben.',
+    cta: 'Open your dashboard',
+    footer: 'You are receiving this because a friend created a Joben account through your referral link.',
+    dateLocale: 'en-GB',
+  },
+}
+
+export async function sendReferralRewardEmail(input: {
+  to: string
+  locale: AnonScanEmailLocale
+  days: number
+  proUntil: string
+  remainingRewards: number
+}): Promise<EmailResult> {
+  const copy = REFERRAL_REWARD_COPY[input.locale]
+  const date = new Date(input.proUntil).toLocaleDateString(copy.dateLocale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Bucharest',
+  })
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: copy.subject(input.days),
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
+  <p style="margin:0 0 12px 0;">${escapeHtml(copy.body(input.days, date))}</p>
+  <p style="margin:0 0 18px 0;">${input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached}</p>
+  ${anonCtaButton(`${appUrl}/${input.locale}/dashboard`, copy.cta)}
+  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.footer}</p>
+</div>`,
+  })
+}

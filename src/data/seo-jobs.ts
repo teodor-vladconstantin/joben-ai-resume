@@ -1,12 +1,16 @@
 import type { AppLocale } from '@/i18n/routing'
 
+// Role data behind the ATS keyword-match API (/api/public/ats-fast-check),
+// the resume-examples role pages (tools, certifications, ATS checklist,
+// extra mistakes and bullets) and the /scrisoare-intentie cover letter pages.
 export interface SeoJob {
   slug: { ro: string; en: string }
+  // Matching role in src/data/resume-roles.ts; /{locale}/cv/{slug} 301s there.
+  resumeRoleSlug: { ro: string; en: string }
   title: { ro: string; en: string }
   category: { ro: string; en: string }
-  salaryRangeRo: string
-  demandLevelRo: 'Foarte Mare' | 'Mare' | 'Medie'
   keywords: {
+    // hardSkills/softSkills are parallel ro/en arrays: index i is the same skill.
     hardSkills: { ro: string[]; en: string[] }
     softSkills: { ro: string[]; en: string[] }
     tools: string[]
@@ -27,10 +31,9 @@ export interface SeoJob {
 export const SEO_JOBS: SeoJob[] = [
   {
     slug: { ro: 'inginer-software', en: 'software-engineer' },
-    title: { ro: 'Inginer Software / Programator', en: 'Software Engineer' },
+    resumeRoleSlug: { ro: 'inginer-software', en: 'software-engineer' },
+    title: { ro: 'Inginer Software', en: 'Software Engineer' },
     category: { ro: 'IT & Tehnologie', en: 'IT & Software' },
-    salaryRangeRo: '8.000 - 22.000 RON net',
-    demandLevelRo: 'Foarte Mare',
     keywords: {
       hardSkills: {
         ro: ['Arhitectură microservicii', 'Testare automată (TDD)', 'Optimizare baze de date', 'Securitate web (OWASP)', 'RESTful APIs / GraphQL', 'CI/CD pipeline'],
@@ -42,7 +45,7 @@ export const SEO_JOBS: SeoJob[] = [
       },
       tools: ['TypeScript', 'React', 'Node.js', 'Next.js', 'Python', 'Docker', 'Kubernetes', 'PostgreSQL', 'Git', 'AWS / GCP'],
       certifications: {
-        ro: ['AWS Certified Solutions Architect', 'CKA (Kubernetes Administrator)', 'Certificare Oracle Java'],
+        ro: ['AWS Certified Solutions Architect', 'CKA (Kubernetes Administrator)', 'Oracle Certified Professional Java'],
         en: ['AWS Certified Solutions Architect', 'CKA (Kubernetes Administrator)', 'Oracle Certified Professional Java'],
       },
     },
@@ -51,13 +54,13 @@ export const SEO_JOBS: SeoJob[] = [
         'Include link direct către profilul GitHub și LinkedIn în antet.',
         'Menționează clar stack-ul tehnologic utilizat la fiecare proiect sau companie.',
         'Cuantifică performanța: procent de reducere a latenței, număr de utilizatori activi, volume de trafic.',
-        'Evită tabelele complexe pentru listarea competențelor (folosește liste separate prin virgule).',
+        'Listează competențele ca text simplu, separate prin virgulă, fără tabele complexe.',
       ],
       en: [
         'Include direct clickable links to GitHub and LinkedIn profiles in the header.',
-        'Explicitly state tech stack used for each job entry.',
+        'Explicitly state the tech stack used for each job entry.',
         'Quantify performance: latency reduction %, DAU/MAU scale, traffic handled.',
-        'Avoid complex tables for skills listing (use bullet points or comma-separated lists).',
+        'List skills as plain comma-separated text or bullet points, without complex tables.',
       ],
     },
     commonMistakes: {
@@ -86,23 +89,22 @@ export const SEO_JOBS: SeoJob[] = [
     ],
     coverLetterSample: {
       ro: {
-        intro: 'Vă adresez această scrisoare cu privire la oportunitatea de Inginer Software în cadrul companiei dumneavoastră. Cu peste 4 ani de experiență practică în construirea de sisteme web distribuite de înaltă performanță...',
-        body: 'În rolul meu cel mai recent, am coordonat migrarea unei aplicații monolitice către o arhitectură scalabilă de microservicii, îmbunătățind disponibilitatea sistemului la 99.98% și scăzând costurile de infrastructură AWS cu 22%. Tehnologiile utilizate zilnic de echipa mea corespund direct cerințelor postului dumneavoastră...',
-        closing: 'Aștept cu entuziasm oportunitatea de a discuta în cadrul unui interviu tehnic despre modul în care expertiza mea poate contribui la obiectivele echipei dumneavoastră.',
+        intro: 'Vă scriu cu privire la postul de Inginer Software din cadrul [Numele companiei]. Am [X] ani de experiență în construirea de aplicații web cu TypeScript, Node.js și PostgreSQL, iar descrierea rolului se potrivește direct cu proiectele la care lucrez în prezent.',
+        body: 'La [Compania actuală] am coordonat migrarea unei aplicații monolitice către microservicii rulate în Docker și Kubernetes, ridicând disponibilitatea sistemului la 99,98% și reducând costurile de infrastructură AWS cu 22%. Am introdus testarea automată în pipeline-ul CI/CD, ceea ce a scurtat ciclul de release de la două săptămâni la două zile, și am îndrumat doi colegi juniori până la primele lor funcționalități livrate în producție. Aș aduce aceeași atenție la performanță și calitatea codului în echipa [Numele echipei].',
+        closing: 'Vă mulțumesc pentru timpul acordat. Aș fi bucuros să discutăm într-un interviu tehnic despre cum pot contribui la produsul [Numele companiei].',
       },
       en: {
-        intro: 'I am writing to express my strong enthusiasm for the Software Engineer role at your company. With over 4 years of proven hands-on experience designing and deploying high-scale web systems...',
-        body: 'In my most recent role, I spearheaded the migration of a legacy monolithic platform into scalable microservices, lifting uptime to 99.98% and trimming cloud infrastructure costs by 22%...',
-        closing: 'I look forward to discussing how my software architecture skills can directly accelerate your engineering goals.',
+        intro: 'I am writing to apply for the Software Engineer role at [Company Name]. I have [X] years of experience building web applications with TypeScript, Node.js, and PostgreSQL, and the role description lines up closely with the systems I work on today.',
+        body: 'At [Current Company], I led the migration of a monolithic application to microservices running on Docker and Kubernetes, lifting uptime to 99.98% and cutting AWS infrastructure costs by 22%. I added automated testing to our CI/CD pipeline, which shortened the release cycle from two weeks to two days, and I mentored two junior engineers through their first production releases. I would bring the same focus on performance and code quality to the [Team Name] team.',
+        closing: 'Thank you for your time. I would welcome the chance to discuss in a technical interview how I can contribute to the [Company Name] product.',
       },
     },
   },
   {
     slug: { ro: 'contabil', en: 'accountant' },
-    title: { ro: 'Contabil / Specialist Financiar', en: 'Accountant' },
+    resumeRoleSlug: { ro: 'contabil', en: 'accountant' },
+    title: { ro: 'Contabil', en: 'Accountant' },
     category: { ro: 'Financiar & Contabilitate', en: 'Finance & Accounting' },
-    salaryRangeRo: '5.500 - 12.000 RON net',
-    demandLevelRo: 'Mare',
     keywords: {
       hardSkills: {
         ro: ['Închidere de lună / an', 'Bilanț contabil', 'Declarații fiscale (D100, D112, D300, D390, D394)', 'e-Factura / SAF-T', 'Contabilitate primară și de gestiune', 'Analiză P&L'],
@@ -133,12 +135,12 @@ export const SEO_JOBS: SeoJob[] = [
     },
     commonMistakes: {
       ro: [
-        'Omiterea denumirii softurilor contabile concrete (ATS-ul filtrează după „SAGA” sau „SAP”).',
+        'Omiterea denumirii softurilor contabile concrete (SAGA, SAP, Charisma), pe care recrutorii le caută după nume.',
         'Fără menționarea declarării electronice sau a conformității cu noile reglementări ANAF.',
         'Lipsa oricărei cifre privind volumul de documente procesat lunar.',
       ],
       en: [
-        'Omitting specific ERP software names which ATS parsers scan for directly.',
+        'Omitting the specific ERP software names (SAP, SAGA, Charisma) that recruiters search for by name.',
         'Missing details on regulatory compliance and electronic tax reporting.',
       ],
     },
@@ -156,23 +158,22 @@ export const SEO_JOBS: SeoJob[] = [
     ],
     coverLetterSample: {
       ro: {
-        intro: 'Vă adresez candidatura mea pentru poziția de Contabil în cadrul companiei dumneavoastră. Cu o experiență de peste 5 ani în contabilitate financiară și expertiză aprofundată în cerințele fiscale actuale din România...',
-        body: 'De-a lungul activității mele, am asigurat închiderea lunară a balanței contabile, întocmirea situațiilor financiare anuale și optimizarea proceselor de facturare. Stăpânirea excelentă a ERP-urilor și a analizei financiare îmi permite să preiau rapid responsabilitățile departamentului dumneavoastră...',
-        closing: 'Vă mulțumesc pentru timpul acordat și rămân la dispoziția dumneavoastră pentru stabilirea unei întrevederi.',
+        intro: 'Vă adresez candidatura mea pentru postul de Contabil din cadrul [Numele companiei]. Am [X] ani de experiență în contabilitate financiară și lucrez zilnic cu declarațiile fiscale, e-Factura și raportarea SAF-T cerute de ANAF.',
+        body: 'La [Compania actuală] gestionez contabilitatea completă pentru un portofoliu de 14 companii, de la înregistrarea documentelor primare până la închiderea de lună și bilanțul anual. Am implementat raportarea SAF-T și e-Factura în SAGA și Charisma fără nicio penalitate ANAF în ultimii 3 ani și am redus timpul de închidere lunară de la 8 la 5 zile lucrătoare prin reconcilieri automatizate în Excel. Aș aduce aceeași rigoare și respectare a termenelor în departamentul financiar [Numele companiei].',
+        closing: 'Vă mulțumesc pentru timpul acordat și rămân la dispoziția dumneavoastră pentru o întrevedere.',
       },
       en: {
-        intro: 'I am delighted to submit my application for the Accountant position at your organization. Bringing over 5 years of rigorous accounting practice and in-depth expertise in statutory standards...',
-        body: 'Throughout my career, I have managed month-end financial closings, annual balance sheets, and automated reporting systems. My proficiency in ERP solutions and variance analysis will deliver immediate value to your team...',
-        closing: 'Thank you for your consideration, and I look forward to meeting with you to discuss how I can contribute.',
+        intro: 'I am applying for the Accountant position at [Company Name]. I have [X] years of financial accounting experience and work daily with statutory tax declarations, e-Invoicing, and SAF-T reporting.',
+        body: 'At [Current Company], I run end-to-end accounting for a portfolio of 14 companies, from primary documents through month-end close and the annual balance sheet. I rolled out SAF-T reporting and e-Invoicing in SAGA and Charisma with zero tax authority penalties over the last 3 years, and I cut month-end close from 8 to 5 business days by automating reconciliations in Excel. I would bring the same rigor and deadline discipline to the [Company Name] finance team.',
+        closing: 'Thank you for your consideration. I would be glad to meet and discuss how I can contribute.',
       },
     },
   },
   {
     slug: { ro: 'manager-de-proiect', en: 'project-manager' },
-    title: { ro: 'Manager de Proiect / Project Manager', en: 'Project Manager' },
+    resumeRoleSlug: { ro: 'manager-de-proiect', en: 'project-manager' },
+    title: { ro: 'Manager de Proiect', en: 'Project Manager' },
     category: { ro: 'Management & Operațiuni', en: 'Management & Operations' },
-    salaryRangeRo: '8.500 - 18.000 RON net',
-    demandLevelRo: 'Foarte Mare',
     keywords: {
       hardSkills: {
         ro: ['Management de buget', 'Gestiunea riscurilor', 'Planificare Sprint / Gantt', 'Managementul stakeholderilor', 'Metodologie Scrum & Kanban', 'KPIs și raportare OKR'],
@@ -203,11 +204,11 @@ export const SEO_JOBS: SeoJob[] = [
     },
     commonMistakes: {
       ro: [
-        'Descrierea task-urilor administrative („am organizat ședințe zilnice”) în loc de realizări de business.',
+        'Descrierea task-urilor administrative („am organizat ședințe zilnice”) fără rezultatul de business obținut.',
         'Lipsa mărimii echipei și a bugetului coordonat.',
       ],
       en: [
-        'Focusing on administrative tasks instead of delivery outcomes and risk mitigation.',
+        'Describing administrative tasks without the delivery outcome or the risk they reduced.',
         'Omitting team scale and budget accountability.',
       ],
     },
@@ -225,26 +226,25 @@ export const SEO_JOBS: SeoJob[] = [
     ],
     coverLetterSample: {
       ro: {
-        intro: 'Vă transmit interesul meu activ pentru rolul de Project Manager în cadrul echipei dumneavoastră. Cu un istoric dovedit în livrarea de proiecte strategice complexe în timp și în bugetul alocat...',
-        body: 'Pe parcursul ultimilor ani am coordonat echipe tehnice și comerciale pentru implementarea cu succes a peste 20 de proiecte la scară largă. Experiența mea în metodologia Agile și managementul riscurilor asigură predictibilitate și eficiență maximă...',
-        closing: 'Aștept cu interes oportunitatea de a discuta despre cum pot accelera derularea inițiativelor din compania dumneavoastră.',
+        intro: 'Vă transmit candidatura mea pentru rolul de Manager de Proiect din cadrul [Numele companiei]. Am [X] ani de experiență în livrarea de proiecte software la termen și în bugetul alocat, cu echipe de dezvoltare, design și QA.',
+        body: 'La [Compania actuală] coordonez în paralel 4 proiecte cu un buget total de 650.000 EUR și o echipă de 16 specialiști. Am introdus planificarea pe sprinturi în Jira și un registru de riscuri revizuit săptămânal, ceea ce ne-a permis să livrăm toate release-urile cu 2 săptămâni înainte de termen și să creștem marja proiectelor cu 14%. Sunt certificat PMP și aș aplica aceeași disciplină de livrare inițiativelor [Numele companiei].',
+        closing: 'Vă mulțumesc pentru atenție. Aș aprecia oportunitatea de a discuta despre proiectele pe care le aveți în plan.',
       },
       en: {
-        intro: 'I am excited to submit my candidacy for the Project Manager position at your company. With a solid track record of delivering multifaceted initiatives strictly on schedule and under budget...',
-        body: 'Over the past 5 years, I have orchestrated cross-functional engineering and design squads to roll out over 20 large-scale releases. My deep background in Scrum and risk mitigation ensures operational momentum...',
-        closing: 'I look forward to discussing how my project delivery framework can benefit your upcoming roadmaps.',
+        intro: 'I am applying for the Project Manager role at [Company Name]. I have [X] years of experience delivering software projects on schedule and on budget with development, design, and QA teams.',
+        body: 'At [Current Company], I run 4 concurrent projects with a combined budget of 650,000 EUR and a 16-person team. I introduced sprint planning in Jira and a risk register reviewed every week, which let us ship every release 2 weeks ahead of deadline and raise project margin by 14%. I hold the PMP certification and would apply the same delivery discipline to the initiatives at [Company Name].',
+        closing: 'Thank you for your time. I would welcome the chance to discuss your upcoming projects.',
       },
     },
   },
   {
     slug: { ro: 'specialist-resurse-umane', en: 'hr-specialist' },
-    title: { ro: 'Specialist Resurse Umane / Recrutor HR', en: 'HR Specialist' },
+    resumeRoleSlug: { ro: 'manager-resurse-umane', en: 'hr-manager' },
+    title: { ro: 'Specialist Resurse Umane', en: 'HR Specialist' },
     category: { ro: 'Resurse Umane & Recrutare', en: 'Human Resources' },
-    salaryRangeRo: '5.000 - 11.500 RON net',
-    demandLevelRo: 'Mare',
     keywords: {
       hardSkills: {
-        ro: ['Recrutare end-to-end', 'Sourcing pe LinkedIn Recruiter', 'Onboarding & Retenție', 'Administrare personal (ReviSal / Reges)', 'Legislația muncii (Codul Muncii)', 'Evaluare de performanță'],
+        ro: ['Recrutare end-to-end', 'Sourcing pe LinkedIn Recruiter', 'Onboarding & Retenție', 'Administrare personal în ReviSal / Reges', 'Legislația muncii (Codul Muncii)', 'Evaluare de performanță'],
         en: ['End-to-end talent acquisition', 'LinkedIn Recruiter sourcing', 'Onboarding & retention', 'Payroll & contract administration', 'Labor law compliance', 'Performance management'],
       },
       softSkills: {
@@ -253,8 +253,8 @@ export const SEO_JOBS: SeoJob[] = [
       },
       tools: ['LinkedIn Recruiter', 'Workable', 'Greenhouse', 'BambooHR', 'ReviSal', 'Charisma HR', 'Slack', 'Notion'],
       certifications: {
-        ro: ['Inspector Resurse Umane (acreditat ANC)', 'Certificare SHRM / CIPD', 'Recruiter Academy Certified'],
-        en: ['SHRM-CP / CIPD Certified', 'LinkedIn Certified Professional Recruiter', 'HR Administration Certification'],
+        ro: ['Inspector Resurse Umane (curs acreditat ANC)', 'Certificare SHRM / CIPD', 'LinkedIn Certified Professional Recruiter'],
+        en: ['SHRM-CP / CIPD Certified', 'LinkedIn Certified Professional Recruiter', 'HR Inspector (ANC-accredited course)'],
       },
     },
     atsChecklist: {
@@ -293,23 +293,22 @@ export const SEO_JOBS: SeoJob[] = [
     ],
     coverLetterSample: {
       ro: {
-        intro: 'Vă adresez dorința mea de a mă alătura echipei dumneavoastră în rolul de Specialist Resurse Umane. Cu un parcurs de peste 4 ani în atragerea talentelor și dezvoltarea culturii organizaționale...',
-        body: 'Am gestionat cu succes atât procesele strategice de recrutare în medii competitive, cât și programele de integrare și conformitate cu legislația muncii. Capacitatea mea de a identifica candidații ideali și de a optimiza experiența angajaților va sprijini direct creșterea organizației...',
-        closing: 'Vă stau cu plăcere la dispoziție pentru a stabili o discuție aprofundată.',
+        intro: 'Vă scriu pentru postul de Specialist Resurse Umane din cadrul [Numele companiei]. Am [X] ani de experiență în recrutare, onboarding și administrare de personal, cu accent pe roluri tehnice și comerciale.',
+        body: 'La [Compania actuală] am condus recrutarea pentru 42 de poziții în 12 luni, folosind LinkedIn Recruiter și Workable, și am redus Time-to-Hire de la 45 la 26 de zile. Am construit un program de onboarding structurat care a menținut retenția la 94% după primul an și am administrat contractele și registrul ReviSal în conformitate cu Codul Muncii. Aș aduce aceeași atenție la experiența candidaților și la conformitate echipei [Numele companiei].',
+        closing: 'Vă mulțumesc pentru timpul acordat și vă stau la dispoziție pentru o discuție.',
       },
       en: {
-        intro: 'I am delighted to express my candidacy for the HR Specialist opening at your company. With over 4 years of dedicated talent acquisition and employee relations experience...',
-        body: 'I have successfully orchestrated full-lifecycle recruiting sprints in high-competition sectors while championing structured onboarding programs that retain top performers...',
-        closing: 'I look forward to discussing how my strategic HR approach can support your organizational expansion.',
+        intro: 'I am applying for the HR Specialist role at [Company Name]. I have [X] years of experience in recruitment, onboarding, and personnel administration, focused on technical and sales roles.',
+        body: 'At [Current Company], I led hiring for 42 positions in 12 months using LinkedIn Recruiter and Workable, and cut time-to-hire from 45 to 26 days. I built a structured onboarding program that kept first-year retention at 94%, and I managed employment contracts and payroll records in line with labor law. I would bring the same care for candidate experience and compliance to the [Company Name] team.',
+        closing: 'Thank you for your time. I would be glad to talk about how I can support your hiring plans.',
       },
     },
   },
   {
     slug: { ro: 'manager-vanzari', en: 'sales-manager' },
-    title: { ro: 'Manager Vânzări / Sales Specialist', en: 'Sales Manager' },
+    resumeRoleSlug: { ro: 'manager-vanzari', en: 'sales-manager' },
+    title: { ro: 'Manager Vânzări', en: 'Sales Manager' },
     category: { ro: 'Vânzări & Business Development', en: 'Sales & Business' },
-    salaryRangeRo: '7.000 - 20.000+ RON (bază + comision)',
-    demandLevelRo: 'Foarte Mare',
     keywords: {
       hardSkills: {
         ro: ['Vânzări B2B / B2C', 'Negociere contracte mari', 'Pipeline management', 'Generare de lead-uri calificate', 'Prognoză vânzări (Forecasting)', 'Strategie Go-To-Market'],
@@ -321,7 +320,7 @@ export const SEO_JOBS: SeoJob[] = [
       },
       tools: ['Salesforce', 'HubSpot CRM', 'Pipedrive', 'Apollo.io', 'LinkedIn Sales Navigator', 'ZoomInfo'],
       certifications: {
-        ro: ['Certified Professional Sales Person (CPSP)', 'Curs Negociere Harvard', 'HubSpot Sales Certified'],
+        ro: ['Certified Professional Sales Person (CPSP)', 'Curs de negociere pentru executivi', 'HubSpot Sales Certified'],
         en: ['Certified Professional Sales Person (CPSP)', 'Executive Negotiation Certificate', 'HubSpot Sales Inbound Certified'],
       },
     },
@@ -340,11 +339,11 @@ export const SEO_JOBS: SeoJob[] = [
     },
     commonMistakes: {
       ro: [
-        'CV fără cifre: un CV de vânzări fără volume vândute și targete atinse este automat descalificat de recrutor.',
-        'Lipsa menționării tipului de clienți (B2B corporate vs. retail).',
+        'CV fără cifre: fără volume vândute și targete atinse, recrutorul nu îți poate evalua rezultatele.',
+        'Lipsa menționării tipului de clienți (B2B corporate sau retail).',
       ],
       en: [
-        'A sales resume without numbers or quota metrics is immediately discarded by hiring managers.',
+        'A sales resume without numbers or quota metrics gives hiring managers nothing to evaluate.',
       ],
     },
     bulletExamples: [
@@ -361,14 +360,14 @@ export const SEO_JOBS: SeoJob[] = [
     ],
     coverLetterSample: {
       ro: {
-        intro: 'Vă adresez scrisoarea mea de intenție pentru poziția de Manager Vânzări în cadrul companiei dumneavoastră. Cu un palmares solid în depășirea obiectivelor comerciale și negocierea de parteneriate strategice B2B...',
-        body: 'Abordarea mea consultativă și stăpânirea avansată a instrumentelor moderne de vânzări au permis echipei mele să atingă o creștere susținută a veniturilor. Sunt motivat să aduc această disciplină și energie comercială în expansiunea portofoliului dumneavoastră...',
-        closing: 'Aștept cu mult interes oportunitatea de a discuta despre strategia de vânzări într-o întâlnire directă.',
+        intro: 'Vă adresez candidatura mea pentru postul de Manager Vânzări din cadrul [Numele companiei]. Am [X] ani de experiență în vânzări B2B, negociere de contracte și conducerea unei echipe orientate pe target.',
+        body: 'La [Compania actuală] am generat 1,8 milioane RON în venituri noi într-un an, depășind targetul anual cu 34% prin semnarea a 28 de clienți corporate. Am reorganizat pipeline-ul în Salesforce pe etape clare de calificare, ceea ce a scurtat ciclul mediu de vânzare de la 60 la 35 de zile, și am instruit trei colegi noi până la atingerea primului target trimestrial. Aș aduce aceeași disciplină comercială în extinderea portofoliului [Numele companiei].',
+        closing: 'Vă mulțumesc pentru atenție și aștept cu interes o întâlnire în care să discutăm strategia de vânzări.',
       },
       en: {
-        intro: 'I am enthusiastic about applying for the Sales Manager position. With a verifiable track record of consistent quota over-attainment and multi-stakeholder contract closing...',
-        body: 'My consultative selling style and disciplined pipeline stewardship have continuously translated into accelerated quarterly revenues. I am eager to apply this proactive mindset to drive your growth metrics...',
-        closing: 'I look forward to discussing commercial roadmaps during a personal interview.',
+        intro: 'I am applying for the Sales Manager position at [Company Name]. I have [X] years of experience in B2B sales, contract negotiation, and leading a quota-carrying team.',
+        body: 'At [Current Company], I generated 1.8M RON in net-new revenue in one year, beating the annual target by 34% by signing 28 enterprise accounts. I restructured our Salesforce pipeline around clear qualification stages, which shortened the average sales cycle from 60 to 35 days, and I coached three new hires to their first quarterly quota. I would bring the same commercial discipline to growing the [Company Name] portfolio.',
+        closing: 'Thank you for your consideration. I look forward to discussing your sales strategy in person.',
       },
     },
   },
@@ -382,31 +381,45 @@ export function getSeoJobBySlug(slug: string, locale: AppLocale = 'ro'): SeoJob 
   return SEO_JOBS.find((j) => j.slug[locale] === slug || j.slug.ro === slug || j.slug.en === slug)
 }
 
+export function getSeoJobForResumeRole(roleSlugEn: string): SeoJob | undefined {
+  return SEO_JOBS.find((j) => j.resumeRoleSlug.en === roleSlugEn)
+}
+
+// Splits "RESTful APIs / GraphQL" into its alternatives. Fragments under 3
+// chars ("CI" from "CI/CD", "CO" from "SAP FI/CO") are dropped because a bare
+// substring that short matches almost any text; the full keyword still counts.
+function alternativesOf(keyword: string | undefined): string[] {
+  if (!keyword) return []
+  const parts = keyword.split('/').map((p) => p.trim().toLowerCase()).filter((p) => p.length >= 3)
+  return [keyword.trim().toLowerCase(), ...parts]
+}
+
 export function calculateJobKeywordMatch(
   text: string,
   job: SeoJob,
   locale: AppLocale = 'ro'
 ): { matchPercentage: number; foundKeywords: string[]; missingKeywords: string[] } {
   const lowerText = text.toLowerCase()
-  const allKeywords = [
-    ...job.keywords.hardSkills[locale],
-    ...job.keywords.softSkills[locale],
-    ...job.keywords.tools,
+  const other: AppLocale = locale === 'ro' ? 'en' : 'ro'
+  const entries: { keyword: string; alternatives: string[] }[] = [
+    ...(['hardSkills', 'softSkills'] as const).flatMap((group) =>
+      job.keywords[group][locale].map((keyword, i) => ({
+        keyword,
+        alternatives: [...alternativesOf(keyword), ...alternativesOf(job.keywords[group][other][i])],
+      }))
+    ),
+    ...job.keywords.tools.map((keyword) => ({ keyword, alternatives: alternativesOf(keyword) })),
   ]
 
   const foundKeywords: string[] = []
   const missingKeywords: string[] = []
+  for (const { keyword, alternatives } of entries) {
+    if (alternatives.some((alt) => lowerText.includes(alt))) foundKeywords.push(keyword)
+    else missingKeywords.push(keyword)
+  }
 
-  allKeywords.forEach((kw) => {
-    if (lowerText.includes(kw.toLowerCase())) {
-      foundKeywords.push(kw)
-    } else {
-      missingKeywords.push(kw)
-    }
-  })
-
-  const matchPercentage = allKeywords.length > 0
-    ? Math.round((foundKeywords.length / allKeywords.length) * 100)
+  const matchPercentage = entries.length > 0
+    ? Math.round((foundKeywords.length / entries.length) * 100)
     : 0
 
   return { matchPercentage, foundKeywords, missingKeywords }

@@ -20,7 +20,7 @@ describe('Social Listening & Lead Response Engine', () => {
 
     expect(draft).toContain('Salut, Andrei_Dev!')
     expect(draft).toContain('ATS')
-    expect(draft).toContain('joben.eu/verificare-cv')
+    expect(draft).toContain('joben.eu/ro/free-ats-checker')
     expect(draft).toContain('măsurabile')
   })
 

@@ -6,86 +6,76 @@ import { routing, type AppLocale } from '@/i18n/routing';
 
 const baseUrl = siteConfig.url;
 
-function alternates(pathByLocale: Record<AppLocale, string>) {
+// Fixed per-content dates: bump the matching entry when that page's content
+// changes, so crawlers see a lastModified that means something.
+const ROLE_PAGES_UPDATED = '2026-09-19';
+// Roles that absorbed the former /cv pages (tools, checklist, scan widget).
+const MERGED_ROLE_PAGES_UPDATED = '2026-10-14';
+const COVER_LETTER_PAGES_UPDATED = '2026-10-14';
+
+type Frequency = MetadataRoute.Sitemap[number]['changeFrequency'];
+
+function alternates(pathByLocale: Partial<Record<AppLocale, string>>) {
   return {
-    languages: Object.fromEntries(
-      routing.locales.map((l) => [l, `${baseUrl}${pathByLocale[l]}`])
-    ),
+    languages: {
+      ...Object.fromEntries(
+        routing.locales
+          .filter((l) => pathByLocale[l] !== undefined)
+          .map((l) => [l, `${baseUrl}/${l}${pathByLocale[l]}`])
+      ),
+      'x-default': `${baseUrl}/ro${pathByLocale.ro}`,
+    },
   };
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPaths: Record<AppLocale, string>[] = [
-    { ro: '', en: '' },
-    { ro: '/pricing', en: '/pricing' },
-    { ro: '/about', en: '/about' },
-    { ro: '/contact', en: '/contact' },
-    { ro: '/privacy', en: '/privacy' },
-    { ro: '/terms', en: '/terms' },
-    { ro: '/sign-in', en: '/sign-in' },
-    { ro: '/sign-up', en: '/sign-up' },
-    { ro: '/resume-examples', en: '/resume-examples' },
-    { ro: '/free-ats-checker', en: '/free-ats-checker' },
-    { ro: '/verificare-cv', en: '/verificare-cv' },
-    { ro: '/cookies', en: '/cookies' },
+  const pages: {
+    path: Partial<Record<AppLocale, string>>;
+    lastModified: string;
+    changeFrequency: Frequency;
+    priority: number;
+  }[] = [
+    { path: { ro: '', en: '' }, lastModified: '2026-10-07', changeFrequency: 'weekly', priority: 1.0 },
+    { path: { ro: '/pricing', en: '/pricing' }, lastModified: '2026-10-14', changeFrequency: 'monthly', priority: 0.9 },
+    { path: { ro: '/about', en: '/about' }, lastModified: '2026-09-20', changeFrequency: 'yearly', priority: 0.5 },
+    { path: { ro: '/contact', en: '/contact' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.5 },
+    { path: { ro: '/privacy', en: '/privacy' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.3 },
+    { path: { ro: '/terms', en: '/terms' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.3 },
+    { path: { ro: '/cookies', en: '/cookies' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.3 },
+    { path: { ro: '/sign-in', en: '/sign-in' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.5 },
+    { path: { ro: '/sign-up', en: '/sign-up' }, lastModified: '2026-10-14', changeFrequency: 'yearly', priority: 0.8 },
+    { path: { ro: '/resume-examples', en: '/resume-examples' }, lastModified: MERGED_ROLE_PAGES_UPDATED, changeFrequency: 'monthly', priority: 0.7 },
+    { path: { ro: '/free-ats-checker', en: '/free-ats-checker' }, lastModified: '2026-10-14', changeFrequency: 'monthly', priority: 0.9 },
   ];
-  const priorities = [1.0, 0.9, 0.5, 0.5, 0.3, 0.3, 0.5, 0.8, 0.7, 0.8, 0.9, 0.3];
-  const frequencies: MetadataRoute.Sitemap[number]['changeFrequency'][] = [
-    'weekly', 'weekly', 'monthly', 'monthly', 'yearly', 'yearly', 'monthly', 'monthly', 'monthly', 'monthly', 'weekly', 'yearly',
-  ];
-
-  const entries: MetadataRoute.Sitemap = []
-
-  staticPaths.forEach((pathByLocale, i) => {
-    routing.locales.forEach((locale) => {
-      entries.push({
-        url: `${baseUrl}/${locale}${pathByLocale[locale]}`,
-        lastModified: new Date(),
-        changeFrequency: frequencies[i],
-        priority: priorities[i],
-        alternates: alternates(pathByLocale),
-      })
-    })
-  })
 
   resumeRoles.forEach((role) => {
-    const pathByLocale = {
-      ro: `/resume-examples/${role.slug.ro}`,
-      en: `/resume-examples/${role.slug.en}`,
-    } as Record<AppLocale, string>
-    routing.locales.forEach((locale) => {
-      entries.push({
-        url: `${baseUrl}/${locale}${pathByLocale[locale]}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.7,
-        alternates: alternates(pathByLocale),
-      })
-    })
-  })
+    const merged = SEO_JOBS.some((job) => job.resumeRoleSlug.en === role.slug.en);
+    pages.push({
+      path: { ro: `/resume-examples/${role.slug.ro}`, en: `/resume-examples/${role.slug.en}` },
+      lastModified: merged ? MERGED_ROLE_PAGES_UPDATED : ROLE_PAGES_UPDATED,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    });
+  });
 
   SEO_JOBS.forEach((job) => {
-    routing.locales.forEach((locale) => {
-      const cvPath = { ro: `/cv/${job.slug.ro}`, en: `/cv/${job.slug.en}` }
-      const letterPath = { ro: `/scrisoare-intentie/${job.slug.ro}`, en: `/scrisoare-intentie/${job.slug.en}` }
+    pages.push({
+      path: { ro: `/scrisoare-intentie/${job.slug.ro}`, en: `/scrisoare-intentie/${job.slug.en}` },
+      lastModified: COVER_LETTER_PAGES_UPDATED,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    });
+  });
 
-      entries.push({
-        url: `${baseUrl}/${locale}${cvPath[locale]}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-        alternates: alternates(cvPath),
-      })
-
-      entries.push({
-        url: `${baseUrl}/${locale}${letterPath[locale]}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.75,
-        alternates: alternates(letterPath),
-      })
-    })
-  })
-
-  return entries
+  return pages.flatMap((page) =>
+    routing.locales
+      .filter((locale) => page.path[locale] !== undefined)
+      .map((locale) => ({
+        url: `${baseUrl}/${locale}${page.path[locale]}`,
+        lastModified: page.lastModified,
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+        alternates: alternates(page.path),
+      }))
+  );
 }

@@ -21,6 +21,32 @@ function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
 }
 
+// Referral link (jb_ref cookie, copied into unsafeMetadata.ref by the sign-up
+// and sign-in pages). Rewards only for a verified, non-disposable email.
+// Returns false on a transient error so the caller answers 500 and svix
+// retries; the referrals claim row makes the retry safe. Business rejections
+// (unknown code, self-referral, already attributed) are not errors.
+async function attributeReferral(
+  userId: string,
+  ref: unknown,
+  verifiedEmail: string | null,
+  log: { requestId: string; eventId: string }
+): Promise<boolean> {
+  if (typeof ref !== 'string' || !ref || !verifiedEmail || isDisposableEmailDomain(verifiedEmail)) return true
+  try {
+    await processReferralAttribution({ newUserId: userId, referralCode: ref })
+    return true
+  } catch (refErr) {
+    logger.error('Referral attribution failed in clerk webhook', {
+      ...log,
+      route: '/api/webhooks/clerk',
+      userId,
+      error: refErr instanceof Error ? refErr.message : 'Unknown error',
+    })
+    return false
+  }
+}
+
 async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
   const requestId = getRequestId(req)
   try {
@@ -222,25 +248,8 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
-    // Referral link (jb_ref cookie, copied into unsafeMetadata by the sign-up
-    // page). Rewards only for a verified, non-disposable email (checked above).
-    const referralCodeParam = typeof evt.data.unsafe_metadata?.ref === 'string'
-      ? evt.data.unsafe_metadata.ref
-      : null
-
-    if (referralCodeParam && primaryEmail) {
-      try {
-        await processReferralAttribution({
-          newUserId: id,
-          referralCode: referralCodeParam,
-        })
-      } catch (refErr) {
-        logger.warn('Failed to process referral attribution in clerk webhook', {
-          requestId,
-          userId: id,
-          error: refErr instanceof Error ? refErr.message : 'Unknown error',
-        })
-      }
+    if (!(await attributeReferral(id, evt.data.unsafe_metadata?.ref, primaryEmail, { requestId, eventId: svixId }))) {
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
     // Set by the sign-up page when the visit came from the free ATS checker
@@ -385,6 +394,12 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
         userId: id,
         error: error.message,
       })
+      return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+    }
+
+    // Email verified after user.created (or the first attempt failed): a
+    // no-op once the referral is claimed.
+    if (!(await attributeReferral(id, evt.data.unsafe_metadata?.ref, primaryEmail, { requestId, eventId: svixId }))) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
   }

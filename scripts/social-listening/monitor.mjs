@@ -61,7 +61,7 @@ function generateResponseDraft(author) {
     `Câteva recomandări practice:\n` +
     `1. Înlocuiește formulările pasive cu verbe de acțiune și cifre concrete (ex. „Crescut vânzările cu 25%”, „Redus timpul de procesare”).\n` +
     `2. Folosește o structură curată pe o singură coloană.\n\n` +
-    `Dacă vrei să vezi gratuit ce erori de compatibilitate ATS are CV-ul tău, poți face o verificare instantă pe https://joben.eu/verificare-cv.\n\n` +
+    `Dacă vrei să vezi gratuit ce erori de compatibilitate ATS are CV-ul tău, poți face o verificare instantă pe https://joben.eu/ro/free-ats-checker.\n\n` +
     `Spor la interviuri!`
   )
 }

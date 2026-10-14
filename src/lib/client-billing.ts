@@ -18,12 +18,20 @@ export async function startCheckout(plan: PaidPlan, locale: AppLocale) {
 
   const payload = (await response.json()) as { url?: string; error?: string }
   if (!response.ok || !payload.url) {
-    throw new Error(payload.error || 'Could not start checkout.')
+    throw new Error(payload.error || 'checkout_failed')
   }
 
   if (typeof window !== 'undefined') {
     window.location.assign(payload.url)
   }
+}
+
+// Maps a checkout error code from /api/billing/checkout to a Billing message key.
+export function checkoutErrorKey(err: unknown): 'alreadyActive' | 'checkoutUnavailable' | 'couldNotStartCheckout' {
+  const code = err instanceof Error ? err.message : ''
+  if (code === 'already_active') return 'alreadyActive'
+  if (code === 'unavailable') return 'checkoutUnavailable'
+  return 'couldNotStartCheckout'
 }
 
 export async function startProCheckout(locale: AppLocale) {

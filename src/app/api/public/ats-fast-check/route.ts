@@ -1,11 +1,12 @@
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
-import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { hasExpectedSignature } from '@/lib/security/file-signature'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { analyzeResumeTextLightweight } from '@/lib/ats-fast-parser'
+import { calculateJobKeywordMatch, getSeoJobBySlug } from '@/data/seo-jobs'
 import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
+import type { AppLocale } from '@/i18n/routing'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -16,6 +17,22 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ])
+
+// The client maps these codes to localized messages (FastAts.errors.*).
+export type FastAtsErrorCode =
+  | 'rate_limited'
+  | 'invalid_input'
+  | 'file_too_large'
+  | 'unsupported_type'
+  | 'unreadable'
+  | 'too_little_text'
+  | 'server'
+
+function errorResponse(code: FastAtsErrorCode, status: number, requestId: string, headers?: Record<string, string>) {
+  const res = jsonWithRequestId({ error: code }, status, requestId)
+  if (headers) for (const [k, v] of Object.entries(headers)) res.headers.set(k, v)
+  return res
+}
 
 function getFileExtension(name: string): string {
   const idx = name.lastIndexOf('.')
@@ -35,64 +52,32 @@ export async function POST(req: Request) {
       failClosed: true,
     })
     if (!limit.ok) {
-      return new Response(JSON.stringify({ error: clientErrorMessage('rate_limit') }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(limit.retryAfter),
-          'x-request-id': requestId,
-        },
-      })
+      return errorResponse('rate_limited', 429, requestId, { 'Retry-After': String(limit.retryAfter) })
     }
 
     let formData: FormData
     try {
       formData = await req.formData()
     } catch {
-      return jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId)
+      return errorResponse('invalid_input', 400, requestId)
     }
 
     const file = formData.get('file')
-    if (!(file instanceof File)) {
-      return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Un fișier PDF sau DOCX este obligatoriu.') },
-        400,
-        requestId
-      )
+    if (!(file instanceof File) || file.size === 0) {
+      return errorResponse('invalid_input', 400, requestId)
     }
-
-    if (file.size === 0) {
-      return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Fișierul încărcat este gol.') },
-        400,
-        requestId
-      )
-    }
-
     if (file.size > MAX_UPLOAD_BYTES) {
-      return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Fișierul depășește limita de 5 MB.') },
-        413,
-        requestId
-      )
+      return errorResponse('file_too_large', 413, requestId)
     }
 
     const extension = getFileExtension(file.name || '')
     if (!ALLOWED_EXTENSIONS.has(extension) || (file.type && !ALLOWED_MIME_TYPES.has(file.type))) {
-      return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Doar fișierele .pdf și .docx sunt suportate.') },
-        415,
-        requestId
-      )
+      return errorResponse('unsupported_type', 415, requestId)
     }
 
     let fileBytes: Uint8Array | null = new Uint8Array(await file.arrayBuffer())
     if (!hasExpectedSignature(fileBytes, extension)) {
-      return jsonWithRequestId(
-        { error: clientErrorMessage('invalid_input', 'Formatul fișierului nu corespunde extensiei sale.') },
-        415,
-        requestId
-      )
+      return errorResponse('unsupported_type', 415, requestId)
     }
 
     let rawText = ''
@@ -110,68 +95,44 @@ export async function POST(req: Request) {
         extension,
         error: message,
       })
-      return jsonWithRequestId(
-        {
-          error: clientErrorMessage(
-            'invalid_input',
-            extension === '.docx'
-              ? 'Nu s-a putut citi textul din fișierul DOCX.'
-              : 'Nu s-a putut citi textul din PDF. Asigură-te că nu este o imagine scanată.'
-          ),
-        },
-        422,
-        requestId
-      )
+      return errorResponse('unreadable', 422, requestId)
     } finally {
       fileBytes = null
     }
 
     if (rawText.trim().length < 50) {
-      return jsonWithRequestId(
-        {
-          error: clientErrorMessage(
-            'invalid_input',
-            'Nu s-a putut extrage suficient text din document. Asigură-te că textul nu este o imagine.'
-          ),
-        },
-        422,
-        requestId
-      )
+      return errorResponse('too_little_text', 422, requestId)
     }
 
-    // Run instant lightweight ATS analysis
     const analysis = analyzeResumeTextLightweight(rawText)
 
-    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
-    await capturePostHogEvent(
-      browserDistinctId
-        ? {
-            distinctId: browserDistinctId,
-            event: 'fast_ats_check_completed',
-            properties: {
-              score: analysis.overallScore,
-              grade: analysis.grade,
-              wordCount: analysis.wordCount,
-              missingSectionsCount: analysis.missingSections.length,
-            },
-          }
-        : {
-            distinctId: 'anon:fast_scan',
-            event: 'fast_ats_check_completed',
-            properties: {
-              score: analysis.overallScore,
-              grade: analysis.grade,
-            },
-          }
-    )
+    // Optional: real keyword match against a role from src/data/seo-jobs.ts.
+    const jobSlug = formData.get('jobSlug')
+    const locale: AppLocale = formData.get('locale') === 'en' ? 'en' : 'ro'
+    const job = typeof jobSlug === 'string' && jobSlug ? getSeoJobBySlug(jobSlug, locale) : undefined
+    const keywordMatch = job ? calculateJobKeywordMatch(rawText, job, locale) : null
+    rawText = ''
 
-    return jsonWithRequestId({ success: true, result: analysis }, 200, requestId)
+    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+    await capturePostHogEvent({
+      distinctId: browserDistinctId ?? 'anon:fast_scan',
+      event: 'fast_ats_check_completed',
+      properties: {
+        score: analysis.overallScore,
+        grade: analysis.grade,
+        issuesCount: analysis.issues.length,
+        ...(browserDistinctId ? { wordCount: analysis.wordCount } : {}),
+        ...(keywordMatch ? { jobMatch: keywordMatch.matchPercentage } : {}),
+      },
+    })
+
+    return jsonWithRequestId({ success: true, result: analysis, keywordMatch }, 200, requestId)
   } catch (error) {
     logger.error('Fast ATS check top-level failure', {
       requestId,
       route: '/api/public/ats-fast-check',
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
+    return errorResponse('server', 500, requestId)
   }
 }
