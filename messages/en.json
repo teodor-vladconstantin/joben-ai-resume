@@ -206,6 +206,24 @@
         "cta": "Start Free"
       },
       {
+        "name": "Interview Pass (14 Days)",
+        "description": "Ideal for your 2-week active job application and interview sprint.",
+        "price": "39 RON",
+        "pricePeriod": "/one-time",
+        "features": [
+          "Full Pro access for 14 days",
+          "One-time payment, no recurring subscription",
+          "Full ATS check report & issue fixes",
+          "Unlimited ATS-optimized PDF exports",
+          "AI bullet rewrites & resume tailoring",
+          "Unlimited AI cover letters"
+        ],
+        "excludedFeatures": [
+          "Does not auto-renew"
+        ],
+        "cta": "Get 14-Day Pass"
+      },
+      {
         "name": "Pro",
         "description": "For active job seekers applying consistently.",
         "price": "59 RON",

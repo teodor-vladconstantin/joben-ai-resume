@@ -112,8 +112,9 @@ export async function POST(req: Request) {
       )
     }
 
+    const isPass = requestedPlan === 'pass_14d'
     const stripePriceId = getPriceIdForPlan(requestedPlan)
-    if (!isStripeConfigured() || !stripePriceId) {
+    if (!isStripeConfigured() || (!stripePriceId && !isPass)) {
       // SECURITY: CLAUDE.md Medium #6 — never leak which env vars are missing
       // to the client. Full diagnostic details stay in the server logs.
       logger.error('Stripe checkout config missing', {
@@ -137,22 +138,41 @@ export async function POST(req: Request) {
     const supabase = createServerClient()
     const { data: profile } = await supabase
       .from('users')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, stripe_subscription_id')
       .eq('clerk_id', userId)
       .maybeSingle()
 
+    // A subscriber already has Pro; a pass would buy nothing. (A pass during
+    // an active pass/referral grant is fine: the webhook extends it.)
+    if (isPass && profile?.stripe_subscription_id) {
+      return jsonWithRequestId(
+        { error: 'This plan is already active for your account.', alreadyActive: true, currentPlan: plan },
+        409,
+        requestId
+      )
+    }
+
     try {
       const stripe = getStripeClient()
-      const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        line_items: [
-          {
-            price: stripePriceId,
+      const lineItem = stripePriceId
+        ? { price: stripePriceId, quantity: 1 }
+        : {
+            price_data: {
+              currency: 'ron',
+              unit_amount: 3900, // 39.00 RON
+              product_data: {
+                name: 'Joben Pro - Pass Interviu (14 Zile)',
+                description: 'Acces complet Pro timp de 14 zile fără abonament recurent.',
+              },
+            },
             quantity: 1,
-          },
-        ],
-        success_url: `${appUrl}/${locale}/dashboard?upgrade=success`,
-        cancel_url: `${appUrl}/${locale}/dashboard?upgrade=cancelled`,
+          }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: isPass ? 'payment' : 'subscription',
+        line_items: [lineItem],
+        success_url: `${appUrl}/${locale}/dashboard?upgrade=success${isPass ? '&pass=14d' : ''}`,
+        cancel_url: `${appUrl}/${locale}/pricing?upgrade=cancelled`,
         metadata: {
           userId,
           planId: requestedPlan,

@@ -1,0 +1,120 @@
+{
+  "name": "Joben.eu - Social Listening & Lead Acquisition Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/programare/new.json?limit=25",
+        "options": {
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (compatible; JobenSocialBot/1.0; +https://joben.eu)"
+          }
+        }
+      },
+      "id": "fetch-reddit-programare",
+      "name": "Fetch r/programare",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/Romania/search.json?q=cv+OR+ats+OR+interviu&sort=new&limit=25",
+        "options": {
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (compatible; JobenSocialBot/1.0; +https://joben.eu)"
+          }
+        }
+      },
+      "id": "fetch-reddit-romania",
+      "name": "Fetch r/Romania",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const keywords = ['cv', 'ats', 'curriculum vitae', 'optimizare cv', 'refuzat', 'interviu', 'recrutare', 'parere cv', 'review cv'];\nconst output = [];\n\nfunction processPosts(posts, sub) {\n  for (const item of posts) {\n    const data = item.data;\n    if (!data) continue;\n    const title = (data.title || '').toLowerCase();\n    const body = (data.selftext || '').toLowerCase();\n    const fullText = title + ' ' + body;\n\n    const matched = keywords.filter(kw => fullText.includes(kw));\n    if (matched.length > 0) {\n      output.push({\n        json: {\n          source: 'reddit',\n          subredditOrGroup: sub,\n          platformUrl: `https://reddit.com${data.permalink}`,\n          author: data.author,\n          title: data.title,\n          body: data.selftext || '',\n          matchedKeywords: matched,\n          relevanceScore: Math.min(100, matched.length * 25)\n        }\n      });\n    }\n  }\n}\n\nconst items = $input.all();\nfor (const item of items) {\n  if (item.json?.data?.children) {\n    const sub = item.json.data.children[0]?.data?.subreddit || 'reddit';\n    processPosts(item.json.data.children, sub);\n  }\n}\n\nreturn output;"
+      },
+      "id": "filter-keywords",
+      "name": "Filter Relevant Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://joben.eu/api/webhooks/social-listening",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.SOCIAL_LISTENING_WEBHOOK_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "forward-to-joben-webhook",
+      "name": "Post to Joben Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          { "node": "Fetch r/programare", "type": "main", "index": 0 },
+          { "node": "Fetch r/Romania", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch r/programare": {
+      "main": [
+        [
+          { "node": "Filter Relevant Posts", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch r/Romania": {
+      "main": [
+        [
+          { "node": "Filter Relevant Posts", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Filter Relevant Posts": {
+      "main": [
+        [
+          { "node": "Post to Joben Webhook", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  }
+}

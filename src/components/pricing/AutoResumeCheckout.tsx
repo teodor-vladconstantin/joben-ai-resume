@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react'
 import { startCheckout, type PaidPlan } from '@/lib/client-billing'
 import type { AppLocale } from '@/i18n/routing'
 
-const VALID_PLANS: PaidPlan[] = ['pro', 'recruiting']
+const VALID_PLANS: PaidPlan[] = ['pro', 'recruiting', 'pass_14d']
 
 function isPaidPlan(value: string | null): value is PaidPlan {
   return value !== null && (VALID_PLANS as string[]).includes(value)
