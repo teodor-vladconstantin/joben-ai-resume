@@ -16,6 +16,7 @@ interface ReferralInfo {
   referralCredits: number
   referralLink: string
   proExpiresAt: string | null
+  hasSubscription: boolean
 }
 
 type ReferralResponse = Partial<ReferralInfo> & { success?: boolean; pending?: boolean }
@@ -68,6 +69,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
         referralCredits: json.referralCredits ?? 0,
         referralLink: json.referralLink,
         proExpiresAt: json.proExpiresAt ?? null,
+        hasSubscription: json.hasSubscription ?? false,
       }
       const expiry = info.proExpiresAt ? new Date(info.proExpiresAt) : null
       const proUntil = expiry && expiry.getTime() > Date.now() ? expiry : null
@@ -148,7 +150,9 @@ export function ReferralCard({ className = '' }: { className?: string }) {
 
       {proUntil ? (
         <p className="text-sm text-(--foreground) border-l-2 border-(--accent) pl-2">
-          {t('proUntil', { date: format.dateTime(proUntil, { dateStyle: 'long' }) })}
+          {info.hasSubscription
+            ? t('daysSavedForLater')
+            : t('proUntil', { date: format.dateTime(proUntil, { dateStyle: 'long' }) })}
         </p>
       ) : null}
 

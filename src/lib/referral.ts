@@ -43,13 +43,21 @@ export function extendExpiry(current: string | null | undefined, days: number, n
   return new Date(Math.max(now, currentMs) + days * DAY_MS).toISOString()
 }
 
+type PlanRow = { plan?: string | null; stripe_subscription_id?: string | null; lifetime_recruiting_unlocked?: boolean | null }
+
+// A subscription or Recruiting shadows pro_expires_at (see getUserPlan): the
+// granted days are kept and only count once that access ends.
+function hasSubscriptionAccess(user: PlanRow): boolean {
+  return Boolean(user.stripe_subscription_id) || user.plan === 'recruiting' || Boolean(user.lifetime_recruiting_unlocked)
+}
+
 // A time-limited grant only lifts free users; paid plans keep their stored plan.
-// Returns the new pro_expires_at.
-async function grantProDays(userClerkId: string, days: number): Promise<string> {
+// Returns the new pro_expires_at and whether a subscription shadows it.
+async function grantProDays(userClerkId: string, days: number): Promise<{ proUntil: string; hasSubscription: boolean }> {
   const supabase = createServerClient()
   const { data: user, error } = await supabase
     .from('users')
-    .select('plan, pro_expires_at')
+    .select('plan, pro_expires_at, stripe_subscription_id, lifetime_recruiting_unlocked')
     .eq('clerk_id', userClerkId)
     .maybeSingle()
   if (error || !user) throw new Error(`grantProDays lookup failed: ${error?.message ?? 'user not found'}`)
@@ -62,7 +70,7 @@ async function grantProDays(userClerkId: string, days: number): Promise<string> 
   const { error: updateError } = await supabase.from('users').update(update).eq('clerk_id', userClerkId)
   if (updateError) throw new Error(`grantProDays update failed: ${updateError.message}`)
   await invalidatePlanCache(userClerkId)
-  return update.pro_expires_at
+  return { proUntil: update.pro_expires_at, hasSubscription: hasSubscriptionAccess(user) }
 }
 
 export interface ReferralInfo {
@@ -71,6 +79,7 @@ export interface ReferralInfo {
   referralCredits: number
   referralLink: string
   proExpiresAt: string | null
+  hasSubscription: boolean
 }
 
 // null while the users row does not exist yet (Clerk webhook not synced).
@@ -78,7 +87,7 @@ export async function getUserReferralInfo(userId: string): Promise<ReferralInfo 
   const supabase = createServerClient()
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('referral_code, referral_count, referral_credits, pro_expires_at')
+    .select('referral_code, referral_count, referral_credits, pro_expires_at, plan, stripe_subscription_id, lifetime_recruiting_unlocked')
     .eq('clerk_id', userId)
     .maybeSingle()
   if (userError) throw new Error(`referral info lookup failed: ${userError.message}`)
@@ -116,6 +125,7 @@ export async function getUserReferralInfo(userId: string): Promise<ReferralInfo 
     referralCredits: user.referral_credits ?? 0,
     referralLink,
     proExpiresAt: user.pro_expires_at ?? null,
+    hasSubscription: hasSubscriptionAccess(user),
   }
 }
 
@@ -224,10 +234,10 @@ export async function processReferralAttribution(input: {
   // claim is released so the webhook retry redoes the whole attribution.
   // ponytail: if only the referrer grant fails, the retry grants the new user
   // again (+3 days twice); a per-side granted flag would close that.
-  let referrerProUntil: string | null = null
+  let referrerGrant: { proUntil: string; hasSubscription: boolean } | null = null
   try {
     await grantProDays(input.newUserId, REFERRED_REWARD_DAYS)
-    if (!capped) referrerProUntil = await grantProDays(referrer.clerk_id, REFERRER_REWARD_DAYS)
+    if (!capped) referrerGrant = await grantProDays(referrer.clerk_id, REFERRER_REWARD_DAYS)
   } catch (error) {
     const { error: releaseError } = await supabase
       .from('referrals')
@@ -271,13 +281,14 @@ export async function processReferralAttribution(input: {
 
     // Best-effort: the grant is already done, so a failed email must neither
     // undo it nor make the webhook retry.
-    if (referrer.email && referrerProUntil) {
+    if (referrer.email && referrerGrant) {
       try {
         const sent = await sendReferralRewardEmail({
           to: referrer.email,
           locale: await getUserLocale(referrer.clerk_id),
           days: REFERRER_REWARD_DAYS,
-          proUntil: referrerProUntil,
+          proUntil: referrerGrant.proUntil,
+          hasSubscription: referrerGrant.hasSubscription,
           remainingRewards: Math.max(0, MAX_REWARDED_REFERRALS_TOTAL - newReferralCount),
         })
         if (!sent.success) {

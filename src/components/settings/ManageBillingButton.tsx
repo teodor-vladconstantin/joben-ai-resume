@@ -7,10 +7,10 @@ import { checkoutErrorKey, startBillingPortal, startProCheckout } from '@/lib/cl
 import type { AppLocale } from '@/i18n/routing'
 
 type ManageBillingButtonProps = {
-  hasStripeCustomer: boolean
+  hasSubscription: boolean
 }
 
-export function ManageBillingButton({ hasStripeCustomer }: ManageBillingButtonProps) {
+export function ManageBillingButton({ hasSubscription }: ManageBillingButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const locale = useLocale() as AppLocale
@@ -20,13 +20,13 @@ export function ManageBillingButton({ hasStripeCustomer }: ManageBillingButtonPr
     setLoading(true)
     setError(null)
     try {
-      if (hasStripeCustomer) {
+      if (hasSubscription) {
         await startBillingPortal(locale)
       } else {
         await startProCheckout(locale)
       }
     } catch (err) {
-      setError(hasStripeCustomer ? t('couldNotOpenPortal') : t(checkoutErrorKey(err)))
+      setError(hasSubscription ? t('couldNotOpenPortal') : t(checkoutErrorKey(err)))
       setLoading(false)
     }
   }
@@ -34,7 +34,7 @@ export function ManageBillingButton({ hasStripeCustomer }: ManageBillingButtonPr
   return (
     <div>
       <Button variant="secondary" size="sm" onClick={handleClick} disabled={loading}>
-        {loading ? '...' : hasStripeCustomer ? t('manageBilling') : t('upgradeToPro')}
+        {loading ? '...' : hasSubscription ? t('manageBilling') : t('upgradeToPro')}
       </Button>
       {error ? <p className="mt-2 text-xs text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
     </div>

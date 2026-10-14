@@ -40,7 +40,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
   const supabase = createServerClient()
   const { data: profile } = await supabase
     .from('users')
-    .select('stripe_customer_id, stripe_subscription_id, pro_expires_at')
+    .select('stripe_subscription_id, pro_expires_at')
     .eq('clerk_id', userId)
     .maybeSingle()
 
@@ -49,7 +49,9 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
     !profile?.stripe_subscription_id && plan === 'pro' && profile?.pro_expires_at
       ? new Date(profile.pro_expires_at)
       : null
-  const hasStripeCustomer = Boolean(profile?.stripe_customer_id)
+  // Only a subscription has something to manage in the portal; pass holders
+  // (who also have a Stripe customer) get the upgrade path.
+  const hasSubscription = Boolean(profile?.stripe_subscription_id)
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ro' ? 'ro-RO' : 'en-GB', { dateStyle: 'long' })
 
   return (
@@ -110,12 +112,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                     {t('billing.grantActiveUntil', { date: dateFormatter.format(grantExpiresAt) })}
                   </p>
                 ) : null}
-                {hasStripeCustomer || plan !== 'recruiting' ? (
+                {hasSubscription || plan !== 'recruiting' ? (
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-(--muted)">
-                      {profile?.stripe_subscription_id ? t('billing.subscription') : t('billing.plan')}
+                      {hasSubscription ? t('billing.subscription') : t('billing.plan')}
                     </div>
-                    <ManageBillingButton hasStripeCustomer={hasStripeCustomer} />
+                    <ManageBillingButton hasSubscription={hasSubscription} />
                   </div>
                 ) : null}
               </div>

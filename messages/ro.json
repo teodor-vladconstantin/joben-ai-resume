@@ -1528,6 +1528,7 @@
     "invitedLabel": "Prieteni invitați",
     "daysEarned": "{days, plural, one {# zi câștigată} few {# zile câștigate} other {# de zile câștigate}}",
     "proUntil": "Ai acces Pro până pe {date}.",
+    "daysSavedForLater": "Zilele Pro câștigate sunt salvate și se aplică după ce se încheie abonamentul tău.",
     "linkLabel": "Linkul tău de recomandare",
     "copy": "Copiază",
     "copied": "Copiat",
