@@ -64,6 +64,7 @@ type UserRow = {
   pro_expires_at: string | null
   referral_code: string | null
   created_at: string
+  stripe_subscription_id?: string | null
 }
 type ReferralRow = { referrer_id: string; referred_user_id: string; status: string; reward_days_granted: number; created_at: string }
 type Op = { table: string; kind: 'select' | 'insert' | 'update' | 'delete'; payload?: Record<string, unknown>; filters: Record<string, unknown>; gte: Record<string, string>; count: boolean }
@@ -159,9 +160,20 @@ describe('processReferralAttribution', () => {
         locale: 'en',
         days: 7,
         proUntil: users.find((u) => u.clerk_id === 'referrer')?.pro_expires_at,
+        hasSubscription: false,
         remainingRewards: 9,
       })
     )
+  })
+
+  it('tells a subscribed referrer the days are saved (no "Pro until" date)', async () => {
+    const { users, referrals } = seed()
+    Object.assign(users[0], { plan: 'pro', stripe_subscription_id: 'sub_1' })
+    createServerClientMock.mockReturnValue(fakeDb(users, referrals))
+
+    await processReferralAttribution({ newUserId: 'newbie', referralCode: 'JOBEN-AAAA2222' })
+
+    expect(sendReferralRewardEmailMock).toHaveBeenCalledWith(expect.objectContaining({ hasSubscription: true }))
   })
 
   it('caps the referrer at 10 rewards in total, even when they are old', async () => {

@@ -1528,6 +1528,7 @@
     "invitedLabel": "Friends invited",
     "daysEarned": "{days, plural, one {# day earned} other {# days earned}}",
     "proUntil": "You have Pro access until {date}.",
+    "daysSavedForLater": "Your earned Pro days are saved and apply after your subscription ends.",
     "linkLabel": "Your referral link",
     "copy": "Copy",
     "copied": "Copied",
