@@ -120,17 +120,17 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
           </p>
         </div>
 
-        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-3 md:divide-x md:divide-y-0">
+        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
           {pricing.plans.map((plan, index) => {
             const meta = pricingPlanMeta[index]
             return (
               <div
                 key={index}
-                className={`flex flex-col p-6 ${meta.isBestValue ? 'bg-(--accent-muted)' : ''}`}
+                className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-(--accent-muted)' : ''}`}
               >
-                {meta.isBestValue && (
-                  <p className="mb-4 font-mono text-(length:--text-label) text-(--foreground)">{Common.bestValue}</p>
-                )}
+                {plan.badge ? (
+                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{plan.badge}</p>
+                ) : null}
 
                 <h3 className="text-xl font-semibold text-(--foreground)">{plan.name}</h3>
                 <p className="text-(--muted) text-xs mt-1">{plan.description}</p>
@@ -155,12 +155,13 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                 <PlanCta
                   label={plan.cta}
                   plan={meta.planId}
-                  className={`w-full text-center ${buttonVariants(meta.isBestValue || meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
+                  className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
                 />
               </div>
             )
           })}
         </div>
+        <p className="mt-4 text-xs text-(--muted)">{pricing.vatNote}</p>
       </main>
     </div>
   )

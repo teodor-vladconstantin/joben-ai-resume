@@ -258,18 +258,18 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
             <p className="text-(--muted)">{home.pricingTeaserSubheading}</p>
           </div>
 
-          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-3 md:divide-x md:divide-y-0" suppressHydrationWarning>
+          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x" suppressHydrationWarning>
             {pricing.plans.map((plan, index) => {
               const meta = pricingPlanMeta[index]
               return (
                 <div
                   key={index}
-                  className={`flex flex-col p-8 ${meta.isBestValue ? 'bg-(--accent-muted)' : ''}`}
+                  className={`flex flex-col p-8 ${meta.isPrimary ? 'bg-(--accent-muted)' : ''}`}
                   suppressHydrationWarning
                 >
-                  {meta.isBestValue && (
-                    <p className="mb-4 font-mono text-(length:--text-label) text-(--foreground)">{Common.bestValue}</p>
-                  )}
+                  {plan.badge ? (
+                    <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{plan.badge}</p>
+                  ) : null}
 
                   <h3 className="text-xl font-bold text-(--foreground)">{plan.name}</h3>
                   <p className="text-(--muted) text-sm mt-2 mb-6">{plan.description}</p>
@@ -285,12 +285,13 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   <PlanCta
                     label={plan.cta}
                     plan={meta.planId}
-                    className={`w-full text-center ${buttonVariants(meta.isBestValue || meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
+                    className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
                   />
                 </div>
               )
             })}
           </div>
+          <p className="mt-4 text-xs text-(--muted)">{pricing.vatNote}</p>
         </section>
 
         {/* FAQ */}

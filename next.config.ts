@@ -1,6 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next'
+import { SEO_JOBS } from './src/data/seo-jobs'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -126,6 +127,13 @@ const SECURITY_HEADERS = [
   },
 ]
 
+const PDF_EXTRACTION_TRACE_INCLUDES = [
+  './node_modules/@napi-rs/canvas/**/*',
+  './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
+  './node_modules/@napi-rs/canvas-linux-x64-musl/**/*',
+  './node_modules/pdfjs-dist/legacy/build/**/*',
+]
+
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
   // pdfjs-dist (used by /api/public/ats-check for local PDF text extraction)
@@ -156,13 +164,11 @@ const nextConfig: NextConfig = {
   // "Cannot find module '/var/task/node_modules/pdfjs-dist/legacy/build/
   // pdf.worker.mjs'". Including the whole legacy/build directory covers
   // that file (and its .map) without hardcoding filenames.
+  // Every route that calls extractTextFromPdf needs these files: add new
+  // PDF-reading routes to this map or extraction fails only on Vercel.
   outputFileTracingIncludes: {
-    '/api/public/ats-check': [
-      './node_modules/@napi-rs/canvas/**/*',
-      './node_modules/@napi-rs/canvas-linux-x64-gnu/**/*',
-      './node_modules/@napi-rs/canvas-linux-x64-musl/**/*',
-      './node_modules/pdfjs-dist/legacy/build/**/*',
-    ],
+    '/api/public/ats-check': PDF_EXTRACTION_TRACE_INCLUDES,
+    '/api/public/ats-fast-check': PDF_EXTRACTION_TRACE_INCLUDES,
   },
   async headers() {
     return [
@@ -170,6 +176,27 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: SECURITY_HEADERS,
       },
+    ]
+  },
+  // /cv/{slug} was merged into /resume-examples/{role}. Every slug (ro or en)
+  // under either locale 301s to that locale's matching role page; anything
+  // else under /cv falls through to the hub.
+  async redirects() {
+    const cvRedirects = SEO_JOBS.flatMap((job) =>
+      (['ro', 'en'] as const).flatMap((locale) =>
+        [...new Set([job.slug.ro, job.slug.en])].map((slug) => ({
+          source: `/${locale}/cv/${slug}`,
+          destination: `/${locale}/resume-examples/${job.resumeRoleSlug[locale]}`,
+          statusCode: 301 as const,
+        }))
+      )
+    )
+    return [
+      ...cvRedirects,
+      { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
+      // The instant checker was folded into the single ATS checker (lead magnet).
+      { source: '/:locale(ro|en)/verificare-cv', destination: '/:locale/free-ats-checker', statusCode: 301 as const },
+      { source: '/verificare-cv', destination: '/ro/free-ats-checker', statusCode: 301 as const },
     ]
   },
   async rewrites() {

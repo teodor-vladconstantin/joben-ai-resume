@@ -5,7 +5,7 @@ import { Link } from '@/i18n/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
-import { startCheckout, type PaidPlan } from '@/lib/client-billing'
+import { checkoutErrorKey, startCheckout, type PaidPlan } from '@/lib/client-billing'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import type { AppLocale } from '@/i18n/routing'
 
@@ -48,7 +48,7 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
     try {
       await startCheckout(plan, locale)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('couldNotStartCheckout'))
+      setError(t(checkoutErrorKey(err)))
       setLoading(false)
     }
   }

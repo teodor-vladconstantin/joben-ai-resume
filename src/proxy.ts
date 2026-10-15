@@ -25,7 +25,14 @@ const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/inges
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect()
+    // Redirect to our own embedded sign-in page, not Clerk's hosted portal.
+    const { userId } = await auth()
+    if (!userId) {
+      const locale = req.nextUrl.pathname.split('/')[1]
+      const url = new URL(`/${locale}/sign-in`, req.url)
+      url.searchParams.set('redirect_url', req.nextUrl.pathname + req.nextUrl.search)
+      return NextResponse.redirect(url)
+    }
   }
 
   if (isUnlocalizedRoute(req)) {
@@ -43,6 +50,20 @@ export default clerkMiddleware(async (auth, req) => {
 
   const res = intlMiddleware(req)
   res.headers.append('Vary', 'Accept')
+
+  // Referral link: first touch wins for 30 days. Readable by the sign-up page,
+  // which copies it into Clerk unsafeMetadata; the webhook re-validates it.
+  const refCode = (req.nextUrl.searchParams.get('ref') || '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 30)
+  if (refCode && !req.cookies.has('jb_ref')) {
+    res.cookies.set('jb_ref', refCode, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+    })
+  }
+
   return res
 })
 

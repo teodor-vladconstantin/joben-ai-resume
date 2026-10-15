@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { clientErrorMessage } from '@/lib/security/client-error'
+import { invalidatePlanCache } from '@/lib/ratelimit'
 import {
   bumpCounter,
   checkRouteRateLimit,
@@ -306,6 +307,9 @@ export async function POST(req: Request) {
         requestId
       )
     }
+
+    // The cached plan would keep the old limits for up to an hour.
+    await invalidatePlanCache(userId)
 
     // error level so every redemption reaches the alert channel (Sentry/webhook).
     logger.error('Lifetime recruiting code redeemed (audit alert)', {

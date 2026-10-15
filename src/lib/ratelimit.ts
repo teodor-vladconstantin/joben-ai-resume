@@ -2,6 +2,7 @@ import type { Redis } from '@upstash/redis'
 import { logger } from '@/lib/logger'
 import { getUpstashClient } from '@/lib/upstash'
 import { getUserPlan as resolveUserPlan } from '@/lib/plans'
+import { createServerClient } from '@/lib/supabase/server'
 
 export type Plan = 'free' | 'pro' | 'recruiting'
 export type Feature = 'covers' | 'jds' | 'bullets' | 'reviews' | 'summaries' | 'cvs'
@@ -211,6 +212,34 @@ export function getRedisClient(): Redis | null {
   return redis
 }
 
+// Call after any write to users.plan / pro_expires_at / stripe_subscription_id
+// so usage meters reflect the change immediately. Best-effort.
+export async function invalidatePlanCache(userId: string): Promise<void> {
+  if (!redis) return
+  try {
+    await redis.del(`plan:${userId}`)
+  } catch (error) {
+    logRedisFailure('Could not invalidate plan cache', {
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+}
+
+// A time-limited Pro grant (pass/referral) must not outlive pro_expires_at in
+// the cache. Subscriptions are invalidated by the Stripe webhook instead.
+async function planCacheTtlSeconds(userId: string, plan: Plan): Promise<number> {
+  if (plan !== 'pro') return PLAN_CACHE_TTL_SECONDS
+  const { data } = await createServerClient()
+    .from('users')
+    .select('pro_expires_at, stripe_subscription_id')
+    .eq('clerk_id', userId)
+    .maybeSingle()
+  if (!data?.pro_expires_at || data.stripe_subscription_id) return PLAN_CACHE_TTL_SECONDS
+  const secondsLeft = Math.floor((new Date(data.pro_expires_at).getTime() - Date.now()) / 1000)
+  return Math.min(PLAN_CACHE_TTL_SECONDS, Math.max(60, secondsLeft))
+}
+
 // Cached wrapper around @/lib/plans's getUserPlan(), which stays the single
 // source of truth for DB resolution + GOD_MODE_EMAILS + lifetime_recruiting
 // override. Previously this function duplicated that entire resolution body
@@ -238,7 +267,7 @@ export async function getUserPlan(userId: string): Promise<Plan> {
 
     if (redis) {
       try {
-        await redis.setex(planCacheKey, PLAN_CACHE_TTL_SECONDS, resolvedPlan)
+        await redis.setex(planCacheKey, await planCacheTtlSeconds(userId, resolvedPlan), resolvedPlan)
       } catch (error) {
         logRedisFailure('Could not write plan cache to Redis', {
           userId,

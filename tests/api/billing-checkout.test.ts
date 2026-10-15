@@ -24,8 +24,10 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('@/lib/plans', () => ({
   getUserPlan: getUserPlanMock,
   getEmailHintFromSessionClaims: getEmailHintFromSessionClaimsMock,
-  getPriceIdForPlan: (plan: 'pro' | 'recruiting') =>
-    plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID,
+  getPriceIdForPlan: (plan: 'pro' | 'recruiting' | 'pass_14d') =>
+    plan === 'pass_14d'
+      ? undefined
+      : plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID,
 }))
 
 vi.mock('@/lib/security/route-rate-limit', () => ({
@@ -50,6 +52,18 @@ vi.mock('stripe', () => ({
     return { checkout: { sessions: { create: sessionsCreateMock } } }
   }),
 }))
+
+function mockProfile(data: { stripe_customer_id: string | null; stripe_subscription_id: string | null }) {
+  createServerClientMock.mockReturnValue({
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
+        })),
+      })),
+    })),
+  })
+}
 
 function makeRequest(body?: unknown) {
   if (body === undefined) {
@@ -143,14 +157,125 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled()
   })
 
-  it('returns 409 instead of opening a second subscription when the user is already on Pro', async () => {
+  it('returns 409 instead of opening a second subscription when the user is already subscribed to Pro', async () => {
     getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1' })
     const { POST } = await import('@/app/api/billing/checkout/route')
 
     const response = await POST(makeRequest())
+    const payload = (await response.json()) as { error?: string }
+
+    expect(response.status).toBe(409)
+    expect(payload.error).toBe('already_active')
+    expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 409 for a Recruiting checkout while a Pro subscription is active (upgrade via the portal)', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1' })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'recruiting' }))
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ error: 'already_active' })
+    expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it('lets a pass or referral holder subscribe to Recruiting', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: null })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'recruiting' }))
+
+    expect(response.status).toBe(200)
+  })
+
+  it('lets a pass or referral holder (Pro without a subscription) subscribe to Pro', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: null })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'pro' }))
+
+    expect(response.status).toBe(200)
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'subscription', customer: 'cus_1' })
+    )
+  })
+
+  it('returns 409 for the 14-day pass when the user already has a subscription', async () => {
+    getUserPlanMock.mockResolvedValue('pro')
+    createServerClientMock.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1' },
+              error: null,
+            }),
+          })),
+        })),
+      })),
+    })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'pass_14d' }))
 
     expect(response.status).toBe(409)
     expect(sessionsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it('sells the 14-day pass as a one-time 39 RON card payment with withdrawal consent', async () => {
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest({ plan: 'pass_14d', locale: 'en' }))
+
+    expect(response.status).toBe(200)
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'payment',
+        locale: 'en',
+        payment_method_types: ['card'],
+        customer_creation: 'always',
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message: expect.stringContaining('https://app.example.com/en/terms'),
+          },
+        },
+        line_items: [
+          expect.objectContaining({
+            price_data: expect.objectContaining({
+              currency: 'ron',
+              unit_amount: 3900,
+              product_data: expect.objectContaining({ name: 'Joben Interview Pass (14 days)' }),
+            }),
+          }),
+        ],
+        metadata: expect.objectContaining({ planId: 'pass_14d' }),
+      })
+    )
+  })
+
+  it('does not set customer_creation for a pass when the Stripe customer already exists', async () => {
+    mockProfile({ stripe_customer_id: 'cus_1', stripe_subscription_id: null })
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    await POST(makeRequest({ plan: 'pass_14d' }))
+
+    const args = sessionsCreateMock.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(args.customer).toBe('cus_1')
+    expect(args).not.toHaveProperty('customer_creation')
+  })
+
+  it('returns the unavailable code when checkout is paused', async () => {
+    process.env.CHECKOUT_DISABLED = 'true'
+    const { POST } = await import('@/app/api/billing/checkout/route')
+
+    const response = await POST(makeRequest())
+    expect(await response.json()).toMatchObject({ error: 'unavailable' })
   })
 
   it('returns 503 without leaking which var is missing when Stripe env is incomplete', async () => {
@@ -187,7 +312,7 @@ describe('POST /api/billing/checkout', () => {
         mode: 'subscription',
         line_items: [{ price: 'price_dummy', quantity: 1 }],
         success_url: 'https://app.example.com/ro/dashboard?upgrade=success',
-        cancel_url: 'https://app.example.com/ro/dashboard?upgrade=cancelled',
+        cancel_url: 'https://app.example.com/ro/pricing?upgrade=cancelled',
         metadata: { userId: 'user_123', planId: 'pro' },
         customer: 'cus_existing',
         customer_email: undefined,

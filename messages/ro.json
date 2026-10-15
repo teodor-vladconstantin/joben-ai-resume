@@ -6,11 +6,11 @@
     },
     "pricing": {
       "title": "Prețuri | Joben, Editor de CV cu AI",
-      "description": "Planuri Gratuit, Pro și Recrutare pentru construirea de CV-uri cu AI. Începi gratuit, faci upgrade când ai nevoie de funcții AI."
+      "description": "Planuri Gratuit, Pro și Recrutare plus Pass Interviu de 14 zile cu plată unică (39 RON) pentru construirea de CV-uri cu AI. Începi gratuit, faci upgrade când ai nevoie de funcții AI."
     },
     "atsChecker": {
-      "title": "Evaluator CV ATS Gratuit: Fără Cont Necesar | Joben",
-      "description": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete: fără cont, fără card, 1 scanare gratuită pe zi."
+      "title": "Verificare CV ATS Gratuită: Analiză AI, Fără Cont | Joben",
+      "description": "Verificare CV gratuită cu analiză AI în câteva secunde: scor de la 0 la 100, 4 categorii și soluții concrete. Fără cont, fără card, o scanare pe zi."
     },
     "resumeExamplesHub": {
       "title": "Exemple de CV și Cuvinte Cheie ATS pe Roluri | Joben",
@@ -182,7 +182,8 @@
   },
   "Pricing": {
     "heading": "Prețuri simple, transparente",
-    "subheading": "Începi gratuit. Faci upgrade când ai nevoie de funcții AI.",
+    "subheading": "Începi gratuit. Faci upgrade la Pro lunar sau iei Pass-ul de 14 zile cu plată unică pentru o căutare intensă de job.",
+    "vatNote": "Prețuri finale. Furnizorul nu este plătitor de TVA.",
     "plans": [
       {
         "name": "Gratuit",
@@ -206,6 +207,26 @@
         "cta": "Începe Gratuit"
       },
       {
+        "name": "Pass Interviu (14 Zile)",
+        "description": "Ideal pentru sprint-ul de aplicare și interviuri din următoarele 2 săptămâni.",
+        "price": "39 RON",
+        "pricePeriod": "/plată unică",
+        "features": [
+          "Acces complet Pro timp de 14 zile",
+          "Plată unică pentru 14 zile",
+          "Salvezi până la 3 CV-uri",
+          "Exporturi PDF nelimitate",
+          "60 scrisori de intenție AI / lună",
+          "60 adaptări de CV (CV vs job description) / lună",
+          "200 rescrieri AI de puncte / lună",
+          "100 evaluări AI ale CV-ului / lună",
+          "Suport prioritar prin email"
+        ],
+        "excludedFeatures": [],
+        "cta": "Ia Pass-ul (39 RON)",
+        "badge": "Plată unică, 14 zile"
+      },
+      {
         "name": "Pro",
         "description": "Pentru cei care caută activ un job și aplică constant.",
         "price": "59 RON",
@@ -217,6 +238,7 @@
           "60 scrisori de intenție AI / lună",
           "60 adaptări de CV (CV vs job description) / lună",
           "200 rescrieri AI de puncte / lună",
+          "100 evaluări AI ale CV-ului / lună",
           "Suport prioritar prin email"
         ],
         "excludedFeatures": [],
@@ -245,7 +267,7 @@
   "AtsChecker": {
     "eyebrow": "Evaluator CV ATS Gratuit",
     "heading": "Evaluator CV ATS Gratuit: Fără Cont Necesar",
-    "subheading": "Scanează-ți CV-ul cu softuri ATS reale, în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și reparații concrete.",
+    "subheading": "Analiză AI a CV-ului tău în câteva secunde. Primești un scor gratuit de la 0 la 100, o analiză pe 4 categorii și soluții concrete.",
     "categoryLabels": {
       "formatting": "Formatare ATS",
       "structure": "Structură",
@@ -333,10 +355,38 @@
     "weak": "Slab",
     "strong": "Puternic",
     "scoreCtaHeading": "Ce scor are, de fapt, CV-ul tău de {role}?",
-    "scoreCtaSubheading": "Primești un scor ATS gratuit de la 0 la 100 în câteva secunde. Fără cont.",
+    "scoreCtaSubheading": "Primești gratuit un scor ATS de la 0 la 100. Fără cont.",
     "scoreCtaButton": "Verifică-mi CV-ul de {role}, Gratuit",
     "faqKeywordsQuestion": "Ce cuvinte cheie ar trebui să conțină un CV de {roleLower} pentru ATS?",
-    "faqMistakesQuestion": "Care sunt greșelile frecvente în CV-urile candidaților de {roleLower}?"
+    "faqMistakesQuestion": "Care sunt greșelile frecvente în CV-urile candidaților de {roleLower}?",
+    "toolsHeading": "Unelte și tehnologii de menționat",
+    "certificationsHeading": "Certificări relevante",
+    "checklistHeading": "Checklist ATS pentru CV-ul de {roleLower}",
+    "coverLetterHeading": "Ai nevoie și de o scrisoare de intenție?",
+    "coverLetterBody": "Vezi un model complet de scrisoare de intenție pentru {role}.",
+    "coverLetterButton": "Vezi modelul de scrisoare"
+  },
+  "SeoCoverLetter": {
+    "metaTitle": "Model scrisoare de intenție {role} | Joben",
+    "metaDescription": "Model complet de scrisoare de intenție pentru {role}, cu paragrafe exemplu și sfaturi bazate pe uneltele și certificările din domeniu.",
+    "eyebrow": "Model scrisoare de intenție",
+    "heading": "Scrisoare de intenție pentru {role}",
+    "subheading": "Un model complet pe care îl adaptezi cu experiența ta, manual sau cu asistentul AI Joben.",
+    "fieldLabel": "Domeniu: {category}",
+    "sampleHeading": "Model complet de scrisoare pentru {role}",
+    "sampleHint": "Înlocuiește datele din paranteze drepte cu informațiile tale reale. Cifrele din exemplu sunt ilustrative: folosește rezultatele tale.",
+    "signature": "[Numele și prenumele] • [Telefon] • [Profil LinkedIn]",
+    "generateCta": "Generează cu AI",
+    "rulesHeading": "3 reguli pentru scrisoarea de {roleLower}",
+    "rule1Title": "Deschide cu un rezultat măsurabil",
+    "rule1Body": "Un exemplu din acest domeniu: „{bullet}”",
+    "rule2Title": "Numește uneltele din anunț",
+    "rule2Body": "Dacă lucrezi cu {tools}, scrie-le exact cum apar în anunțul de job.",
+    "rule3Title": "Leagă certificările de rezultate",
+    "rule3Body": "O certificare precum {certification} contează mai mult când arăți proiectul în care ai aplicat-o.",
+    "resumeCtaHeading": "Vezi și exemplele de CV pentru {role}",
+    "resumeCtaBody": "Cuvinte cheie ATS, unelte, certificări și exemple de puncte pentru același domeniu.",
+    "resumeCtaButton": "Vezi exemplele de CV"
   },
   "Faq": [
     {
@@ -366,6 +416,10 @@
     {
       "question": "Pot anula planul plătit oricând?",
       "answer": "Da. Îți poți gestiona facturarea din cont și anula oricând vrei. Perioada curentă rămâne activă până la final."
+    },
+    {
+      "question": "Cum funcționează Pass-ul Interviu de 14 zile?",
+      "answer": "Plătești o singură dată 39 RON și primești acces Pro timp de 14 zile de la plată. Pass-ul nu se reînnoiește automat, iar la expirare contul revine la planul Gratuit, cu limitele lui. Dacă mai cumperi un pass cât timp e activ, zilele se adaugă. La plată soliciți începerea imediată a accesului, așa că dreptul de retragere de 14 zile se pierde odată ce accesul începe."
     },
     {
       "question": "Datele CV-ului meu sunt în siguranță?",
@@ -465,7 +519,12 @@
     "redirectingToCheckout": "Te redirecționăm către plata securizată...",
     "somethingWentWrong": "Ceva nu a mers bine. Încearcă din nou.",
     "manageBilling": "Gestionează Facturarea",
-    "upgradeToPro": "Treci la Pro"
+    "upgradeToPro": "Treci la Pro",
+    "buyPass": "Pass 14 zile (39 RON)",
+    "alreadyActive": "Planul acesta este deja activ pe contul tău.",
+    "checkoutUnavailable": "Plățile sunt temporar indisponibile. Încearcă din nou mai târziu.",
+    "passSuccess": "Plata a fost primită. Pass-ul tău Pro este activ până la {date}.",
+    "passPending": "Plata a fost primită. Pass-ul tău Pro se activează în câteva momente; reîncarcă pagina dacă nu apare."
   },
   "Shared": {
     "close": "Închide",
@@ -641,7 +700,7 @@
       "metaTitle": "Politica de Confidențialitate | Joben, generator de CV-uri cu AI",
       "metaDescription": "Citește politica de confidențialitate Joben. Află cum generatorul nostru gratuit de CV-uri cu AI gestionează, protejează și procesează datele tale personale.",
       "heading": "Politica de Confidențialitate",
-      "lastUpdated": "7 octombrie 2026",
+      "lastUpdated": "14 octombrie 2026",
       "intro": "Această politică descrie modul în care gestionăm informațiile tale atunci când folosești Joben.",
       "breadcrumbLabel": "Politica de Confidențialitate",
       "footerPrefix": "Citește ",
@@ -674,7 +733,7 @@
         },
         {
           "title": "7. Retenția datelor",
-          "content": "Date de cont, CV, scrisoare de intenție și analiză AI: păstrate cât timp contul este activ și șterse imediat la ștergerea contului. Evidențe de facturare: păstrate de Stripe conform propriilor cerințe de conformitate. Formulare de feedback: păstrate 24 de luni. Jurnale de webhook și evenimente de analiză: păstrate până la 12 luni pentru securitate și depanare, apoi șterse. Jurnale de monitorizare a erorilor (Sentry): păstrate conform ferestrei implicite de 90 de zile a furnizorului. Date de limitare a ratei (Redis): expiră automat, de la câteva ore până la o lună, în funcție de fereastra limitei."
+          "content": "Date de cont, CV, scrisoare de intenție și analiză AI: păstrate cât timp contul este activ și șterse imediat la ștergerea contului. Programul de recomandări: când cineva își face cont prin linkul tău de recomandare, sau tu îți faci cont prin linkul altcuiva, stocăm cine pe cine a recomandat, codul de recomandare folosit, data și zilele Pro acordate fiecărei părți; folosim aceste date doar pentru a acorda recompensele și pentru a aplica limita de 5 recomandări recompensate la 30 de zile. Aceste înregistrări sunt păstrate cât timp conturile implicate sunt active și sunt șterse odată cu oricare dintre conturi. Evidențe de facturare: păstrate de Stripe conform propriilor cerințe de conformitate. Formulare de feedback: păstrate 24 de luni. Jurnale de webhook și evenimente de analiză: păstrate până la 12 luni pentru securitate și depanare, apoi șterse. Jurnale de monitorizare a erorilor (Sentry): păstrate conform ferestrei implicite de 90 de zile a furnizorului. Date de limitare a ratei (Redis): expiră automat, de la câteva ore până la o lună, în funcție de fereastra limitei."
         },
         {
           "title": "8. Securitate",
@@ -710,7 +769,7 @@
       "metaTitle": "Termeni și Condiții | Joben, generator de CV-uri cu AI",
       "metaDescription": "Citește termenii și condițiile de utilizare Joben. Înțelege regulile, ghidurile și acordurile pentru folosirea generatorului nostru gratuit de CV-uri cu AI și a uneltelor de optimizare ATS.",
       "heading": "Termeni și Condiții",
-      "lastUpdated": "2 octombrie 2026",
+      "lastUpdated": "14 octombrie 2026",
       "intro": "Te rugăm să citești acești termeni cu atenție înainte de a folosi Joben.",
       "breadcrumbLabel": "Termeni și Condiții",
       "footerPrefix": "Citește ",
@@ -735,7 +794,11 @@
         },
         {
           "title": "5. Facturare, upgrade-uri și rambursări",
-          "content": "Planurile plătite sunt facturate conform prețurilor afișate la finalizarea comenzii. Se pot aplica taxe. Cu excepția cazurilor prevăzute de lege, sumele plătite nu sunt rambursabile."
+          "content": "Planurile plătite sunt facturate conform prețurilor afișate la finalizarea comenzii. Prețurile afișate sunt finale; furnizorul nu este plătitor de TVA. Cu excepția cazurilor prevăzute de lege, sumele plătite nu sunt rambursabile."
+        },
+        {
+          "title": "5.1. Dreptul de retragere",
+          "content": "Ca și consumator, ai în general un drept de retragere de 14 zile pentru contractele încheiate la distanță (OUG nr. 34/2014). Pentru Pass-ul Interviu de 14 zile, accesul Pro începe imediat după plată. La finalizarea comenzii îți exprimi acordul expres pentru începerea imediată a accesului și iei la cunoștință că pierzi dreptul de retragere odată ce accesul începe (art. 16 lit. m din OUG nr. 34/2014)."
         },
         {
           "title": "6. Utilizare acceptabilă",
@@ -779,7 +842,7 @@
       "metaTitle": "Politica de Cookie-uri | Joben, generator de CV-uri cu AI",
       "metaDescription": "Află ce cookie-uri folosește Joben, de ce și cum le poți controla.",
       "heading": "Politica de Cookie-uri",
-      "lastUpdated": "2 octombrie 2026",
+      "lastUpdated": "14 octombrie 2026",
       "intro": "Această pagină listează fiecare cookie pe care Joben îl setează, de ce și cât timp este valabil. Îți poți schimba alegerea oricând, ștergând stocarea locală a browserului pentru acest site, sau folosind bannerul de cookie-uri afișat la prima vizită.",
       "breadcrumbLabel": "Politica de Cookie-uri",
       "footerPrefix": "Citește ",
@@ -815,6 +878,12 @@
           "provider": "Clerk",
           "purpose": "Token de autentificare folosit pentru securizarea sesiunii.",
           "duration": "Sesiune"
+        },
+        {
+          "name": "jb_ref",
+          "provider": "Joben",
+          "purpose": "Funcțional (atribuirea recomandărilor). Setat doar când deschizi un link de recomandare; reține codul de recomandare pentru ca persoana care te-a invitat să primească recompensa dacă îți faci cont. Conține doar acel cod.",
+          "duration": "30 de zile"
         }
       ],
       "analyticsCookies": [
@@ -1135,7 +1204,7 @@
     },
     "cancelButton": "Anulează",
     "saveChangesButton": "Salvează Modificările",
-    "upgradeDefaultMessage": "Deblochează generare AI nelimitată de scrisori de intenție cu Pro.",
+    "upgradeDefaultMessage": "Primești 60 de scrisori de intenție AI pe lună cu Pro.",
     "errors": {
       "generateDraft": "Ciorna nu a putut fi generată.",
       "generateDraftAiUpgrade": "Această acțiune AI este disponibilă cu Pro.",
@@ -1172,7 +1241,9 @@
       "title": "Facturare",
       "description": "Gestionează-ți abonamentul și metodele de plată.",
       "currentPlan": "Plan curent",
-      "subscription": "Abonament"
+      "subscription": "Abonament",
+      "plan": "Plan",
+      "grantActiveUntil": "Pass/Pro activ până la {date}"
     },
     "notifications": {
       "title": "Notificări",
@@ -1263,7 +1334,7 @@
       "notReviewedYet": "Neevaluat încă",
       "viewLatest": "Vezi Ultima Evaluare",
       "reReview": "Reevaluează",
-      "defaultUpgradeMessage": "Treci la Pro pentru analiză AI nelimitată.",
+      "defaultUpgradeMessage": "Treci la Pro pentru 100 de analize AI pe lună.",
       "errorPdfOnly": "Momentan sunt acceptate doar fișiere PDF.",
       "errorPdfTooLarge": "PDF-ul trebuie să aibă sub 5 MB.",
       "errorCouldNotExtractText": "Nu am putut extrage text din acest PDF.",
@@ -1358,5 +1429,112 @@
       "signIn": "Trebuie să fii autentificat ca să lași feedback.",
       "generic": "Ceva nu a mers bine. Încearcă din nou."
     }
+  },
+  "FastAts": {
+    "upload": {
+      "formats": "PDF sau DOCX, maximum 5 MB.",
+      "change": "Schimbă fișierul"
+    },
+    "errors": {
+      "rate_limited": "Ai făcut multe scanări într-un timp scurt. Încearcă din nou peste câteva minute.",
+      "invalid_input": "Încarcă un fișier PDF sau DOCX.",
+      "file_too_large": "Fișierul depășește limita de 5 MB.",
+      "unsupported_type": "Acceptăm doar fișiere PDF și DOCX.",
+      "unreadable": "Nu am putut citi textul din fișier. Dacă PDF-ul este o imagine scanată, exportă-l din nou ca text.",
+      "too_little_text": "Am găsit prea puțin text în document. Verifică dacă textul se poate selecta.",
+      "server": "A apărut o eroare. Încearcă din nou.",
+      "network": "Eroare de conexiune. Verifică internetul și încearcă din nou."
+    },
+    "result": {
+      "grade": "Calificativ: {grade}"
+    },
+    "grades": {
+      "Poor": "Slab",
+      "Fair": "Acceptabil",
+      "Good": "Bun",
+      "Excellent": "Excelent"
+    },
+    "issues": {
+      "missing_email": {
+        "title": "Lipsește adresa de email"
+      },
+      "missing_phone": {
+        "title": "Lipsește numărul de telefon"
+      },
+      "short_resume": {
+        "title": "CV scurt ({count} cuvinte)"
+      },
+      "missing_experience_section": {
+        "title": "Nu am găsit secțiunea de experiență"
+      },
+      "missing_skills_section": {
+        "title": "Nu am găsit secțiunea de competențe"
+      },
+      "lack_of_metrics": {
+        "title": "Puține rezultate măsurabile ({count})"
+      },
+      "dense_paragraphs": {
+        "title": "Paragrafe lungi ({count})"
+      },
+      "passive_verbs": {
+        "title": "Puține verbe de acțiune ({count})"
+      },
+      "generic_verbs": {
+        "title": "Formulări generice repetate ({count})"
+      },
+      "missing_summary": {
+        "title": "Lipsește sumarul profesional"
+      },
+      "missing_linkedin": {
+        "title": "Lipsește linkul de LinkedIn"
+      },
+      "no_dates": {
+        "title": "Lipsesc datele perioadelor"
+      },
+      "too_long": {
+        "title": "CV foarte lung ({count} cuvinte)"
+      },
+      "missing_languages": {
+        "title": "Lipsește secțiunea de limbi străine"
+      },
+      "missing_certifications": {
+        "title": "Nu am găsit certificări sau cursuri"
+      }
+    },
+    "widget": {
+      "badge": "Scanner ATS: {job}",
+      "title": "Verifică potrivirea CV-ului tău cu rolul de {job}",
+      "subtitle": "Comparăm textul CV-ului cu profilul de cuvinte cheie pe care l-am alcătuit pentru acest rol.",
+      "uploadPrompt": "Încarcă CV-ul ca să-l compari cu profilul de {job}",
+      "scanning": "Se compară CV-ul cu profilul de {job}...",
+      "button": "Scanează potrivirea cu rolul",
+      "match": "Potrivire cuvinte cheie",
+      "matchHigh": "Potrivire bună",
+      "matchMid": "Potrivire parțială",
+      "matchLow": "Potrivire slabă",
+      "forJob": "pentru {job}",
+      "atsScore": "Scor de structură CV",
+      "missing": "Cuvinte cheie din profilul rolului care nu apar în CV:",
+      "found": "Cuvinte cheie găsite în CV:",
+      "cta": "Creează CV-ul în editorul Joben",
+      "ctaNote": "Editorul te ajută să adaugi cuvintele cheie relevante în secțiunile potrivite.",
+      "rescan": "Verifică alt fișier"
+    }
+  },
+  "Referral": {
+    "title": "Invită prieteni și primești zile Pro",
+    "description": "Pentru fiecare prieten care își creează cont prin linkul tău și își confirmă adresa de email, tu primești {referrerDays} zile Pro, iar prietenul tău primește {friendDays} zile Pro.",
+    "conditions": "Primești recompense pentru cel mult {maxTotal} prieteni în total și cel mult {maxMonthly} în orice interval de 30 de zile. Peste aceste limite, prietenii tăi primesc în continuare cele {friendDays} zile.",
+    "invitedLabel": "Prieteni invitați",
+    "daysEarned": "{days, plural, one {# zi câștigată} few {# zile câștigate} other {# de zile câștigate}}",
+    "proUntil": "Ai acces Pro până pe {date}.",
+    "daysSavedForLater": "Zilele Pro câștigate sunt salvate și se aplică după ce se încheie abonamentul tău.",
+    "linkLabel": "Linkul tău de recomandare",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "shareLabel": "Distribuie pe",
+    "shareText": "Folosesc Joben.eu, un editor de CV-uri cu AI care îți verifică CV-ul pentru filtrele ATS. Dacă îți faci cont prin linkul meu, primești {friendDays} zile Pro gratuit:",
+    "pending": "Contul tău se pregătește. Linkul de recomandare apare aici în curând, așa că reîncarcă pagina peste câteva momente.",
+    "loading": "Se încarcă linkul de recomandare"
   }
 }
