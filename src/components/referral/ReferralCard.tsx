@@ -83,7 +83,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
     }
   }, [])
 
-  const boxClass = `bg-(--surface) p-6 border border-(--border) ${className}`
+  const boxClass = `bg-(--surface) p-6 border border-(--accent) ${className}`
 
   if (state.kind === 'error') return null
 

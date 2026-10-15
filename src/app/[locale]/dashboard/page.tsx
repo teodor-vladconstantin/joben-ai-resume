@@ -152,6 +152,7 @@ export default async function DashboardPage({
           {atsScanCard.kind === 'pending' && <AtsScanCardPending />}
           <ProfileCompletion stats={stats} />
           {isNewUser && quickActions}
+          <ReferralCard className="mb-8" />
           {!isNewUser && <RedeemCodeCard currentPlan={currentPlan} />}
           {!isNewUser && <StatCards stats={stats} />}
 
@@ -234,8 +235,6 @@ export default async function DashboardPage({
             {!isNewUser && <WeeklyGoals stats={stats} />}
             <QuickTip isNewUser={isNewUser} />
           </div>
-
-          <ReferralCard className="mt-8" />
 
           <RecentDocuments recentDocs={recentDocs} />
         </main>
