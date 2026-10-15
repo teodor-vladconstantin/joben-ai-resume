@@ -80,6 +80,8 @@ const EXPECTED_DELETE_CALLS: Array<{ table: string; column: string }> = [
   { table: 'email_events', column: 'user_clerk_id' },
   { table: 'product_events', column: 'user_clerk_id' },
   { table: 'anonymous_scans', column: 'claimed_by' },
+  { table: 'referrals', column: 'referrer_id' },
+  { table: 'referrals', column: 'referred_user_id' },
   { table: 'users', column: 'clerk_id' },
 ]
 

@@ -4,7 +4,6 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Eyebrow } from '@/components/ui/Badge'
 import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
-import { BUILD_TIME } from '@/lib/content'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
 
@@ -23,7 +22,10 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: `/${locale}/free-ats-checker`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/free-ats-checker`])),
+      languages: {
+        ...Object.fromEntries(routing.locales.map((l) => [l, `/${l}/free-ats-checker`])),
+        'x-default': '/ro/free-ats-checker',
+      },
     },
     openGraph: {
       title,
@@ -62,7 +64,8 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Any',
         description: atsChecker.subheading,
-        dateModified: BUILD_TIME,
+        inLanguage: locale,
+        dateModified: '2026-10-14',
         offers: {
           '@type': 'Offer',
           price: '0',

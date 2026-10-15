@@ -36,8 +36,6 @@ export const isoDateString = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, {
   message: 'Date must use YYYY-MM-DD format',
 })
 
-export const planIdEnum = z.enum(['free', 'pro', 'recruiting'])
-
 // --- Resume payload (kept permissive on shape, strict on size) ---
 
 export const resumePersonalSchema = z
@@ -263,7 +261,7 @@ export const redeemCodeSchema = z
 
 export const checkoutRequestSchema = z
   .object({
-    plan: z.enum(['pro', 'recruiting']).optional(),
+    plan: z.enum(['pro', 'recruiting', 'pass_14d']).optional(),
     locale: z.enum(['ro', 'en']).optional(),
   })
   .strict()

@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
-import { startCheckout, type PaidPlan } from '@/lib/client-billing'
+import { checkoutErrorKey, startCheckout, type PaidPlan } from '@/lib/client-billing'
 import type { AppLocale } from '@/i18n/routing'
 
-const VALID_PLANS: PaidPlan[] = ['pro', 'recruiting']
+const VALID_PLANS: PaidPlan[] = ['pro', 'recruiting', 'pass_14d']
 
 function isPaidPlan(value: string | null): value is PaidPlan {
   return value !== null && (VALID_PLANS as string[]).includes(value)
@@ -19,24 +19,24 @@ function isPaidPlan(value: string | null): value is PaidPlan {
 // already authenticated.
 export function AutoResumeCheckout() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const { isLoaded, isSignedIn } = useAuth()
   const locale = useLocale() as AppLocale
   const t = useTranslations('Billing')
   const [error, setError] = useState<string | null>(null)
-  const requestedPlan = searchParams.get('startCheckout')
+  // Read once: the param is stripped from the URL before redirecting.
+  const [requestedPlan] = useState(() => searchParams.get('startCheckout'))
+  const started = useRef(false)
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || !isPaidPlan(requestedPlan)) return
+    if (started.current || !isLoaded || !isSignedIn || !isPaidPlan(requestedPlan)) return
+    started.current = true
 
-    let cancelled = false
-    startCheckout(requestedPlan, locale).catch((err) => {
-      if (!cancelled) setError(err instanceof Error ? err.message : t('couldNotStartCheckout'))
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [isLoaded, isSignedIn, requestedPlan, locale, t])
+    // Drop ?startCheckout so Back from Stripe does not start checkout again.
+    router.replace(pathname, { scroll: false })
+    startCheckout(requestedPlan, locale).catch((err) => setError(t(checkoutErrorKey(err))))
+  }, [isLoaded, isSignedIn, requestedPlan, locale, t, router, pathname])
 
   if (!isPaidPlan(requestedPlan) || (isLoaded && !isSignedIn)) return null
 

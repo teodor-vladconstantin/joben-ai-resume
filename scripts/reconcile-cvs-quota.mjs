@@ -49,12 +49,17 @@ function normalizePlan(plan) {
 }
 
 // Mirrors src/lib/plans.ts getUserPlan()'s resolution order: god-mode email
-// override > lifetime_recruiting_unlocked > users.plan > 'free'.
+// override > lifetime_recruiting_unlocked > recruiting or active subscription
+// (users.plan) > pass/referral grant (pro until pro_expires_at, then free) >
+// users.plan.
 function resolvePlan(userRow) {
   if (!userRow) return 'free'
   if (GOD_MODE_EMAILS.has(normalizeEmail(userRow.email))) return 'recruiting'
   if (userRow.lifetime_recruiting_unlocked) return 'recruiting'
-  return normalizePlan(userRow.plan)
+  const storedPlan = normalizePlan(userRow.plan)
+  if (storedPlan === 'recruiting' || userRow.stripe_subscription_id) return storedPlan
+  if (userRow.pro_expires_at) return new Date(userRow.pro_expires_at).getTime() > Date.now() ? 'pro' : 'free'
+  return storedPlan
 }
 
 async function main() {
@@ -121,7 +126,7 @@ async function main() {
     const chunk = userIds.slice(i, i + CHUNK)
     const { data, error } = await supabase
       .from('users')
-      .select('clerk_id, plan, email, lifetime_recruiting_unlocked')
+      .select('clerk_id, plan, email, lifetime_recruiting_unlocked, pro_expires_at, stripe_subscription_id')
       .in('clerk_id', chunk)
 
     if (error) {

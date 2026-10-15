@@ -6,11 +6,11 @@
     },
     "pricing": {
       "title": "Pricing | Joben AI Resume Builder",
-      "description": "Free, Pro, and Recruiting plans for AI-powered resume building. Start free, upgrade when you need AI features."
+      "description": "Free, Pro, and Recruiting plans plus a one-time 14-day Interview Pass (39 RON) for AI-powered resume building. Start free, upgrade when you need AI features."
     },
     "atsChecker": {
-      "title": "Free ATS Resume Checker: No Signup Required | Joben",
-      "description": "Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes: no signup, no credit card, 1 free scan a day."
+      "title": "Free ATS Resume Checker: AI Analysis, No Signup | Joben",
+      "description": "Check your resume with an AI analysis in seconds: a 0-100 score, a 4-category breakdown and specific fixes. No signup, no credit card, 1 free scan a day."
     },
     "resumeExamplesHub": {
       "title": "Resume Examples & ATS Keywords by Role | Joben",
@@ -182,7 +182,8 @@
   },
   "Pricing": {
     "heading": "Simple, transparent pricing",
-    "subheading": "Start free. Upgrade when you need AI-powered features.",
+    "subheading": "Start free. Upgrade to monthly Pro or get the one-time 14-day Pass for an intensive job search.",
+    "vatNote": "Final prices. The provider is not registered for VAT.",
     "plans": [
       {
         "name": "Free",
@@ -206,6 +207,26 @@
         "cta": "Start Free"
       },
       {
+        "name": "Interview Pass (14 Days)",
+        "description": "Ideal for your 2-week active job application and interview sprint.",
+        "price": "39 RON",
+        "pricePeriod": "/one-time",
+        "features": [
+          "Full Pro access for 14 days",
+          "One-time payment for 14 days",
+          "Save up to 3 CVs",
+          "Unlimited PDF exports",
+          "60 AI cover letters / month",
+          "60 resume-tailoring runs (CV vs JD) / month",
+          "200 AI bullet rewrites / month",
+          "100 AI resume reviews / month",
+          "Priority email support"
+        ],
+        "excludedFeatures": [],
+        "cta": "Get 14-Day Pass",
+        "badge": "One-time, 14 days"
+      },
+      {
         "name": "Pro",
         "description": "For active job seekers applying consistently.",
         "price": "59 RON",
@@ -217,6 +238,7 @@
           "60 AI cover letters / month",
           "60 resume-tailoring runs (CV vs JD) / month",
           "200 AI bullet rewrites / month",
+          "100 AI resume reviews / month",
           "Priority email support"
         ],
         "excludedFeatures": [],
@@ -245,7 +267,7 @@
   "AtsChecker": {
     "eyebrow": "Free ATS Resume Checker",
     "heading": "Free ATS Resume Checker: No Signup Required",
-    "subheading": "Scan your resume against real ATS software in seconds. Get a free 0-100 score, a 4-category breakdown, and specific fixes.",
+    "subheading": "An AI analysis of your resume in seconds. Get a free 0-100 score, a 4-category breakdown and specific fixes.",
     "categoryLabels": {
       "formatting": "ATS Formatting",
       "structure": "Structure",
@@ -333,10 +355,38 @@
     "weak": "Weak",
     "strong": "Strong",
     "scoreCtaHeading": "How does your {role} resume actually score?",
-    "scoreCtaSubheading": "Get a free 0-100 ATS score in seconds. No signup required.",
+    "scoreCtaSubheading": "Get a free 0-100 ATS score. No signup required.",
     "scoreCtaButton": "Check My {role} Resume, Free",
     "faqKeywordsQuestion": "What keywords should {roleLowerWithArticle} resume include for ATS?",
-    "faqMistakesQuestion": "What are common resume mistakes for {roleLower} candidates?"
+    "faqMistakesQuestion": "What are common resume mistakes for {roleLower} candidates?",
+    "toolsHeading": "Tools and technologies to name",
+    "certificationsHeading": "Relevant certifications",
+    "checklistHeading": "ATS checklist for {roleLower} resumes",
+    "coverLetterHeading": "Need a cover letter too?",
+    "coverLetterBody": "See a complete {role} cover letter example.",
+    "coverLetterButton": "View the cover letter example"
+  },
+  "SeoCoverLetter": {
+    "metaTitle": "{role} Cover Letter Example | Joben",
+    "metaDescription": "A complete {role} cover letter example with sample paragraphs and practical tips grounded in the tools and credentials of the field.",
+    "eyebrow": "Cover letter example",
+    "heading": "{role} Cover Letter Example",
+    "subheading": "A complete sample you can adapt with your own experience, by hand or with the Joben AI assistant.",
+    "fieldLabel": "Field: {category}",
+    "sampleHeading": "Full sample letter for {role}",
+    "sampleHint": "Replace the data in square brackets with your own details. The numbers in the sample are illustrative: use your own results.",
+    "signature": "[Full name] • [Phone] • [LinkedIn profile]",
+    "generateCta": "Generate with AI",
+    "rulesHeading": "3 rules for a {roleLower} cover letter",
+    "rule1Title": "Open with a measurable result",
+    "rule1Body": "An example from this field: \"{bullet}\"",
+    "rule2Title": "Name the tools from the job ad",
+    "rule2Body": "If you work with {tools}, write them exactly as the job ad spells them.",
+    "rule3Title": "Tie credentials to outcomes",
+    "rule3Body": "A credential such as {certification} counts for more when you show the project where you applied it.",
+    "resumeCtaHeading": "See the {role} resume examples too",
+    "resumeCtaBody": "ATS keywords, tools, certifications, and bullet examples for the same field.",
+    "resumeCtaButton": "View resume examples"
   },
   "Faq": [
     {
@@ -366,6 +416,10 @@
     {
       "question": "Can I cancel my paid plan anytime?",
       "answer": "Yes. You can manage billing from your account and cancel whenever you want. Your current period remains active until it ends."
+    },
+    {
+      "question": "How does the 14-day Interview Pass work?",
+      "answer": "You pay 39 RON once and get Pro access for 14 days from payment. The pass does not auto-renew, and when it expires your account returns to the Free plan and its limits. Buying another pass while one is active adds the days on top. At checkout you request that access starts immediately, so the 14-day right of withdrawal is lost once access begins."
     },
     {
       "question": "Is my resume data secure?",
@@ -465,7 +519,12 @@
     "redirectingToCheckout": "Redirecting you to secure checkout...",
     "somethingWentWrong": "Something went wrong. Please try again.",
     "manageBilling": "Manage Billing",
-    "upgradeToPro": "Upgrade to Pro"
+    "upgradeToPro": "Upgrade to Pro",
+    "buyPass": "14-day Pass (39 RON)",
+    "alreadyActive": "This plan is already active on your account.",
+    "checkoutUnavailable": "Payments are temporarily unavailable. Please try again later.",
+    "passSuccess": "Payment received. Your Pro pass is active until {date}.",
+    "passPending": "Payment received. Your Pro pass activates in a few moments; reload the page if it does not show yet."
   },
   "Shared": {
     "close": "Close",
@@ -641,7 +700,7 @@
       "metaTitle": "Privacy Policy | Joben AI Resume Builder",
       "metaDescription": "Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.",
       "heading": "Privacy Policy",
-      "lastUpdated": "October 7, 2026",
+      "lastUpdated": "October 14, 2026",
       "intro": "This policy describes how we handle your information when you use Joben.",
       "breadcrumbLabel": "Privacy Policy",
       "footerPrefix": "Read our ",
@@ -674,7 +733,7 @@
         },
         {
           "title": "7. Data Retention",
-          "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window."
+          "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Referral program: when someone signs up through your referral link, or you sign up through someone else's, we store who referred whom, the referral code used, the date, and the Pro days granted to each side; we use this only to apply the rewards and to enforce the limit of 5 rewarded referrals per 30 days. These records are kept while the accounts involved are active and are deleted together with either account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window."
         },
         {
           "title": "8. Security",
@@ -710,7 +769,7 @@
       "metaTitle": "Terms and Conditions | Joben AI Resume Builder",
       "metaDescription": "Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.",
       "heading": "Terms and Conditions",
-      "lastUpdated": "October 2, 2026",
+      "lastUpdated": "October 14, 2026",
       "intro": "Please read these terms carefully before using Joben.",
       "breadcrumbLabel": "Terms and Conditions",
       "footerPrefix": "Read our ",
@@ -735,7 +794,11 @@
         },
         {
           "title": "5. Billing, Upgrades, and Refunds",
-          "content": "Paid plans are billed according to the pricing shown at checkout. Taxes may apply. Unless required by law, fees are non-refundable."
+          "content": "Paid plans are billed according to the pricing shown at checkout. Displayed prices are final; the provider is not registered for VAT. Unless required by law, fees are non-refundable."
+        },
+        {
+          "title": "5.1. Right of Withdrawal",
+          "content": "As a consumer, you generally have a 14-day right of withdrawal for distance contracts (Romanian Government Emergency Ordinance no. 34/2014). For the 14-day Interview Pass, Pro access starts immediately after payment. At checkout you give your express consent for access to start immediately and acknowledge that you lose the right of withdrawal once access begins (art. 16 letter m of GEO no. 34/2014)."
         },
         {
           "title": "6. Acceptable Use",
@@ -779,7 +842,7 @@
       "metaTitle": "Cookie Policy | Joben AI Resume Builder",
       "metaDescription": "Learn what cookies Joben uses, why, and how to control them.",
       "heading": "Cookie Policy",
-      "lastUpdated": "October 2, 2026",
+      "lastUpdated": "October 14, 2026",
       "intro": "This page lists every cookie Joben sets, why, and how long it lasts. You can change your choice at any time by clearing your browser's local storage for this site, or by using the cookie banner shown on your first visit.",
       "breadcrumbLabel": "Cookie Policy",
       "footerPrefix": "Read our ",
@@ -815,6 +878,12 @@
           "provider": "Clerk",
           "purpose": "Authentication token used to secure your session.",
           "duration": "Session"
+        },
+        {
+          "name": "jb_ref",
+          "provider": "Joben",
+          "purpose": "Functional (referral attribution). Set only when you open a referral link; remembers the referral code so the person who invited you gets credit if you sign up. Holds only that code.",
+          "duration": "30 days"
         }
       ],
       "analyticsCookies": [
@@ -1135,7 +1204,7 @@
     },
     "cancelButton": "Cancel",
     "saveChangesButton": "Save Changes",
-    "upgradeDefaultMessage": "Unlock unlimited AI cover letter generation with Pro.",
+    "upgradeDefaultMessage": "Get 60 AI cover letters a month with Pro.",
     "errors": {
       "generateDraft": "Could not generate draft.",
       "generateDraftAiUpgrade": "This AI action is available on Pro.",
@@ -1172,7 +1241,9 @@
       "title": "Billing",
       "description": "Manage your subscription and payment methods.",
       "currentPlan": "Current plan",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "plan": "Plan",
+      "grantActiveUntil": "Pass/Pro active until {date}"
     },
     "notifications": {
       "title": "Notifications",
@@ -1263,7 +1334,7 @@
       "notReviewedYet": "Not reviewed yet",
       "viewLatest": "View Latest",
       "reReview": "Re-review",
-      "defaultUpgradeMessage": "Upgrade to Pro for unlimited AI analysis.",
+      "defaultUpgradeMessage": "Upgrade to Pro for 100 AI reviews a month.",
       "errorPdfOnly": "Only PDF files are supported at the moment.",
       "errorPdfTooLarge": "PDF must be under 5 MB.",
       "errorCouldNotExtractText": "Could not extract text from this PDF.",
@@ -1358,5 +1429,112 @@
       "signIn": "You must be signed in to leave feedback.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "FastAts": {
+    "upload": {
+      "formats": "PDF or DOCX, up to 5 MB.",
+      "change": "Change file"
+    },
+    "errors": {
+      "rate_limited": "You ran many scans in a short time. Please try again in a few minutes.",
+      "invalid_input": "Please upload a PDF or DOCX file.",
+      "file_too_large": "The file is larger than 5 MB.",
+      "unsupported_type": "Only PDF and DOCX files are supported.",
+      "unreadable": "We could not read text from this file. If the PDF is a scanned image, export it again as text.",
+      "too_little_text": "We found too little text in the document. Check that the text can be selected.",
+      "server": "Something went wrong. Please try again.",
+      "network": "Connection error. Check your internet and try again."
+    },
+    "result": {
+      "grade": "Grade: {grade}"
+    },
+    "grades": {
+      "Poor": "Poor",
+      "Fair": "Fair",
+      "Good": "Good",
+      "Excellent": "Excellent"
+    },
+    "issues": {
+      "missing_email": {
+        "title": "Email address missing"
+      },
+      "missing_phone": {
+        "title": "Phone number missing"
+      },
+      "short_resume": {
+        "title": "Short resume ({count} words)"
+      },
+      "missing_experience_section": {
+        "title": "Experience section not found"
+      },
+      "missing_skills_section": {
+        "title": "Skills section not found"
+      },
+      "lack_of_metrics": {
+        "title": "Few measurable results ({count})"
+      },
+      "dense_paragraphs": {
+        "title": "Long paragraphs ({count})"
+      },
+      "passive_verbs": {
+        "title": "Few action verbs ({count})"
+      },
+      "generic_verbs": {
+        "title": "Repeated generic phrasing ({count})"
+      },
+      "missing_summary": {
+        "title": "Professional summary missing"
+      },
+      "missing_linkedin": {
+        "title": "LinkedIn link missing"
+      },
+      "no_dates": {
+        "title": "Dates missing"
+      },
+      "too_long": {
+        "title": "Very long resume ({count} words)"
+      },
+      "missing_languages": {
+        "title": "Languages section missing"
+      },
+      "missing_certifications": {
+        "title": "No certifications or courses found"
+      }
+    },
+    "widget": {
+      "badge": "ATS scanner: {job}",
+      "title": "Check how well your resume matches the {job} role",
+      "subtitle": "We compare your resume text with the keyword profile we put together for this role.",
+      "uploadPrompt": "Upload your resume to compare it with the {job} profile",
+      "scanning": "Comparing your resume with the {job} profile...",
+      "button": "Scan role match",
+      "match": "Keyword match",
+      "matchHigh": "Good match",
+      "matchMid": "Partial match",
+      "matchLow": "Weak match",
+      "forJob": "for {job}",
+      "atsScore": "Resume structure score",
+      "missing": "Role keywords that do not appear in your resume:",
+      "found": "Keywords found in your resume:",
+      "cta": "Build your resume in the Joben editor",
+      "ctaNote": "The editor helps you add the relevant keywords to the right sections.",
+      "rescan": "Check another file"
+    }
+  },
+  "Referral": {
+    "title": "Invite friends, earn Pro days",
+    "description": "For every friend who creates an account through your link and verifies their email, you get {referrerDays} days of Pro and your friend gets {friendDays} days of Pro.",
+    "conditions": "You earn rewards for up to {maxTotal} friends in total and up to {maxMonthly} in any 30-day window. Past these limits, your friends still get their {friendDays} days.",
+    "invitedLabel": "Friends invited",
+    "daysEarned": "{days, plural, one {# day earned} other {# days earned}}",
+    "proUntil": "You have Pro access until {date}.",
+    "daysSavedForLater": "Your earned Pro days are saved and apply after your subscription ends.",
+    "linkLabel": "Your referral link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "shareLabel": "Share on",
+    "shareText": "I use Joben.eu, an AI resume editor that checks your resume against ATS filters. Sign up through my link and you get {friendDays} days of Pro for free:",
+    "pending": "Your account is still being set up. Your referral link will appear here shortly, so refresh the page in a moment.",
+    "loading": "Loading your referral link"
   }
 }

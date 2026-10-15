@@ -14,6 +14,7 @@ import {
   readAtsSignupAttribution,
   type AtsSignupAttribution,
 } from '@/lib/ats-attribution'
+import { readReferralCookie } from '@/lib/referral-shared'
 import type { AppLocale } from '@/i18n/routing'
 
 // The acceptance (with its signup_consents token) is kept in localStorage so
@@ -64,20 +65,24 @@ function writeStorage(storage: 'local' | 'session', key: string, value: string |
   }
 }
 
-// Read back in the Clerk webhook: consentToken (ToS acceptance) and
-// atsSource/atsScanId (signup_completed properties, scan claim). User-editable,
-// so the webhook re-validates everything.
+// Read back in the Clerk webhook: consentToken (ToS acceptance),
+// atsSource/atsScanId (signup_completed properties, scan claim), ref
+// (referral code) and locale (language of account emails, see
+// src/lib/user-locale.ts). User-editable, so the server re-validates everything.
 function buildUnsafeMetadata(
+  locale: AppLocale,
   consentToken: string | null,
-  attribution: AtsSignupAttribution | null
-): Record<string, string> | undefined {
-  const metadata: Record<string, string> = {}
+  attribution: AtsSignupAttribution | null,
+  referralCode: string | null
+): Record<string, string> {
+  const metadata: Record<string, string> = { locale }
   if (consentToken) metadata.consentToken = consentToken
   if (attribution) {
     metadata.atsSource = attribution.source
     if (attribution.scanId) metadata.atsScanId = attribution.scanId
   }
-  return Object.keys(metadata).length > 0 ? metadata : undefined
+  if (referralCode) metadata.ref = referralCode
+  return metadata
 }
 
 function sanitizeReturnBackUrl(value: string | null, fallback: string): string {
@@ -102,6 +107,7 @@ function SignUpContent() {
   const [submitting, setSubmitting] = useState(false)
   const [consentToken, setConsentToken] = useState<string | null>(null)
   const [attribution, setAttribution] = useState<AtsSignupAttribution | null>(null)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
 
   // Records the acceptance server-side (signup_consents row, same as before)
   // and only then shows Clerk's form, so the token is in unsafeMetadata from
@@ -154,6 +160,7 @@ function SignUpContent() {
       }
     }
     setAttribution(current)
+    setReferralCode(readReferralCookie())
 
     // Ticked within the last 30 minutes (another tab, an earlier Clerk step,
     // the OAuth round trip): reuse that acceptance and its token, no new
@@ -178,7 +185,7 @@ function SignUpContent() {
       path={`/${locale}/sign-up`}
       signInUrl={`/${locale}/sign-in`}
       fallbackRedirectUrl={returnBackUrl}
-      unsafeMetadata={buildUnsafeMetadata(consentToken, attribution)}
+      unsafeMetadata={buildUnsafeMetadata(locale, consentToken, attribution, referralCode)}
     />
   )
 

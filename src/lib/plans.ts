@@ -29,20 +29,23 @@ export function getEmailHintFromSessionClaims(sessionClaims: unknown): string | 
   return typeof candidate === 'string' ? candidate : undefined
 }
 
-export type PaidPlan = 'pro' | 'recruiting'
+export type PaidPlan = 'pro' | 'recruiting' | 'pass_14d'
 
 // Single source of truth for mapping a Stripe price ID back to the plan it
 // sells, shared by the checkout route (choosing which price to charge) and
 // the webhook handler (resolving an existing subscription's plan).
 export function resolvePlanFromPriceId(priceId: string | null | undefined): PaidPlan | null {
   if (!priceId) return null
+  if (priceId === process.env.STRIPE_PASS_14D_PRICE_ID) return 'pass_14d'
   if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro'
   if (priceId === process.env.STRIPE_RECRUITING_PRICE_ID) return 'recruiting'
   return null
 }
 
 export function getPriceIdForPlan(plan: PaidPlan): string | undefined {
-  return plan === 'recruiting' ? process.env.STRIPE_RECRUITING_PRICE_ID : process.env.STRIPE_PRO_PRICE_ID
+  if (plan === 'pass_14d') return process.env.STRIPE_PASS_14D_PRICE_ID
+  if (plan === 'recruiting') return process.env.STRIPE_RECRUITING_PRICE_ID
+  return process.env.STRIPE_PRO_PRICE_ID
 }
 
 export async function getUserPlan(userId: string, userEmailHint?: string | null): Promise<UserPlan> {
@@ -53,7 +56,7 @@ export async function getUserPlan(userId: string, userEmailHint?: string | null)
   const supabase = createServerClient()
   const { data, error } = await supabase
     .from('users')
-    .select('plan, email, lifetime_recruiting_unlocked')
+    .select('plan, email, lifetime_recruiting_unlocked, pro_expires_at, stripe_subscription_id')
     .eq('clerk_id', userId)
     .maybeSingle()
 
@@ -82,7 +85,18 @@ export async function getUserPlan(userId: string, userEmailHint?: string | null)
     return 'recruiting'
   }
 
-  return normalizePlan((data?.plan as string | undefined) || 'free')
+  const storedPlan = normalizePlan((data?.plan as string | undefined) || 'free')
+  // Recruiting and active subscriptions are never shadowed by a time grant.
+  if (storedPlan === 'recruiting' || data?.stripe_subscription_id) {
+    return storedPlan
+  }
+
+  // 14-day pass or referral grant: Pro until pro_expires_at, then free.
+  if (data?.pro_expires_at) {
+    return new Date(data.pro_expires_at).getTime() > Date.now() ? 'pro' : 'free'
+  }
+
+  return storedPlan
 }
 
 export async function isGodModeUser(userId: string): Promise<boolean> {

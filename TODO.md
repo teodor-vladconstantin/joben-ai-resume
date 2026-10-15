@@ -1,4 +1,33 @@
 ## Active
+- [IN PROGRESS] 2026-10-15 Growth (preview verificat, NEMERGED în main): commit-uri b12a316 + 1fe1173 pe
+  feat/agent-readiness. /free-ats-checker (Haiku) e singurul lead magnet; /verificare-cv și /cv redirect 301.
+  Pass 14d, referral (3/30 zile, 10 total, email RO/EN), SEO pe resume-examples + scrisoare-intentie. tsc/lint curate,
+  367 teste, build Vercel Ready; smoke test preview OK (pagini, redirecturi, 401 la webhook cu secretul vechi, scanare
+  PDF reală cu potrivire pe rol). Bug prins doar pe Vercel: pdf.worker.mjs lipsea pentru ats-fast-check (acum în
+  outputFileTracingIncludes + test de gardă).
+  - 2026-10-15: a4ac2d9 (copy onest pt abonați, Setări upgrade pt pass, teste noi). tsc/lint curate, 371 teste,
+    build local + Vercel Ready; preview re-verificat (pagini RO/EN, 301-uri, sitemap, cookie ref, webhook 401,
+    scanare PDF reală pe rol). Migrările 20261014* SUNT DEJA aplicate în prod (verificat pe vdgjx...).
+  - RĂMAS (user): 1) Stripe Dashboard > Settings > Public details: URL termeni https://joben.eu/ro/terms (altfel
+    checkout-ul pass-ului eșuează); 2) test manual în Stripe test mode: cumpărare pass, refund, cod 100%; link ?ref=
+    cu cont nou (email RO/EN la referent); 3) merge în main. ATENȚIE: o singură sesiune Claude pe repo odată.
+  - Cunoscut/neînchis: ștergerea contului resetează contoarele de plafon referral; CI/CD nu e recunoscut în
+    potrivirea pe rol; URL EN de scrisori e în română. Social listening rămâne ultimul (texte + disclosure).
+- [IN PROGRESS] 2026-10-14 Growth: 5 sisteme (commit `86491e1` pe feat/agent-readiness, PROGRESS.md). Review de
+  securitate făcut și reparat înainte de livrare (secret hardcodat, RLS public pe social_leads, farming referral,
+  rate limit scanner, suprascriere plan recruiting). tsc/lint curate, 317 teste verzi.
+  - RĂMAS (user): 1) aplică ÎNTÂI cele 2 migrări 20261014* în SQL Editor (fără ele getUserPlan dă 'free' tuturor);
+    2) Vercel prod: SOCIAL_LISTENING_WEBHOOK_SECRET (+ opțional TELEGRAM_BOT_TOKEN/CHAT_ID, DISCORD_WEBHOOK_URL);
+    3) merge în main. Cron `pass-expiration` nu e programat (redundant: getUserPlan verifică expirarea).
+- [DONE] 2026-10-09 Model Claude: Haiku 4.5 → `claude-haiku-5-5` (app, ATS checker public, resume-parser).
+  Fallback app: `claude-haiku-4-5-20251001` (era `claude-3-haiku`); parser rămâne pe `claude-sonnet-5`.
+  - Breaking găsit în producție: Haiku 5.5 dă 400 la `temperature` ("deprecated for this model") și gândește
+    implicit. Fix: `temperature` scos, `thinking: { type: 'disabled' }` (acceptat și de fallback-uri);
+    `max_tokens` +30% pentru tokenizer-ul nou (ATS 800→1100, `maxOutputTokensPerCall` 2000→2600).
+  - Verificat: API real pe toate 3 modelele; prompt ATS pe Haiku 5.5 → JSON valid, 2.5s; parser pe VM Oracle
+    reconstruit + parse real OK (~10s); Vercel Ready fără erori de model; 205 teste API/lib verzi.
+  - Rollback VM: `~/main.py.bak-20261009` + imaginea `joben-resume-parser:prev-20261009`.
+  - Rămas: un scan ATS real pe joben.eu (limita 1/zi pe IP consumată în timpul testării).
 - [DONE] 2026-10-07 Fail-open la Redis/Supabase restrâns (RUNBOOK §5 actualizat): AI pe planul free refuzat cu 503
   `service_unavailable` când Redis dă eroare (planurile plătite rămân fail-open; fără Upstash în dev/CI nimic nu
   se schimbă); `/api/parse` fail-closed în producție; `isEmailSuppressed` aruncă la eroare, iar `sendEmail`
