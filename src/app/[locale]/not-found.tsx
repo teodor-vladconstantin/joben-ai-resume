@@ -12,7 +12,7 @@ export default async function NotFound() {
         <h1 className="text-2xl font-bold text-(--foreground) mb-3">{t('title')}</h1>
         <p className="text-(--muted) text-sm mb-8">{t('description')}</p>
         <Link
-          href="/dashboard"
+          href="/"
           className={buttonVariants('primary', 'md')}
         >
           {t('cta')}

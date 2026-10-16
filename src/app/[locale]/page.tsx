@@ -102,7 +102,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
           </p>
 
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-12" suppressHydrationWarning>
-            <AuthAwareSignupLink signedOutHref="/free-ats-checker" className={buttonVariants('primary', 'lg')}>
+            <AuthAwareSignupLink ctaId="home_hero" signedOutHref="/free-ats-checker" className={buttonVariants('primary', 'lg')}>
               {home.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
           </div>
@@ -331,7 +331,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         <div className="max-w-(--container-max) mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
           <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footer.heading}</h2>
           <div className="flex flex-col sm:flex-row gap-4 mt-8" suppressHydrationWarning>
-            <AuthAwareSignupLink className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
+            <AuthAwareSignupLink ctaId="home_footer" className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
             <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</Link>
           </div>
         </div>

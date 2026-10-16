@@ -16,6 +16,8 @@ Training-Usage: allow
 Sitemap: ${siteConfig.url}/sitemap.xml
 Llms: ${siteConfig.url}/llms.txt
 Llms-Full: ${siteConfig.url}/llms-full.txt
+Llms-En: ${siteConfig.url}/llms-en.txt
+Llms-Full-En: ${siteConfig.url}/llms-full-en.txt
 `
 
   return new Response(body, {

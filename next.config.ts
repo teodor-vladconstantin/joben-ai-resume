@@ -193,6 +193,8 @@ const nextConfig: NextConfig = {
     )
     return [
       ...cvRedirects,
+      // English cover letters moved from the Romanian segment to /cover-letter.
+      { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
       // The instant checker was folded into the single ATS checker (lead magnet).
       { source: '/:locale(ro|en)/verificare-cv', destination: '/:locale/free-ats-checker', statusCode: 301 as const },

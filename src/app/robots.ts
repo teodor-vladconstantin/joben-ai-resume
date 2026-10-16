@@ -17,7 +17,20 @@ const disallow = [
 
 // A crawler matching a named group ignores the "*" group, so every named bot
 // repeats the same disallow list. Public pages stay explicitly allowed.
-const allowedBots = ['Googlebot', 'Google-Extended', 'GPTBot', 'ClaudeBot', 'PerplexityBot'];
+// Search and user-triggered AI fetchers decide whether Joben is cited in answers.
+const allowedBots = [
+  'Googlebot',
+  'Google-Extended',
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Applebot-Extended',
+];
 
 export default function robots(): MetadataRoute.Robots {
   return {

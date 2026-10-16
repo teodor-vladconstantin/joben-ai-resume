@@ -7,6 +7,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/locale-alternates'
 import { clerkAppearance } from '@/lib/clerk-appearance'
 import { validateEnv } from '@/lib/env'
 import { siteConfig, BUILD_TIME } from '@/lib/content'
@@ -45,10 +46,7 @@ export async function generateMetadata({
     keywords: ['AI resume builder', 'free resume maker', 'ATS resume format', 'CV builder', 'joben', 'resume templates', 'best AI resume builder'],
     authors: [{ name: 'Joben' }],
     creator: 'Joben',
-    alternates: {
-      canonical: `/${locale}`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
-    },
+    alternates: localeAlternates(locale, ''),
     icons: {
       icon: '/jobeneu_logo.jpg',
       shortcut: '/jobeneu_logo.jpg',

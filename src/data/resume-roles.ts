@@ -1,4 +1,5 @@
 import type { AppLocale } from '@/i18n/routing'
+import { MORE_ROLES } from './resume-roles-more'
 
 export type LocalizedText = { ro: string; en: string }
 export type LocalizedList = { ro: string[]; en: string[] }
@@ -12,10 +13,9 @@ export type ResumeRole = {
   strongBullet: LocalizedText
 }
 
-// 20 roles so far, scaling toward the full 30+ role catalog. Add more entries
-// here once approved; the route at src/app/[locale]/resume-examples/[slug]/page.tsx
+// 30 roles (20 here, 10 in resume-roles-more.ts). Add more entries to either file; the route at src/app/[locale]/resume-examples/[slug]/page.tsx
 // and the sitemap both derive their pages from this file automatically, per locale.
-export const resumeRoles: ResumeRole[] = [
+const BASE_ROLES: ResumeRole[] = [
   {
     slug: { ro: 'analist-date', en: 'data-analyst' },
     title: { ro: 'Analist de Date', en: 'Data Analyst' },
@@ -557,6 +557,8 @@ export const resumeRoles: ResumeRole[] = [
     },
   },
 ]
+
+export const resumeRoles: ResumeRole[] = [...BASE_ROLES, ...MORE_ROLES]
 
 export function getResumeRole(locale: AppLocale, slug: string): ResumeRole | undefined {
   return resumeRoles.find((role) => role.slug[locale] === slug)

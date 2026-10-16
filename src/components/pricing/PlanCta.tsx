@@ -6,6 +6,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { checkoutErrorKey, startCheckout, type PaidPlan } from '@/lib/client-billing'
+import { pushGtmEvent } from '@/lib/gtm-events'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import type { AppLocale } from '@/i18n/routing'
 
@@ -23,7 +24,11 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
   const t = useTranslations('Billing')
 
   if (!plan) {
-    return <AuthAwareSignupLink className={className}>{label}</AuthAwareSignupLink>
+    return (
+      <AuthAwareSignupLink ctaId="pricing_free" className={className}>
+        {label}
+      </AuthAwareSignupLink>
+    )
   }
 
   // Signed-out visitor: send them through sign-up first instead of a dead-end
@@ -36,6 +41,7 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
         href={`/sign-up?redirect_url=${encodeURIComponent(resumeUrl)}`}
         className={className}
         aria-disabled={!isLoaded}
+        onClick={() => pushGtmEvent('plan_cta_click', { plan })}
       >
         {label}
       </Link>
@@ -43,6 +49,7 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
   }
 
   const handleClick = async () => {
+    pushGtmEvent('plan_cta_click', { plan })
     setLoading(true)
     setError(null)
     try {

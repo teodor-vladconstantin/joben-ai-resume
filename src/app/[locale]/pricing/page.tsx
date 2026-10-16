@@ -8,9 +8,11 @@ import { PlanCta } from '@/components/pricing/PlanCta'
 import { AutoResumeCheckout } from '@/components/pricing/AutoResumeCheckout'
 import { pricingPlanMeta, siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
-import { routing, type AppLocale } from '@/i18n/routing'
+import type { AppLocale } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { TrackOnView } from '@/components/analytics/TrackOnView'
 
 function priceAmount(price: string): string {
   return price.replace(/[^\d]/g, '')
@@ -29,10 +31,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: `/${locale}/pricing`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/pricing`])),
-    },
+    alternates: localeAlternates(locale, '/pricing'),
     openGraph: {
       title,
       description,
@@ -92,6 +91,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
       <JsonLd data={jsonLd} />
+      <TrackOnView event="pricing_viewed" />
       <Suspense fallback={null}>
         <AutoResumeCheckout />
       </Suspense>
