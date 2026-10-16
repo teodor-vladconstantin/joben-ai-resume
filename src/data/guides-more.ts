@@ -2,6 +2,7 @@
 import type { Guide } from './guides'
 import { MORE_GUIDES_B } from './guides-more-b'
 import { MORE_GUIDES_C } from './guides-more-c'
+import { MORE_GUIDES_D } from './guides-more-d'
 
 const A: Guide[] = [
   {
@@ -483,4 +484,4 @@ const A: Guide[] = [
   },
 ]
 
-export const MORE_GUIDES: Guide[] = [...A, ...MORE_GUIDES_B, ...MORE_GUIDES_C]
+export const MORE_GUIDES: Guide[] = [...A, ...MORE_GUIDES_B, ...MORE_GUIDES_C, ...MORE_GUIDES_D]

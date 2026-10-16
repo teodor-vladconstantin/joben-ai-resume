@@ -9,7 +9,7 @@ const baseUrl = siteConfig.url;
 
 // Fixed per-content dates: bump the matching entry when that page's content
 // changes, so crawlers see a lastModified that means something.
-const ROLE_PAGES_UPDATED = '2026-10-17';
+const ROLE_PAGES_UPDATED = '2026-10-16';
 // Roles that absorbed the former /cv pages (tools, checklist, scan widget).
 const MERGED_ROLE_PAGES_UPDATED = '2026-10-14';
 const COVER_LETTER_PAGES_UPDATED = '2026-10-16';
