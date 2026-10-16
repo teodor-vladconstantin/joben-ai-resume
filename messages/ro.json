@@ -419,7 +419,7 @@
     },
     {
       "question": "Ce se întâmplă cu datele din CV-ul meu?",
-      "answer": "CV-ul, scrisorile și analizele se păstrează cât timp contul e activ și se șterg imediat când îți ștergi contul. Pentru funcțiile AI, textul relevant din CV ajunge la Anthropic (SUA) doar ca să genereze rezultatul, fără numele sau e-mailul tău, iar Anthropic nu folosește implicit datele din API la antrenarea modelelor. Accesul la baza de date este restricționat prin politici la nivel de rând, iar traficul este criptat prin TLS. Îți poți exporta sau șterge datele din cont."
+      "answer": "CV-ul, scrisorile și analizele se păstrează cât timp contul e activ și se elimină imediat când îți ștergi contul. Pentru funcțiile AI, textul relevant din CV ajunge la Anthropic (SUA) doar ca să genereze rezultatul, fără numele sau e-mailul tău, iar Anthropic nu folosește implicit datele din API la antrenarea modelelor. Accesul la baza de date este restricționat prin politici la nivel de rând, iar traficul este criptat prin TLS. Îți poți exporta sau șterge datele din cont."
     }
   ],
   "Footer": {
