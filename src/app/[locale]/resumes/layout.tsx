@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'Nav' })
   return {
-    title: `${t('resumes')} | Joben`,
+    title: `${t('resumes')}`,
     robots: { index: false, follow: false },
   }
 }

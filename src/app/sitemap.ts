@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { siteConfig } from '@/lib/content';
 import { resumeRoles } from '@/data/resume-roles';
 import { SEO_JOBS } from '@/data/seo-jobs';
+import { GUIDES } from '@/data/guides';
 import { routing, type AppLocale } from '@/i18n/routing';
 
 const baseUrl = siteConfig.url;
@@ -42,8 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: { ro: '/privacy', en: '/privacy' }, lastModified: '2026-10-14', changeFrequency: 'yearly', priority: 0.3 },
     { path: { ro: '/terms', en: '/terms' }, lastModified: '2026-10-14', changeFrequency: 'yearly', priority: 0.3 },
     { path: { ro: '/cookies', en: '/cookies' }, lastModified: '2026-10-14', changeFrequency: 'yearly', priority: 0.3 },
-    { path: { ro: '/sign-in', en: '/sign-in' }, lastModified: '2026-10-07', changeFrequency: 'yearly', priority: 0.5 },
-    { path: { ro: '/sign-up', en: '/sign-up' }, lastModified: '2026-10-14', changeFrequency: 'yearly', priority: 0.8 },
     { path: { ro: '/resume-examples', en: '/resume-examples' }, lastModified: MERGED_ROLE_PAGES_UPDATED, changeFrequency: 'monthly', priority: 0.7 },
     { path: { ro: '/free-ats-checker', en: '/free-ats-checker' }, lastModified: '2026-10-14', changeFrequency: 'monthly', priority: 0.9 },
   ];
@@ -64,6 +63,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: COVER_LETTER_PAGES_UPDATED,
       changeFrequency: 'monthly',
       priority: 0.6,
+    });
+  });
+
+  // Romanian-only: no en path, so no en entry and no hreflang pair.
+  GUIDES.forEach((guide) => {
+    pages.push({
+      path: { ro: `/ghiduri/${guide.slug}` },
+      lastModified: guide.dateModified,
+      changeFrequency: 'monthly',
+      priority: 0.7,
     });
   });
 
