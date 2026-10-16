@@ -3,6 +3,7 @@
 import type { Guide, GuideContent } from './guides'
 import { GLOSSARY_MORE } from './glossary-more'
 import { GLOSSARY_MORE_B } from './glossary-more-b'
+import { GLOSSARY_MORE_C } from './glossary-more-c'
 
 const DATE = '2026-10-16'
 
@@ -530,4 +531,4 @@ const BASE_GLOSSARY: Guide[] = [
   ),
 ]
 
-export const GLOSSARY: Guide[] = [...BASE_GLOSSARY, ...GLOSSARY_MORE, ...GLOSSARY_MORE_B]
+export const GLOSSARY: Guide[] = [...BASE_GLOSSARY, ...GLOSSARY_MORE, ...GLOSSARY_MORE_B, ...GLOSSARY_MORE_C]

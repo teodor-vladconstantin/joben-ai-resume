@@ -8,7 +8,7 @@ Actualizat: 2026-10-16. Planul-sursă: `~/.claude/plans/breezy-chasing-mist.md`.
 |---|---|
 | hreflang + `x-default` + canonical pe toate paginile publice | `src/lib/locale-alternates.ts` și `guideMetadata`/`hubMetadata` |
 | Rute localizate | ghiduri/guides, glosar/glossary, comparatii/compare, scrisoare-intentie/cover-letter (301 de la `/en/scrisoare-intentie/*`) |
-| Pagini | 46 roluri, 10 scrisori, 25 ghiduri, 20 termeni de glosar, 3 comparații, 3 hub-uri, toate în ro + en |
+| Pagini | 54 roluri, 10 scrisori, 32 ghiduri, 26 termeni de glosar, 3 comparații, 3 hub-uri, toate în ro + en |
 | Sitemap | include hub-urile și toate paginile, cu alternates |
 | robots | permite Googlebot, GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended |
 | AI discovery | `/llms.txt`, `/llms-en.txt`, `/llms-full.txt`, `/llms-full-en.txt`, `/ai/*.json`, `/.well-known/ai.txt`, markdown pe `Accept: text/markdown` |
@@ -88,7 +88,9 @@ Făcut în lotul 2 (2026-10-16): ghiduri pentru schimbare de carieră, pauză î
 
 Făcut în lotul 3 (2026-10-16): ghiduri pentru medici și asistenți, șoferi și curieri, muncă în UE, scrisoare pentru schimbare de carieră, negocierea salariului, media/GPA, ingineri, studenți și Erasmus; roluri: electrician, operator date, barista și ospătar, șofer, consultant financiar, motion designer, coordonator de proiect, analist securitate cibernetică; glosar: OKR, ATS vs CRM, employer branding, recomandare internă, interviu structurat, scrisoare de intenție.
 
-**Idei pentru lotul 4**: ghiduri pe domenii (IT, HoReCa, retail, construcții, educație), CV în alte limbi (germană, franceză), ghid de interviu pe tipuri de întrebări, certificări pe domenii; încă 10 roluri pe piața locală; glosar: soft skills pe roluri, ghid de ATS pe platforme (cu surse verificate).
+Făcut în lotul 4 (2026-10-16): ghiduri pe domenii (IT, HoReCa, retail, construcții și meserii, educație), tipuri de întrebări la interviu, CV în germană (Lebenslauf); roluri: dezvoltator backend, dezvoltator mobile, inginer constructor, mecanic auto, consilier vânzări magazin, bucătar, content manager, asistent HR; glosar: fișa postului, assessment center, muncă hibridă, angajare pe bază de competențe, ofertă de angajare, feedback după interviu.
+
+**Idei pentru lotul 5**: ghiduri pentru CV în franceză și spaniolă, certificări pe domenii (cu surse oficiale), CV pentru marketing, finanțe, juridic, sănătate publică; încă 10 roluri (de exemplu analist business junior, QA automation, DevOps junior, grafician, vânzător online); glosar: soft skills pe roluri, ATS pe platforme (cu surse verificate); pagină de template-uri CV (`/cv-templates`) cu șabloane reale descărcabile.
 
 **Comparații**: Joben vs Zety, Resume.io, Novoresume, Enhancv. Scrie-le doar după ce verifici manual funcțiile și prețurile concurenților din surse publice la data scrierii. Fiecare afirmație despre un concurent trebuie să aibă sursă.
 
