@@ -2,7 +2,7 @@
 // no invented statistics.
 import type { Guide } from './guides'
 
-const DATE = '2026-10-17'
+const DATE = '2026-10-16'
 
 export const MORE_GUIDES_C: Guide[] = [
   {

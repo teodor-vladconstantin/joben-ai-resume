@@ -8,7 +8,7 @@ Actualizat: 2026-10-16. Planul-sursă: `~/.claude/plans/breezy-chasing-mist.md`.
 |---|---|
 | hreflang + `x-default` + canonical pe toate paginile publice | `src/lib/locale-alternates.ts` și `guideMetadata`/`hubMetadata` |
 | Rute localizate | ghiduri/guides, glosar/glossary, comparatii/compare, scrisoare-intentie/cover-letter (301 de la `/en/scrisoare-intentie/*`) |
-| Pagini | 38 roluri, 10 scrisori, 17 ghiduri, 14 termeni de glosar, 3 comparații, 3 hub-uri, toate în ro + en |
+| Pagini | 46 roluri, 10 scrisori, 25 ghiduri, 20 termeni de glosar, 3 comparații, 3 hub-uri, toate în ro + en |
 | Sitemap | include hub-urile și toate paginile, cu alternates |
 | robots | permite Googlebot, GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended |
 | AI discovery | `/llms.txt`, `/llms-en.txt`, `/llms-full.txt`, `/llms-full-en.txt`, `/ai/*.json`, `/.well-known/ai.txt`, markdown pe `Accept: text/markdown` |
@@ -84,13 +84,11 @@ Funnel de urmărit în GA4/PostHog: pagină SEO > `ats_scan_started` > `ats_resu
 
 ## 6. Backlog de conținut (următoarele pagini)
 
-Făcut în lotul 2 (2026-10-17): ghiduri pentru schimbare de carieră, pauză în carieră, freelancer, CV vs LinkedIn, răspuns la "Povestește-mi despre tine", referințe, scrisoare fără experiență, portofoliu de dezvoltator; roluri: farmacist, inginer mecanic, specialist achiziții, tehnician IT, manager de magazin, arhitect, curier, contabil-șef; glosar: KPI, onboarding, preaviz, headhunter, perioadă de probă, upskilling.
+Făcut în lotul 2 (2026-10-16): ghiduri pentru schimbare de carieră, pauză în carieră, freelancer, CV vs LinkedIn, răspuns la "Povestește-mi despre tine", referințe, scrisoare fără experiență, portofoliu de dezvoltator; roluri: farmacist, inginer mecanic, specialist achiziții, tehnician IT, manager de magazin, arhitect, curier, contabil-șef; glosar: KPI, onboarding, preaviz, headhunter, perioadă de probă, upskilling.
 
-**Ghiduri rămase**: CV pentru medici/asistenți, CV pentru șoferi și curieri, CV pentru muncă în UE, scrisoare pentru schimbare de carieră, cum ceri salariul, CV cu media/GPA, certificări care contează pe domenii, CV pentru ingineri, CV pentru studenți Erasmus.
+Făcut în lotul 3 (2026-10-16): ghiduri pentru medici și asistenți, șoferi și curieri, muncă în UE, scrisoare pentru schimbare de carieră, negocierea salariului, media/GPA, ingineri, studenți și Erasmus; roluri: electrician, operator date, barista și ospătar, șofer, consultant financiar, motion designer, coordonator de proiect, analist securitate cibernetică; glosar: OKR, ATS vs CRM, employer branding, recomandare internă, interviu structurat, scrisoare de intenție.
 
-**Roluri rămase**: electrician, operator date, barista/ospătar, șofer, consultant financiar, grafician motion, project coordinator, analist cibernetic.
-
-**Glosar rămas**: OKR, probation vs trial, reskilling în IT, ATS vs CRM, referral, employer branding.
+**Idei pentru lotul 4**: ghiduri pe domenii (IT, HoReCa, retail, construcții, educație), CV în alte limbi (germană, franceză), ghid de interviu pe tipuri de întrebări, certificări pe domenii; încă 10 roluri pe piața locală; glosar: soft skills pe roluri, ghid de ATS pe platforme (cu surse verificate).
 
 **Comparații**: Joben vs Zety, Resume.io, Novoresume, Enhancv. Scrie-le doar după ce verifici manual funcțiile și prețurile concurenților din surse publice la data scrierii. Fiecare afirmație despre un concurent trebuie să aibă sursă.
 
