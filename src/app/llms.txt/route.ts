@@ -1,7 +1,7 @@
 import { siteConfig } from '@/lib/content'
 import { resumeRoles } from '@/data/resume-roles'
 import { SEO_JOBS } from '@/data/seo-jobs'
-import { GUIDES } from '@/data/guides'
+import { GUIDES, guidePath } from '@/data/guides'
 import messagesRo from '../../../messages/ro.json'
 
 // llmstxt.org-shaped index for AI answer-engine crawlers (Perplexity,
@@ -25,8 +25,11 @@ export function GET() {
       `- [${job.title.ro} Cover Letter](${siteConfig.url}/ro/scrisoare-intentie/${job.slug.ro}): a full sample cover letter and structure rules for ${job.title.ro} roles.`
   ).join('\n')
 
-  const guideLinks = GUIDES.map(
-    (guide) => `- [${guide.title}](${siteConfig.url}/ro/ghiduri/${guide.slug}): ${guide.description}`
+  const guideLinks = GUIDES.flatMap((guide) =>
+    (['ro', 'en'] as const).map(
+      (locale) =>
+        `- [${guide.content[locale].title}](${siteConfig.url}/${locale}${guidePath(locale, guide)}): ${guide.content[locale].description}`
+    )
   ).join('\n')
 
   const body = `# ${siteConfig.name}

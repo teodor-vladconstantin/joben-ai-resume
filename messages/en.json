@@ -447,6 +447,10 @@
         "label": "Resume Examples"
       },
       {
+        "href": "/guides/cv-readable-by-ats",
+        "label": "Guide: Resume read by ATS"
+      },
+      {
         "href": "/free-ats-checker",
         "label": "Free ATS Checker"
       }

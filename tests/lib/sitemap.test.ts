@@ -12,9 +12,13 @@ describe('sitemap', () => {
     expect(urls).toContain('https://joben.eu/en/scrisoare-intentie/software-engineer')
   })
 
-  it('lists guides in ro only', () => {
+  it('lists each guide under its own localized path and pairs them with hreflang', () => {
     expect(urls).toContain('https://joben.eu/ro/ghiduri/cv-citit-corect-de-ats')
+    expect(urls).toContain('https://joben.eu/en/guides/cv-readable-by-ats')
     expect(urls.some((u) => u.includes('/en/ghiduri/'))).toBe(false)
+    expect(urls.some((u) => u.includes('/ro/guides/'))).toBe(false)
+    const ro = entries.find((e) => e.url === 'https://joben.eu/ro/ghiduri/cv-citit-corect-de-ats')
+    expect(ro?.alternates?.languages?.en).toBe('https://joben.eu/en/guides/cv-readable-by-ats')
   })
 
   it('uses fixed lastModified dates and x-default alternates', () => {
