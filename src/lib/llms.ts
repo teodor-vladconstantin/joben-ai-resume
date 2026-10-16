@@ -67,6 +67,7 @@ Joben is a web app with no public API. Agents should link users to these pages.
 - [Pricing](${base}/pricing): Free, a one-time 14-day Pass, Pro, and Recruiting plans.
 - [Free ATS Resume Checker](${base}/free-ats-checker): Free 0-100 ATS score with a category breakdown, no signup required.
 - [Resume Examples](${base}/resume-examples): Role-specific ATS keywords and resume writing guidance.
+- [CV Templates](${base}/${locale === 'ro' ? 'sabloane-cv' : 'cv-templates'}): Free single-column DOCX templates (classic, student, career change) in Romanian and English.
 
 ${contentSections}
 

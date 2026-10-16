@@ -28,6 +28,8 @@ Adăugarea unei pagini noi: un obiect în `src/data/guides-more*.ts` (ghid), `gl
 
 ## 3. Backlinks: plan pe 6 luni (5-10 linkuri relevante pe lună)
 
+Planul detaliat pe 12 săptămâni, cu ținte, texte pregătite și tracker, este în `docs/seo/BACKLINKS.md` (și `backlink-tracker.csv`). Mai jos rămâne rezumatul.
+
 Principiu: puține linkuri bune, din surse relevante pentru joburi, carieră, studenți și startup-uri din România și UE.
 
 ### Luna 1: fundația (linkuri de profil și directoare)
@@ -90,7 +92,22 @@ Făcut în lotul 3 (2026-10-16): ghiduri pentru medici și asistenți, șoferi �
 
 Făcut în lotul 4 (2026-10-16): ghiduri pe domenii (IT, HoReCa, retail, construcții și meserii, educație), tipuri de întrebări la interviu, CV în germană (Lebenslauf); roluri: dezvoltator backend, dezvoltator mobile, inginer constructor, mecanic auto, consilier vânzări magazin, bucătar, content manager, asistent HR; glosar: fișa postului, assessment center, muncă hibridă, angajare pe bază de competențe, ofertă de angajare, feedback după interviu.
 
-**Idei pentru lotul 5**: ghiduri pentru CV în franceză și spaniolă, certificări pe domenii (cu surse oficiale), CV pentru marketing, finanțe, juridic, sănătate publică; încă 10 roluri (de exemplu analist business junior, QA automation, DevOps junior, grafician, vânzător online); glosar: soft skills pe roluri, ATS pe platforme (cu surse verificate); pagină de template-uri CV (`/cv-templates`) cu șabloane reale descărcabile.
+### Loturi viitoare de conținut (în pauză)
+
+**Starea la 2026-10-16:** producția de volum e oprită. Site-ul are 54 de roluri, 32 de ghiduri, 26 de termeni de glosar, 10 scrisori și 3 comparații (274 de URL-uri), iar Search Console arăta doar 12 click-uri și 902 afișări în 90 de zile. Nu mai adăugăm pagini până nu vedem cum le tratează Google.
+
+**Condiția de reluare (verificare la 1-2 săptămâni după 2026-10-16):** în Search Console, la Pages, numără câte din cele 274 de URL-uri sunt indexate.
+- Peste ~60% indexate și apar afișări pe clustere noi: reluăm, dar doar în clusterele care primesc afișări.
+- Multe în „Discovered, currently not indexed” sau „Crawled, currently not indexed”: nu adăugăm pagini. Întărim cele existente (conținut mai bogat, exemple reale, linkuri interne) și facem backlinks (secțiunea 3).
+
+**Ordinea lotului 5 (când se reia):**
+1. `/cv-templates` (șabloane DOCX reale): în lucru, branch `feat/cv-templates`. Este singurul element care adaugă un lucru nou și poate atrage linkuri.
+2. Pagini pentru clusterele care aduc afișări în Search Console (ghiduri și roluri înrudite), în loturi de maximum 10.
+3. Comparații cu concurenți (Zety, Resume.io, Novoresume, Enhancv), doar cu surse publice verificate la data scrierii.
+
+**Idei rămase, cu prioritate scăzută:** CV în franceză și spaniolă, certificări pe domenii (cu surse oficiale), CV pentru marketing, finanțe, juridic și sănătate publică, încă ~10 roluri (analist business junior, QA automation, DevOps junior, grafician, vânzător online), glosar pe soft skills pe roluri și ghid de ATS pe platforme (cu surse verificate).
+
+**Reguli pentru orice lot nou:** maximum 10 pagini pe lot, fiecare cu conținut propriu (nu variații pe același șablon), fără cifre sau afirmații juridice neverificate, fără em dashes și fără formulări de tip „X, nu Y”, apoi `tsc`, `eslint`, teste, build, PR, deploy, verificare live și IndexNow.
 
 **Comparații**: Joben vs Zety, Resume.io, Novoresume, Enhancv. Scrie-le doar după ce verifici manual funcțiile și prețurile concurenților din surse publice la data scrierii. Fiecare afirmație despre un concurent trebuie să aibă sursă.
 

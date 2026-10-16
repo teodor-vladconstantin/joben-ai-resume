@@ -1,4 +1,5 @@
 ## Active
+- [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
 - [IN PROGRESS] 2026-10-16 Plan SEO/GEO/CRO (~/.claude/plans/breezy-chasing-mist.md, docs/seo/PLAYBOOK.md). Cod făcut, necomis:
   x-default + alternates pe toate paginile, /en/cover-letter (301 de la vechiul URL), hub-uri + 9 ghiduri + 8 termeni glosar + 3 comparații
   (ro+en), 30 roluri, 10 scrisori, llms*.txt/ai*.json în EN, OG per pagină, evenimente cta_click/plan_cta_click/pricing_viewed.
