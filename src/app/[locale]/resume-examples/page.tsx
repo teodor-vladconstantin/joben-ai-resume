@@ -6,10 +6,12 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 import { resumeRoles } from '@/data/resume-roles'
+import { GUIDES } from '@/data/guides'
 import { siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 export async function generateMetadata({
   params,
@@ -73,10 +75,7 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
 
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">
@@ -105,6 +104,26 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
             </Link>
           ))}
         </div>
+
+        {/* Guides are Romanian-only, so the block only renders on /ro. */}
+        {locale === 'ro' && GUIDES.length > 0 && (
+          <section className="mt-16 space-y-4">
+            <h2 className="text-2xl font-bold text-(--foreground)">Ghiduri</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {GUIDES.map((guide) => (
+                <Link key={guide.slug} href={`/ghiduri/${guide.slug}`}>
+                  <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
+                    <p className="text-(--foreground) font-semibold">{guide.title}</p>
+                    <p className="mt-1.5 text-sm text-(--muted)">{guide.description}</p>
+                    <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
+                      Citește ghidul <ArrowRight className="h-3.5 w-3.5" />
+                    </p>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )

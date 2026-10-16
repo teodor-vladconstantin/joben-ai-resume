@@ -21,6 +21,7 @@ import { RevealWords } from '@/components/motion/RevealWords'
 import { RevealRule } from '@/components/motion/RevealRule'
 import { Reveal } from '@/components/motion/Reveal'
 import type { Messages } from '@/i18n/messages'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const icons: { [key: string]: React.ElementType } = {
   Zap,
@@ -82,10 +83,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
 
   return (
     <div className="flex flex-col min-h-screen" suppressHydrationWarning>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>

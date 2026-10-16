@@ -11,6 +11,7 @@ import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
 import { routing, type AppLocale } from '@/i18n/routing'
 import { SEO_JOBS, type SeoJob } from '@/data/seo-jobs'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 // Content dates for the Article JSON-LD; bump DATE_MODIFIED when the samples change.
 const DATE_PUBLISHED = '2026-10-14'
@@ -106,10 +107,7 @@ export default async function SeoScrisoareIntentiePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24 space-y-12">

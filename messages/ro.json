@@ -1,23 +1,23 @@
 {
   "Metadata": {
     "home": {
-      "title": "Joben | Cel Mai Bun Editor de CV cu AI, Gratuit, Optimizat ATS",
+      "title": "Joben | Editor de CV cu AI, Gratuit, Optimizat ATS",
       "description": "Joben e un editor de CV cu AI, gratuit. Creezi CV-uri și scrisori de intenție optimizate ATS în minute și treci de filtrele automate ale recrutorilor."
     },
     "pricing": {
-      "title": "Prețuri | Joben, Editor de CV cu AI",
-      "description": "Planuri Gratuit, Pro și Recrutare plus Pass Interviu de 14 zile cu plată unică (39 RON) pentru construirea de CV-uri cu AI. Începi gratuit, faci upgrade când ai nevoie de funcții AI."
+      "title": "Prețuri și planuri pentru CV cu AI",
+      "description": "Planuri Gratuit, Pro și Recrutare, plus Pass Interviu de 14 zile la 39 RON, plată unică. Începi gratuit și treci la upgrade când ai nevoie de AI."
     },
     "atsChecker": {
-      "title": "Verificare CV ATS Gratuită: Analiză AI, Fără Cont | Joben",
+      "title": "Verificare CV ATS Gratuită: Analiză AI, Fără Cont",
       "description": "Verificare CV gratuită cu analiză AI în câteva secunde: scor de la 0 la 100, 4 categorii și soluții concrete. Fără cont, fără card, o scanare pe zi."
     },
     "resumeExamplesHub": {
-      "title": "Exemple de CV și Cuvinte Cheie ATS pe Roluri | Joben",
+      "title": "Exemple de CV și Cuvinte Cheie ATS pe Roluri",
       "description": "Cuvinte cheie ATS pe roluri, greșeli frecvente de CV și exemple de puncte slabe vs. puternice. Exemple de CV gratuite pentru fiecare etapă de carieră."
     },
     "resumeExampleRole": {
-      "title": "Exemple de CV și Cuvinte Cheie ATS pentru {role} | Joben",
+      "title": "CV {role}: cuvinte cheie ATS",
       "description": "Cuvinte cheie ATS, greșeli frecvente și o rescriere de punct slab vs. puternic pentru CV-uri de {role}."
     }
   },
@@ -79,8 +79,8 @@
       }
     ],
     "atsPreview": {
-      "heading": "Vezi Ce Văd Recrutorii În CV-ul Tău",
-      "subheading": "AI-ul nostru îți analizează CV-ul comparativ cu joburi reale, ca să știi exact unde te afli.",
+      "heading": "Cum îți evaluează Joben CV-ul?",
+      "subheading": "Joben compară CV-ul cu joburi reale și îl notează de la 0 la 100 pe cinci categorii: lizibilitate ATS, calitatea conținutului, calitatea redactării, optimizare pentru job și pregătire pentru aplicare. Pentru fiecare punct slab primești o rescriere concretă.",
       "scoreLabel": "Excelent",
       "categories": [
         "Lizibilitate ATS",
@@ -173,8 +173,8 @@
         ]
       }
     ],
-    "pricingTeaserHeading": "Prețuri Simple, Transparente",
-    "pricingTeaserSubheading": "Începi gratuit, faci upgrade când ai nevoie de avantajul competitiv.",
+    "pricingTeaserHeading": "Cât costă Joben?",
+    "pricingTeaserSubheading": "Începi gratuit, cu 1 CV salvat și 5 exporturi PDF. Pass-ul Interviu de 14 zile costă 39 RON, o singură plată, iar Pro ridică limitele lunare.",
     "faqHeading": "Întrebări Frecvente",
     "faqSubheading": "Tot ce trebuie să știi înainte să îți construiești următorul CV.",
     "faqOpen": "Deschide",
@@ -367,7 +367,7 @@
     "coverLetterButton": "Vezi modelul de scrisoare"
   },
   "SeoCoverLetter": {
-    "metaTitle": "Model scrisoare de intenție {role} | Joben",
+    "metaTitle": "Model scrisoare de intenție {role}",
     "metaDescription": "Model complet de scrisoare de intenție pentru {role}, cu paragrafe exemplu și sfaturi bazate pe uneltele și certificările din domeniu.",
     "eyebrow": "Model scrisoare de intenție",
     "heading": "Scrisoare de intenție pentru {role}",
@@ -394,24 +394,20 @@
       "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună și 15 rescrieri de puncte/lună."
     },
     {
-      "question": "Ce primesc cu Pro?",
-      "answer": "Pro îți oferă 3 CV-uri salvate, exporturi nelimitate, 60 scrisori de intenție/lună, 60 adaptări de CV/lună și 200 rescrieri de puncte/lună."
+      "question": "Ce este un ATS și ce face cu CV-ul meu?",
+      "answer": "ATS (Applicant Tracking System) este software-ul prin care companiile primesc, stochează și filtrează candidaturi. Citește fișierul CV-ului, extrage textul și îl împarte în câmpuri (date de contact, experiență, studii, competențe), iar recrutorul caută și filtrează în aceste câmpuri. Dacă textul se extrage greșit, CV-ul poate apărea incomplet sau poate lipsi din căutările recrutorului."
     },
     {
-      "question": "Cum funcționează limitele AI?",
-      "answer": "Fiecare plan are contoare lunare clare pentru scrisori de intenție, adaptare de CV și rescrieri de puncte. Contoarele se resetează la începutul fiecărei luni."
+      "question": "De ce este CV-ul meu citit greșit sau respins de un ATS?",
+      "answer": "Cauzele frecvente sunt layout-ul pe mai multe coloane, tabelele, textul pus în imagini sau casete, datele de contact în antet ori subsol și denumirile neobișnuite de secțiuni, de exemplu „Parcursul meu\" în loc de „Experiență\". Parserul citește de sus în jos, așa că ordinea se amestecă sau conținutul dispare. Un CV pe o singură coloană, cu titluri standard, evită majoritatea acestor probleme."
     },
     {
-      "question": "CV-urile sunt compatibile cu ATS?",
-      "answer": "Da. Șabloanele și formatarea Joben sunt construite să funcționeze cu sistemele de urmărire a candidaților și să păstreze conținutul lizibil pentru recrutori."
+      "question": "Ce cuvinte cheie trebuie să pun în CV și de unde le iau?",
+      "answer": "Din anunțul jobului: competențele, uneltele și certificările care apar la cerințele obligatorii sau de mai multe ori. Folosește formularea exactă din anunț, de exemplu „Google Analytics\" dacă așa apare, și pune cuvântul în punctele de la experiență, unde arată cum l-ai folosit. Adaugă doar ce ai folosit efectiv."
     },
     {
-      "question": "Pot crea mai multe variante ale CV-ului meu?",
-      "answer": "Sigur. Poți crea variante adaptate pentru roluri, industrii sau job description-uri diferite și le gestionezi din dashboard."
-    },
-    {
-      "question": "Pot genera și scrisori de intenție?",
-      "answer": "Da. Toate planurile pot genera scrisori de intenție, cu limite lunare în funcție de planul tău."
+      "question": "Sunt CV-urile Joben compatibile cu ATS?",
+      "answer": "Șablonul și exportul PDF sunt construite pentru citire automată: o singură coloană, titluri standard de secțiuni și text selectabil. Fiecare ATS are propriul parser, deci nicio unealtă nu poate garanta citirea perfectă în toate. Scanarea gratuită îți dă un scor de la 0 la 100 și punctele de reparat în CV-ul tău."
     },
     {
       "question": "Pot anula planul plătit oricând?",
@@ -422,8 +418,8 @@
       "answer": "Plătești o singură dată 39 RON și primești acces Pro timp de 14 zile de la plată. Pass-ul nu se reînnoiește automat, iar la expirare contul revine la planul Gratuit, cu limitele lui. Dacă mai cumperi un pass cât timp e activ, zilele se adaugă. La plată soliciți începerea imediată a accesului, așa că dreptul de retragere de 14 zile se pierde odată ce accesul începe."
     },
     {
-      "question": "Datele CV-ului meu sunt în siguranță?",
-      "answer": "Folosim autentificare modernă și o infrastructură backend securizată. Datele tale sunt izolate per cont și folosite doar pentru experiența ta în aplicație."
+      "question": "Ce se întâmplă cu datele din CV-ul meu?",
+      "answer": "CV-ul, scrisorile și analizele se păstrează cât timp contul e activ și se șterg imediat când îți ștergi contul. Pentru funcțiile AI, textul relevant din CV ajunge la Anthropic (SUA) doar ca să genereze rezultatul, fără numele sau e-mailul tău, iar Anthropic nu folosește implicit datele din API la antrenarea modelelor. Accesul la baza de date este restricționat prin politici la nivel de rând, iar traficul este criptat prin TLS. Îți poți exporta sau șterge datele din cont."
     }
   ],
   "Footer": {
@@ -451,6 +447,10 @@
         "label": "Exemple de CV"
       },
       {
+        "href": "/ghiduri/cv-citit-corect-de-ats",
+        "label": "Ghid: CV citit de ATS"
+      },
+      {
         "href": "/free-ats-checker",
         "label": "Evaluator ATS Gratuit"
       }
@@ -475,15 +475,15 @@
     "companyLine": "Joben este operat de {legalName}, CUI {cui}, Nr. Reg. Com. {regCom}, cu sediul social în {address}. Contact: {email}."
   },
   "About": {
-    "metaTitle": "Despre Joben | Joben",
-    "metaDescription": "Ce e Joben și cum ne poți contacta.",
+    "metaTitle": "Despre Joben: ce este și cum funcționează",
+    "metaDescription": "Ce este Joben, cum funcționează scorul ATS de la 0 la 100 și rescrierea cu AI a CV-ului, plus datele companiei și cum ne poți contacta.",
     "heading": "Despre Joben",
     "intro": "Joben e un editor de CV cu inteligență artificială, construit pentru candidații care vor să treacă de filtrele ATS și să ajungă la interviu. Evaluăm CV-uri, rescriem punctele slabe și generăm scrisori de intenție adaptate fiecărei aplicații.",
     "contactHeading": "Contact",
     "contactBody": "Întrebări, feedback sau o solicitare legată de datele tale? Ne găsești la {email}."
   },
   "Contact": {
-    "metaTitle": "Contact Joben | Joben",
+    "metaTitle": "Contact",
     "metaDescription": "Cum ajungi la echipa Joben: întrebări generale, facturare, solicitări privind datele și detaliile companiei.",
     "heading": "Contact Joben",
     "intro": "Joben e un editor de CV și scrisori de intenție cu inteligență artificială, operat de o companie înregistrată în România. Scrie-ne despre cum funcționează produsul, o problemă cu contul sau abonamentul, feedback pentru o funcție sau o solicitare privind datele tale personale. Mesajele ajung într-o căsuță de email citită de echipă.",
@@ -697,8 +697,8 @@
   },
   "Legal": {
     "privacy": {
-      "metaTitle": "Politica de Confidențialitate | Joben, generator de CV-uri cu AI",
-      "metaDescription": "Citește politica de confidențialitate Joben. Află cum generatorul nostru gratuit de CV-uri cu AI gestionează, protejează și procesează datele tale personale.",
+      "metaTitle": "Politica de confidențialitate",
+      "metaDescription": "Cum gestionează și protejează Joben datele tale personale și datele din CV: ce colectăm, cât le păstrăm, cu cine le partajăm și ce drepturi ai.",
       "heading": "Politica de Confidențialitate",
       "lastUpdated": "14 octombrie 2026",
       "intro": "Această politică descrie modul în care gestionăm informațiile tale atunci când folosești Joben.",
@@ -766,8 +766,8 @@
       ]
     },
     "terms": {
-      "metaTitle": "Termeni și Condiții | Joben, generator de CV-uri cu AI",
-      "metaDescription": "Citește termenii și condițiile de utilizare Joben. Înțelege regulile, ghidurile și acordurile pentru folosirea generatorului nostru gratuit de CV-uri cu AI și a uneltelor de optimizare ATS.",
+      "metaTitle": "Termeni și condiții",
+      "metaDescription": "Termenii și condițiile Joben: regulile de utilizare a editorului de CV cu AI, planurile și plățile, răspunderea și datele companiei.",
       "heading": "Termeni și Condiții",
       "lastUpdated": "14 octombrie 2026",
       "intro": "Te rugăm să citești acești termeni cu atenție înainte de a folosi Joben.",
@@ -839,8 +839,8 @@
       ]
     },
     "cookies": {
-      "metaTitle": "Politica de Cookie-uri | Joben, generator de CV-uri cu AI",
-      "metaDescription": "Află ce cookie-uri folosește Joben, de ce și cum le poți controla.",
+      "metaTitle": "Politica de cookie-uri",
+      "metaDescription": "Ce cookie-uri folosește Joben, la ce servesc și cum le poți controla din bannerul de consimțământ și din setările browserului.",
       "heading": "Politica de Cookie-uri",
       "lastUpdated": "14 octombrie 2026",
       "intro": "Această pagină listează fiecare cookie pe care Joben îl setează, de ce și cât timp este valabil. Îți poți schimba alegerea oricând, ștergând stocarea locală a browserului pentru acest site, sau folosind bannerul de cookie-uri afișat la prima vizită.",
@@ -1406,7 +1406,7 @@
     }
   },
   "Feedback": {
-    "metaTitle": "Feedback | Joben",
+    "metaTitle": "Feedback",
     "metaDescription": "Spune-ne ce crezi și ajută-ne să modelăm Joben în perioada beta.",
     "eyebrow": "Feedback beta",
     "heading": "Ajută-ne să îmbunătățim Joben",

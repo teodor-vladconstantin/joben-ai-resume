@@ -4,6 +4,7 @@ import { Navbar } from '@/components/ui/Navbar'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const CONTACT_EMAIL = 'privacy@joben.eu'
 
@@ -15,13 +16,25 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'About' })
 
+  const title = t('metaTitle')
+  const description = t('metaDescription')
   return {
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title,
+    description,
     alternates: {
       canonical: `/${locale}/about`,
       languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/about`])),
     },
+    openGraph: {
+      title,
+      description,
+      url: `/${locale}/about`,
+      siteName: 'Joben',
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Joben AI Resume Builder' }],
+      locale: locale === 'ro' ? 'ro_RO' : 'en_US',
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
   }
 }
 
@@ -43,10 +56,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div className="min-h-screen flex flex-col pb-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
