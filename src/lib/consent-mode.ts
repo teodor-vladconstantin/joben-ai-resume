@@ -8,11 +8,13 @@
 export const CONSENT_MODE_DEFAULT_SCRIPT = `
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+var accepted = false;
+try { accepted = localStorage.getItem('joben_cookie_consent') === 'accepted'; } catch (e) {}
 gtag('consent', 'default', {
   'ad_storage': 'denied',
   'ad_user_data': 'denied',
   'ad_personalization': 'denied',
-  'analytics_storage': 'denied'
+  'analytics_storage': accepted ? 'granted' : 'denied'
 });
 `
 
