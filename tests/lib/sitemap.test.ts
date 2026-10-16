@@ -9,7 +9,7 @@ describe('sitemap', () => {
     expect(urls.some((u) => u.includes('/cv/'))).toBe(false)
     expect(urls.some((u) => u.includes('verificare-cv'))).toBe(false)
     expect(urls).toContain('https://joben.eu/ro/free-ats-checker')
-    expect(urls).toContain('https://joben.eu/en/scrisoare-intentie/software-engineer')
+    expect(urls).toContain('https://joben.eu/en/cover-letter/software-engineer')
   })
 
   it('lists each guide under its own localized path and pairs them with hreflang', () => {

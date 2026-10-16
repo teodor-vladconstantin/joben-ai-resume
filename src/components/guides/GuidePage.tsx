@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { TrackedLink } from '@/components/ui/TrackedLink'
 import { Navbar } from '@/components/ui/Navbar'
 import { Eyebrow } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -8,7 +9,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
-import { guidePath, type Guide } from '@/data/guides'
+import { GUIDE_SEGMENT, guidePath, guidesOfKind, kindOf, type Guide, type GuideKind } from '@/data/guides'
 import { routing, type AppLocale } from '@/i18n/routing'
 
 // Copy around the guide text. Guides carry their own per-locale content, so
@@ -51,6 +52,21 @@ const COPY: Record<
   },
 }
 
+const KIND_COPY: Record<GuideKind, Record<AppLocale, { eyebrow: string; related: string; hub: string }>> = {
+  guide: {
+    ro: { eyebrow: 'Ghid', related: 'Alte ghiduri', hub: 'Toate ghidurile' },
+    en: { eyebrow: 'Guide', related: 'More guides', hub: 'All guides' },
+  },
+  glossary: {
+    ro: { eyebrow: 'Glosar', related: 'Alți termeni', hub: 'Tot glosarul' },
+    en: { eyebrow: 'Glossary', related: 'More terms', hub: 'Full glossary' },
+  },
+  compare: {
+    ro: { eyebrow: 'Comparație', related: 'Alte comparații', hub: 'Toate comparațiile' },
+    en: { eyebrow: 'Comparison', related: 'More comparisons', hub: 'All comparisons' },
+  },
+}
+
 const fullPath = (locale: AppLocale, guide: Guide) => `/${locale}${guidePath(locale, guide)}`
 
 export function guideMetadata(locale: AppLocale, guide: Guide): Metadata {
@@ -88,6 +104,11 @@ export function guideMetadata(locale: AppLocale, guide: Guide): Metadata {
 
 export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }) {
   const copy = COPY[locale]
+  const kind = kindOf(guide)
+  const kindCopy = KIND_COPY[kind][locale]
+  const related = guidesOfKind(kind)
+    .filter((g) => g !== guide)
+    .slice(0, 4)
   const content = guide.content[locale]
   const path = fullPath(locale, guide)
   const jsonLd = {
@@ -126,7 +147,7 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto pt-32 pb-24 space-y-12">
         <header className="space-y-4">
-          <Eyebrow>{copy.eyebrow}</Eyebrow>
+          <Eyebrow>{kindCopy.eyebrow}</Eyebrow>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-(--foreground)">{content.title}</h1>
           <p className="text-xs text-(--muted) font-mono">
             {copy.updated}: <time dateTime={guide.dateModified}>{guide.dateModified}</time>
@@ -171,14 +192,34 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
             <h2 className="font-bold text-lg text-(--foreground)">{copy.ctaHeading}</h2>
             <p className="text-xs text-(--muted) mt-1">{copy.ctaBody}</p>
           </div>
-          <Link
+          <TrackedLink
             href="/free-ats-checker"
+            ctaId={`${kind}_ats_cta`}
             className={`shrink-0 ${buttonVariants('primary', 'md')} text-sm font-semibold flex items-center gap-1.5`}
           >
             <span>{copy.ctaButton}</span>
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </TrackedLink>
         </div>
+        {related.length > 0 && (
+          <nav aria-label={kindCopy.related} className="space-y-3">
+            <h2 className="text-lg font-bold text-(--foreground)">{kindCopy.related}</h2>
+            <ul className="space-y-2">
+              {related.map((g) => (
+                <li key={g.content[locale].slug}>
+                  <Link href={guidePath(locale, g)} className="text-(--foreground) underline underline-offset-4">
+                    {g.content[locale].title}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href={`/${GUIDE_SEGMENT[kind][locale]}`} className="text-(--muted) underline underline-offset-4">
+                  {kindCopy.hub}
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
       </main>
     </div>
   )

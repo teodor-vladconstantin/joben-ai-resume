@@ -20,7 +20,20 @@ export function GET() {
       { url: `${siteConfig.url}/ro/free-ats-checker`, description: 'Free 0-100 ATS score with a category breakdown, no signup required.' },
       { url: `${siteConfig.url}/ro/resume-examples`, description: 'Role-specific ATS keywords and resume writing guidance.' },
     ],
+    contentHubs: {
+      ro: [
+        `${siteConfig.url}/ro/ghiduri`,
+        `${siteConfig.url}/ro/glosar`,
+        `${siteConfig.url}/ro/comparatii`,
+      ],
+      en: [
+        `${siteConfig.url}/en/guides`,
+        `${siteConfig.url}/en/glossary`,
+        `${siteConfig.url}/en/compare`,
+      ],
+    },
     fullContent: `${siteConfig.url}/llms-full.txt`,
+    fullContentEn: `${siteConfig.url}/llms-full-en.txt`,
   }
 
   return Response.json(body)
