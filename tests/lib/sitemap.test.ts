@@ -12,6 +12,11 @@ describe('sitemap', () => {
     expect(urls).toContain('https://joben.eu/en/scrisoare-intentie/software-engineer')
   })
 
+  it('lists guides in ro only', () => {
+    expect(urls).toContain('https://joben.eu/ro/ghiduri/cv-citit-corect-de-ats')
+    expect(urls.some((u) => u.includes('/en/ghiduri/'))).toBe(false)
+  })
+
   it('uses fixed lastModified dates and x-default alternates', () => {
     for (const entry of entries) {
       expect(entry.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}$/)

@@ -11,6 +11,7 @@ import { clerkAppearance } from '@/lib/clerk-appearance'
 import { validateEnv } from '@/lib/env'
 import { siteConfig, BUILD_TIME } from '@/lib/content'
 import { organizationJsonLd } from '@/lib/structured-data'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { ClientProviders } from '@/components/ClientProviders'
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { SiteFooter } from '@/components/layout/SiteFooter'
@@ -38,7 +39,8 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(siteConfig.url),
-    title,
+    // Child pages set a bare title; the template appends the brand once.
+    title: { default: title, template: '%s | Joben' },
     description,
     keywords: ['AI resume builder', 'free resume maker', 'ATS resume format', 'CV builder', 'joben', 'resume templates', 'best AI resume builder'],
     authors: [{ name: 'Joben' }],
@@ -186,25 +188,22 @@ export default async function RootLayout({
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: stripInjectedAttrScript }}
           />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@graph': [
-                  {
-                    '@type': 'WebSite',
-                    '@id': `${siteConfig.url}/#website`,
-                    url: `${siteConfig.url}/${locale}`,
-                    name: 'Joben',
-                    description: websiteDescription,
-                    inLanguage: locale,
-                    dateModified: BUILD_TIME,
-                    publisher: { '@id': `${siteConfig.url}/#organization` },
-                  },
-                  organizationJsonLd(),
-                ]
-              })
+          <JsonLd
+            data={{
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': `${siteConfig.url}/#website`,
+                  url: `${siteConfig.url}/${locale}`,
+                  name: 'Joben',
+                  description: websiteDescription,
+                  inLanguage: locale,
+                  dateModified: BUILD_TIME,
+                  publisher: { '@id': `${siteConfig.url}/#organization` },
+                },
+                organizationJsonLd(),
+              ],
             }}
           />
           <NextIntlClientProvider locale={locale}>

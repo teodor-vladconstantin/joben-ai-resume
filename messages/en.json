@@ -5,19 +5,19 @@
       "description": "Joben is a free AI resume builder. Create ATS-optimized resumes and cover letters in minutes, and pass automated recruiter screeners."
     },
     "pricing": {
-      "title": "Pricing | Joben AI Resume Builder",
-      "description": "Free, Pro, and Recruiting plans plus a one-time 14-day Interview Pass (39 RON) for AI-powered resume building. Start free, upgrade when you need AI features."
+      "title": "Pricing and Plans for the AI Resume Builder",
+      "description": "Free, Pro and Recruiting plans, plus a one-time 14-day Interview Pass (39 RON). Start free and upgrade when you need the AI features."
     },
     "atsChecker": {
-      "title": "Free ATS Resume Checker: AI Analysis, No Signup | Joben",
+      "title": "Free ATS Resume Checker: AI Analysis, No Signup",
       "description": "Check your resume with an AI analysis in seconds: a 0-100 score, a 4-category breakdown and specific fixes. No signup, no credit card, 1 free scan a day."
     },
     "resumeExamplesHub": {
-      "title": "Resume Examples & ATS Keywords by Role | Joben",
+      "title": "Resume Examples & ATS Keywords by Role",
       "description": "Role-specific ATS keywords, common resume mistakes, and weak-vs-strong bullet examples. Free resume examples for every career stage."
     },
     "resumeExampleRole": {
-      "title": "{role} Resume Examples & ATS Keywords | Joben",
+      "title": "{role} Resume Examples & Keywords",
       "description": "ATS keywords, common mistakes, and a weak-vs-strong bullet rewrite for {role} resumes."
     }
   },
@@ -79,8 +79,8 @@
       }
     ],
     "atsPreview": {
-      "heading": "See What Recruiters See In Your Resume",
-      "subheading": "Our AI reviews your resume against real job postings so you know where you stand.",
+      "heading": "How does Joben score your resume?",
+      "subheading": "Joben compares your resume against real job postings and scores it from 0 to 100 across five categories: ATS readability, content quality, writing quality, job optimization and application readiness. For every weak point you get a concrete rewrite.",
       "scoreLabel": "Excellent",
       "categories": [
         "ATS readability",
@@ -173,8 +173,8 @@
         ]
       }
     ],
-    "pricingTeaserHeading": "Simple, Transparent Pricing",
-    "pricingTeaserSubheading": "Start for free, upgrade when you need the competitive edge.",
+    "pricingTeaserHeading": "How much does Joben cost?",
+    "pricingTeaserSubheading": "You start free, with 1 saved resume and 5 PDF exports. The 14-day Interview Pass costs 39 RON, paid once, and Pro raises the monthly limits.",
     "faqHeading": "Frequently Asked Questions",
     "faqSubheading": "Everything you need to know before building your next resume.",
     "faqOpen": "Open",
@@ -367,7 +367,7 @@
     "coverLetterButton": "View the cover letter example"
   },
   "SeoCoverLetter": {
-    "metaTitle": "{role} Cover Letter Example | Joben",
+    "metaTitle": "{role} Cover Letter Example",
     "metaDescription": "A complete {role} cover letter example with sample paragraphs and practical tips grounded in the tools and credentials of the field.",
     "eyebrow": "Cover letter example",
     "heading": "{role} Cover Letter Example",
@@ -394,24 +394,20 @@
       "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month."
     },
     {
-      "question": "What do I get with Pro?",
-      "answer": "Pro gives you 3 saved CVs, unlimited exports, 60 cover letters/month, 60 CV-tailoring runs/month, and 200 bullet rewrites/month."
+      "question": "What is an ATS and what does it do with my resume?",
+      "answer": "An ATS (Applicant Tracking System) is the software companies use to receive, store and filter applications. It reads your resume file, extracts the text and splits it into fields (contact details, experience, education, skills), and recruiters search and filter on those fields. If the text is extracted wrongly, your resume can show up incomplete or be missing from recruiter searches."
     },
     {
-      "question": "How do AI limits work?",
-      "answer": "Each plan has clear monthly usage counters for cover letters, CV tailoring, and bullet rewrites. Counters reset at the start of each month."
+      "question": "Why does an ATS misread or reject my resume?",
+      "answer": "Common causes are multi-column layouts, tables, text inside images or text boxes, contact details in the header or footer, and unusual section names such as \"My journey\" instead of \"Experience\". The parser reads top to bottom, so the order gets scrambled or content disappears. A single-column resume with standard headings avoids most of these problems."
     },
     {
-      "question": "Are the resumes ATS-friendly?",
-      "answer": "Yes. Joben templates and formatting are built to work with applicant tracking systems and keep your content readable by recruiters."
+      "question": "Which keywords should I put in my resume, and where do I find them?",
+      "answer": "Take them from the job posting: the skills, tools and certifications listed as requirements or repeated several times. Use the posting's exact wording, for example \"Google Analytics\" if that is how it appears, and place the word in your experience bullets, where it shows how you used it. Add only what you have actually used."
     },
     {
-      "question": "Can I create multiple versions of my resume?",
-      "answer": "Absolutely. You can create tailored versions for different roles, industries, or job descriptions and manage them from your dashboard."
-    },
-    {
-      "question": "Can I generate cover letters too?",
-      "answer": "Yes. All plans can generate cover letters, with monthly limits based on your plan."
+      "question": "Are Joben resumes ATS-compatible?",
+      "answer": "The template and the PDF export are built for machine reading: a single column, standard section headings and selectable text. Every ATS has its own parser, so no tool can guarantee perfect parsing in all of them. The free scan gives you a 0 to 100 score and the specific points to fix in your resume."
     },
     {
       "question": "Can I cancel my paid plan anytime?",
@@ -422,8 +418,8 @@
       "answer": "You pay 39 RON once and get Pro access for 14 days from payment. The pass does not auto-renew, and when it expires your account returns to the Free plan and its limits. Buying another pass while one is active adds the days on top. At checkout you request that access starts immediately, so the 14-day right of withdrawal is lost once access begins."
     },
     {
-      "question": "Is my resume data secure?",
-      "answer": "We use modern authentication and secure backend infrastructure. Your data is isolated per account and only used to power your experience."
+      "question": "What happens to the data in my resume?",
+      "answer": "Your resumes, cover letters and analyses are kept while your account is active and deleted immediately when you delete the account. For AI features, the relevant resume text goes to Anthropic (US) only to generate the result, without your name or email, and Anthropic does not use API data for model training by default. Database access is restricted with row-level security policies and traffic is encrypted with TLS. You can export or delete your data from your account."
     }
   ],
   "Footer": {
@@ -475,15 +471,15 @@
     "companyLine": "Joben is operated by {legalName}, tax ID (CUI) {cui}, Trade Register no. {regCom}, registered office at {address}. Contact: {email}."
   },
   "About": {
-    "metaTitle": "About Joben | Joben",
-    "metaDescription": "What Joben is, and how to reach us.",
+    "metaTitle": "About Joben: what it is and how it works",
+    "metaDescription": "What Joben is, how the 0 to 100 ATS score and AI resume rewriting work, plus company details and how to reach us.",
     "heading": "About Joben",
     "intro": "Joben is an AI resume builder built for candidates who want to get past ATS filters and reach the interview. We score resumes, rewrite weak bullet points, and generate cover letters tailored to each application.",
     "contactHeading": "Contact",
     "contactBody": "Questions, feedback, or a request about your data? Reach us at {email}."
   },
   "Contact": {
-    "metaTitle": "Contact Joben | Joben",
+    "metaTitle": "Contact",
     "metaDescription": "How to reach the Joben team: general questions, billing, privacy requests and company details.",
     "heading": "Contact Joben",
     "intro": "Joben is an AI resume and cover letter builder operated by a registered Romanian company. Write to us about how the product works, a problem with your account or a subscription, feedback on a feature, or a request about your personal data. Messages go to a real inbox that the team reads.",
@@ -697,8 +693,8 @@
   },
   "Legal": {
     "privacy": {
-      "metaTitle": "Privacy Policy | Joben AI Resume Builder",
-      "metaDescription": "Read the privacy policy for Joben. Learn how our free AI resume builder securely handles, protects, and processes your personal information and resume data.",
+      "metaTitle": "Privacy Policy",
+      "metaDescription": "How Joben handles and protects your personal data and resume data: what we collect, how long we keep it, who we share it with and your rights.",
       "heading": "Privacy Policy",
       "lastUpdated": "October 14, 2026",
       "intro": "This policy describes how we handle your information when you use Joben.",
@@ -766,8 +762,8 @@
       ]
     },
     "terms": {
-      "metaTitle": "Terms and Conditions | Joben AI Resume Builder",
-      "metaDescription": "Read the terms and conditions for using Joben. Understand the rules, guidelines, and agreements for using our free AI resume builder and ATS optimization tools.",
+      "metaTitle": "Terms and Conditions",
+      "metaDescription": "The terms and conditions for using Joben: usage rules for the AI resume builder and ATS tools, plans and payments, liability and company details.",
       "heading": "Terms and Conditions",
       "lastUpdated": "October 14, 2026",
       "intro": "Please read these terms carefully before using Joben.",
@@ -839,8 +835,8 @@
       ]
     },
     "cookies": {
-      "metaTitle": "Cookie Policy | Joben AI Resume Builder",
-      "metaDescription": "Learn what cookies Joben uses, why, and how to control them.",
+      "metaTitle": "Cookie Policy",
+      "metaDescription": "What cookies Joben uses, what they are for and how you can control them from the consent banner and your browser settings.",
       "heading": "Cookie Policy",
       "lastUpdated": "October 14, 2026",
       "intro": "This page lists every cookie Joben sets, why, and how long it lasts. You can change your choice at any time by clearing your browser's local storage for this site, or by using the cookie banner shown on your first visit.",
@@ -1406,7 +1402,7 @@
     }
   },
   "Feedback": {
-    "metaTitle": "Feedback | Joben",
+    "metaTitle": "Feedback",
     "metaDescription": "Share your feedback and help shape Joben during the beta.",
     "eyebrow": "Beta feedback",
     "heading": "Help us improve Joben",

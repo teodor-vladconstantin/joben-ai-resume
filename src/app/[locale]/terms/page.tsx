@@ -6,6 +6,7 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 export async function generateMetadata({
   params,
@@ -59,10 +60,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div className="min-h-screen flex flex-col pb-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
