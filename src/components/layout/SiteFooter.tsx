@@ -1,12 +1,28 @@
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { CompanyDetails } from '@/components/layout/CompanyDetails'
+import { GUIDE_SEGMENT } from '@/data/guides'
+import { CV_TEMPLATES_SEGMENT } from '@/components/seo/CvTemplatesPage'
+import type { AppLocale } from '@/i18n/routing'
+
+// Resource pages use a different URL segment per locale, so the links are built here.
+const RESOURCE_LABELS: Record<AppLocale, { guides: string; glossary: string; templates: string; heading: string }> = {
+  ro: { guides: 'Ghiduri', glossary: 'Glosar', templates: 'Șabloane CV', heading: 'Resurse' },
+  en: { guides: 'Guides', glossary: 'Glossary', templates: 'CV templates', heading: 'Resources' },
+}
 
 export async function SiteFooter() {
   const t = await getTranslations('Footer')
   const productLinks = t.raw('productLinks') as { href: string; label: string }[]
   const legalLinks = t.raw('legalLinks') as { href: string; label: string }[]
+  const locale = (await getLocale()) as AppLocale
+  const labels = RESOURCE_LABELS[locale] ?? RESOURCE_LABELS.ro
+  const resourceLinks = [
+    { href: `/${GUIDE_SEGMENT.guide[locale] ?? 'ghiduri'}`, label: labels.guides },
+    { href: `/${GUIDE_SEGMENT.glossary[locale] ?? 'glosar'}`, label: labels.glossary },
+    { href: `/${CV_TEMPLATES_SEGMENT[locale] ?? 'sabloane-cv'}`, label: labels.templates },
+  ]
 
   return (
     <footer className="border-t border-(--border) bg-(--background) py-10">
@@ -22,6 +38,19 @@ export async function SiteFooter() {
               <h3 className="font-mono text-(length:--text-label) text-(--muted)">{t('productHeading')}</h3>
               <ul className="mt-3 space-y-2">
                 {productLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-mono text-(length:--text-label) text-(--muted)">{labels.heading}</h3>
+              <ul className="mt-3 space-y-2">
+                {resourceLinks.map((link) => (
                   <li key={link.href}>
                     <Link href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
                       {link.label}
