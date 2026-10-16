@@ -12,8 +12,12 @@ export function CookieConsentBanner() {
   const t = useTranslations('CookieConsent')
 
   useEffect(() => {
+    const stored = getCookieConsent()
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount read of localStorage, not a subscribable external store
-    setVisible(getCookieConsent() === null)
+    setVisible(stored === null)
+    // Consent Mode defaults to denied on every page load; replay the stored
+    // choice so returning visitors who already accepted are actually measured.
+    if (stored === 'accepted') pushConsentUpdate(true)
   }, [])
 
   if (!visible) return null
