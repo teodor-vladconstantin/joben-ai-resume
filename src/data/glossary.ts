@@ -1,6 +1,7 @@
 // Glossary: one short definition page per hiring term, ro + en. Same model as guides.
 // Copy rules: no em dashes, no "X, not Y" phrasing, no invented statistics.
 import type { Guide, GuideContent } from './guides'
+import { GLOSSARY_MORE } from './glossary-more'
 
 const DATE = '2026-10-16'
 
@@ -11,7 +12,7 @@ const term = (ro: GuideContent, en: GuideContent): Guide => ({
   content: { ro, en },
 })
 
-export const GLOSSARY: Guide[] = [
+const BASE_GLOSSARY: Guide[] = [
   term(
     {
       slug: 'ce-este-ats',
@@ -527,3 +528,5 @@ export const GLOSSARY: Guide[] = [
     },
   ),
 ]
+
+export const GLOSSARY: Guide[] = [...BASE_GLOSSARY, ...GLOSSARY_MORE]
