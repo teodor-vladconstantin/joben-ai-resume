@@ -9,7 +9,7 @@ export type MdLocale = (typeof LOCALES)[number]
 // under a locale (or at the root) is a 404.
 const KNOWN_SEGMENTS = new Set([
   'pricing', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sign-in', 'sign-up',
-  'resume-examples', 'free-ats-checker', 'scrisoare-intentie', 'dashboard', 'resumes', 'cover-letters',
+  'resume-examples', 'free-ats-checker', 'scrisoare-intentie', 'cover-letter', 'ghiduri', 'guides', 'glosar', 'glossary', 'comparatii', 'compare', 'dashboard', 'resumes', 'cover-letters',
   'ai-review', 'feedback', 'settings', 'sentry-example-page',
 ])
 

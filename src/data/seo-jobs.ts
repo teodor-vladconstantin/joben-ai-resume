@@ -1,4 +1,5 @@
 import type { AppLocale } from '@/i18n/routing'
+import { MORE_SEO_JOBS } from './seo-jobs-more'
 
 // Role data behind the ATS keyword-match API (/api/public/ats-fast-check),
 // the resume-examples role pages (tools, certifications, ATS checklist,
@@ -28,7 +29,7 @@ export interface SeoJob {
   }
 }
 
-export const SEO_JOBS: SeoJob[] = [
+const BASE_SEO_JOBS: SeoJob[] = [
   {
     slug: { ro: 'inginer-software', en: 'software-engineer' },
     resumeRoleSlug: { ro: 'inginer-software', en: 'software-engineer' },
@@ -425,4 +426,17 @@ export function calculateJobKeywordMatch(
     : 0
 
   return { matchPercentage, foundKeywords, missingKeywords }
+}
+
+export const SEO_JOBS: SeoJob[] = [...BASE_SEO_JOBS, ...MORE_SEO_JOBS]
+
+const COVER_LETTER_SEGMENT: Record<AppLocale, string> = { ro: 'scrisoare-intentie', en: 'cover-letter' }
+
+export function findSeoJob(locale: AppLocale, slug: string): SeoJob | undefined {
+  return SEO_JOBS.find((job) => job.slug[locale] === slug)
+}
+
+/** Locale-less path (what the i18n Link expects). */
+export function coverLetterPath(locale: AppLocale, job: SeoJob): string {
+  return `/${COVER_LETTER_SEGMENT[locale]}/${job.slug[locale]}`
 }

@@ -4,6 +4,12 @@
 // metadata, Article + FAQPage JSON-LD, the direct-answer block, the sitemap
 // entries and the llms.txt links are all generated from it.
 import type { AppLocale } from '@/i18n/routing'
+import { MORE_GUIDES } from './guides-more'
+import { GLOSSARY } from './glossary'
+import { COMPARISONS } from './comparisons'
+
+/** guide = how-to article, glossary = one-term definition, compare = Joben vs alternative. */
+export type GuideKind = 'guide' | 'glossary' | 'compare'
 
 export interface GuideSection {
   /** H2. Phrase it as the question the section answers. */
@@ -26,13 +32,15 @@ export interface GuideContent {
 }
 
 export interface Guide {
+  /** Defaults to 'guide'. Decides the URL segment and the hub the page is listed on. */
+  kind?: GuideKind
   /** ISO dates (YYYY-MM-DD). Bump dateModified when the content changes. */
   datePublished: string
   dateModified: string
   content: Record<AppLocale, GuideContent>
 }
 
-export const GUIDES: Guide[] = [
+const CORE_GUIDES: Guide[] = [
   {
     datePublished: '2026-10-15',
     dateModified: '2026-10-16',
@@ -237,13 +245,25 @@ export const GUIDES: Guide[] = [
   },
 ]
 
-const SEGMENT: Record<AppLocale, string> = { ro: 'ghiduri', en: 'guides' }
+export const GUIDES: Guide[] = [...CORE_GUIDES, ...MORE_GUIDES, ...GLOSSARY, ...COMPARISONS]
 
-export function getGuide(locale: AppLocale, slug: string): Guide | undefined {
-  return GUIDES.find((guide) => guide.content[locale].slug === slug)
+export const GUIDE_SEGMENT: Record<GuideKind, Record<AppLocale, string>> = {
+  guide: { ro: 'ghiduri', en: 'guides' },
+  glossary: { ro: 'glosar', en: 'glossary' },
+  compare: { ro: 'comparatii', en: 'compare' },
+}
+
+export const kindOf = (guide: Guide): GuideKind => guide.kind ?? 'guide'
+
+export function guidesOfKind(kind: GuideKind): Guide[] {
+  return GUIDES.filter((guide) => kindOf(guide) === kind)
+}
+
+export function getGuide(locale: AppLocale, slug: string, kind: GuideKind = 'guide'): Guide | undefined {
+  return GUIDES.find((guide) => kindOf(guide) === kind && guide.content[locale].slug === slug)
 }
 
 /** Locale-less path (what the i18n Link expects). */
 export function guidePath(locale: AppLocale, guide: Guide): string {
-  return '/' + SEGMENT[locale] + '/' + guide.content[locale].slug
+  return '/' + GUIDE_SEGMENT[kindOf(guide)][locale] + '/' + guide.content[locale].slug
 }

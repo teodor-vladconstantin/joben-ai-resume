@@ -1,18 +1,19 @@
 import { MetadataRoute } from 'next';
 import { siteConfig } from '@/lib/content';
 import { resumeRoles } from '@/data/resume-roles';
-import { SEO_JOBS } from '@/data/seo-jobs';
-import { GUIDES, guidePath } from '@/data/guides';
+import { SEO_JOBS, coverLetterPath } from '@/data/seo-jobs';
+import { GUIDES, GUIDE_SEGMENT, guidePath, type GuideKind } from '@/data/guides';
 import { routing, type AppLocale } from '@/i18n/routing';
 
 const baseUrl = siteConfig.url;
 
 // Fixed per-content dates: bump the matching entry when that page's content
 // changes, so crawlers see a lastModified that means something.
-const ROLE_PAGES_UPDATED = '2026-09-19';
+const ROLE_PAGES_UPDATED = '2026-10-16';
 // Roles that absorbed the former /cv pages (tools, checklist, scan widget).
 const MERGED_ROLE_PAGES_UPDATED = '2026-10-14';
-const COVER_LETTER_PAGES_UPDATED = '2026-10-14';
+const COVER_LETTER_PAGES_UPDATED = '2026-10-16';
+const GUIDE_HUBS_UPDATED = '2026-10-16';
 
 type Frequency = MetadataRoute.Sitemap[number]['changeFrequency'];
 
@@ -47,6 +48,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: { ro: '/free-ats-checker', en: '/free-ats-checker' }, lastModified: '2026-10-14', changeFrequency: 'monthly', priority: 0.9 },
   ];
 
+  (Object.keys(GUIDE_SEGMENT) as GuideKind[]).forEach((kind) => {
+    pages.push({
+      path: { ro: `/${GUIDE_SEGMENT[kind].ro}`, en: `/${GUIDE_SEGMENT[kind].en}` },
+      lastModified: GUIDE_HUBS_UPDATED,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
+
   resumeRoles.forEach((role) => {
     const merged = SEO_JOBS.some((job) => job.resumeRoleSlug.en === role.slug.en);
     pages.push({
@@ -59,7 +69,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   SEO_JOBS.forEach((job) => {
     pages.push({
-      path: { ro: `/scrisoare-intentie/${job.slug.ro}`, en: `/scrisoare-intentie/${job.slug.en}` },
+      path: { ro: coverLetterPath('ro', job), en: coverLetterPath('en', job) },
       lastModified: COVER_LETTER_PAGES_UPDATED,
       changeFrequency: 'monthly',
       priority: 0.6,

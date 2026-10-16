@@ -3,7 +3,8 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { Navbar } from '@/components/ui/Navbar'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { company } from '@/lib/content'
-import { routing, type AppLocale } from '@/i18n/routing'
+import type { AppLocale } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -25,10 +26,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: `/${locale}/contact`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/contact`])),
-    },
+    alternates: localeAlternates(locale, '/contact'),
     openGraph: {
       title,
       description,
