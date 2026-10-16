@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { siteConfig } from '@/lib/content';
 import { resumeRoles } from '@/data/resume-roles';
 import { SEO_JOBS } from '@/data/seo-jobs';
-import { GUIDES } from '@/data/guides';
+import { GUIDES, guidePath } from '@/data/guides';
 import { routing, type AppLocale } from '@/i18n/routing';
 
 const baseUrl = siteConfig.url;
@@ -66,10 +66,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
-  // Romanian-only: no en path, so no en entry and no hreflang pair.
   GUIDES.forEach((guide) => {
     pages.push({
-      path: { ro: `/ghiduri/${guide.slug}` },
+      path: { ro: guidePath('ro', guide), en: guidePath('en', guide) },
       lastModified: guide.dateModified,
       changeFrequency: 'monthly',
       priority: 0.7,
