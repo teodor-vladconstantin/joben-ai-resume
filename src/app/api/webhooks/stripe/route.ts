@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { capturePostHogEvent } from '@/lib/posthog-server'
+import { sendGaPurchase } from '@/lib/ga-mp'
 import { resolvePlanFromPriceId } from '@/lib/plans'
 import { invalidatePlanCache } from '@/lib/ratelimit'
 import { extendExpiry } from '@/lib/referral'
@@ -334,6 +335,16 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
           event: 'payment_completed',
           properties: { plan: planId || 'pro', amount: session.amount_total ?? null },
         })
+
+        if (session.metadata?.gaClientId && session.payment_status === 'paid') {
+          await sendGaPurchase({
+            clientId: session.metadata.gaClientId,
+            transactionId: session.id,
+            plan: planId || 'pro',
+            value: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? 'ron').toUpperCase(),
+          })
+        }
 
         const updatePayload: {
           plan?: string

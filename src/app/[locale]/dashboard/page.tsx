@@ -19,7 +19,6 @@ import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
 import { RedeemCodeCard } from '@/components/dashboard/RedeemCodeCard'
 import { ReferralCard } from '@/components/referral/ReferralCard'
-import { PurchaseTracker } from '@/components/dashboard/PurchaseTracker'
 import { getUserPlan } from '@/lib/plans'
 import { createServerClient } from '@/lib/supabase/server'
 import type { AppLocale } from '@/i18n/routing'
@@ -144,7 +143,6 @@ export default async function DashboardPage({
             <p className="text-(--muted)">{d.subGreeting}</p>
           </div>
 
-          {upgrade === 'success' && <PurchaseTracker plan={pass === '14d' ? 'pass_14d' : 'subscription'} />}
           {passNoticeText ? (
             <p role="status" className="mb-8 border-l-2 border-(--accent) bg-(--surface) px-4 py-3 text-sm text-(--foreground)">
               {passNoticeText}
