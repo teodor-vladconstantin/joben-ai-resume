@@ -6,10 +6,11 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 import { resumeRoles } from '@/data/resume-roles'
-import { GUIDES } from '@/data/guides'
+import { GUIDES, guidePath } from '@/data/guides'
 import { siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -26,10 +27,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: `/${locale}/resume-examples`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/resume-examples`])),
-    },
+    alternates: localeAlternates(locale, '/resume-examples'),
     openGraph: {
       title,
       description,
@@ -105,18 +103,17 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
           ))}
         </div>
 
-        {/* Guides are Romanian-only, so the block only renders on /ro. */}
-        {locale === 'ro' && GUIDES.length > 0 && (
+        {GUIDES.length > 0 && (
           <section className="mt-16 space-y-4">
-            <h2 className="text-2xl font-bold text-(--foreground)">Ghiduri</h2>
+            <h2 className="text-2xl font-bold text-(--foreground)">{locale === 'ro' ? 'Ghiduri' : 'Guides'}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {GUIDES.map((guide) => (
-                <Link key={guide.slug} href={`/ghiduri/${guide.slug}`}>
+                <Link key={guide.content[locale].slug} href={guidePath(locale, guide)}>
                   <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
-                    <p className="text-(--foreground) font-semibold">{guide.title}</p>
-                    <p className="mt-1.5 text-sm text-(--muted)">{guide.description}</p>
+                    <p className="text-(--foreground) font-semibold">{guide.content[locale].title}</p>
+                    <p className="mt-1.5 text-sm text-(--muted)">{guide.content[locale].description}</p>
                     <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
-                      Citește ghidul <ArrowRight className="h-3.5 w-3.5" />
+                      {locale === 'ro' ? 'Citește ghidul' : 'Read the guide'} <ArrowRight className="h-3.5 w-3.5" />
                     </p>
                   </Card>
                 </Link>
