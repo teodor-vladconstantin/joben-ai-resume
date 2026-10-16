@@ -76,7 +76,7 @@ const SECTION_PATTERNS: { key: FastAtsSectionKey; regex: RegExp }[] = [
   { key: 'experience', regex: /(experien[țţt][aă]|experience|work history|istoric profesional|employment)/i },
   { key: 'education', regex: /(educa[țţt]ie|education|studii|academic|formare)/i },
   { key: 'skills', regex: /(abilit[aă][țţt]i|skills|competen[țţt]e|tehnologii|expertiz[aă]|core competencies)/i },
-  { key: 'summary', regex: /(profil|summary|despre mine|about me|obiectiv|objective)/i },
+  { key: 'summary', regex: /(profil|rezumat|sumar|summary|despre mine|about me|obiectiv|objective)/i },
   { key: 'projects', regex: /(proiecte|projects|portofoliu|portfolio)/i },
   { key: 'certifications', regex: /(certific[aă]ri|certifications?|cursuri|courses|training|acredit[aă]ri)/i },
   { key: 'languages', regex: /(limbi str[aă]ine|limbi|languages)/i },
