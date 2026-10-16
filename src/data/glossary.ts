@@ -2,6 +2,7 @@
 // Copy rules: no em dashes, no "X, not Y" phrasing, no invented statistics.
 import type { Guide, GuideContent } from './guides'
 import { GLOSSARY_MORE } from './glossary-more'
+import { GLOSSARY_MORE_B } from './glossary-more-b'
 
 const DATE = '2026-10-16'
 
@@ -529,4 +530,4 @@ const BASE_GLOSSARY: Guide[] = [
   ),
 ]
 
-export const GLOSSARY: Guide[] = [...BASE_GLOSSARY, ...GLOSSARY_MORE]
+export const GLOSSARY: Guide[] = [...BASE_GLOSSARY, ...GLOSSARY_MORE, ...GLOSSARY_MORE_B]

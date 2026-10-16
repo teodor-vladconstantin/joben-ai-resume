@@ -2,7 +2,7 @@
 // phrasing, no invented statistics. Legal topics point readers to the law in force.
 import type { Guide, GuideContent } from './guides'
 
-const DATE = '2026-10-17'
+const DATE = '2026-10-16'
 
 const term = (ro: GuideContent, en: GuideContent): Guide => ({
   kind: 'glossary',
