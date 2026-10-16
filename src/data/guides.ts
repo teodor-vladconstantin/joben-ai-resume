@@ -58,7 +58,7 @@ export const GUIDES: Guide[] = [
         ],
       },
       {
-        heading: 'Ce structură și ce titluri de secțiuni citește corect?',
+        heading: 'Ce structură și titluri de secțiuni citește corect?',
         paragraphs: [
           'Folosește o singură coloană, de sus în jos, în ordinea: date de contact, rezumat scurt, experiență profesională, educație, competențe, limbi străine. Parserul recunoaște titlurile uzuale și mapează conținutul de sub ele în câmpul potrivit.',
           'Un titlu creativ precum „Parcursul meu" sau „Ce știu să fac" poate lăsa secțiunea nemapată. Folosește „Experiență profesională", „Educație", „Competențe".',
@@ -99,9 +99,9 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Cum verific singur dacă ATS-ul îmi citește CV-ul?',
         paragraphs: [
-          'Deschide PDF-ul sau DOCX-ul, selectează tot (Ctrl+A), copiază și lipește într-un editor simplu, cum e Notepad. Ce vezi acolo este foarte aproape de ce vede parserul.',
+          'Deschide PDF-ul sau DOCX-ul, selectează tot (Ctrl+A), copiază și lipește într-un editor simplu, cum e Notepad. Rezultatul este foarte aproape de ce vede parserul.',
           'Verifică trei lucruri: ordinea secțiunilor este cea corectă, datele de contact sunt prezente și fiecare post are funcția, compania și perioada pe linii alăturate. Dacă textul apare amestecat sau lipsește, repară sursa și exportă din nou.',
-          'Pentru o verificare automată, scanarea gratuită Joben îți dă un scor de la 0 la 100 și punctele de reparat. Scorul este estimarea Joben și nu rezultatul unui anumit ATS, deci folosește-l ca indicator de lizibilitate.',
+          'Pentru o verificare automată, scanarea gratuită Joben îți dă un scor de la 0 la 100 și punctele de reparat. Scorul este estimarea Joben a lizibilității pentru ATS, deci folosește-l ca indicator.',
         ],
       },
     ],
