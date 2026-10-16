@@ -10,6 +10,7 @@ import { pricingPlanMeta, siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 function priceAmount(price: string): string {
   return price.replace(/[^\d]/g, '')
@@ -54,7 +55,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   const { locale } = await params
   setRequestLocale(locale)
   const messages = (await getMessages({ locale })) as unknown as Messages
-  const { Common, Pricing: pricing, Faq: faq } = messages
+  const { Common, Pricing: pricing } = messages
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -85,26 +86,12 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         },
         category: pricingPlanMeta[index].planId ?? 'free',
       })),
-      {
-        '@type': 'FAQPage',
-        mainEntity: faq.map((item) => ({
-          '@type': 'Question',
-          name: item.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: item.answer,
-          },
-        })),
-      },
     ],
   }
 
   return (
     <div className="min-h-screen bg-(--background) text-(--foreground)">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <Suspense fallback={null}>
         <AutoResumeCheckout />
       </Suspense>

@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/content'
 import { resumeRoles } from '@/data/resume-roles'
 import { SEO_JOBS } from '@/data/seo-jobs'
+import { GUIDES } from '@/data/guides'
 import messagesRo from '../../../messages/ro.json'
 
 // llmstxt.org-shaped index for AI answer-engine crawlers (Perplexity,
@@ -24,6 +25,10 @@ export function GET() {
       `- [${job.title.ro} Cover Letter](${siteConfig.url}/ro/scrisoare-intentie/${job.slug.ro}): a full sample cover letter and structure rules for ${job.title.ro} roles.`
   ).join('\n')
 
+  const guideLinks = GUIDES.map(
+    (guide) => `- [${guide.title}](${siteConfig.url}/ro/ghiduri/${guide.slug}): ${guide.description}`
+  ).join('\n')
+
   const body = `# ${siteConfig.name}
 
 > ${messagesRo.Metadata.home.description}
@@ -43,6 +48,10 @@ Joben is a web app with no public API. Agents should link users to these pages.
 - [Pricing](${siteConfig.url}/ro/pricing): Free, a one-time 14-day Pass, Pro, and Recruiting plans.
 - [Free ATS Resume Checker](${siteConfig.url}/ro/free-ats-checker): Free 0-100 ATS score with a category breakdown, no signup required.
 - [Resume Examples](${siteConfig.url}/ro/resume-examples): Role-specific ATS keywords and resume writing guidance.
+
+## Guides (Romanian)
+
+${guideLinks}
 
 ## Resume Examples by Role
 
