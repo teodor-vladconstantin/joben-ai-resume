@@ -1,10 +1,11 @@
 ## Active
 - [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
-- [IN PROGRESS] 2026-10-16 Plan SEO/GEO/CRO (~/.claude/plans/breezy-chasing-mist.md, docs/seo/PLAYBOOK.md). Cod făcut, necomis:
-  x-default + alternates pe toate paginile, /en/cover-letter (301 de la vechiul URL), hub-uri + 9 ghiduri + 8 termeni glosar + 3 comparații
-  (ro+en), 30 roluri, 10 scrisori, llms*.txt/ai*.json în EN, OG per pagină, evenimente cta_click/plan_cta_click/pricing_viewed.
-  tsc/lint curate, 377 teste, build local OK. RĂMAS (user): triggere GTM pentru evenimentele noi, sitemap + hub-uri în GSC, IndexNow,
-  recenzii reale, backlinks (docs/seo/PLAYBOOK.md §3), comparații cu concurenți doar după verificare manuală.
+- [DONE] 2026-10-16 Plan SEO/GEO/CRO livrat în producție (PR #28-#33, docs/seo/PLAYBOOK.md și BACKLINKS.md): hreflang + x-default,
+  /en/cover-letter (301), hub-uri ghiduri/glosar/comparații, 54 roluri + 32 ghiduri + 26 glosar + 10 scrisori + 3 comparații (ro+en),
+  /ro/sabloane-cv + /en/cv-templates (6 DOCX, test de parsare), llms/ai în EN, OG per pagină, evenimente GA4 (GTM v6 publicat),
+  sitemap trimis în GSC, hub-uri cerute la indexare, IndexNow trimis (cheie în public/). Fix parser ATS: "Rezumat" recunoscut.
+  RĂMAS (user): steluță key event pentru plan_cta_click în GA4 (după ce apare în Recent events), recenzii reale, backlinks conform BACKLINKS.md,
+  verificare indexare în GSC la 1-2 săptămâni (decide dacă reluăm conținutul).
 - [IN PROGRESS] 2026-10-15 Growth (preview verificat, NEMERGED în main): commit-uri b12a316 + 1fe1173 pe
   feat/agent-readiness. /free-ats-checker (Haiku) e singurul lead magnet; /verificare-cv și /cv redirect 301.
   Pass 14d, referral (3/30 zile, 10 total, email RO/EN), SEO pe resume-examples + scrisoare-intentie. tsc/lint curate,
