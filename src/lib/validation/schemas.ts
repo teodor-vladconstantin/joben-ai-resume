@@ -263,6 +263,8 @@ export const checkoutRequestSchema = z
   .object({
     plan: z.enum(['pro', 'recruiting', 'pass_14d']).optional(),
     locale: z.enum(['ro', 'en']).optional(),
+    // GA client id from the `_ga` cookie ("1234567890.1234567890"); present only with analytics consent.
+    gaClientId: z.string().regex(/^\d{5,12}\.\d{5,12}$/).optional(),
   })
   .strict()
 

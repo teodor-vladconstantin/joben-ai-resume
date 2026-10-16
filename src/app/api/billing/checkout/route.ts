@@ -164,6 +164,7 @@ export async function POST(req: Request) {
         metadata: {
           userId,
           planId: requestedPlan,
+          ...(parsedBody.data.gaClientId ? { gaClientId: parsedBody.data.gaClientId } : {}),
         },
         customer: customerId,
         customer_email: customerId ? undefined : email,

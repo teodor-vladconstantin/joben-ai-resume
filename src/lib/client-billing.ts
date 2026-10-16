@@ -1,6 +1,6 @@
 import posthog from 'posthog-js'
 import type { AppLocale } from '@/i18n/routing'
-import { pushGtmEvent } from '@/lib/gtm-events'
+import { getGaClientId, pushGtmEvent } from '@/lib/gtm-events'
 
 export type PaidPlan = 'pro' | 'recruiting' | 'pass_14d'
 
@@ -15,7 +15,7 @@ export async function startCheckout(plan: PaidPlan, locale: AppLocale) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ plan, locale }),
+    body: JSON.stringify({ plan, locale, gaClientId: getGaClientId() }),
   })
 
   const payload = (await response.json()) as { url?: string; error?: string }
