@@ -9,7 +9,8 @@ import { resumeRoles } from '@/data/resume-roles'
 import { GUIDES, guidePath } from '@/data/guides'
 import { siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
-import { routing, type AppLocale } from '@/i18n/routing'
+import type { AppLocale } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -26,10 +27,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: `/${locale}/resume-examples`,
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}/resume-examples`])),
-    },
+    alternates: localeAlternates(locale, '/resume-examples'),
     openGraph: {
       title,
       description,
