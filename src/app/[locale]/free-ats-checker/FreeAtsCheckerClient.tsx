@@ -10,6 +10,7 @@ import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { useServerError } from '@/hooks/useServerError'
+import { pushGtmEvent } from '@/lib/gtm-events'
 
 type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 type GradeKey = 'Poor' | 'Fair' | 'Good' | 'Excellent'
@@ -91,6 +92,7 @@ export function FreeAtsCheckerClient() {
   // upload pageview.
   useEffect(() => {
     if (!result) return
+    pushGtmEvent('ats_scan_completed', { score: result.overall_score, grade: result.grade })
     posthog.capture('ats_result_viewed', {
       scanId,
       score: result.overall_score,

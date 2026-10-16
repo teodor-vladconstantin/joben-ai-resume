@@ -1,5 +1,6 @@
 import posthog from 'posthog-js'
 import type { AppLocale } from '@/i18n/routing'
+import { pushGtmEvent } from '@/lib/gtm-events'
 
 export type PaidPlan = 'pro' | 'recruiting' | 'pass_14d'
 
@@ -7,6 +8,7 @@ export async function startCheckout(plan: PaidPlan, locale: AppLocale) {
   // Captured here (click time) rather than only on the server, so we still
   // see the conversion intent if the user abandons before checkout session creation finishes.
   posthog.capture('checkout_started', { plan })
+  pushGtmEvent('begin_checkout', { plan })
 
   const response = await fetch('/api/billing/checkout', {
     method: 'POST',

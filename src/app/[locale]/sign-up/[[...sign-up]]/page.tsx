@@ -15,6 +15,7 @@ import {
   type AtsSignupAttribution,
 } from '@/lib/ats-attribution'
 import { readReferralCookie } from '@/lib/referral-shared'
+import { pushGtmEvent } from '@/lib/gtm-events'
 import type { AppLocale } from '@/i18n/routing'
 
 // The acceptance (with its signup_consents token) is kept in localStorage so
@@ -137,6 +138,7 @@ function SignUpContent() {
     // codebase's bias toward availability.
     writeStorage('local', LEGAL_ACCEPTED_KEY, JSON.stringify({ token, at: Date.now() } satisfies StoredConsent))
     posthog.capture('signup_consent_accepted', { source })
+    pushGtmEvent('sign_up_started', { source: source ?? 'direct' })
     setConsentToken(token)
     setAccepted(true)
   }, [])
