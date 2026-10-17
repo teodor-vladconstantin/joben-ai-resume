@@ -5,7 +5,7 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { capturePostHogEvent } from '@/lib/posthog-server'
-import { sendAnonymousScanConfirmationIfEligible } from '@/lib/anonymous-scan-emails'
+import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
@@ -128,11 +128,15 @@ export async function POST(req: Request) {
       finalEmail = email
     }
 
-    // Double opt-in: the report is only sent after the address owner confirms.
-    await sendAnonymousScanConfirmationIfEligible({
+    await sendAnonymousScanReportEmailIfEligible({
       scanId,
       email: finalEmail,
       locale: toAnonScanEmailLocale(scan.locale),
+      analyticsDistinctId: scan.posthog_distinct_id ?? null,
+      overallScore: reportJson.data.overall_score,
+      grade: reportJson.data.grade,
+      categories: reportJson.data.categories,
+      issues: reportJson.data.issues,
     })
 
     // Only for visitors who accepted analytics cookies at scan time (see
