@@ -15,9 +15,11 @@ vi.mock('@/lib/supabase/server', () => ({
   createServerClient: () => ({
     from: () => ({
       insert: async () => ({ error: null }),
-      update: (values: { status: string }) => {
-        statusUpdates.push(values.status)
-        return { eq: async () => ({ error: null }) }
+      update: (values: { status?: string }) => {
+        // The email_confirmed_at stamp has no status; only email_events updates count.
+        if (values.status) statusUpdates.push(values.status)
+        const done = Promise.resolve({ error: null })
+        return { eq: () => Object.assign(done, { is: () => done }) }
       },
     }),
   }),
