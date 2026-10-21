@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useLocale } from 'next-intl'
 import { useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
@@ -27,9 +28,23 @@ function PostHogIdentify() {
   return null
 }
 
+// Page language ('ro' | 'en') on every browser event and on the person, so
+// server-side events (signup, checkout, payment) can be broken down by it too.
+function PostHogLocale() {
+  const locale = useLocale()
+
+  useEffect(() => {
+    posthog.register({ locale })
+    posthog.setPersonProperties({ locale })
+  }, [locale])
+
+  return null
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   return (
     <PHProvider client={posthog}>
+      <PostHogLocale />
       <PostHogIdentify />
       {children}
     </PHProvider>
