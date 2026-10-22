@@ -11,4 +11,8 @@ describe('data retention', () => {
     const rule = RETENTION_RULES.find((r) => r.table === 'anonymous_scans')
     expect(rule).toMatchObject({ days: 90, unownedColumn: 'claimed_by' })
   })
+
+  it('measures signup consents on accepted_at, which has no created_at', () => {
+    expect(RETENTION_RULES.find((r) => r.table === 'signup_consents')?.column).toBe('accepted_at')
+  })
 })

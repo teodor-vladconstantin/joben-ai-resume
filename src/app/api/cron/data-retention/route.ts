@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     let query = supabase
       .from(rule.table)
       .delete({ count: 'exact' })
-      .lt('created_at', retentionCutoff(rule.days))
+      .lt(rule.column ?? 'created_at', retentionCutoff(rule.days))
     if (rule.unownedColumn) query = query.is(rule.unownedColumn, null)
 
     const { count, error } = await query

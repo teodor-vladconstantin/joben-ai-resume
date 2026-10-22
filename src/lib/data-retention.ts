@@ -3,13 +3,15 @@
 export type RetentionRule = {
   table: string
   days: number
+  // Timestamp column the window is measured on (defaults to created_at).
+  column?: string
   // Extra filter so only rows nobody owns are removed (anonymous visitors).
   unownedColumn?: string
 }
 
 export const RETENTION_RULES: readonly RetentionRule[] = [
   { table: 'anonymous_scans', days: 90, unownedColumn: 'claimed_by' },
-  { table: 'signup_consents', days: 30 },
+  { table: 'signup_consents', days: 30, column: 'accepted_at' },
   { table: 'email_events', days: 365 },
   { table: 'product_events', days: 365 },
   { table: 'webhook_events', days: 365 },
