@@ -1,0 +1,18 @@
+name: Data Retention
+
+# Vercel Hobby cron slots are taken (see redis-health-cron.yml), so the
+# retention sweep runs from here. Windows live in src/lib/data-retention.ts.
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/data-retention
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/data-retention" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

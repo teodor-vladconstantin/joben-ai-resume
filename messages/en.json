@@ -308,7 +308,7 @@
     "reportSentTo": "Report sent to {email}.",
     "sendDifferentEmail": "Send to a different email",
     "getReportByEmail": "Get this report by email",
-    "emailExplainer": "We'll send your score, category breakdown, and issues to your inbox.",
+    "emailExplainer": "We'll send your score, category breakdown, and issues to your inbox. By sending, you agree to receive the report and up to 2 follow-up emails with CV tips. You can unsubscribe at any time, and the details are in the Privacy Policy.",
     "emailPlaceholder": "you@email.com",
     "emailMeThisReport": "Email me this report",
     "freeIncludes": "Free plan includes 15 AI bullet rewrites and an ATS-optimized template every month.",
@@ -690,170 +690,187 @@
   },
   "CookieConsent": {
     "ariaLabel": "Cookie consent",
-    "messagePrefix": "We use strictly necessary cookies to run Joben, and optional analytics cookies to improve it. See our",
+    "messagePrefix": "We use strictly necessary cookies to run Joben. With your consent we also use analytics cookies (PostHog, Google Analytics) and session recordings to improve the product. You can change your choice at any time from the page footer. See our",
     "cookiePolicyLinkText": "Cookie Policy",
     "rejectNonEssential": "Reject non-essential",
-    "acceptAll": "Accept all"
+    "acceptAll": "Accept all",
+    "settingsLink": "Cookie settings"
   },
   "Legal": {
     "privacy": {
       "metaTitle": "Privacy Policy",
-      "metaDescription": "How Joben handles and protects your personal data and resume data: what we collect, how long we keep it, who we share it with and your rights.",
+      "metaDescription": "How Joben processes your personal data and CV data: purposes, legal bases, recipients, retention periods and your GDPR rights.",
       "heading": "Privacy Policy",
-      "lastUpdated": "October 14, 2026",
-      "intro": "This policy describes how we handle your information when you use Joben.",
+      "lastUpdated": "22 October 2026",
+      "intro": "This policy explains what data we process when you use Joben, why we process it, who we share it with, how long we keep it and what rights you have.",
       "breadcrumbLabel": "Privacy Policy",
       "footerPrefix": "Read our ",
       "footerLinkLabel": "Terms and Conditions",
-      "footerSuffix": " for legal terms of service.",
+      "footerSuffix": " for the legal terms of the service.",
       "sections": [
         {
-          "title": "1. Scope",
-          "content": "This Privacy Policy explains how TETA ABC SRL, the data controller for Joben (\"we\", \"us\"), collects, uses, stores, and shares your personal data when you use joben.eu and our AI resume-building services, in accordance with the EU General Data Protection Regulation (GDPR)."
+          "title": "1. Who we are",
+          "content": "The controller of your data is TETA ABC SRL (tax ID 22404824, trade register J2007001135104), with its registered office at Str. Centrală nr. 169, sat Mărăcineni, Buzău County, postal code 127325, Romania. We provide Joben at joben.eu.\n\nFor any question about your data, write to privacy@joben.eu. We have not appointed a Data Protection Officer (DPO) because we do not fall under the cases in Article 37 GDPR, and privacy@joben.eu is our data protection contact point.\n\nWe process data under Regulation (EU) 2016/679 (GDPR), Romanian Law no. 190/2018, Romanian Law no. 506/2004 on the processing of personal data and the protection of privacy in electronic communications, and Directive 2002/58/EC (ePrivacy)."
         },
         {
-          "title": "2. Data We Collect",
-          "content": "Account data: email address and first/last name, collected via Clerk when you sign up. Resume and cover letter content: the full text and structured data you enter into the builder (work history, education, skills). AI analysis results: scores and feedback generated when you run an AI review. Billing metadata: your Stripe customer ID and subscription ID (we never see or store your card number (Stripe handles that directly)). Usage analytics: pseudonymous product-usage events (e.g. feature used, plan tier) tied to your account ID, collected only after you accept analytics cookies. Technical/error logs: request identifiers, error messages, and, when an unhandled error occurs, your IP address (via our error-monitoring provider). Feedback: if you submit our in-app feedback form, your email address and free-text responses."
+          "title": "2. Data we process, purposes and legal bases",
+          "content": "Each category of data has a specific purpose and legal basis:\n\n- Account data (email address, first and last name, the sign-in method managed by Clerk, chosen language, date and version of the Terms accepted): we create and secure your account and prove acceptance of the Terms. Basis: performance of the contract (Art. 6(1)(b) GDPR) and our legitimate interest in proving acceptance of the terms (Art. 6(1)(f)).\n- Your content (CVs, cover letters, text pasted into the editor, files uploaded for import, AI analyses and results): we provide the features you created the account for. Basis: performance of the contract.\n- Payment data (Stripe customer, subscription and payment IDs, chosen plan, promo codes used): we process payments and keep accounting records. Your card number is entered directly at Stripe and never reaches us. Basis: performance of the contract and the legal obligation to keep accounting records (Art. 6(1)(b) and (c)).\n- Free ATS checker without an account: the CV file is analysed in memory and is not saved. We keep the score, the generated report (categories and issues found), the language, a hash of the IP address, a random device identifier from the jb_atsdid cookie and, if you enter it, your email address. Purposes: delivering the report, the daily anti-abuse limit and linking the report to your account if you create one. Basis: steps at your request before a contract (Art. 6(1)(b)) for the report, legitimate interest in preventing abuse (point (f)) and your consent for the follow-up emails described below.\n- Service emails (confirmations, reports, invoices, notices about your account or subscription): basis performance of the contract. Follow-up emails to visitors of the ATS checker without an account (up to 2, after 48 hours and after 7 days): basis your consent (Art. 6(1)(a) GDPR and Art. 12 of Law no. 506/2004), given when you submit your address. Emails about similar features to users with an account: basis legitimate interest and Art. 12(2) of Law no. 506/2004. Every email contains an unsubscribe link. After you unsubscribe we keep the address on a suppression list so that we respect your refusal.\n- Referral programme (the referral code, the link between the person who invites and the person invited, date, Pro days granted): we grant rewards and apply programme limits. Basis: performance of the contract and legitimate interest in preventing abuse.\n- Security and diagnostics (technical logs, request identifiers, error messages, the IP address in error reports, IP hash for rate limiting): we protect the service, prevent abuse and fix errors. Basis: legitimate interest (Art. 6(1)(f)) and the security obligation in Art. 32 GDPR.\n- Usage analytics and session recordings (PostHog, Google Analytics, Sentry Replay): we understand how the product is used. Basis: your consent only (Art. 6(1)(a) GDPR and Art. 4(5) of Law no. 506/2004). Without your consent these tools do not load.\n- Feedback and correspondence (the email address and message you send us): we reply and improve the product. Basis: legitimate interest and, where relevant, performance of the contract.\n\nAccount data is required to create an account. Without it we cannot provide the service. The optional analytics and the follow-up emails from the ATS checker depend only on your choice."
         },
         {
-          "title": "3. How We Use Data",
-          "content": "To provide the core resume-building and AI-review service you signed up for; to process payments; to detect and prevent abuse (rate limiting); to send service emails (welcome, inactivity reminders, feedback requests); to fix bugs via error monitoring; and, only with your consent, to understand product usage through analytics."
+          "title": "3. Artificial intelligence processing",
+          "content": "When you use an AI feature (CV analysis, job tailoring, cover letter, bullet rewriting, CV file import), we send the relevant text and, on import, the file to Anthropic (the Claude models), our AI provider, solely to generate the result you asked for. We do not send your account data (email, user ID). The CV text does contain whatever you wrote in it, including your name and contact details. Under Anthropic commercial API terms, data sent through the API is not used to train its models.\n\nWe do not use your CVs to train our own or anyone else's models.\n\nThe ATS score, evaluations and suggestions are indicative estimates generated automatically. They produce no legal effects on you, are not sent to employers and are not decisions based solely on automated processing within the meaning of Art. 22 GDPR. You decide what to use from them. Results are generated by an artificial intelligence system and may contain errors, so check them before use.\n\nPlease do not include special-category data in your CV (health, religious or political beliefs, ethnic origin, sex life). If you choose to include it anyway, we process it only to provide the service, based on your explicit consent (Art. 9(2)(a) GDPR), which you can withdraw by deleting the information or the account."
         },
         {
-          "title": "4. AI Processing",
-          "content": "When you use an AI feature (resume analysis, tailoring, cover letter generation, bullet rewriting), the relevant resume or job-description text you provide is sent to Anthropic (\"Claude\"), our AI provider, solely to generate that output. We do not send your name or email to Anthropic; we only send the document content needed for the specific request. Anthropic does not use API inputs to train its models by default."
+          "title": "4. Who we share data with",
+          "content": "We do not sell your data and do not use it for advertising. We share it only with providers acting as processors under data processing agreements, and only as far as necessary:\n\n- Clerk (authentication and account management, USA)\n- Supabase (database and storage of account content)\n- Anthropic (AI processing, USA)\n- Stripe (payments; also acts as an independent controller for fraud prevention and its own legal obligations, USA/EU)\n- Resend (delivery of transactional and follow-up emails, USA)\n- Upstash (rate limiting, cache)\n- Vercel (application hosting and aggregated performance metrics without cookies, USA)\n- Oracle Cloud Infrastructure (VPS server for parsing CV files and generating PDFs)\n- Sentry (error monitoring, EU instance; Sentry Replay only with consent)\n- PostHog (product analytics and session recordings, EU instance, only with consent)\n- Google Ireland Limited (Google Analytics 4 through Google Tag Manager, only with consent)\n\nWe may also disclose data to authorities when the law requires it and to professional advisers (accountant, lawyer) bound by confidentiality."
         },
         {
-          "title": "5. Sub-Processors",
-          "content": "We share data with the following providers, each acting as a data processor under its own data processing agreement: Anthropic (AI processing of resume/CV text, USA), Stripe (payment processing, global/USA), Resend (transactional email delivery, USA), PostHog (product analytics, EU-hosted instance, only with consent), Upstash (rate-limiting cache, USA), Vercel (application hosting, global/USA), Sentry (error monitoring, EU-hosted instance), Supabase (database hosting and data storage)."
+          "title": "5. Transfers outside the European Economic Area",
+          "content": "Some providers (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle) process data in the United States or in other countries outside the EEA. Transfers rely on the European Commission adequacy decision on the EU-US Data Privacy Framework for certified providers or, failing that, on the Standard Contractual Clauses (Decision (EU) 2021/914), supplemented by additional measures where needed.\n\nYou can request a copy of the applicable safeguards by writing to privacy@joben.eu."
         },
         {
-          "title": "6. Legal Bases",
-          "content": "Contract performance: account creation, resume/cover letter storage, AI features, and billing, all necessary to provide the service you signed up for. Legitimate interest: fraud/abuse prevention (rate limiting), error monitoring, and service emails directly related to your account. Consent: analytics cookies (PostHog), which only load after you accept them in the cookie banner. Legal obligation: retaining billing records where required by tax law."
+          "title": "6. How long we keep data",
+          "content": "- Account, CVs, cover letters and AI analyses: while the account is active. When you delete the account in Settings, the data is deleted immediately from the live database, and the provider's backups rotate out automatically.\n- ATS scans without an account: 90 days, if not linked to an account. If you create an account, the scan becomes part of your account.\n- Sign-up terms acceptance token: 30 days.\n- Logs of emails sent, product events and webhook logs: 12 months.\n- Feedback messages: 24 months.\n- Payment and invoicing records: the periods set by the Romanian Accounting Law no. 82/1991 (between 5 and 10 years), with us and with Stripe.\n- Email suppression list (unsubscribed addresses): as long as needed to respect your refusal, only the address and the reason.\n- Referral programme: while the accounts involved exist.\n- Monitored public posts (section 12): 90 days.\n- Error reports (Sentry): about 90 days. Rate limiting data (Upstash): from a few hours up to one month.\n- Analytics data (PostHog, Google Analytics): at most 14 months."
         },
         {
-          "title": "7. Data Retention",
-          "content": "Account, resume, cover letter, and AI-analysis data: retained while your account is active and deleted immediately when you delete your account. Referral program: when someone signs up through your referral link, or you sign up through someone else's, we store who referred whom, the referral code used, the date, and the Pro days granted to each side; we use this only to apply the rewards and to enforce the limit of 5 rewarded referrals per 30 days. These records are kept while the accounts involved are active and are deleted together with either account. Billing records: retained by Stripe per their own compliance requirements. Feedback submissions: retained for 24 months. Webhook and analytics event logs: retained for up to 12 months for security and debugging, then purged. Error-monitoring logs (Sentry): retained per our provider's default 90-day window. Rate-limiting data (Redis): expires automatically within hours to a month depending on the limit window."
+          "title": "7. Your rights",
+          "content": "Under the GDPR you have the following rights:\n\n- access to the data we hold (Settings > Export my data gives an instant JSON export)\n- rectification of inaccurate data (you can edit it directly in the app)\n- erasure of your data (Settings > Delete account, processed immediately)\n- restriction of processing\n- data portability, in a structured, machine-readable format (the JSON export)\n- objection to processing based on legitimate interest\n- withdrawal of consent at any time, without affecting the lawfulness of earlier processing (the cookie banner, the unsubscribe link in emails or privacy@joben.eu)\n- the right not to be subject to a decision based solely on automated processing with legal effects (Joben makes no such decisions)\n\nFor rights that cannot be exercised directly in the app, write to privacy@joben.eu. We reply within one month (extendable by up to two further months for complex requests, with notice to you) and do not charge fees, except for manifestly unfounded or excessive requests. We may ask for proof of identity to protect your data.\n\nYou have the right to lodge a complaint with a supervisory authority. In Romania this is the National Supervisory Authority for Personal Data Processing (ANSPDCP), B-dul G-ral Gheorghe Magheru nr. 28-30, sector 1, Bucharest, www.dataprotection.ro, anspdcp@dataprotection.ro. If you live in another member state you can contact the authority in your country. You also have the right to apply to the competent courts."
         },
         {
-          "title": "8. Security",
-          "content": "We use encryption in transit (TLS) for all traffic, restrict database access to server-side service credentials only, and apply row-level security policies on every table holding personal data. No method of transmission or storage is completely secure, so we cannot guarantee absolute security."
+          "title": "8. Cookies and similar technologies",
+          "content": "We use strictly necessary cookies and, only with your consent, analytics tools. The full list, the purpose and duration of each, and how to change your choice are in the Cookie Policy, available at /cookies. You can change your choice at any time from the Cookie settings link in the footer of every page."
         },
         {
-          "title": "9. Your Rights",
-          "content": "Under the GDPR you have the right to: access the personal data we hold about you (use \"Export My Data\" in Settings for an instant JSON export); request deletion of your account and all associated data (use \"Delete Account\" in Settings, which is processed immediately); rectify inaccurate data (update it directly in the app or contact us); object to or restrict certain processing, such as analytics (use the cookie banner or contact us); and data portability (the export above is provided in a structured, machine-readable JSON format). To exercise any right not available directly in the app, email privacy@joben.eu. You also have the right to lodge a complaint with your local data protection supervisory authority."
+          "title": "9. Security",
+          "content": "We apply technical and organisational measures appropriate to the risk: encryption in transit (TLS), row-level security (RLS) on tables holding personal data, database access only through server-side services, secret keys kept apart from client code, request rate limiting, hashing of IP addresses used for limiting and mandatory re-authentication when deleting an account.\n\nIf a personal data breach occurs that poses a risk to your rights, we notify ANSPDCP within 72 hours and inform you directly when the risk is high (Art. 33 and 34 GDPR). No method of transmission or storage is completely secure, so we cannot guarantee absolute security."
         },
         {
-          "title": "10. Cookies and Similar Technologies",
-          "content": "We use strictly necessary cookies to keep you signed in and secure the service, and, only if you accept them via our cookie banner, analytics cookies to understand product usage. See our full Cookie Policy for the complete list of cookies, their purpose, and how to change your choice at any time."
+          "title": "10. Minors",
+          "content": "Joben is intended for people aged 16 or over, the age of digital consent in Romania. We do not knowingly collect data from anyone under that age. If you believe a minor has given us data, write to privacy@joben.eu and we will delete it."
         },
         {
-          "title": "11. International Data Transfers",
-          "content": "Some of our sub-processors (Anthropic, Stripe, Resend, Upstash, Vercel) are based in or process data in the United States. Where we transfer personal data outside the European Economic Area, we rely on the European Commission's Standard Contractual Clauses (SCCs) or an equivalent adequacy safeguard offered by that provider."
+          "title": "11. Links to other sites",
+          "content": "Joben may contain links to third-party sites (for example Stripe, ANPC or career resources). Those sites have their own privacy policies, for which we are not responsible."
         },
         {
-          "title": "12. Children's Privacy",
-          "content": "Joben is not directed at, and we do not knowingly collect data from, anyone under 16 years old, the minimum age required to use our services under these terms. If you believe a minor has provided us personal data, contact us and we will delete it."
+          "title": "12. Monitored public posts",
+          "content": "We follow public posts on forums and social platforms where people ask for help with a CV or a job search, so that we can offer useful replies. For these posts we keep the link, the author's public username, the title and the text of the post for 90 days. Basis: legitimate interest (Art. 6(1)(f)). This is the notice required by Art. 14 GDPR for people whose public posts we process.\n\nYou can object at any time by writing to privacy@joben.eu, and your post is deleted."
         },
         {
-          "title": "13. Changes to This Policy",
-          "content": "We may update this policy periodically. Material changes will be reflected by an updated \"Last updated\" date above; continued use after an update means you acknowledge the revised version."
+          "title": "13. Changes to this policy",
+          "content": "We update this policy from time to time. For significant changes we send an email or show an in-app notice before they apply. The date of the last update appears at the top of the page, and earlier versions are available on request."
         },
         {
           "title": "14. Contact",
-          "content": "For privacy requests or questions, contact us at privacy@joben.eu."
+          "content": "For requests or questions about personal data write to privacy@joben.eu. For other subjects use hello@joben.eu."
         }
       ]
     },
     "terms": {
       "metaTitle": "Terms and Conditions",
-      "metaDescription": "The terms and conditions for using Joben: usage rules for the AI resume builder and ATS tools, plans and payments, liability and company details.",
+      "metaDescription": "Joben terms and conditions: using the service, plans and payments, the right of withdrawal, AI use, liability and dispute resolution.",
       "heading": "Terms and Conditions",
-      "lastUpdated": "October 14, 2026",
-      "intro": "Please read these terms carefully before using Joben.",
+      "lastUpdated": "22 October 2026",
+      "intro": "Please read these terms before using Joben. They form the contract between you and TETA ABC SRL.",
       "breadcrumbLabel": "Terms and Conditions",
       "footerPrefix": "Read our ",
       "footerLinkLabel": "Privacy Policy",
       "footerSuffix": " for details on how we collect and process data.",
       "sections": [
         {
-          "title": "1. Acceptance of These Terms",
-          "content": "By accessing or using Joben, you agree to these Terms and Conditions. If you do not agree, do not use the service. Joben is a service provided by TETA ABC SRL, whose identification details are shown at the top of this page."
+          "title": "1. The parties and acceptance of the terms",
+          "content": "Joben is an online service provided by TETA ABC SRL (tax ID 22404824, trade register J2007001135104, Str. Centrală nr. 169, sat Mărăcineni, Buzău County, 127325, Romania, hello@joben.eu), referred to below as \"Joben\" or \"we\".\n\nBy creating an account (ticking acceptance of the Terms and the Privacy Policy) or by using the service, for example the free ATS checker without an account, you agree to these terms. If you do not agree, do not use the service. The contract is concluded in Romanian or English, according to the language of the page you use."
         },
         {
-          "title": "2. Eligibility and Accounts",
-          "content": "You must be at least 16 years old to use Joben. You must provide accurate account information and keep your login credentials secure. You are responsible for activity under your account."
+          "title": "2. Eligibility and account",
+          "content": "Joben is intended for people looking for a job and using it for personal purposes. You must be at least 16 to use the service and at least 18 (or have the consent of your legal representative) to buy a paid plan.\n\nProvide accurate information, keep your sign-in details safe and tell us immediately if you suspect unauthorised access. You are responsible for activity in your account. An account is personal and cannot be shared or resold."
         },
         {
-          "title": "3. Description of Services",
-          "content": "Joben provides resume and cover letter tools, AI-powered analysis, and export features. Features and limits may depend on your plan."
+          "title": "3. The services",
+          "content": "Joben offers a CV and cover letter editor, templates, CV import, ATS checking, AI-assisted analysis, job tailoring and rewriting, and export to PDF or DOCX. Features and monthly limits depend on the plan and are shown on the pricing page.\n\nWe may improve, change or withdraw features. For changes that significantly affect your access to or use of a paid service we notify you in advance, and your statutory rights on the conformity of digital services remain unchanged."
         },
         {
-          "title": "4. No Guarantee of Employment Outcomes",
-          "content": "Joben is a resume-writing and optimization tool. We do not guarantee interviews, job offers, or any specific employment outcome. AI-generated scores and suggestions are informational aids, not a promise of results."
+          "title": "4. AI features and your responsibility for content",
+          "content": "The AI features use language models provided by Anthropic. Results are generated automatically by an artificial intelligence system, may contain mistakes or unsuitable wording and are informational. Before sending a CV or letter to an employer, check, edit and validate all content.\n\nYou are responsible for the accuracy of the information in your CV. Do not use Joben to invent experience, degrees or references. The ATS score is an indicative estimate based on general rules, and each employer and recruiting system works differently. Joben does not assess candidates for employers and does not make hiring decisions.\n\nDetails on AI data processing are in the Privacy Policy."
         },
         {
-          "title": "5. Billing, Upgrades, and Refunds",
-          "content": "Paid plans are billed according to the pricing shown at checkout. Displayed prices are final; the provider is not registered for VAT. Unless required by law, fees are non-refundable."
+          "title": "5. No guarantee of employment outcomes",
+          "content": "Joben is a tool for writing and optimising CVs. We do not guarantee interviews, job offers, passing an ATS filter or any other employment outcome."
         },
         {
-          "title": "5.1. Right of Withdrawal",
-          "content": "As a consumer, you generally have a 14-day right of withdrawal for distance contracts (Romanian Government Emergency Ordinance no. 34/2014). For the 14-day Interview Pass, Pro access starts immediately after payment. At checkout you give your express consent for access to start immediately and acknowledge that you lose the right of withdrawal once access begins (art. 16 letter m of GEO no. 34/2014)."
+          "title": "6. Plans, prices and payments",
+          "content": "Prices are shown in RON on the pricing page and at checkout. Displayed prices are final; the provider is not a VAT payer. Payments are processed by Stripe, and the order confirmation and payment document reach your email.\n\n- The Free plan has the limits shown and involves no payment.\n- The 14-day Interview Pass is a one-off payment, with no automatic renewal, and gives Pro access for 14 days.\n- The Pro (monthly) and Recruiting Plan (6 months) plans are subscriptions that renew automatically at the end of each billing period, at the price shown at checkout, until cancelled.\n\nYou can cancel a subscription at any time in Settings (the Stripe billing portal) or by deleting your account. Cancelling stops future renewals, and access continues until the end of the period already paid. If we change the price of a subscription, we notify you at least 30 days in advance and the new price applies from the next renewal; you can cancel before then.\n\nMonthly AI usage limits in each plan are those shown. Promo codes and Pro days from the referral programme are personal, have no cash value and we may refuse or withdraw them in case of abuse."
         },
         {
-          "title": "6. Acceptable Use",
-          "content": "You agree not to use Joben for unlawful, abusive, or fraudulent activity, and not to attempt unauthorized access, disruption, or misuse of the platform."
+          "title": "7. Right of withdrawal and refunds",
+          "content": "If you are a consumer, you have the right to withdraw from a contract concluded at a distance within 14 days of its conclusion, without giving a reason (Art. 9 of Government Emergency Ordinance no. 34/2014). To withdraw, send us a clear statement at hello@joben.eu stating your name, your account email and the order. You may use the model withdrawal form in GEO no. 34/2014. We confirm receipt and refund the amounts paid within 14 days at most, using the same payment method.\n\nIf you asked for access to start immediately during the withdrawal period, on withdrawal you pay an amount proportionate to the access period used up to then, and the rest is refunded.\n\nFor the 14-day Interview Pass, at Stripe checkout you give your express consent to access starting immediately and acknowledge that you lose the right of withdrawal to the extent the law (Art. 16 of GEO no. 34/2014) allows this exception. If the exception does not apply, the rules above apply.\n\nApart from the right of withdrawal and statutory guarantee rights, amounts paid for an access period that has already started are not refunded. If a paid service did not work as described, write to us and we will fix it or refund proportionately, as the law requires."
         },
         {
-          "title": "7. AI Output Disclaimer",
-          "content": "AI-generated suggestions are produced by processing your resume and job-description text through a third-party AI provider (Anthropic). Outputs are provided for informational purposes only. You are responsible for reviewing, editing, and validating all generated content before use, including for accuracy."
+          "title": "8. Acceptable use",
+          "content": "You agree not to:\n\n- use Joben for illegal or fraudulent activity or activity that infringes the rights of others\n- upload content you have no right to use, or other people's personal data without a legal basis\n- attempt unauthorised access, bypass usage limits, overload the service or scrape content automatically\n- reverse engineer, resell or redistribute the service or templates as a separate product\n- use the AI features to generate illegal, deceptive or harassing content"
         },
         {
-          "title": "8. Your Content",
-          "content": "You retain ownership of content you upload or create. You grant us a limited license to process that content (including sending it to our AI provider), only to provide, maintain, and improve the service."
+          "title": "9. Your content",
+          "content": "You remain the owner of the rights in the content you create or upload. You grant us a limited, non-exclusive licence, valid while you have an account, solely to process that content to provide the service to you, including sending it to our AI and infrastructure providers. We do not use your content to train AI models.\n\nYou warrant that you have the right to use the content you upload. You can export or delete your data at any time in Settings."
         },
         {
-          "title": "9. Intellectual Property",
-          "content": "The Joben platform, branding, software, and related materials are protected by intellectual property laws and remain the property of Joben and its licensors."
+          "title": "10. Intellectual property",
+          "content": "The Joben platform, software, brand, texts, templates and related materials are protected by intellectual property law and belong to Joben or its licensors. You receive a personal, non-exclusive, non-transferable licence to use the service. The documents you export (CVs, letters) can be used freely by you for your job applications."
         },
         {
-          "title": "10. Suspension and Termination",
-          "content": "We may suspend or terminate access for violations of these terms, security risks, non-payment, or legal requirements. You may delete your account at any time from Settings."
+          "title": "11. Availability and support",
+          "content": "We make reasonable efforts to keep the service available, but interruptions may occur for maintenance or for reasons outside our control. We do not offer a guaranteed uptime level. Support is provided at hello@joben.eu, with priority for paid plans."
         },
         {
-          "title": "11. Disclaimers and Limitation of Liability",
-          "content": "The service is provided on an \"as is\" and \"as available\" basis. To the maximum extent permitted by law, Joben is not liable for indirect, incidental, or consequential damages, including loss of employment opportunity."
+          "title": "12. Suspension and termination",
+          "content": "You can end the contract at any time by deleting your account in Settings; deletion also cancels an active subscription.\n\nWe may suspend or close an account for a serious breach of these terms, a security risk, fraud or a legal obligation. Where possible we tell you the reason and give you the chance to fix the situation. If termination is due to us or to reasons not attributable to you, we refund the paid and unused period proportionately."
         },
         {
-          "title": "12. Governing Law",
-          "content": "These terms are governed by the laws of Romania and of the European Union, without regard to conflict-of-law principles, without prejudice to any mandatory consumer-protection rights you have under the law of your country of residence."
+          "title": "13. Statutory guarantee and limitation of liability",
+          "content": "If you are a consumer, you benefit from the statutory rights on the conformity of digital content and digital services (Directive (EU) 2019/770, transposed in Romania). Nothing in these terms restricts them.\n\nWe do not exclude or limit liability for acts committed intentionally or with gross negligence, for injury to life, bodily integrity or health, or for any other liability that cannot be limited by law.\n\nOtherwise, to the extent permitted by law, the service is provided \"as is\" and our liability for direct damages is limited to the amounts you paid in the last 12 months. We are not liable for indirect damages, for the loss of a job opportunity or for decisions taken on the basis of AI suggestions.\n\nWe are not liable for non-performance caused by force majeure or by outages of third-party infrastructure providers beyond our reasonable control."
         },
         {
-          "title": "13. Changes to Terms",
-          "content": "We may update these terms from time to time. Continued use after updates means you accept the revised terms."
+          "title": "14. Personal data",
+          "content": "The processing of your personal data is described in the Privacy Policy, and the use of cookies in the Cookie Policy. Both are part of the information given to you and apply alongside these terms."
         },
         {
-          "title": "14. Contact",
-          "content": "For general or legal questions, contact us at hello@joben.eu. For privacy requests, contact us at privacy@joben.eu."
+          "title": "15. Complaints and dispute resolution",
+          "content": "If you have a problem, write to hello@joben.eu and we will try to resolve it amicably. As a consumer you can also turn to the National Authority for Consumer Protection (ANPC, anpc.ro) or to an alternative dispute resolution (ADR) body listed on anpc.ro. These routes are optional and do not affect your right to go to court.\n\nThe European online dispute resolution (ODR) platform was closed on 20 July 2025."
+        },
+        {
+          "title": "16. Governing law and competent courts",
+          "content": "These terms are governed by Romanian law and European Union law. If you are a consumer, you benefit from the mandatory protection of the law of your country of residence and may bring proceedings before the courts of your country. For users who are not consumers, disputes are resolved by the competent courts at our registered office in Buzău County."
+        },
+        {
+          "title": "17. Changes to the terms",
+          "content": "We may change these terms for legitimate reasons, for example legal changes, new features or security measures. For significant changes we notify you by email or in the app at least 30 days before they apply. If you do not accept a change, you can end the contract before it applies, with a proportionate refund of the paid and unused period. Earlier versions are available on request."
+        },
+        {
+          "title": "18. Final provisions",
+          "content": "If any provision of these terms is void or unenforceable, the others remain valid. These terms, together with the Privacy Policy and the Cookie Policy, are the entire understanding between us about the service. We may not assign the contract without preserving your rights."
+        },
+        {
+          "title": "19. Contact",
+          "content": "General and legal questions: hello@joben.eu. Personal data requests: privacy@joben.eu. Identification details: TETA ABC SRL, tax ID 22404824, trade register J2007001135104, Str. Centrală nr. 169, sat Mărăcineni, Buzău County, 127325, Romania."
         }
       ]
     },
     "cookies": {
       "metaTitle": "Cookie Policy",
-      "metaDescription": "What cookies Joben uses, what they are for and how you can control them from the consent banner and your browser settings.",
+      "metaDescription": "Which cookies and similar technologies Joben uses, what they are for, how long they last and how to change your choice at any time.",
       "heading": "Cookie Policy",
-      "lastUpdated": "October 14, 2026",
-      "intro": "This page lists every cookie Joben sets, why, and how long it lasts. You can change your choice at any time by clearing your browser's local storage for this site, or by using the cookie banner shown on your first visit.",
+      "lastUpdated": "22 October 2026",
+      "intro": "This page lists the cookies and similar technologies (localStorage, sessionStorage) that Joben uses, their purpose and duration. Art. 4(5) of Romanian Law no. 506/2004, Art. 5(3) of Directive 2002/58/EC and the GDPR apply.",
       "breadcrumbLabel": "Cookie Policy",
       "footerPrefix": "Read our ",
       "footerLinkLabel": "Privacy Policy",
-      "footerSuffix": " for how we handle personal data more broadly.",
-      "necessaryHeading": "Strictly Necessary",
-      "necessaryBody": "These cookies are required for the site to function, primarily keeping you signed in. They cannot be disabled and are not subject to consent under GDPR/ePrivacy.",
-      "analyticsHeading": "Analytics (Optional)",
-      "analyticsBody": "These cookies help us understand how the product is used so we can improve it. They are only set after you click \"Accept all\" in the cookie banner, and never before.",
-      "marketingHeading": "Marketing",
-      "marketingBody": "We do not use marketing or advertising cookies.",
+      "footerSuffix": " for how we process personal data.",
+      "necessaryHeading": "Strictly necessary",
+      "necessaryBody": "These cookies are needed for the site to work and for features you explicitly request (sign-in, remembering your choices, security). They are used without consent under the ePrivacy exemption and cannot be switched off in the banner. You can block cookies in your browser settings, but some features (sign-in) will stop working.",
+      "analyticsHeading": "Analytics (optional, with consent)",
+      "analyticsBody": "These tools show us how the product is used so that we can improve it. They load and store data on your device only after you press \"Accept all\". Until then, Google Tag Manager, Google Analytics, PostHog, Vercel Web Analytics and Sentry Replay are not loaded.\n\nSession recordings (PostHog, Sentry Replay) replay interaction with the page, and text input fields are masked by default.",
+      "marketingHeading": "Marketing and advertising",
+      "marketingBody": "We do not use marketing or advertising cookies. The Google consent signals for ads (ad_storage, ad_user_data, ad_personalization) stay permanently denied.",
       "tableHeaders": {
         "name": "Name",
         "provider": "Provider",
@@ -870,34 +887,88 @@
         {
           "name": "__client_uat",
           "provider": "Clerk",
-          "purpose": "Syncs sign-in state across tabs.",
+          "purpose": "Syncs sign-in state between tabs.",
           "duration": "1 year"
         },
         {
           "name": "__clerk_db_jwt",
           "provider": "Clerk",
-          "purpose": "Authentication token used to secure your session.",
+          "purpose": "Technical authentication token (mainly used in development environments).",
           "duration": "Session"
         },
         {
           "name": "jb_ref",
           "provider": "Joben",
-          "purpose": "Functional (referral attribution). Set only when you open a referral link; remembers the referral code so the person who invited you gets credit if you sign up. Holds only that code.",
+          "purpose": "Remembers the referral code when you open a referral link, so the person who invited you gets the reward if you create an account. Contains only that code.",
           "duration": "30 days"
+        },
+        {
+          "name": "jb_atsdid",
+          "provider": "Joben",
+          "purpose": "Random identifier that applies the daily anti-abuse limit of the free ATS checker. Holds no information about your device.",
+          "duration": "30 days"
+        },
+        {
+          "name": "joben_cookie_consent, joben_cookie_consent_at (localStorage)",
+          "provider": "Joben",
+          "purpose": "Remembers your cookie choice and its date.",
+          "duration": "12 months"
+        },
+        {
+          "name": "joben_legal_accepted (localStorage)",
+          "provider": "Joben",
+          "purpose": "Briefly remembers acceptance of the Terms during sign-up.",
+          "duration": "20 minutes"
+        },
+        {
+          "name": "theme (localStorage)",
+          "provider": "Joben",
+          "purpose": "Remembers the theme you chose (light or dark).",
+          "duration": "Until you delete it"
         }
       ],
       "analyticsCookies": [
         {
-          "name": "ph_*",
-          "provider": "PostHog",
-          "purpose": "Pseudonymous product analytics (feature usage, page views). Only set after you accept analytics cookies.",
+          "name": "ph_phc_*_posthog (cookie and localStorage)",
+          "provider": "PostHog (EU)",
+          "purpose": "Product analytics: pages visited, features used, session recordings.",
           "duration": "Up to 1 year"
         },
         {
-          "name": "_vercel_*",
-          "provider": "Vercel Analytics",
-          "purpose": "Aggregate, privacy-friendly page-view analytics. Only set after you accept analytics cookies.",
-          "duration": "Up to 1 year"
+          "name": "_ga, _ga_*",
+          "provider": "Google Analytics 4 via Google Tag Manager (Google Ireland Ltd)",
+          "purpose": "Traffic statistics and visitor sources.",
+          "duration": "Up to 2 years"
+        },
+        {
+          "name": "sentryReplaySession (sessionStorage)",
+          "provider": "Sentry (EU)",
+          "purpose": "Session recording for diagnosing errors.",
+          "duration": "Session"
+        },
+        {
+          "name": "Vercel Web Analytics",
+          "provider": "Vercel",
+          "purpose": "Aggregated page view statistics. Sets no cookies.",
+          "duration": "No cookie"
+        }
+      ],
+      "sections": [
+        {
+          "title": "How to manage your choice",
+          "content": "On your first visit a banner appears with the buttons \"Reject non-essential\" and \"Accept all\", given equal prominence. You can change or withdraw your choice at any time with the \"Cookie settings\" link in the footer of any page. Withdrawal stops PostHog collection immediately. Google scripts already loaded in the current page stop on the next page load.\n\nWe ask for your choice again after 12 months or if you clear the site data in your browser. You can delete cookies and local data at any time in your browser settings."
+        },
+        {
+          "title": "Technologies without cookies",
+          "content": "Vercel Speed Insights measures page speed through aggregated metrics, without cookies and without persistent identifiers. The basis is our legitimate interest in keeping the site fast."
+        },
+        {
+          "title": "Transfers and third parties",
+          "content": "PostHog and Sentry use EU-hosted instances. Google Analytics is provided by Google Ireland Limited and may involve transfers to the USA, covered as described in the Privacy Policy. Details on data processing are in the Privacy Policy."
+        },
+        {
+          "title": "Contact",
+          "content": "Questions about cookies: privacy@joben.eu."
         }
       ]
     }
