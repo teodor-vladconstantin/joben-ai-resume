@@ -1,4 +1,4 @@
-﻿import { Resend } from 'resend'
+import { Resend } from 'resend'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
 import { logger } from '@/lib/logger'
@@ -571,7 +571,7 @@ export async function sendReferralRewardEmail(input: {
   })
 }
 
-// Legally required transactional messages (withdrawal acknowledgement). These
+// Legally required transactional messages (e.g. the inactive-account warning). These
 // skip sendEmail on purpose: they must reach the consumer even if the address
 // is on the marketing suppression list, and carry no unsubscribe footer.
 export async function sendTransactionalEmail(input: {
