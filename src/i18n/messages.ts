@@ -274,6 +274,7 @@ export type Messages = {
     cookiePolicyLinkText: string
     rejectNonEssential: string
     acceptAll: string
+    settingsLink: string
   }
   Legal: {
     privacy: LegalPolicy

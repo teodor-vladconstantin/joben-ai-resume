@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
-import { getCookieConsent, setCookieConsent } from '@/lib/cookie-consent'
+import { COOKIE_SETTINGS_OPEN_EVENT, getCookieConsent, setCookieConsent } from '@/lib/cookie-consent'
 import { pushConsentUpdate } from '@/lib/consent-mode'
+import { enableSentryReplay } from '@/lib/sentry-replay'
 
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false)
@@ -14,6 +15,11 @@ export function CookieConsentBanner() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount read of localStorage, not a subscribable external store
     setVisible(getCookieConsent() === null)
+
+    // The footer "Cookie settings" link reopens the banner so the choice can be changed.
+    const reopen = () => setVisible(true)
+    window.addEventListener(COOKIE_SETTINGS_OPEN_EVENT, reopen)
+    return () => window.removeEventListener(COOKIE_SETTINGS_OPEN_EVENT, reopen)
   }, [])
 
   if (!visible) return null
@@ -22,6 +28,7 @@ export function CookieConsentBanner() {
     setCookieConsent('accepted')
     posthog.opt_in_capturing()
     pushConsentUpdate(true)
+    enableSentryReplay()
     setVisible(false)
   }
 
@@ -55,7 +62,7 @@ export function CookieConsentBanner() {
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 rounded-none bg-(--accent) px-4 py-2 text-sm font-medium text-(--accent-ink) transition-colors duration-150 ease-out hover:bg-(--accent-strong) sm:flex-none"
+            className="flex-1 rounded-none border border-(--border) px-4 py-2 text-sm font-medium text-(--foreground) transition-colors duration-150 ease-out hover:bg-(--surface-elevated) sm:flex-none"
           >
             {t('acceptAll')}
           </button>

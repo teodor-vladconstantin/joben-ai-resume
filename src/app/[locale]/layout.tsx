@@ -171,16 +171,6 @@ export default async function RootLayout({
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: CONSENT_MODE_DEFAULT_SCRIPT }}
           />
-          {process.env.NEXT_PUBLIC_GTM_ID && (
-            <noscript>
-              <iframe
-                src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
-                height="0"
-                width="0"
-                style={{ display: 'none', visibility: 'hidden' }}
-              />
-            </noscript>
-          )}
           <Script
             id="strip-browser-injected-bis-attr"
             strategy="beforeInteractive"

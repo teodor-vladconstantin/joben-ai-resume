@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { CompanyDetails } from '@/components/layout/CompanyDetails'
+import { CookieSettingsLink } from '@/components/layout/CookieSettingsLink'
 import { GUIDE_SEGMENT } from '@/data/guides'
 import { CV_TEMPLATES_SEGMENT } from '@/components/seo/CvTemplatesPage'
 import type { AppLocale } from '@/i18n/routing'
@@ -70,6 +71,9 @@ export async function SiteFooter() {
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <CookieSettingsLink />
+                </li>
               </ul>
             </div>
           </div>
