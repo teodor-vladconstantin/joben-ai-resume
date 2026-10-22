@@ -570,3 +570,29 @@ export async function sendReferralRewardEmail(input: {
 </div>`,
   })
 }
+
+// Legally required transactional messages (withdrawal acknowledgement). These
+// skip sendEmail on purpose: they must reach the consumer even if the address
+// is on the marketing suppression list, and carry no unsubscribe footer.
+export async function sendTransactionalEmail(input: {
+  to: string
+  subject: string
+  html: string
+  replyTo?: string
+}): Promise<EmailResult> {
+  const client = getResendClient()
+  if (!client) return { success: false, error: 'RESEND_API_KEY is not configured.' }
+  try {
+    const response = (await client.emails.send({
+      from: automationFromEmail,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      replyTo: input.replyTo,
+    })) as ResendResponse
+    if (response.error) return { success: false, error: response.error.message || 'Resend send failed.' }
+    return { success: true, providerId: response.data?.id }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
