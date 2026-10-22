@@ -8,6 +8,7 @@ import type { AppLocale } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { LegalText } from '@/components/legal/LegalText'
 
 export async function generateMetadata({
   params,
@@ -106,20 +107,27 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
         <article className="divide-y divide-(--border)">
           <section className="py-8 first:pt-0">
             <h2 className="text-lg font-semibold text-(--foreground)">{cookies.necessaryHeading}</h2>
-            <p className="mt-2 text-sm leading-6 text-(--muted)">{cookies.necessaryBody}</p>
+            <LegalText text={cookies.necessaryBody} />
             <CookieTable headers={cookies.tableHeaders} rows={cookies.necessaryCookies} />
           </section>
 
           <section className="py-8">
             <h2 className="text-lg font-semibold text-(--foreground)">{cookies.analyticsHeading}</h2>
-            <p className="mt-2 text-sm leading-6 text-(--muted)">{cookies.analyticsBody}</p>
+            <LegalText text={cookies.analyticsBody} />
             <CookieTable headers={cookies.tableHeaders} rows={cookies.analyticsCookies} />
           </section>
 
           <section className="py-8">
             <h2 className="text-lg font-semibold text-(--foreground)">{cookies.marketingHeading}</h2>
-            <p className="mt-2 text-sm leading-6 text-(--muted)">{cookies.marketingBody}</p>
+            <LegalText text={cookies.marketingBody} />
           </section>
+
+          {cookies.sections?.map((section) => (
+            <section key={section.title} className="py-8">
+              <h2 className="text-lg font-semibold text-(--foreground)">{section.title}</h2>
+              <LegalText text={section.content} />
+            </section>
+          ))}
         </article>
 
         <p className="mt-8 text-sm text-(--muted)">

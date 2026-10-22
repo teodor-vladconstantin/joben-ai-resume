@@ -1,4 +1,5 @@
 ## Active
+- [IN PROGRESS] 2026-10-22 Refacere Termeni/Confidențialitate/Cookie (RO+EN, branch feat/legal-refresh, necomis): texte noi, GTM și Sentry Replay doar după consimțământ, link Setări cookie, expirare consimțământ 12 luni, cron retenție date. Vezi docs/legal/COMPLIANCE.md (puncte rămase pentru owner).
 - [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
 - [DONE] 2026-10-16 Plan SEO/GEO/CRO livrat în producție (PR #28-#33, docs/seo/PLAYBOOK.md și BACKLINKS.md): hreflang + x-default,
   /en/cover-letter (301), hub-uri ghiduri/glosar/comparații, 54 roluri + 32 ghiduri + 26 glosar + 10 scrisori + 3 comparații (ro+en),

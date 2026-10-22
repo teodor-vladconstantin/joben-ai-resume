@@ -5,6 +5,7 @@
 import posthog from 'posthog-js'
 import * as Sentry from "@sentry/nextjs";
 import { getCookieConsent } from '@/lib/cookie-consent'
+import { enableSentryReplay } from '@/lib/sentry-replay'
 import { BROWSER_NOISE_ERRORS, BROWSER_NOISE_URLS, scrubSentryEvent } from '@/lib/security/sentry-scrub'
 
 const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
@@ -28,7 +29,8 @@ Sentry.init({
   dsn: "https://39e304482d48c2d9aeb663a996b3d8ea@o4511258775388160.ingest.de.sentry.io/4511258779254864",
 
   // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+  // Replay is added only after analytics consent (see enableSentryReplay).
+  integrations: [],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
@@ -45,10 +47,12 @@ Sentry.init({
 
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
   ignoreErrors: BROWSER_NOISE_ERRORS,
   denyUrls: BROWSER_NOISE_URLS,
   beforeSend: scrubSentryEvent,
 });
+
+if (getCookieConsent() === 'accepted') enableSentryReplay()
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

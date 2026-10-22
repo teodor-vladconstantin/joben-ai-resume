@@ -62,7 +62,7 @@ const MAX_OUTPUT_TOKENS = 1100
 // still leaves the device counter in place. Not a fingerprint: it carries no
 // information about the device itself, just a random id this route issued.
 const DEVICE_COOKIE_NAME = 'jb_atsdid'
-const DEVICE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 400 // ~400 days, the browser-enforced cap
+const DEVICE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30 // 30 days covers the daily cap; stated in the Cookie Policy
 const DEVICE_ID_PATTERN = /^[0-9a-f-]{36}$/i
 
 const emailSchema = z.string().trim().toLowerCase().email().max(254)

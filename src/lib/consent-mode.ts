@@ -9,7 +9,10 @@ export const CONSENT_MODE_DEFAULT_SCRIPT = `
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 var accepted = false;
-try { accepted = localStorage.getItem('joben_cookie_consent') === 'accepted'; } catch (e) {}
+try {
+  var at = Number(localStorage.getItem('joben_cookie_consent_at'));
+  accepted = localStorage.getItem('joben_cookie_consent') === 'accepted' && !(at && Date.now() - at > 365 * 24 * 60 * 60 * 1000);
+} catch (e) {}
 gtag('consent', 'default', {
   'ad_storage': 'denied',
   'ad_user_data': 'denied',
