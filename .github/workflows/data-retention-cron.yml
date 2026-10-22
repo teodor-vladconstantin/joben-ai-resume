@@ -28,3 +28,22 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           [ "$status" = "200" ]
+
+  inactive-accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/inactive-accounts
+        run: |
+          status=$(curl -s -o response.json -w "%{http_code}" -X POST "${{ secrets.PROD_APP_URL }}/api/cron/inactive-accounts"             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP $status"
+          cat response.json
+          echo
+          {
+            echo "### Inactive accounts (HTTP $status)"
+            echo '```json'
+            cat response.json
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$status" = "200" ]
