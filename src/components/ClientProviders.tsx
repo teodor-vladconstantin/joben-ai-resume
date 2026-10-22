@@ -2,7 +2,7 @@ import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { GoogleTagManager } from '@next/third-parties/google'
+import { GtmGate } from '@/components/GtmGate'
 import { PostHogProvider } from '@/components/PostHogProvider'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { ScrollProgress } from '@/components/motion/ScrollProgress'
@@ -34,7 +34,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <WebVitalsReporter />
         <AnalyticsGate />
         <SpeedInsights />
-        {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
+        {GTM_ID && <GtmGate gtmId={GTM_ID} />}
       </PostHogProvider>
     </ThemeProvider>
   )

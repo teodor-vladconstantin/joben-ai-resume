@@ -8,6 +8,7 @@ import type { AppLocale } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { LegalText } from '@/components/legal/LegalText'
 
 export async function generateMetadata({
   params,
@@ -73,7 +74,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
           {privacy.sections?.map((section) => (
             <section key={section.title} className="py-8 first:pt-0">
               <h2 className="text-lg font-semibold text-(--foreground)">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-(--muted)">{section.content}</p>
+              <LegalText text={section.content} />
             </section>
           ))}
         </article>
