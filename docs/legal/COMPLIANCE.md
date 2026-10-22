@@ -20,8 +20,8 @@ Not legal advice. Have a Romanian lawyer validate before relying on it.
 
 ## Open items for the owner
 1. Add the `CRON_SECRET` / `PROD_APP_URL` secrets (already used by other workflows) and run the workflow once with `workflow_dispatch`.
-2. Set GA4 data retention to 14 months and PostHog retention to match (policy promises at most 14 months).
-3. Confirm Supabase project region and Resend/Upstash regions, then name them in Privacy section 4/5 if EU.
+2. Verified via PostHog MCP: free plan keeps events 1 year, recordings 30 days (project setting), IPs anonymized, inputs masked. GA4 event-level retention defaults to 2 months (max 14), so the 14-month promise already holds; no change needed.
+3. Supabase is in AWS us-east-1 (from supabase/.temp pooler URL), so it is named as a US transfer in Privacy sections 4 and 5. Resend/Upstash regions are still unconfirmed; moving Supabase to an EU region would simplify the transfer story.
 4. Stripe Dashboard > Public details: terms URL `https://joben.eu/ro/terms` (needed for Pass checkout).
 5. Subscriptions (Pro, Recruiting) have no withdrawal waiver at checkout, so the 14-day right applies with proportional payment (Terms section 7). Pass keeps the waiver; a lawyer should confirm it is valid for a 14-day service.
 6. Withdrawal button (Directive 2023/2673, art. 11a CRD, applies 2026-06-19): Romanian transposition not verified. If required, add a "withdraw from contract" function in Settings.
