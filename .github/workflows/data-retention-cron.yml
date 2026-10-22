@@ -14,5 +14,17 @@ jobs:
     steps:
       - name: Trigger /api/cron/data-retention
         run: |
-          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/data-retention" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          status=$(curl -s -o response.json -w "%{http_code}" -X POST "${{ secrets.PROD_APP_URL }}/api/cron/data-retention" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP $status"
+          cat response.json
+          echo
+          # Rows deleted per table, shown in the run summary.
+          {
+            echo "### Data retention (HTTP $status)"
+            echo '```json'
+            cat response.json
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$status" = "200" ]
