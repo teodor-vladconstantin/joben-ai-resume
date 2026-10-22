@@ -28,3 +28,8 @@ Not legal advice. Have a Romanian lawyer validate before relying on it.
 7. `jb_ref` (referral attribution, 30 days) is classed as necessary. A strict reading could require consent; the safe alternative is setting it only after consent.
 8. Pricing states "provider is not a VAT payer"; update Terms section 6 if that changes.
 9. Social listening (Privacy section 12) stores third-party public posts for 90 days; keep it small or drop it if unused.
+
+## Round 2 (competitor review, 2026-10-22)
+Compared against Novoresume, Kickresume, Resume.io, Enhancv and Rezi (public terms/privacy). Added: inactive-account deletion (24 months, 30-day warning, `/api/cron/inactive-accounts`, accounts with a Stripe subscription are never auto-deleted), Anthropic 30-day API retention and 30-day backup wording, personal-use/commercial-use clause, feedback clause, referral programme changes, permanent deletion and service discontinuation, Google sign-in data, FAQ aligned with Terms section 7.
+Not adopted on purpose: arbitration, class-action waiver, indemnification and perpetual content licences (unfair or invalid against EU consumers).
+Backups: the linked Supabase project is not visible from the dashboard login used for research, so the plan was not read. "30 days at most" holds for every Supabase plan.
