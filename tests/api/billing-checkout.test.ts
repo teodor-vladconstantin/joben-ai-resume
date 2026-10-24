@@ -313,7 +313,7 @@ describe('POST /api/billing/checkout', () => {
         line_items: [{ price: 'price_dummy', quantity: 1 }],
         success_url: 'https://app.example.com/ro/dashboard?upgrade=success',
         cancel_url: 'https://app.example.com/ro/pricing?upgrade=cancelled',
-        metadata: { userId: 'user_123', planId: 'pro' },
+        metadata: { userId: 'user_123', planId: 'pro', locale: 'ro' },
         customer: 'cus_existing',
         customer_email: undefined,
         allow_promotion_codes: true,
@@ -384,7 +384,7 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         line_items: [{ price: 'price_recruiting_dummy', quantity: 1 }],
-        metadata: { userId: 'user_123', planId: 'recruiting' },
+        metadata: { userId: 'user_123', planId: 'recruiting', locale: 'ro' },
       })
     )
     expect(capturePostHogEventMock).not.toHaveBeenCalled()
@@ -407,7 +407,7 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         line_items: [{ price: 'price_dummy', quantity: 1 }],
-        metadata: { userId: 'user_123', planId: 'pro' },
+        metadata: { userId: 'user_123', planId: 'pro', locale: 'ro' },
       })
     )
   })
