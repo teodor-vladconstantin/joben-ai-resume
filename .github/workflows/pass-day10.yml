@@ -1,0 +1,18 @@
+name: Pass Day-10 Email
+
+# Daily. The route is idempotent (email_events lock per purchase), so a rerun
+# only picks up purchases not yet emailed. Same pattern as anonymous-scan-crons.yml.
+on:
+  schedule:
+    - cron: '30 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  pass-day10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/pass-day10
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/pass-day10" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
