@@ -1,7 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { trackProductEvent } from '@/lib/analytics'
-import { capturePostHogEvent } from '@/lib/posthog-server'
 import { sendRateLimitEmailIfEligible } from '@/lib/email-automation'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { getEmailHintFromSessionClaims, getPriceIdForPlan, getUserPlan, type PaidPlan } from '@/lib/plans'
@@ -164,6 +163,7 @@ export async function POST(req: Request) {
         metadata: {
           userId,
           planId: requestedPlan,
+          locale,
           ...(parsedBody.data.gaClientId ? { gaClientId: parsedBody.data.gaClientId } : {}),
         },
         customer: customerId,
@@ -203,12 +203,6 @@ export async function POST(req: Request) {
         metadata: {
           sessionId: session.id,
         },
-      })
-
-      await capturePostHogEvent({
-        distinctId: userId,
-        event: 'checkout_started',
-        properties: { plan: requestedPlan },
       })
 
       return jsonWithRequestId({ url: session.url }, 200, requestId)

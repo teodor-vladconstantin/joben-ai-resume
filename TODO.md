@@ -1,4 +1,7 @@
 ## Active
+- [IN PROGRESS] 2026-10-24 Distribuție (necomis): payment_completed/checkout_started fără dublură, poartă email în free-ats-checker
+  (prima corecție gratis, restul după email), scripts/utm.mjs + docs/growth/weekly-report.sql. RĂMAS: test în browser al porții
+  cu un CV cu 2+ probleme (limita 1 scanare/zi a blocat testul), workflow n8n de luni, email ziua 10 pentru Pass, cron data-retention (JAVASCRIPT-NEXTJS-18).
 - [IN PROGRESS] 2026-10-22 Refacere Termeni/Confidențialitate/Cookie (RO+EN, branch feat/legal-refresh, necomis): texte noi, GTM și Sentry Replay doar după consimțământ, link Setări cookie, expirare consimțământ 12 luni, cron retenție date. Vezi docs/legal/COMPLIANCE.md (puncte rămase pentru owner).
 - [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
 - [DONE] 2026-10-16 Plan SEO/GEO/CRO livrat în producție (PR #28-#33, docs/seo/PLAYBOOK.md și BACKLINKS.md): hreflang + x-default,

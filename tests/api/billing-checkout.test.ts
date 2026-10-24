@@ -313,16 +313,15 @@ describe('POST /api/billing/checkout', () => {
         line_items: [{ price: 'price_dummy', quantity: 1 }],
         success_url: 'https://app.example.com/ro/dashboard?upgrade=success',
         cancel_url: 'https://app.example.com/ro/pricing?upgrade=cancelled',
-        metadata: { userId: 'user_123', planId: 'pro' },
+        metadata: { userId: 'user_123', planId: 'pro', locale: 'ro' },
         customer: 'cus_existing',
         customer_email: undefined,
         allow_promotion_codes: true,
       })
     )
     expect(trackProductEventMock).toHaveBeenCalled()
-    expect(capturePostHogEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({ distinctId: 'user_123', event: 'checkout_started' })
-    )
+    // checkout_started is captured client-side only (client-billing.ts).
+    expect(capturePostHogEventMock).not.toHaveBeenCalled()
   })
 
   it('falls back to customer_email when there is no existing Stripe customer', async () => {
@@ -385,12 +384,10 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         line_items: [{ price: 'price_recruiting_dummy', quantity: 1 }],
-        metadata: { userId: 'user_123', planId: 'recruiting' },
+        metadata: { userId: 'user_123', planId: 'recruiting', locale: 'ro' },
       })
     )
-    expect(capturePostHogEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({ properties: { plan: 'recruiting' } })
-    )
+    expect(capturePostHogEventMock).not.toHaveBeenCalled()
   })
 
   it('returns 503 when the Recruiting Plan price id is missing, without touching the Pro price', async () => {
@@ -410,7 +407,7 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         line_items: [{ price: 'price_dummy', quantity: 1 }],
-        metadata: { userId: 'user_123', planId: 'pro' },
+        metadata: { userId: 'user_123', planId: 'pro', locale: 'ro' },
       })
     )
   })
