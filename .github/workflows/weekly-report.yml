@@ -1,0 +1,23 @@
+name: Weekly Source Report
+
+# Luni 07:00 UTC (10:00 în România): funnel pe sursă din PostHog, trimis pe email.
+# Secrete necesare: POSTHOG_PERSONAL_API_KEY (cheie personală, scope query:read),
+# RESEND_API_KEY. Destinatar: duku.constantin@gmail.com (implicit în script).
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/weekly-report.mjs
+        env:
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

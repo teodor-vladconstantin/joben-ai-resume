@@ -307,6 +307,7 @@
     "whatToFix": "Ce ai de reparat",
     "reportSentTo": "Raport trimis la {email}.",
     "sendDifferentEmail": "Trimite la alt email",
+    "moreFixesByEmail": "{count, plural, one {Mai este # corecție} few {Mai sunt # corecții} other {Mai sunt # de corecții}}. Introdu emailul de mai jos ca să vezi lista completă aici și să o primești în inbox.",
     "getReportByEmail": "Primește raportul pe email",
     "emailExplainer": "Îți trimitem scorul, analiza pe categorii și problemele găsite direct în inbox. Prin trimitere ești de acord să primești raportul și până la 2 emailuri ulterioare cu sfaturi pentru CV. Te poți dezabona oricând, iar detaliile sunt în Politica de Confidențialitate.",
     "emailPlaceholder": "tu@email.com",

@@ -255,9 +255,8 @@ describe('POST /api/webhooks/stripe', () => {
         },
       },
     ])
-    expect(capturePostHogEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({ distinctId: 'user_1', event: 'payment_completed' })
-    )
+    // Subscriptions report payment_completed from invoice.paid, not here.
+    expect(capturePostHogEventMock).not.toHaveBeenCalled()
   })
 
   it('checkout.session.completed: lifetime_recruiting_unlocked users are never downgraded by planId', async () => {
