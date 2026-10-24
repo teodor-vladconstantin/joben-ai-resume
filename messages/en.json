@@ -307,6 +307,7 @@
     "whatToFix": "What to fix",
     "reportSentTo": "Report sent to {email}.",
     "sendDifferentEmail": "Send to a different email",
+    "moreFixesByEmail": "{count, plural, one {# more fix is waiting} other {# more fixes are waiting}}. Enter your email below to unlock the full list here and get it in your inbox.",
     "getReportByEmail": "Get this report by email",
     "emailExplainer": "We'll send your score, category breakdown, and issues to your inbox. By sending, you agree to receive the report and up to 2 follow-up emails with CV tips. You can unsubscribe at any time, and the details are in the Privacy Policy.",
     "emailPlaceholder": "you@email.com",

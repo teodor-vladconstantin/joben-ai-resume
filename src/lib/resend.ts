@@ -457,6 +457,51 @@ export async function sendAnonymousScan7dEmail(input: {
   })
 }
 
+const PASS_DAY10_COPY: Record<AnonScanEmailLocale, {
+  subject: (days: number) => string
+  heading: string
+  body: (days: number) => string
+  pitch: string
+  cta: string
+}> = {
+  en: {
+    subject: (days) => `Your Interview Pass ends in ${days} ${days === 1 ? 'day' : 'days'}`,
+    heading: 'Keep your Pro tools while you apply.',
+    body: (days) => `Your 14-day Interview Pass has ${days} ${days === 1 ? 'day' : 'days'} left. After that your account returns to the free plan.`,
+    pitch: 'Pro is 59 RON per month and you can cancel any time. Your resumes, tailored versions and cover letters stay exactly where they are.',
+    cta: 'See Pro',
+  },
+  ro: {
+    subject: (days) => `Pass-ul tău de Interviu se încheie în ${days} ${days === 1 ? 'zi' : 'zile'}`,
+    heading: 'Păstrează uneltele Pro cât timp aplici.',
+    body: (days) => `Pass-ul tău de Interviu de 14 zile mai are ${days} ${days === 1 ? 'zi' : 'zile'}. După aceea contul revine la planul gratuit.`,
+    pitch: 'Pro costă 59 RON pe lună și îl poți anula oricând. CV-urile, versiunile adaptate și scrisorile tale rămân exact unde sunt.',
+    cta: 'Vezi Pro',
+  },
+}
+
+export async function sendPassDay10Email(input: {
+  to: string
+  locale: AnonScanEmailLocale
+  daysLeft: number
+}): Promise<EmailResult> {
+  const copy = PASS_DAY10_COPY[input.locale]
+  const href = `${appUrl}/${input.locale}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=pass_day10`
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: copy.subject(input.daysLeft),
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
+  <p style="margin:0 0 12px 0;">${copy.body(input.daysLeft)}</p>
+  <p style="margin:0 0 18px 0;">${copy.pitch}</p>
+  ${anonCtaButton(href, copy.cta)}
+</div>`,
+  })
+}
+
 export async function sendExportFollowupEmail(input: {
   to: string
   firstName?: string | null
