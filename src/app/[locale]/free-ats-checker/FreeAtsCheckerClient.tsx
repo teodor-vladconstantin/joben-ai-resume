@@ -267,6 +267,9 @@ export function FreeAtsCheckerClient() {
   if (result) {
     const worstCategory = getWorstCategory(result.categories)
     const hasIssues = result.issues.length > 0
+    // The score stays free; the full fix list unlocks once the report is emailed.
+    const visibleIssues = emailSentTo || !scanId ? result.issues : result.issues.slice(0, 1)
+    const hiddenIssuesCount = result.issues.length - visibleIssues.length
     const worstCategoryMessageKey = hasIssues ? CATEGORY_TO_MESSAGE_KEY[worstCategory] : null
     // `from`/`scan` are read by the sign-up page (src/lib/ats-attribution.ts).
     const signUpHref = `/sign-up?${new URLSearchParams(scanId ? { from: 'ats', scan: scanId } : { from: 'ats' }).toString()}`
@@ -292,7 +295,7 @@ export function FreeAtsCheckerClient() {
           <Card radius="lg" className="p-6">
             <h2 className="text-(--foreground) font-bold mb-4">{t('whatToFix')}</h2>
             <ul className="space-y-4">
-              {result.issues.map((item, index) => (
+              {visibleIssues.map((item, index) => (
                 <li key={index} className="flex gap-3">
                   <AlertTriangle className="h-5 w-5 shrink-0 text-(--foreground) mt-0.5" />
                   <div>
@@ -302,36 +305,11 @@ export function FreeAtsCheckerClient() {
                 </li>
               ))}
             </ul>
+            {hiddenIssuesCount > 0 && (
+              <p className="mt-4 text-sm font-semibold text-(--foreground)">{t('moreFixesByEmail', { count: hiddenIssuesCount })}</p>
+            )}
           </Card>
         )}
-
-        <Card
-          ref={freeCtaRef}
-          elevated
-          radius="lg"
-          className="p-6 text-center"
-          onClickCapture={(event) => {
-            if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'free', scanId, score: result.overall_score })
-          }}
-        >
-          {worstCategoryMessageKey ? (
-            <>
-              <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
-              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
-                {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
-              </AuthAwareSignupLink>
-            </>
-          ) : (
-            <>
-              <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
-              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
-                {t('createFreeAccount')}
-              </AuthAwareSignupLink>
-            </>
-          )}
-        </Card>
 
         {scanId && (
           emailSentTo ? (
@@ -368,6 +346,34 @@ export function FreeAtsCheckerClient() {
             </Card>
           )
         )}
+
+        <Card
+          ref={freeCtaRef}
+          elevated
+          radius="lg"
+          className="p-6 text-center"
+          onClickCapture={(event) => {
+            if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'free', scanId, score: result.overall_score })
+          }}
+        >
+          {worstCategoryMessageKey ? (
+            <>
+              <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
+              <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
+              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+                {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
+              </AuthAwareSignupLink>
+            </>
+          ) : (
+            <>
+              <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
+              <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
+              <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
+                {t('createFreeAccount')}
+              </AuthAwareSignupLink>
+            </>
+          )}
+        </Card>
 
         <Card
           radius="lg"

@@ -330,11 +330,15 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
           return jsonWithRequestId({ message: 'Stale webhook ignored' }, 200, requestId)
         }
 
-        await capturePostHogEvent({
-          distinctId: userId,
-          event: 'payment_completed',
-          properties: { plan: planId || 'pro', amount: session.amount_total ?? null },
-        })
+        // Subscriptions report payment_completed from invoice.paid; only
+        // one-time payments (the pass) have no invoice event.
+        if (session.mode === 'payment') {
+          await capturePostHogEvent({
+            distinctId: userId,
+            event: 'payment_completed',
+            properties: { plan: planId || 'pass_14d', amount: session.amount_total ?? null },
+          })
+        }
 
         if (session.metadata?.gaClientId && session.payment_status === 'paid') {
           await sendGaPurchase({

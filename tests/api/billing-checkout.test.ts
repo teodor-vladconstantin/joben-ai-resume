@@ -320,9 +320,8 @@ describe('POST /api/billing/checkout', () => {
       })
     )
     expect(trackProductEventMock).toHaveBeenCalled()
-    expect(capturePostHogEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({ distinctId: 'user_123', event: 'checkout_started' })
-    )
+    // checkout_started is captured client-side only (client-billing.ts).
+    expect(capturePostHogEventMock).not.toHaveBeenCalled()
   })
 
   it('falls back to customer_email when there is no existing Stripe customer', async () => {
@@ -388,9 +387,7 @@ describe('POST /api/billing/checkout', () => {
         metadata: { userId: 'user_123', planId: 'recruiting' },
       })
     )
-    expect(capturePostHogEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({ properties: { plan: 'recruiting' } })
-    )
+    expect(capturePostHogEventMock).not.toHaveBeenCalled()
   })
 
   it('returns 503 when the Recruiting Plan price id is missing, without touching the Pro price', async () => {
