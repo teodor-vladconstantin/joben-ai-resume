@@ -11,8 +11,8 @@ const incrementFeatureCounterMock = vi.fn()
 const recordLimitHitMock = vi.fn()
 const recordTokenUsageMock = vi.fn()
 
-vi.mock('@anthropic-ai/sdk', () => ({
-  default: class Anthropic {
+vi.mock('@posthog/ai/anthropic', () => ({
+  Anthropic: class Anthropic {
     messages = {
       create: createMessageMock,
     }
