@@ -1,4 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { Anthropic } from '@posthog/ai/anthropic'
+import type AnthropicOriginal from '@anthropic-ai/sdk'
+import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
+import { randomUUID } from 'crypto'
 import {
   checkAndReserveTokens,
   checkFeatureLimit,
@@ -18,8 +21,9 @@ import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 // upstream cannot tie up Next.js request handlers indefinitely.
 const ANTHROPIC_TIMEOUT_MS = 30_000
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
+  posthog: posthogAi,
 })
 const primaryClaudeModel = 'claude-haiku-5-5'
 const fallbackClaudeModel = 'claude-haiku-4-5-20251001'
@@ -34,8 +38,8 @@ const FEATURE_LABEL: Record<Feature, string> = {
   cvs: 'resume creations',
 }
 
-export type MessageParam = Anthropic.MessageParam
-export type Message = Anthropic.Message
+export type MessageParam = AnthropicOriginal.MessageParam
+export type Message = AnthropicOriginal.Message
 
 export interface RateLimitError {
   error: string
@@ -98,7 +102,8 @@ async function createMessage(
     system?: string
     messages: MessageParam[]
     maxTokens: number
-  }
+  },
+  observability: { distinctId: string; traceId: string }
 ): Promise<Message> {
   const system = input.system
     ? [
@@ -110,16 +115,22 @@ async function createMessage(
       ]
     : undefined
 
-  return anthropic.messages.create({
+  const response = await anthropic.messages.create({
     model,
     max_tokens: input.maxTokens,
     // Haiku 5.5 rejects sampling params (temperature etc.) and thinks by default;
     // disabled keeps the old latency and token budget, and Haiku 4.5 (fallback) accepts it too.
     thinking: { type: 'disabled' },
     system,
-    stream: false,
+    stream: false as const,
     messages: input.messages,
-  })
+    posthogDistinctId: observability.distinctId,
+    posthogTraceId: observability.traceId,
+    posthogProperties: { $ai_session_id: `process-${process.pid}` },
+  }) as Message
+
+  await flushPostHogAi()
+  return response
 }
 
 export function extractTextFromAnthropicMessage(response: Message): string {
@@ -234,6 +245,8 @@ export async function callAnthropicWithLimits(params: {
     : Math.max(1, Math.min(limits.maxOutputTokensPerCall, tokenRemaining))
 
   let response: Message
+  const traceId = randomUUID()
+  const observability = { distinctId: params.userId, traceId }
 
   try {
     try {
@@ -241,7 +254,7 @@ export async function callAnthropicWithLimits(params: {
         system: params.system,
         messages: params.messages,
         maxTokens,
-      })
+      }, observability)
     } catch (error) {
       const shouldRetryWithFallback =
         defaultClaudeModel !== fallbackClaudeModel && isModelNotFoundError(error)
@@ -254,7 +267,7 @@ export async function callAnthropicWithLimits(params: {
         system: params.system,
         messages: params.messages,
         maxTokens,
-      })
+      }, observability)
     }
   } catch (error) {
     // Never let a raw provider error reach the route handler (and therefore
