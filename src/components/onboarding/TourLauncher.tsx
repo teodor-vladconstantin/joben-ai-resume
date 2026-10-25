@@ -24,6 +24,7 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
   const stateRef = useRef<OnboardingState | null>(null)
   const driverRef = useRef<Driver | null>(null)
   const runningRef = useRef(false)
+  const mountedRef = useRef(false)
 
   const start = useCallback(
     async (trigger: 'auto' | 'manual') => {
@@ -32,10 +33,20 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
       if (steps.length === 0) return
       runningRef.current = true
 
-      const { driver } = await import('driver.js')
+      let driver: typeof import('driver.js').driver
+      try {
+        ;({ driver } = await import('driver.js'))
+      } catch {
+        runningRef.current = false
+        return
+      }
+      // Unmounted or shrunk below desktop while the chunk was loading.
+      if (!mountedRef.current || !window.matchMedia(DESKTOP_QUERY).matches) {
+        runningRef.current = false
+        return
+      }
       const label = tRef.current
       const alreadySeen = Boolean(stateRef.current?.tours[tourId])
-      posthog.capture('tour_started', { tourId, trigger })
 
       const instance = driver({
         showProgress: true,
@@ -73,10 +84,22 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
         },
       })
       driverRef.current = instance
-      instance.drive()
+      try {
+        posthog.capture('tour_started', { tourId, trigger })
+        instance.drive()
+      } catch {
+        runningRef.current = false
+      }
     },
     [tourId]
   )
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   useEffect(() => {
     const query = window.matchMedia(DESKTOP_QUERY)
@@ -96,7 +119,9 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
         if (cancelled) return
         stateRef.current = state
         if (shouldAutoStart({ state, tourId, isDesktop })) {
-          timer = setTimeout(() => void start('auto'), AUTO_START_DELAY_MS)
+          timer = setTimeout(() => {
+            if (!runningRef.current && !stateRef.current?.tours[tourId]) void start('auto')
+          }, AUTO_START_DELAY_MS)
         }
       })
       .catch(() => undefined)
