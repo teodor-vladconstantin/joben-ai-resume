@@ -1,0 +1,150 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-10-25 12:00:00",
+  "containerVersion": {
+    "path": "accounts/6225136777/containers/181898196/versions/0",
+    "accountId": "6225136777",
+    "containerId": "181898196",
+    "containerVersionId": "0",
+    "container": {
+      "path": "accounts/6225136777/containers/181898196",
+      "accountId": "6225136777",
+      "containerId": "181898196",
+      "name": "joben.eu",
+      "publicId": "GTM-MJ5VPX6J",
+      "usageContext": ["WEB"],
+      "fingerprint": "0",
+      "tagIds": ["GTM-MJ5VPX6J"]
+    },
+    "tag": [
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "tagId": "9001",
+        "name": "GA4 Event - sign_up",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "sign_up" },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "parameter", "value": "method" },
+                  { "type": "TEMPLATE", "key": "parameterValue", "value": "{{DLV - signup_method}}" }
+                ]
+              }
+            ]
+          },
+          { "type": "TEMPLATE", "key": "measurementIdOverride", "value": "G-PGLHWSE720" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["9101"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "tagId": "9002",
+        "name": "GA4 Event - generate_lead",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "generate_lead" },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "parameter", "value": "source" },
+                  { "type": "TEMPLATE", "key": "parameterValue", "value": "{{DLV - lead_source}}" }
+                ]
+              }
+            ]
+          },
+          { "type": "TEMPLATE", "key": "measurementIdOverride", "value": "G-PGLHWSE720" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["9102"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "triggerId": "9101",
+        "name": "CE - sign_up",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              { "type": "TEMPLATE", "key": "arg1", "value": "sign_up" }
+            ]
+          }
+        ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "triggerId": "9102",
+        "name": "CE - generate_lead",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              { "type": "TEMPLATE", "key": "arg1", "value": "generate_lead" }
+            ]
+          }
+        ],
+        "fingerprint": "0"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "variableId": "9201",
+        "name": "DLV - signup_method",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "method" }
+        ],
+        "fingerprint": "0",
+        "formatValue": {}
+      },
+      {
+        "accountId": "6225136777",
+        "containerId": "181898196",
+        "variableId": "9202",
+        "name": "DLV - lead_source",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "source" }
+        ],
+        "fingerprint": "0",
+        "formatValue": {}
+      }
+    ],
+    "builtInVariable": [],
+    "fingerprint": "0"
+  }
+}
