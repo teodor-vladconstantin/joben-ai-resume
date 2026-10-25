@@ -14,6 +14,7 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import { getLatestClaimedAtsScan, getLatestReviewSummary, getRecentDocuments, getUserDashboardStats } from '@/lib/actions/db'
 import { AtsScanCard } from '@/components/dashboard/AtsScanCard'
 import { AtsScanCardPending } from '@/components/dashboard/AtsScanCardPending'
+import { MobileHandoffCard } from '@/components/dashboard/MobileHandoffCard'
 import { selectAtsScanCardState } from '@/lib/ats-scan-card'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
@@ -148,6 +149,7 @@ export default async function DashboardPage({
               {passNoticeText}
             </p>
           ) : null}
+          {isNewUser && user?.id && <MobileHandoffCard />}
           {atsScanCard.kind === 'card' && <AtsScanCard scan={atsScanCard.scan} locale={locale} />}
           {atsScanCard.kind === 'pending' && <AtsScanCardPending />}
           <ProfileCompletion stats={stats} />

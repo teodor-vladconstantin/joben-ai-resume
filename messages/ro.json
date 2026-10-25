@@ -548,6 +548,13 @@
       "cta": "Deschide editorul",
       "loading": "Încărcăm scorul din scanarea ATS gratuită..."
     },
+    "mobileHandoff": {
+      "title": "Editorul merge cel mai bine pe laptop",
+      "body": "Primești un link pe email și îți continui CV-ul pe un ecran mai mare.",
+      "cta": "Trimite-mi linkul pe email",
+      "sent": "Gata. Verifică inboxul și deschide linkul pe laptop.",
+      "error": "Nu am putut trimite emailul. Încearcă din nou în câteva momente."
+    },
     "greetingMorning": "Bună dimineața",
     "greetingEvening": "Bună seara",
     "guestFallbackName": "acolo",
