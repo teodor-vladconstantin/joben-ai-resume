@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { timeAgo } from '@/lib/time-ago'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
 
 type ResumeListItem = {
   id: string
@@ -116,7 +117,7 @@ export default function ResumesPage() {
               <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
               <p className="text-(--muted)">{loadState === 'ready' ? t('resumeCount', { count: resumes.length }) : '\u00a0'}</p>
             </div>
-            <Link href="/resumes/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
+            <Link href="/resumes/new" data-tour="resumes-create" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
               <Plus className="w-5 h-5" /> {t('createResume')}
             </Link>
           </div>
@@ -155,13 +156,13 @@ export default function ResumesPage() {
               />
             ) : (
               <div className="divide-y divide-(--border)">
-                {visibleResumes.map((resume) => (
-                  <div key={resume.id} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
+                {visibleResumes.map((resume, index) => (
+                  <div key={resume.id} data-tour={index === 0 ? 'resumes-row' : undefined} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{resume.title || t('untitled')}</p>
                       <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString(locale)}</p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div data-tour={index === 0 ? 'resumes-actions' : undefined} className="flex items-center gap-3 shrink-0">
                       <span className="font-mono text-xs font-bold tabular-nums">
                         {Number(resume.score || 0)}
                       </span>
@@ -182,6 +183,7 @@ export default function ResumesPage() {
               </div>
             )}
           </div>
+          <TourLauncher tourId="resumes" />
         </main>
       </div>
     </div>
