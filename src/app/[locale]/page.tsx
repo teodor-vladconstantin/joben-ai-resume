@@ -88,20 +88,20 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
 
       <main className="grow pt-24 pb-16" suppressHydrationWarning>
         {/* HERO SECTION */}
-        <section id="builder" data-section="Hero" className="relative px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto mt-12 mb-20" suppressHydrationWarning>
+        <section id="builder" data-section="Hero" className="relative px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto mt-6 mb-20" suppressHydrationWarning>
           <AmbientDataTexture />
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-(--foreground) max-w-3xl leading-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-(--foreground) max-w-4xl leading-tight">
             <RevealWords as="span" text={home.heroPrefix} />{' '}
             <HeroWordRotate words={home.heroRotatingWords} />{' '}
             <RevealWords as="span" text={home.heroSuffix} />
           </h1>
 
-          <p className="text-xl text-(--muted) mb-10 max-w-xl">
+          <p className="text-lg text-(--muted) mb-8 max-w-3xl">
             {home.subheading}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-start gap-4 mb-12" suppressHydrationWarning>
+          <div className="flex flex-col sm:flex-row items-start gap-4 mb-6" suppressHydrationWarning>
             <AuthAwareSignupLink ctaId="home_hero" signedOutHref="/free-ats-checker" className={buttonVariants('primary', 'lg')}>
               {home.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
