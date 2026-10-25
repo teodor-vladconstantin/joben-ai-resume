@@ -202,6 +202,7 @@ describe('callAnthropicWithLimits', () => {
     expect(createMessageMock).toHaveBeenCalledTimes(1)
     expect(createMessageMock.mock.calls[0][0]).toMatchObject({
       max_tokens: 1200,
+      posthogPrivacyMode: true,
     })
     expect(recordTokenUsageMock).toHaveBeenCalledWith('user_4', 100, 55)
     expect(incrementFeatureCounterMock).toHaveBeenCalledWith('user_4', 'bullets')
