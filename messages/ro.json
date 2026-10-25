@@ -328,7 +328,8 @@
     "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
-    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare"
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
+    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>."
   },
   "SignUp": {
     "eyebrow": "Cont nou",
