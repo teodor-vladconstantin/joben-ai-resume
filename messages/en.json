@@ -713,7 +713,9 @@
       "titlePrefix": "Profile Completion - ",
       "item1": "Create first resume",
       "item2": "Create cover letter",
-      "item3": "Get AI review"
+      "item3": "Get AI review",
+      "item4": "Export your first PDF",
+      "close": "Dismiss"
     },
     "redeemCode": {
       "heading": "Redeem Access Code",
