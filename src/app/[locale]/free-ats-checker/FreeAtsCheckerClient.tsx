@@ -11,6 +11,9 @@ import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { useServerError } from '@/hooks/useServerError'
 import { pushGtmEvent } from '@/lib/gtm-events'
+import { Link } from '@/i18n/navigation'
+
+const legalLinkClass = 'text-(--foreground) underline decoration-(--border) underline-offset-2 hover:decoration-(--accent) transition-colors duration-150 ease-out'
 
 type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 type GradeKey = 'Poor' | 'Fair' | 'Good' | 'Excellent'
@@ -76,6 +79,7 @@ export function FreeAtsCheckerClient() {
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [email, setEmail] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isRateLimited, setIsRateLimited] = useState(false)
@@ -502,10 +506,33 @@ export function FreeAtsCheckerClient() {
         <p className="text-xs text-(--muted) mt-1.5">{t('neverRequired')}</p>
       </div>
 
+      <label className="mt-6 flex items-start gap-3 text-xs text-(--muted)">
+        <input
+          type="checkbox"
+          checked={acceptedTerms}
+          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
+        />
+        <span>
+          {t.rich('consentLabel', {
+            terms: (chunks) => (
+              <Link href="/terms" target="_blank" rel="noopener noreferrer" className={legalLinkClass}>
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link href="/privacy" target="_blank" rel="noopener noreferrer" className={legalLinkClass}>
+                {chunks}
+              </Link>
+            ),
+          })}
+        </span>
+      </label>
+
       <button
         onClick={() => void handleScan()}
-        disabled={!file || isScanning}
-        className={`mt-6 w-full inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${buttonVariants('primary', 'lg')}`}
+        disabled={!file || !acceptedTerms || isScanning}
+        className={`mt-4 w-full inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${buttonVariants('primary', 'lg')}`}
       >
         {isScanning ? (
           <>
