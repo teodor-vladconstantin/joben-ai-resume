@@ -36,21 +36,22 @@ export const TOURS: Record<TourId, TourStep[]>
 ```
 
 - `anchor` is the value of a `data-tour="..."` attribute placed on the real element. Class names and DOM structure are never used as selectors.
-- Copy lives in `messages/ro.json` and `messages/en.json` under `Onboarding.<tourId>.<stepKey>.title|body`.
+- Copy lives in `messages/ro.json` and `messages/en.json` under `Onboarding.ui.*` (buttons, help label) and `Onboarding.tours.<tourId>.<stepKey>.{title,body}`.
 - Steps, as found in the code (new users do not see the stat cards, and the editor has one template and no template picker, so the first draft of this list changed):
   - **dashboard** (5): sidebar navigation, create button, activation checklist, ATS scan card (skipped when absent), referral card.
   - **resumes** (3): create button, first resume row, row actions. A brand-new user has no rows yet, so the first visit shows the create step only.
   - **editor** (5): section tabs, PDF import, AI tailor, live preview, save and export. `ResumeBuilder.tsx` has 2376 lines, so only these five anchors are added there.
   - **coverLetters** (3): create button, letter card, card actions.
-  - **aiReview** (4): resume selector, run review, category scores, how to apply a fix.
+  - **aiReview** (4): upload, job description, run review, history of saved resumes.
 
 ### Launcher
 
 `<TourLauncher tourId="..." />` is a client component mounted by each section's page. Four of the five section pages are client components, so the launcher loads the state itself through a server action instead of receiving it as a prop.
 
 - On mount it checks `matchMedia('(min-width: 1024px)')`. Below that it renders nothing.
+- Auto-start is skipped while a modal (`[aria-modal="true"]`) is open; the tour stays unseen and runs on the next visit. The "?" button ignores this check.
 - Once the state has loaded, if the tour is not seen and the user is not `legacy`, it starts the tour 3 seconds later, so the cookie banner and PostHog survey settle first. The tour never starts before the state is known, so there is no flash for users who already saw it.
-- Steps whose anchor is missing from the DOM are skipped. An empty tour is not started.
+- Steps whose anchor is missing from the DOM, or has zero height, are skipped (an empty wrapper does not count). An empty tour is not started.
 - Esc and the close button stop the tour. Finishing or stopping marks the tour as seen.
 - A fixed "?" button (bottom corner, always on desktop) starts the tour on demand, regardless of `seen` and `legacy`.
 - `driver.js` is imported dynamically inside the launcher, so it only loads when a tour runs.
@@ -65,7 +66,7 @@ Column `users.onboarding jsonb not null default '{}'`:
 ```
 
 - New migration (`supabase migration new onboarding_state`) adds the column and sets `{"legacy": true}` on every row that exists at migration time. Existing users never get automatic tours; they can start any tour from "?".
-- Server action in `src/lib/actions` (`markTourSeen(tourId)`, `dismissChecklist()`) reads `auth()`, updates only the current user's row, and validates `tourId` against the registry.
+- Server action in `src/lib/onboarding/actions.ts` (`markTourSeen(tourId)`, `dismissChecklist()`) reads `auth()`, updates only the current user's row, and validates `tourId` against the registry.
 - If the `users` row does not exist yet (the Clerk webhook can lag right after sign-up), the server action writes with an upsert on `clerk_id`; the webhook's own upsert never touches `onboarding`.
 - If the state cannot be read, the server action returns a `legacy` state, so a database error never starts a tour.
 - No service role key reaches the client.
