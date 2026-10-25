@@ -10,7 +10,7 @@
   și template_downloaded în PostHog. 4) test poartă email cu un CV cu 2+ probleme. 5) lista de marketing din șabloane: reluăm după 30 de
   zile de date (9 vizualizări/lună acum; texte legale pregătite în conversație, nu aplicate).
 - [IN PROGRESS] 2026-10-22 Refacere Termeni/Confidențialitate/Cookie (RO+EN, branch feat/legal-refresh, necomis): texte noi, GTM și Sentry Replay doar după consimțământ, link Setări cookie, expirare consimțământ 12 luni, cron retenție date. Vezi docs/legal/COMPLIANCE.md (puncte rămase pentru owner).
-- [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
+- [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli). Verificat 2026-10-25: 12 din 40 URL-uri din eșantion indexate (30%), restul nedescoperite, sitemap retrimis; conținutul rămâne în pauză, reverificare ~2026-11-01.
 - [DONE] 2026-10-16 Plan SEO/GEO/CRO livrat în producție (PR #28-#33, docs/seo/PLAYBOOK.md și BACKLINKS.md): hreflang + x-default,
   /en/cover-letter (301), hub-uri ghiduri/glosar/comparații, 54 roluri + 32 ghiduri + 26 glosar + 10 scrisori + 3 comparații (ro+en),
   /ro/sabloane-cv + /en/cv-templates (6 DOCX, test de parsare), llms/ai în EN, OG per pagină, evenimente GA4 (GTM v6 publicat),

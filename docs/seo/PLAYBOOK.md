@@ -96,6 +96,14 @@ Făcut în lotul 4 (2026-10-16): ghiduri pe domenii (IT, HoReCa, retail, constru
 
 **Starea la 2026-10-16:** producția de volum e oprită. Site-ul are 54 de roluri, 32 de ghiduri, 26 de termeni de glosar, 10 scrisori și 3 comparații (274 de URL-uri), iar Search Console arăta doar 12 click-uri și 902 afișări în 90 de zile. Nu mai adăugăm pagini până nu vedem cum le tratează Google.
 
+**Verificarea din 2026-10-25:** am inspectat în Search Console un eșantion de 40 de URL-uri (fiecare al 7-lea din cele 276 ale sitemap-ului). 12 sunt indexate (30%) și 28 sunt „URL is unknown to Google", adică încă nedescoperite. Niciunul nu e „Crawled, currently not indexed" sau „Discovered, currently not indexed", deci Google nu le-a respins pe calitate. În eșantion: roluri 0 din 20, scrisori 0 din 2, comparații 0 din 1, ghiduri 4 din 10, glosar 5 din 8; hub-urile de ghiduri și de exemple sunt indexate.
+
+- Sitemap-ul trimis pe 2026-10-16 era în starea „pending" și nu fusese descărcat niciodată. L-am retrimis pe 2026-10-25, 17:49 UTC.
+- Partea tehnică e în regulă: sitemap-ul răspunde 200 cu XML, hub-urile leagă toate paginile de detaliu (54 de roluri RO, 54 EN, 32 de ghiduri), iar redirecturile `www` și `http` sunt corecte.
+- Trafic pe 28 de zile: 22 de click-uri și 1.439 de afișări. Afișările au crescut de la ~6 pe zi la ~239 pe zi. Click-urile vin din `/free-ats-checker` (CTR 11%) și din homepage (539 de afișări, CTR 1,5%).
+- Verdict: sub pragul de 60%, deci conținutul rămâne în pauză. Pași: urmărim dacă sitemap-ul iese din „pending", cerem indexare manuală pentru hub-uri și câteva roluri (limita din GSC e ~10 pe zi), facem backlinks (secțiunea 3) și rescriem titlul și descrierea paginilor cu poziție bună și zero click-uri (`/en/cv-templates`: 145 de afișări la poziția 6,4; `/en/guides/resume-after-a-career-gap`: 82 de afișări la poziția 5,4).
+- Reverificare la ~2026-11-01, cu același eșantion.
+
 **Condiția de reluare (verificare la 1-2 săptămâni după 2026-10-16):** în Search Console, la Pages, numără câte din cele 274 de URL-uri sunt indexate.
 - Peste ~60% indexate și apar afișări pe clustere noi: reluăm, dar doar în clusterele care primesc afișări.
 - Multe în „Discovered, currently not indexed” sau „Crawled, currently not indexed”: nu adăugăm pagini. Întărim cele existente (conținut mai bogat, exemple reale, linkuri interne) și facem backlinks (secțiunea 3).
