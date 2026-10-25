@@ -5,6 +5,7 @@ import { useLocale } from 'next-intl'
 import { useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import { SignUpEvent } from '@/components/SignUpEvent'
 
 const INTERNAL_TEST_EMAIL = process.env.NEXT_PUBLIC_INTERNAL_TEST_EMAIL
 
@@ -46,6 +47,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     <PHProvider client={posthog}>
       <PostHogLocale />
       <PostHogIdentify />
+      <SignUpEvent />
       {children}
     </PHProvider>
   )

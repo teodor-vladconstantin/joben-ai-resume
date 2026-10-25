@@ -207,6 +207,7 @@ export function FreeAtsCheckerClient() {
           scanId: payload.scanId ?? null,
           sent: Boolean(payload.emailSent),
         })
+        pushGtmEvent('generate_lead', { source: 'ats_report' })
       }
 
       setResult(payload.result)
@@ -224,6 +225,7 @@ export function FreeAtsCheckerClient() {
     if (!scanId || !postScanEmail.trim()) return
 
     posthog.capture('ats_report_email_requested', { when: 'post_scan', scanId })
+    pushGtmEvent('generate_lead', { source: 'ats_report' })
     setIsSendingReport(true)
     setReportError(null)
 
