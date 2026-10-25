@@ -4,6 +4,8 @@
 type GtmEventName =
   | 'ats_scan_completed'
   | 'sign_up_started'
+  | 'sign_up'
+  | 'generate_lead'
   | 'begin_checkout'
   | 'cta_click'
   | 'pricing_viewed'
