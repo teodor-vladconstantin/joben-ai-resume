@@ -4,7 +4,9 @@ import { readFileSync } from 'node:fs'
 
 const POSTHOG_HOST = 'https://eu.posthog.com'
 const PROJECT_ID = '163757'
-const { POSTHOG_PERSONAL_API_KEY, RESEND_API_KEY } = process.env
+// Secrets pasted from a clipboard often carry a trailing CRLF, which invalidates an Authorization header.
+const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY?.trim()
+const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim()
 const REPORT_EMAIL = process.env.REPORT_EMAIL || 'duku.constantin@gmail.com'
 for (const [name, value] of Object.entries({ POSTHOG_PERSONAL_API_KEY, RESEND_API_KEY })) {
   if (!value) throw new Error(`${name} lipsește`)
