@@ -18,7 +18,7 @@ import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
-import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
+import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
@@ -389,6 +389,7 @@ export async function POST(req: Request) {
         ...(browserDistinctId ? { posthogDistinctId: browserDistinctId } : {}),
         posthogTraceId: traceId,
         posthogProperties: { $ai_session_id: `ats-${deviceId}` },
+        ...POSTHOG_AI_PRIVATE,
       }) as { content: Array<{ type: string; text?: string }> }
 
       await flushPostHogAi()
