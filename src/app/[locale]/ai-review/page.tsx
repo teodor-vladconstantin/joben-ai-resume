@@ -12,6 +12,7 @@ import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { resumeToPlainText } from '@/lib/resume-text'
 import { useServerError } from '@/hooks/useServerError'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
 
 type ResumeItem = {
   id: string
@@ -266,6 +267,7 @@ export default function AIReviewPage() {
               />
               <div
                 role="button"
+                data-tour="ai-upload"
                 tabIndex={0}
                 className={`border border-dashed p-8 text-center transition-colors duration-150 ease-out ${
                   isDraggingUpload
@@ -309,6 +311,7 @@ export default function AIReviewPage() {
                 ) : null}
               </div>
               <textarea
+                data-tour="ai-jd"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 className="mt-4 w-full h-24 bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) resize-none transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
@@ -321,6 +324,7 @@ export default function AIReviewPage() {
                 </div>
               ) : (
                 <button
+                  data-tour="ai-start"
                   onClick={() => void handleAnalyze()}
                   disabled={isProcessingUpload}
                   className={`mt-4 inline-flex items-center gap-2 disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
@@ -342,7 +346,7 @@ export default function AIReviewPage() {
             </div>
           </div>
 
-          <div className="border border-(--border) bg-(--surface) p-5">
+          <div data-tour="ai-history" className="border border-(--border) bg-(--surface) p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h3 className="text-xl font-bold text-(--foreground)">{t('reviewExistingResume')}</h3>
               <div className="relative w-full max-w-sm">
@@ -402,6 +406,7 @@ export default function AIReviewPage() {
               </div>
             )}
           </div>
+          <TourLauncher tourId="aiReview" />
         </main>
       </div>
 
