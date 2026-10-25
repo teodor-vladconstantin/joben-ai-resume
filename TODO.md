@@ -1,7 +1,13 @@
 ## Active
-- [IN PROGRESS] 2026-10-24 Distribuție (necomis): payment_completed/checkout_started fără dublură, poartă email în free-ats-checker
-  (prima corecție gratis, restul după email), scripts/utm.mjs + docs/growth/weekly-report.sql. RĂMAS: test în browser al porții
-  cu un CV cu 2+ probleme (limita 1 scanare/zi a blocat testul), workflow n8n de luni, email ziua 10 pentru Pass, cron data-retention (JAVASCRIPT-NEXTJS-18).
+- [IN PROGRESS] 2026-10-25 Distribuție (PR #43-#47 live): payment_completed/checkout_started fără dublură, poartă email în free-ats-checker,
+  email ziua 10 pentru Pass (cron pass-day10), UTM (scripts/utm.mjs), raport săptămânal pe sursă (GitHub Actions, luni 07:00 UTC, merge),
+  sondaj PostHog "Welcome to Joben" (lansat, limba din URL), GA4: key events + accounts.google.com la unwanted referrals,
+  evenimente sign_up/generate_lead în cod, template_downloaded în PostHog.
+  RĂMAS (user): 1) GTM: workspace "ga4-signup-lead" (nr. 8) are 6 elemente importate (docs/gtm/ga4-signup-lead.json), NEPUBLICAT:
+  Preview pe joben.eu apoi Submit DOAR din el; NU publica workspace-ul 6 (31 modificări vechi, șterge tag-uri live).
+  2) după primele hit-uri: key events sign_up și generate_lead în GA4. 3) test sondaj în română pe /ro/dashboard (browser EN)
+  și template_downloaded în PostHog. 4) test poartă email cu un CV cu 2+ probleme. 5) lista de marketing din șabloane: reluăm după 30 de
+  zile de date (9 vizualizări/lună acum; texte legale pregătite în conversație, nu aplicate).
 - [IN PROGRESS] 2026-10-22 Refacere Termeni/Confidențialitate/Cookie (RO+EN, branch feat/legal-refresh, necomis): texte noi, GTM și Sentry Replay doar după consimțământ, link Setări cookie, expirare consimțământ 12 luni, cron retenție date. Vezi docs/legal/COMPLIANCE.md (puncte rămase pentru owner).
 - [BACKLOG] 2026-10-16 Loturi viitoare de conținut SEO în pauză până la verificarea indexării în GSC (la 1-2 săptămâni): vezi docs/seo/PLAYBOOK.md, secțiunea 6 (condiții de reluare, ordine, reguli).
 - [DONE] 2026-10-16 Plan SEO/GEO/CRO livrat în producție (PR #28-#33, docs/seo/PLAYBOOK.md și BACKLINKS.md): hreflang + x-default,
