@@ -1,6 +1,6 @@
 import { Anthropic } from '@posthog/ai/anthropic'
 import type AnthropicOriginal from '@anthropic-ai/sdk'
-import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
+import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { randomUUID } from 'crypto'
 import {
   checkAndReserveTokens,
@@ -127,6 +127,7 @@ async function createMessage(
     posthogDistinctId: observability.distinctId,
     posthogTraceId: observability.traceId,
     posthogProperties: { $ai_session_id: `process-${process.pid}` },
+    ...POSTHOG_AI_PRIVATE,
   }) as Message
 
   await flushPostHogAi()
