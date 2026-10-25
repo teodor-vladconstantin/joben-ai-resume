@@ -4,8 +4,7 @@ import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { dismissChecklist } from '@/lib/onboarding/actions'
-
-type ChecklistStats = { resumes: number; coverLetters: number; aiReviews: number; pdfExports: number }
+import { getChecklistItems, type ChecklistStats } from '@/lib/onboarding/checklist'
 
 // Activation checklist: four steps up to the first exported PDF. Completion
 // comes from existing stats; only "dismissed" is stored (users.onboarding).
@@ -14,12 +13,12 @@ export function ProfileCompletion({ stats, dismissed }: { stats: ChecklistStats;
   const [isVisible, setIsVisible] = useState(!dismissed)
   const [, startTransition] = useTransition()
 
-  const items = [
-    { done: stats.resumes > 0, label: t('item1'), href: '/resumes/new' },
-    { done: stats.aiReviews > 0, label: t('item3'), href: '/ai-review' },
-    { done: stats.coverLetters > 0, label: t('item2'), href: '/cover-letters/new' },
-    { done: stats.pdfExports > 0, label: t('item4'), href: '/resumes' },
-  ]
+  const items = getChecklistItems(stats, {
+    resume: t('item1'),
+    aiReview: t('item3'),
+    coverLetter: t('item2'),
+    pdfExport: t('item4'),
+  })
   const completed = items.filter((item) => item.done).length
   if (!isVisible || completed === items.length) return null
   const percent = (completed / items.length) * 100
