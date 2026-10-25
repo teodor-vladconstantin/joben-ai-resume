@@ -22,6 +22,8 @@ if (posthogProjectToken && process.env.NODE_ENV === 'production') {
     capture_pageleave: true,
     disable_session_recording: false,
     opt_out_capturing_by_default: getCookieConsent() !== 'accepted',
+    // Survey copy follows the site locale (/en or /ro), not the browser language.
+    override_display_language: window.location.pathname.startsWith('/en') ? 'en' : 'ro',
   })
 }
 
