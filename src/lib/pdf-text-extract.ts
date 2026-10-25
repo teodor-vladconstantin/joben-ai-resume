@@ -34,9 +34,15 @@ export function itemsToText(items: TextItem[]): string {
     if (prev && !atLineStart) {
       const size = Math.max(item.height, prev.height, 1)
       const sameLine = Math.abs(item.transform[5] - prev.transform[5]) <= size * 0.5
+      // Right-to-left runs advance toward smaller x: the gap is between the
+      // previous item's left edge and this item's right edge.
+      const gap =
+        item.dir === 'rtl'
+          ? prev.transform[4] - (item.transform[4] + item.width)
+          : item.transform[4] - (prev.transform[4] + prev.width)
       if (!sameLine) {
         out += '\n'
-      } else if (item.transform[4] - (prev.transform[4] + prev.width) > size * WORD_GAP_RATIO && !out.endsWith(' ')) {
+      } else if (gap > size * WORD_GAP_RATIO && !out.endsWith(' ')) {
         out += ' '
       }
     }
@@ -53,13 +59,24 @@ export function itemsToText(items: TextItem[]): string {
   return out
 }
 
+const isLower = (ch: string) => ch === ch.toLowerCase() && ch !== ch.toUpperCase()
+const isUpper = (ch: string) => ch === ch.toUpperCase() && ch !== ch.toLowerCase()
+
 // Safety net for tracked headings that still arrive as "E D U C A T I O N":
-// 4+ single letters separated by single spaces become one word.
-// ponytail: also glues a tracked multi-word heading ("S K I L L S  W O R K")
-// when its word gap is one space and both words sit in one item; per-item
-// merging in itemsToText keeps the usual case (a separate space item) apart.
+// 4+ single letters separated by single spaces become one word. A lowercase
+// letter followed by an uppercase one is a word boundary, so
+// "S a l e s A s s o c i a t e" becomes "Sales Associate".
+// ponytail: an all-caps tracked run with no case change ("S K I L L S W O R K",
+// one space between the words) still fuses; the per-item merging in itemsToText
+// keeps the usual case (a separate space item) apart.
 export function mergeSpacedLetters(text: string): string {
-  return text.replace(/(?<![\p{L}\p{N}])(?:\p{L} ){3,}\p{L}(?![\p{L}\p{N}])/gu, (run) => run.replace(/ /g, ''))
+  return text.replace(/(?<![\p{L}\p{N}])(?:\p{L} ){3,}\p{L}(?![\p{L}\p{N}])/gu, (run) => {
+    const letters = run.split(' ')
+    return letters.reduce(
+      (word, letter, i) => (i > 0 && isLower(letters[i - 1]) && isUpper(letter) ? `${word} ${letter}` : word + letter),
+      ''
+    )
+  })
 }
 
 /**
