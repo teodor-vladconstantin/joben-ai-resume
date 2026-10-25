@@ -539,6 +539,46 @@
     },
     "rateLimited": "Prea multe cereri. Așteaptă puțin și încearcă din nou."
   },
+  "Onboarding": {
+    "ui": {
+      "next": "Înainte",
+      "prev": "Înapoi",
+      "done": "Gata",
+      "help": "Arată ghidul pentru această pagină"
+    },
+    "tours": {
+      "dashboard": {
+        "sidebar": { "title": "Navigarea ta", "body": "De aici ajungi dintr-un click la CV-uri, scrisori, AI Review și setări." },
+        "create": { "title": "Începe un CV nou", "body": "Pornești de la un CV gol sau imporți un PDF existent direct în editor." },
+        "checklist": { "title": "Primii tăi pași", "body": "Parcurge cei patru pași și ai un CV gata, exportat. Fiecare pas te duce la pagina potrivită." },
+        "ats": { "title": "Scanarea ta ATS gratuită", "body": "Scorul și problemele găsite sunt salvate aici. Deschide editorul ca să le repari cu AI." },
+        "referral": { "title": "Invită prieteni", "body": "Trimite linkul tău: primești 7 zile Pro pentru fiecare prieten care își face cont și își confirmă emailul." }
+      },
+      "resumes": {
+        "create": { "title": "Creează un CV", "body": "Pornești un CV nou de aici. În editor poți importa un PDF existent." },
+        "row": { "title": "CV-urile tale", "body": "Fiecare rând arată titlul, ultima modificare și scorul unui CV." },
+        "actions": { "title": "Deschide, editează sau șterge", "body": "Ochiul și creionul deschid CV-ul în editor, coșul îl șterge." }
+      },
+      "editor": {
+        "tabs": { "title": "Secțiunile CV-ului", "body": "Completează fiecare tab: date personale, experiență, educație, abilități și altele." },
+        "import": { "title": "Importă un PDF", "body": "Ai deja un CV? Importă-l și câmpurile se completează singure." },
+        "tailor": { "title": "Adaptează-l la un job", "body": "Lipești un anunț și AI propune modificări potrivite cu el." },
+        "preview": { "title": "Previzualizare live", "body": "Asta văd angajatorii. Se actualizează pe măsură ce scrii." },
+        "export": { "title": "Salvează și exportă", "body": "Salvează ce ai făcut, apoi exportă un PDF gata de trimis." }
+      },
+      "coverLetters": {
+        "create": { "title": "Creează o scrisoare de intenție", "body": "Pornești o scrisoare nouă de aici." },
+        "row": { "title": "Scrisorile tale", "body": "Fiecare rând arată titlul și ultima modificare a unei scrisori." },
+        "actions": { "title": "Deschide, editează sau șterge", "body": "Ochiul și creionul deschid scrisoarea, coșul o șterge." }
+      },
+      "aiReview": {
+        "upload": { "title": "Încarcă un CV", "body": "Aruncă aici un PDF ca să-l evaluezi fără să-l salvezi mai întâi ca CV." },
+        "jd": { "title": "Adaugă descrierea jobului", "body": "Opțional. Cu un anunț lipit aici, evaluarea verifică și cât de bine te potrivești cu el." },
+        "start": { "title": "Pornește evaluarea", "body": "Primești un scor cu îmbunătățiri concrete." },
+        "history": { "title": "CV-urile tale și evaluările anterioare", "body": "Evaluează orice CV salvat, redeschide ultimul rezultat sau rulează din nou după ce îl îmbunătățești." }
+      }
+    }
+  },
   "Dashboard": {
     "atsScanCard": {
       "eyebrow": "Din scanarea ATS gratuită",
