@@ -1,5 +1,5 @@
 ## Active
-- [IN PROGRESS] 2026-10-25 Onboarding: tururi driver.js per secțiune (dashboard, CV-uri, editor, scrisori, AI Review) + checklist de activare, stare în users.onboarding. Spec: docs/superpowers/specs/2026-10-25-onboarding-tours-design.md, plan: docs/superpowers/plans/2026-10-25-onboarding-tours.md.
+- [IN PROGRESS] 2026-10-25 Onboarding: tururi driver.js per secțiune (dashboard, CV-uri, editor, scrisori, AI Review) + checklist de activare, stare în users.onboarding. Cod gata și în PR (teste, build verzi); migrația 20261025130000 APLICATĂ în producție (39 useri existenți marcați legacy, înregistrată în schema_migrations). RĂMAS (user): test manual pe un cont nou, tururile pornesc la prima intrare în fiecare secțiune, "?" le relansează, nimic sub 1024 px; apoi evenimentele tour_* în PostHog. Spec: docs/superpowers/specs/2026-10-25-onboarding-tours-design.md, plan: docs/superpowers/plans/2026-10-25-onboarding-tours.md.
 - [IN PROGRESS] 2026-10-25 Distribuție (PR #43-#47 live): payment_completed/checkout_started fără dublură, poartă email în free-ats-checker,
   email ziua 10 pentru Pass (cron pass-day10), UTM (scripts/utm.mjs), raport săptămânal pe sursă (GitHub Actions, luni 07:00 UTC, merge),
   sondaj PostHog "Welcome to Joben" (lansat, limba din URL), GA4: key events + accounts.google.com la unwanted referrals,
