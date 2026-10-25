@@ -17,6 +17,51 @@ function isTextItem(item: TextItem | TextMarkedContent): item is TextItem {
   return 'str' in item && typeof item.str === 'string'
 }
 
+// A gap wider than this share of the glyph height counts as a word space.
+const WORD_GAP_RATIO = 0.15
+
+/**
+ * Joins pdfjs text items in stream order, deciding spaces and line breaks from
+ * item positions. Appending a space after every item turned letter-spaced
+ * headings (one item per glyph) into "E D U C A T I O N".
+ */
+export function itemsToText(items: TextItem[]): string {
+  let out = ''
+  let prev: TextItem | null = null
+  let atLineStart = true
+
+  for (const item of items) {
+    if (prev && !atLineStart) {
+      const size = Math.max(item.height, prev.height, 1)
+      const sameLine = Math.abs(item.transform[5] - prev.transform[5]) <= size * 0.5
+      if (!sameLine) {
+        out += '\n'
+      } else if (item.transform[4] - (prev.transform[4] + prev.width) > size * WORD_GAP_RATIO && !out.endsWith(' ')) {
+        out += ' '
+      }
+    }
+    // Per item, so the space item between two tracked words survives.
+    out += mergeSpacedLetters(item.str)
+    if (item.hasEOL) {
+      out += '\n'
+      atLineStart = true
+    } else {
+      atLineStart = false
+    }
+    if (item.str !== '') prev = item
+  }
+  return out
+}
+
+// Safety net for tracked headings that still arrive as "E D U C A T I O N":
+// 4+ single letters separated by single spaces become one word.
+// ponytail: also glues a tracked multi-word heading ("S K I L L S  W O R K")
+// when its word gap is one space and both words sit in one item; per-item
+// merging in itemsToText keeps the usual case (a separate space item) apart.
+export function mergeSpacedLetters(text: string): string {
+  return text.replace(/(?<![\p{L}\p{N}])(?:\p{L} ){3,}\p{L}(?![\p{L}\p{N}])/gu, (run) => run.replace(/ /g, ''))
+}
+
 /**
  * Extracts plain text from a PDF's pages. Never writes the file to disk —
  * everything happens on the in-memory byte array the caller passes in.
@@ -47,13 +92,15 @@ export async function extractTextFromPdf(data: Uint8Array): Promise<string> {
       try {
         const content = await page.getTextContent()
         // Keep pdfjs line breaks so bullets/sections stay distinguishable.
-        chunks.push(content.items.filter(isTextItem).map((item) => item.str + (item.hasEOL ? '\n' : ' ')).join(''))
+        chunks.push(itemsToText(content.items.filter(isTextItem)))
       } finally {
         page.cleanup()
       }
     }
 
-    return chunks.join('\n').replace(/[ \t]{2,}/g, ' ').trim()
+    // Merge before collapsing spaces: a double space is the word gap that keeps
+    // "W O R K  E X P E R I E N C E" from fusing into one word.
+    return mergeSpacedLetters(chunks.join('\n')).replace(/[ \t]{2,}/g, ' ').trim()
   } finally {
     // pdfjs-dist 6.x moved destroy() from PDFDocumentProxy to the loading task.
     await loadingTask.destroy()

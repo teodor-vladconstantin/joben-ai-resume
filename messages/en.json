@@ -328,7 +328,8 @@
     "neverRequired": "Never required, you'll see your score either way.",
     "scanning": "Scanning your resume...",
     "scanButton": "Scan My Resume, Free",
-    "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan"
+    "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan",
+    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>."
   },
   "SignUp": {
     "eyebrow": "Sign up",
@@ -547,6 +548,13 @@
       "hintNoIssues": "Upload the same CV in the editor to tailor it for real job postings.",
       "cta": "Open the editor",
       "loading": "Loading the score from your free ATS scan..."
+    },
+    "mobileHandoff": {
+      "title": "The editor works best on a laptop",
+      "body": "Get a link by email and carry on with your CV on a bigger screen.",
+      "cta": "Email me the link",
+      "sent": "Done. Check your inbox and open the link on your laptop.",
+      "error": "Could not send the email. Try again in a moment."
     },
     "greetingMorning": "Good morning",
     "greetingEvening": "Good evening",

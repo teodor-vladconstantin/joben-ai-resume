@@ -616,6 +616,46 @@ export async function sendReferralRewardEmail(input: {
   })
 }
 
+const MOBILE_HANDOFF_COPY: Record<AnonScanEmailLocale, {
+  subject: string
+  heading: string
+  body: string
+  cta: string
+}> = {
+  ro: {
+    subject: 'Continuă CV-ul pe laptop',
+    heading: 'Editorul Joben merge cel mai bine pe laptop',
+    body: 'Deschide linkul de mai jos pe laptop. Contul și scanarea ATS te așteaptă acolo, iar editorul are tot spațiul de care ai nevoie.',
+    cta: 'Deschide dashboard-ul',
+  },
+  en: {
+    subject: 'Continue your CV on a laptop',
+    heading: 'The Joben editor works best on a laptop',
+    body: 'Open the link below on your laptop. Your account and ATS scan are waiting there, and the editor has all the room you need.',
+    cta: 'Open your dashboard',
+  },
+}
+
+// Sent when a signed-in user asks for it from the dashboard on a small screen,
+// so it goes straight to their own address and skips the marketing suppression
+// list on purpose (a requested link, not a campaign).
+export async function sendMobileHandoffEmail(input: {
+  to: string
+  locale: AnonScanEmailLocale
+}): Promise<EmailResult> {
+  const copy = MOBILE_HANDOFF_COPY[input.locale]
+  const href = `${appUrl}/${input.locale}/dashboard?utm_source=email&utm_medium=handoff&utm_campaign=mobile_handoff`
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: copy.subject,
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
+  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
+  <p style="margin:0 0 18px 0;">${copy.body}</p>
+  ${anonCtaButton(href, copy.cta)}
+</div>`,
+  })
+}
+
 // Legally required transactional messages (e.g. the inactive-account warning). These
 // skip sendEmail on purpose: they must reach the consumer even if the address
 // is on the marketing suppression list, and carry no unsubscribe footer.

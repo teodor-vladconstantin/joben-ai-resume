@@ -328,7 +328,8 @@
     "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
-    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare"
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
+    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>."
   },
   "SignUp": {
     "eyebrow": "Cont nou",
@@ -547,6 +548,13 @@
       "hintNoIssues": "Încarcă același CV în editor ca să îl adaptezi pentru joburi reale.",
       "cta": "Deschide editorul",
       "loading": "Încărcăm scorul din scanarea ATS gratuită..."
+    },
+    "mobileHandoff": {
+      "title": "Editorul merge cel mai bine pe laptop",
+      "body": "Primești un link pe email și îți continui CV-ul pe un ecran mai mare.",
+      "cta": "Trimite-mi linkul pe email",
+      "sent": "Gata. Verifică inboxul și deschide linkul pe laptop.",
+      "error": "Nu am putut trimite emailul. Încearcă din nou în câteva momente."
     },
     "greetingMorning": "Bună dimineața",
     "greetingEvening": "Bună seara",
