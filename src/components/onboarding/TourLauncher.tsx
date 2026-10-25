@@ -29,7 +29,10 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
   const start = useCallback(
     async (trigger: 'auto' | 'manual') => {
       if (runningRef.current) return
-      const steps = resolveSteps(TOURS[tourId], (anchor) => document.querySelector(selectorFor(anchor)) !== null)
+      const steps = resolveSteps(TOURS[tourId], (anchor) => {
+        const el = document.querySelector(selectorFor(anchor))
+        return el !== null && el.getBoundingClientRect().height > 0
+      })
       if (steps.length === 0) return
       runningRef.current = true
 
@@ -68,11 +71,19 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
         onHighlightStarted: (_element, _step, opts) => {
           posthog.capture('tour_step_viewed', { tourId, stepIndex: opts.index })
         },
+        // driver.js only fires onDestroyed after its first animation, so release the guard here.
+        // With this hook set driver.js leaves the destroy to us.
+        onDestroyStarted: () => {
+          runningRef.current = false
+          instance.destroy()
+        },
         onDestroyed: (_element, _step, opts) => {
           runningRef.current = false
           const reason = opts.reason
-          // 'api' and 'replaced' mean the page changed under the tour: neither a skip nor a finish.
-          if (reason !== 'done' && reason !== 'close' && reason !== 'escape' && reason !== 'overlay') return
+          // Leaving the page mid-tour destroys it with 'api' at a later step: count it as a skip.
+          // 'api' at the first step and 'replaced' are neither a skip nor a finish.
+          const leftMidTour = reason === 'api' && (opts.index ?? 0) > 0
+          if (!leftMidTour && reason !== 'done' && reason !== 'close' && reason !== 'escape' && reason !== 'overlay') return
           if (reason === 'done') posthog.capture('tour_completed', { tourId })
           else posthog.capture('tour_skipped', { tourId, stepIndex: opts.index })
           if (!alreadySeen) {
@@ -120,6 +131,8 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
         stateRef.current = state
         if (shouldAutoStart({ state, tourId, isDesktop })) {
           timer = setTimeout(() => {
+            // A modal is open (e.g. the AI review before/after): stay unseen, run on the next visit.
+            if (document.querySelector('[aria-modal="true"]')) return
             if (!runningRef.current && !stateRef.current?.tours[tourId]) void start('auto')
           }, AUTO_START_DELAY_MS)
         }
