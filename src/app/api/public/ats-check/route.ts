@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { Anthropic } from '@posthog/ai/anthropic'
 import { z } from 'zod'
 import { randomUUID } from 'crypto'
 import { NextResponse } from 'next/server'
@@ -18,6 +18,7 @@ import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
+import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
@@ -30,8 +31,9 @@ export const maxDuration = 30
 // bytes and extracted text are never written to disk or a DB.
 const ANTHROPIC_TIMEOUT_MS = 30_000
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
+  posthog: posthogAi,
 })
 const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5'
 
@@ -232,6 +234,10 @@ export async function POST(req: Request) {
       return withDeviceCookie(jsonWithRequestId({ error: clientErrorMessage('invalid_input') }, 400, requestId))
     }
 
+    // The browser's PostHog distinct id: the client sends it only after the
+    // visitor accepted analytics cookies, so its presence IS the consent
+    // signal. It links AI traces and server-side events to the browser history.
+    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
     const file = formData.get('file')
     if (!(file instanceof File)) {
       return withDeviceCookie(
@@ -370,18 +376,25 @@ export async function POST(req: Request) {
     const locale = toAnonScanEmailLocale(String(formData.get('locale') || ''))
 
     let result: unknown
+    const traceId = randomUUID()
     try {
       const message = await anthropic.messages.create({
         model,
         max_tokens: MAX_OUTPUT_TOKENS,
         // Haiku 5.5 rejects temperature; thinking off keeps the old latency and token budget.
         thinking: { type: 'disabled' },
+        stream: false as const,
         system: withCurrentDateContext(ATS_CHECK_SYSTEM_PROMPT + outputLanguageRule(String(formData.get('locale') || ''))),
         messages: [{ role: 'user', content: `Resume:\n${safeResumeText}` }],
-      })
+        ...(browserDistinctId ? { posthogDistinctId: browserDistinctId } : {}),
+        posthogTraceId: traceId,
+        posthogProperties: { $ai_session_id: `ats-${deviceId}` },
+      }) as { content: Array<{ type: string; text?: string }> }
+
+      await flushPostHogAi()
 
       const textBlock = message.content.find((block) => block.type === 'text')
-      const analysisText = textBlock && textBlock.type === 'text' ? textBlock.text : ''
+      const analysisText = textBlock?.type === 'text' && typeof textBlock.text === 'string' ? textBlock.text : ''
       result = normalizeAtsScanScores(stripFalsePositiveIssues(parseClaudeJsonText(analysisText)))
     } catch (error) {
       if (error instanceof ClaudeJsonParseError) {
@@ -422,12 +435,6 @@ export async function POST(req: Request) {
         scanEmail = parsedEmail.data
       }
     }
-
-    // The browser's PostHog distinct id: the client sends it only after the
-    // visitor accepted analytics cookies, so its presence IS the consent
-    // signal. Stored on the scan row, it is the only id server-side events
-    // about this scan (emails sent, claim at sign-up) are ever captured under.
-    const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
 
     // Persisted unconditionally (not only when an email was given) so a
     // scanId always exists for the post-scan "email me this report" flow.

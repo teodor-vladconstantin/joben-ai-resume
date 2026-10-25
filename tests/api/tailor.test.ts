@@ -15,8 +15,8 @@ vi.mock('@/lib/plans', () => ({
   getEmailHintFromSessionClaims: getEmailHintFromSessionClaimsMock,
 }))
 
-vi.mock('@anthropic-ai/sdk', () => ({
-  default: class Anthropic {
+vi.mock('@posthog/ai/anthropic', () => ({
+  Anthropic: class Anthropic {
     messages = { create: createMessageMock }
   },
 }))
