@@ -18,6 +18,7 @@ export type DashboardStats = {
   resumes: number
   coverLetters: number
   aiReviews: number
+  pdfExports: number
   averageScore: number
 }
 
@@ -100,10 +101,15 @@ export async function getUserDashboardStats(userId: string) {
   try {
     const supabase = createServerClient()
 
-    const [resumesRes, coverLettersRes, aiReviewsRes] = await Promise.all([
+    const [resumesRes, coverLettersRes, aiReviewsRes, pdfExportsRes] = await Promise.all([
       supabase.from('resumes').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('cover_letters').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('ai_reviews').select('*', { count: 'exact', head: true }).eq('user_id', userId)
+      supabase.from('ai_reviews').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase
+        .from('product_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_clerk_id', userId)
+        .eq('event_name', 'resume_exported_pdf'),
     ])
 
     const { data: reviewScores } = await supabase
@@ -122,6 +128,7 @@ export async function getUserDashboardStats(userId: string) {
       resumes: resumesRes.count || 0,
       coverLetters: coverLettersRes.count || 0,
       aiReviews: aiReviewsRes.count || 0,
+      pdfExports: pdfExportsRes.count || 0,
       averageScore,
     } as DashboardStats
   } catch (error) {
@@ -130,7 +137,7 @@ export async function getUserDashboardStats(userId: string) {
       userId,
       error: error instanceof Error ? error.message : 'Unknown error',
     })
-    return { resumes: 0, coverLetters: 0, aiReviews: 0, averageScore: 0 } as DashboardStats
+    return { resumes: 0, coverLetters: 0, aiReviews: 0, pdfExports: 0, averageScore: 0 } as DashboardStats
   }
 }
 

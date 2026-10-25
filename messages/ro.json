@@ -713,7 +713,9 @@
       "titlePrefix": "Completarea Profilului - ",
       "item1": "Creează primul CV",
       "item2": "Creează o scrisoare de intenție",
-      "item3": "Obține o evaluare AI"
+      "item3": "Obține o evaluare AI",
+      "item4": "Exportă primul tău PDF",
+      "close": "Închide"
     },
     "redeemCode": {
       "heading": "Activează un Cod de Acces",
