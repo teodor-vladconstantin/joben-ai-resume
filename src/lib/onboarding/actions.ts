@@ -37,10 +37,15 @@ async function writeRaw(userId: string, onboarding: Record<string, unknown>): Pr
 }
 
 export async function getOnboardingState(): Promise<OnboardingState> {
-  const { userId } = await auth()
-  if (!userId) return NO_TOUR_STATE
-  const { raw, failed } = await readRaw(userId)
-  return failed ? NO_TOUR_STATE : parseOnboarding(raw)
+  try {
+    const { userId } = await auth()
+    if (!userId) return NO_TOUR_STATE
+    const { raw, failed } = await readRaw(userId)
+    return failed ? NO_TOUR_STATE : parseOnboarding(raw)
+  } catch (error) {
+    logger.warn('Onboarding state read threw', { source: 'onboarding', error: error instanceof Error ? error.message : String(error) })
+    return NO_TOUR_STATE
+  }
 }
 
 export async function markTourSeen(tourId: string): Promise<void> {
