@@ -539,6 +539,46 @@
     },
     "rateLimited": "Too many requests. Wait a moment and try again."
   },
+  "Onboarding": {
+    "ui": {
+      "next": "Next",
+      "prev": "Back",
+      "done": "Done",
+      "help": "Show the guide for this page"
+    },
+    "tours": {
+      "dashboard": {
+        "sidebar": { "title": "Your navigation", "body": "Resumes, cover letters, AI Review and settings are one click away from here." },
+        "create": { "title": "Start a new resume", "body": "Begin with a blank resume or import an existing PDF inside the editor." },
+        "checklist": { "title": "Your first steps", "body": "Complete these four steps and you have a finished, exported resume. Each step links to the right page." },
+        "ats": { "title": "Your free ATS scan", "body": "The score and issues from your scan are saved here. Open the editor to fix them with AI." },
+        "referral": { "title": "Invite friends", "body": "Share your link: you get 7 Pro days for every friend who joins and confirms their email." }
+      },
+      "resumes": {
+        "create": { "title": "Create a resume", "body": "Start a new resume from here. You can import an existing PDF in the editor." },
+        "row": { "title": "Your resumes", "body": "Each row shows the title, the last update and the score of a resume." },
+        "actions": { "title": "Open, edit or delete", "body": "The eye and the pencil open the resume in the editor, the bin deletes it." }
+      },
+      "editor": {
+        "tabs": { "title": "Resume sections", "body": "Fill in each tab: personal details, experience, education, skills and more." },
+        "import": { "title": "Import a PDF", "body": "Already have a resume? Import it and the fields fill themselves." },
+        "tailor": { "title": "Tailor it to a job", "body": "Paste a job posting and AI suggests changes that match it." },
+        "preview": { "title": "Live preview", "body": "This is the page employers see. It updates as you type." },
+        "export": { "title": "Save and export", "body": "Save your work, then export a PDF ready to send." }
+      },
+      "coverLetters": {
+        "create": { "title": "Create a cover letter", "body": "Start a new cover letter from here." },
+        "row": { "title": "Your cover letters", "body": "Each row shows the title and the last update of a letter." },
+        "actions": { "title": "Open, edit or delete", "body": "The eye and the pencil open the letter, the bin deletes it." }
+      },
+      "aiReview": {
+        "upload": { "title": "Upload a resume", "body": "Drop a PDF here to review it without saving it as a resume first." },
+        "jd": { "title": "Add the job description", "body": "Optional. With a posting pasted here, the review also checks how well you match it." },
+        "start": { "title": "Run the review", "body": "You get a score with concrete fixes." },
+        "history": { "title": "Your resumes and past reviews", "body": "Review any saved resume, reopen the latest result, or run it again after you improve it." }
+      }
+    }
+  },
   "Dashboard": {
     "atsScanCard": {
       "eyebrow": "From your free ATS scan",
@@ -673,7 +713,9 @@
       "titlePrefix": "Profile Completion - ",
       "item1": "Create first resume",
       "item2": "Create cover letter",
-      "item3": "Get AI review"
+      "item3": "Get AI review",
+      "item4": "Export your first PDF",
+      "close": "Dismiss"
     },
     "redeemCode": {
       "heading": "Redeem Access Code",

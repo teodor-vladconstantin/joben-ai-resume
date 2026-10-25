@@ -1540,6 +1540,7 @@ export function ResumeBuilder() {
           }}
         />
         <div
+          data-tour="editor-tabs"
           className="shrink-0 border-b border-(--border) px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
@@ -1577,6 +1578,7 @@ export function ResumeBuilder() {
               {t('sections.addSection')}
             </button>
             <button
+              data-tour="editor-import"
               onClick={() => {
                 if (getPdfImportCount(resumeData) >= MAX_PDF_IMPORTS_PER_RESUME) {
                   setShowImportLimitModal(true)
@@ -1593,6 +1595,7 @@ export function ResumeBuilder() {
             </button>
             <FeatureButton
               feature="jds"
+              data-tour="editor-tailor"
               onClick={() => setIsTailorModalOpen(true)}
               className="flex-1 rounded-none border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--foreground) hover:bg-(--surface-elevated) transition-colors duration-150 ease-out"
             >
@@ -2215,7 +2218,7 @@ export function ResumeBuilder() {
           ) : null}
         </div>
         
-        <div className="shrink-0 p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4" suppressHydrationWarning>
+        <div data-tour="editor-export" className="shrink-0 p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4" suppressHydrationWarning>
           <button
             onClick={() => void persistResume()}
             disabled={isLoading || isImportingPdf || isExportingPdf || saveStatus === 'saving'}
@@ -2234,7 +2237,7 @@ export function ResumeBuilder() {
       </div>
 
       {/* Live Preview Pane */}
-      <div className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+      <div data-tour="editor-preview" className="grow min-w-0 bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
         {/* Mock A4 Paper Preview */}
         <div className="h-full w-full max-w-230 bg-white border border-(--border) mx-auto overflow-y-auto print:border-0 print:w-full print:max-w-none print:overflow-visible print:h-auto">
           <HarvardTemplate data={resumeData} />

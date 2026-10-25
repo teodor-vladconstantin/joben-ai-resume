@@ -1,6 +1,7 @@
 "use client"
 
 import dynamic from 'next/dynamic'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
 
 const ResumeBuilderNoSSR = dynamic(
   () => import('@/components/builder/ResumeBuilder').then((m) => m.ResumeBuilder),
@@ -8,5 +9,10 @@ const ResumeBuilderNoSSR = dynamic(
 )
 
 export function ResumeBuilderMount() {
-  return <ResumeBuilderNoSSR />
+  return (
+    <>
+      <ResumeBuilderNoSSR />
+      <TourLauncher tourId="editor" />
+    </>
+  )
 }
