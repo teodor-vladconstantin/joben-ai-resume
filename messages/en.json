@@ -548,6 +548,13 @@
       "cta": "Open the editor",
       "loading": "Loading the score from your free ATS scan..."
     },
+    "mobileHandoff": {
+      "title": "The editor works best on a laptop",
+      "body": "Get a link by email and carry on with your CV on a bigger screen.",
+      "cta": "Email me the link",
+      "sent": "Done. Check your inbox and open the link on your laptop.",
+      "error": "Could not send the email. Try again in a moment."
+    },
     "greetingMorning": "Good morning",
     "greetingEvening": "Good evening",
     "guestFallbackName": "There",
