@@ -318,3 +318,39 @@ body {
 .cl-profileSectionItemList p {
   color: var(--foreground) !important;
 }
+
+/* Onboarding tours (driver.js): follow the site theme in light and dark. */
+.driver-popover.joben-tour {
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+.driver-popover.joben-tour .driver-popover-title {
+  color: var(--foreground);
+  font-weight: 700;
+}
+.driver-popover.joben-tour .driver-popover-description,
+.driver-popover.joben-tour .driver-popover-progress-text {
+  color: var(--muted);
+}
+.driver-popover.joben-tour .driver-popover-close-btn {
+  color: var(--muted);
+}
+.driver-popover.joben-tour .driver-popover-navigation-btns button {
+  background: var(--surface-elevated);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  text-shadow: none;
+}
+.driver-popover.joben-tour .driver-popover-navigation-btns button:last-child {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.driver-popover.joben-tour .driver-popover-arrow-side-left { border-left-color: var(--surface); }
+.driver-popover.joben-tour .driver-popover-arrow-side-right { border-right-color: var(--surface); }
+.driver-popover.joben-tour .driver-popover-arrow-side-top { border-top-color: var(--surface); }
+.driver-popover.joben-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--surface); }
