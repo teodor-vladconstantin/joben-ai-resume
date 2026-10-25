@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { timeAgo } from '@/lib/time-ago'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
 
 type CoverLetterItem = {
   id: string
@@ -99,7 +100,7 @@ export default function CoverLettersPage() {
               <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
               <p className="text-(--muted)">{t('letterCount', { count: letters.length })}</p>
             </div>
-            <Link href="/cover-letters/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
+            <Link href="/cover-letters/new" data-tour="letters-create" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
               <Plus className="w-5 h-5" /> {t('createCoverLetter')}
             </Link>
           </div>
@@ -137,13 +138,13 @@ export default function CoverLettersPage() {
               />
             ) : (
               <div className="divide-y divide-(--border)">
-                {visibleLetters.map((letter) => (
-                  <div key={letter.id} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
+                {visibleLetters.map((letter, index) => (
+                  <div key={letter.id} data-tour={index === 0 ? 'letters-row' : undefined} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{letter.title || t('untitledCoverLetter')}</p>
                       <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(letter.updated_at).toLocaleDateString(locale)}</p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div data-tour={index === 0 ? 'letters-actions' : undefined} className="flex items-center gap-3 shrink-0">
                       <span className="font-mono text-xs font-bold opacity-70">{t('badgeLabel')}</span>
                       <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(letter.updated_at, locale)}</span>
                       <Link href={`/cover-letters/${letter.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Eye className="w-4 h-4" /></Link>
@@ -162,6 +163,7 @@ export default function CoverLettersPage() {
               </div>
             )}
           </div>
+          <TourLauncher tourId="coverLetters" />
         </main>
       </div>
     </div>

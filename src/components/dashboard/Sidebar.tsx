@@ -24,7 +24,7 @@ export function Sidebar() {
   ]
 
   return (
-    <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
+    <aside data-tour="dashboard-sidebar" className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
       <div className="flex items-center justify-between px-5 py-5">
         <Link href="/" className="flex items-center gap-2">
           <span className="relative h-8 w-8 overflow-hidden">
@@ -39,7 +39,7 @@ export function Sidebar() {
         )}
       </div>
 
-      <div className="px-5 mb-4">
+      <div data-tour="dashboard-create" className="px-5 mb-4">
         <Link href="/resumes/new" className={`w-full justify-center ${buttonVariants('primary', 'sm')}`}>
           <Plus className="w-4 h-4" /> {tNav('createNew')}
         </Link>

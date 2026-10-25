@@ -15,6 +15,8 @@ import { getLatestClaimedAtsScan, getLatestReviewSummary, getRecentDocuments, ge
 import { AtsScanCard } from '@/components/dashboard/AtsScanCard'
 import { AtsScanCardPending } from '@/components/dashboard/AtsScanCardPending'
 import { MobileHandoffCard } from '@/components/dashboard/MobileHandoffCard'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
+import { getOnboardingState } from '@/lib/onboarding/actions'
 import { selectAtsScanCardState } from '@/lib/ats-scan-card'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
@@ -87,6 +89,7 @@ export default async function DashboardPage({
     upgrade === 'success' && pass === '14d' && user?.id ? await getPassNoticeText(user.id, locale) : null
 
   const stats = await getUserDashboardStats(userId)
+  const onboarding = await getOnboardingState()
   const recentDocs = await getRecentDocuments(userId)
   const latestReview = await getLatestReviewSummary(userId)
   const atsScanCard = selectAtsScanCardState({
@@ -150,11 +153,15 @@ export default async function DashboardPage({
             </p>
           ) : null}
           {isNewUser && user?.id && <MobileHandoffCard />}
-          {atsScanCard.kind === 'card' && <AtsScanCard scan={atsScanCard.scan} locale={locale} />}
+          {atsScanCard.kind === 'card' && (
+            <div data-tour="dashboard-ats">
+              <AtsScanCard scan={atsScanCard.scan} locale={locale} />
+            </div>
+          )}
           {atsScanCard.kind === 'pending' && <AtsScanCardPending />}
-          <ProfileCompletion stats={stats} />
+          <ProfileCompletion stats={stats} dismissed={onboarding.checklistDismissedAt !== null} />
           {isNewUser && quickActions}
-          <ReferralCard className="mb-8" />
+          <div data-tour="dashboard-referral"><ReferralCard className="mb-8" /></div>
           {!isNewUser && <RedeemCodeCard currentPlan={currentPlan} />}
           {!isNewUser && <StatCards stats={stats} />}
 
@@ -239,6 +246,7 @@ export default async function DashboardPage({
           </div>
 
           <RecentDocuments recentDocs={recentDocs} />
+          <TourLauncher tourId="dashboard" />
         </main>
       </div>
     </div>
