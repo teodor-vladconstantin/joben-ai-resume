@@ -29,6 +29,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
     "disposable-email-domains": "^1.0.62",
+    "driver.js": "^1.10.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
     "mammoth": "^1.12.1",
