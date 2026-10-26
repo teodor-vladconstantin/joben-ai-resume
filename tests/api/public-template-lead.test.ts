@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { checkRouteRateLimitMock, upsertMock, updateMock, captureMock } = vi.hoisted(() => ({
+const { checkRouteRateLimitMock, upsertMock, updateMock, captureMock, insertMock, confirmEmailMock } = vi.hoisted(() => ({
   checkRouteRateLimitMock: vi.fn(),
   upsertMock: vi.fn(),
   updateMock: vi.fn(),
   captureMock: vi.fn(),
+  insertMock: vi.fn(),
+  confirmEmailMock: vi.fn(),
+}))
+
+vi.mock('@/lib/resend', () => ({
+  sendTemplateLeadConfirmEmail: confirmEmailMock,
+  toAnonScanEmailLocale: (v: string | null) => (v === 'en' ? 'en' : 'ro'),
 }))
 
 vi.mock('@/lib/security/route-rate-limit', () => ({
@@ -19,6 +26,13 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
     from: () => ({
       upsert: upsertMock,
+      insert: insertMock,
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () =>
+            Promise.resolve({ data: { id: 'lead-1', locale: 'ro', marketing_consent: true, email_confirmed_at: null } }),
+        }),
+      }),
       update: (values: unknown) => {
         updateMock(values)
         return { eq: () => ({ eq: () => Promise.resolve({ error: null }) }) }
@@ -41,6 +55,23 @@ describe('POST /api/public/template-lead', () => {
     upsertMock.mockReset().mockResolvedValue({ error: null })
     updateMock.mockReset()
     captureMock.mockReset()
+    insertMock.mockReset().mockResolvedValue({ error: null })
+    confirmEmailMock.mockReset().mockResolvedValue({ success: true, providerId: 'p1' })
+  })
+
+  it('sends one confirmation email only when marketing consent is ticked', async () => {
+    await POST(request({ ...valid, marketingConsent: false }))
+    expect(confirmEmailMock).not.toHaveBeenCalled()
+
+    await POST(request({ ...valid, marketingConsent: true }))
+    expect(confirmEmailMock).toHaveBeenCalledWith({ to: 'ana@example.com', leadId: 'lead-1', locale: 'ro' })
+  })
+
+  it('skips the confirmation email when the lock shows one was already sent', async () => {
+    insertMock.mockResolvedValue({ error: { code: '23505', message: 'duplicate' } })
+    const res = await POST(request({ ...valid, marketingConsent: true }))
+    expect(res.status).toBe(200)
+    expect(confirmEmailMock).not.toHaveBeenCalled()
   })
 
   it('rejects submissions without the terms checkbox', async () => {
