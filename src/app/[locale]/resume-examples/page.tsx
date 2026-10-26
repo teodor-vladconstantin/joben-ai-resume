@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 import { resumeRoles } from '@/data/resume-roles'
 import { GUIDES, guidePath } from '@/data/guides'
+import { SEO_JOBS, coverLetterPath } from '@/data/seo-jobs'
 import { siteConfig } from '@/lib/content'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import type { AppLocale } from '@/i18n/routing'
@@ -121,6 +122,24 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
             </div>
           </section>
         )}
+
+        <section className="mt-16 space-y-4">
+          <h2 className="text-2xl font-bold text-(--foreground)">
+            {locale === 'ro' ? 'Scrisori de intenție pe roluri' : 'Cover letter examples by role'}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {SEO_JOBS.map((job) => (
+              <Link key={job.slug[locale]} href={coverLetterPath(locale, job)}>
+                <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
+                  <p className="text-(--foreground) font-semibold">{job.title[locale]}</p>
+                  <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
+                    {locale === 'ro' ? 'Vezi scrisoarea' : 'See the cover letter'} <ArrowRight className="h-3.5 w-3.5" />
+                  </p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   )
