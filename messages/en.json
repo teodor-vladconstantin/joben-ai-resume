@@ -1658,5 +1658,14 @@
     "shareText": "I use Joben.eu, an AI resume editor that checks your resume against ATS filters. Sign up through my link and you get {friendDays} days of Pro for free:",
     "pending": "Your account is still being set up. Your referral link will appear here shortly, so refresh the page in a moment.",
     "loading": "Loading your referral link"
+  },
+  "TemplateGate": {
+    "title": "Download the free template",
+    "body": "Enter your email and the download starts right away.",
+    "emailPlaceholder": "you@email.com",
+    "termsLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "marketingLabel": "I want to receive CV and job search tips and Joben offers by email. I can unsubscribe at any time.",
+    "submit": "Download template",
+    "error": "We could not save your address. Please try again."
   }
 }
