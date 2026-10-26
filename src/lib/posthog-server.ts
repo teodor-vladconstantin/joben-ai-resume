@@ -70,6 +70,12 @@ export async function aliasPostHogDistinctId(input: { distinctId: string; alias:
 // otherwise anyone who knows such an id could alias events into that person.
 const BROWSER_DISTINCT_ID_PATTERN = /^[A-Za-z0-9_.:@-]{1,200}$/
 
+// The browser's PostHog session id, sent so server events land in the same
+// session replay and funnel session as the page events. Only a property.
+export function toBrowserSessionId(value: unknown): string | null {
+  return typeof value === 'string' && /^[A-Za-z0-9-]{1,64}$/.test(value) ? value : null
+}
+
 export function toBrowserDistinctId(value: unknown): string | null {
   if (typeof value !== 'string' || !BROWSER_DISTINCT_ID_PATTERN.test(value)) return null
   if (value.startsWith('user_') || value.startsWith('anon:')) return null
