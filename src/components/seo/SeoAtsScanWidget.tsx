@@ -62,7 +62,11 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
       formData.append('jobSlug', jobSlug)
       formData.append('locale', locale)
       const distinctId = posthog.get_distinct_id?.()
-      if (distinctId) formData.append('distinctId', distinctId)
+      if (distinctId) {
+        formData.append('distinctId', distinctId)
+        const sessionId = posthog.get_session_id?.()
+        if (sessionId) formData.append('sessionId', sessionId)
+      }
       const response = await fetch('/api/public/ats-fast-check', { method: 'POST', body: formData })
       const data = (await response.json().catch(() => ({}))) as {
         result?: FastAtsAnalysisResult

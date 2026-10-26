@@ -5,7 +5,7 @@ import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
 import { analyzeResumeTextLightweight } from '@/lib/ats-fast-parser'
 import { calculateJobKeywordMatch, getSeoJobBySlug } from '@/data/seo-jobs'
-import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
+import { capturePostHogEvent, toBrowserDistinctId, toBrowserSessionId } from '@/lib/posthog-server'
 import type { AppLocale } from '@/i18n/routing'
 
 export const runtime = 'nodejs'
@@ -116,6 +116,7 @@ export async function POST(req: Request) {
     // Only analytics for visitors whose browser sent its PostHog id; no shared
     // catch-all id that would merge every anonymous visitor into one person.
     const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+    const browserSessionId = toBrowserSessionId(formData.get('sessionId'))
     if (browserDistinctId) {
       await capturePostHogEvent({
         distinctId: browserDistinctId,
@@ -126,6 +127,7 @@ export async function POST(req: Request) {
           issuesCount: analysis.issues.length,
           jobSlug: job.slug.en,
           jobMatch: keywordMatch.matchPercentage,
+          ...(browserSessionId ? { $session_id: browserSessionId } : {}),
         },
       })
     }

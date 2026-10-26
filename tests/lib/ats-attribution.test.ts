@@ -28,6 +28,15 @@ describe('readAtsSignupAttribution', () => {
   })
 })
 
+describe('toBrowserSessionId', () => {
+  it('accepts a posthog session id and refuses anything else', async () => {
+    const { toBrowserSessionId } = await import('@/lib/posthog-server')
+    expect(toBrowserSessionId('01926b1c-6f2a-7c3e-9d1a-2b3c4d5e6f70')).toBe('01926b1c-6f2a-7c3e-9d1a-2b3c4d5e6f70')
+    expect(toBrowserSessionId('<script>')).toBeNull()
+    expect(toBrowserSessionId(null)).toBeNull()
+  })
+})
+
 describe('toBrowserDistinctId', () => {
   it('accepts a posthog anonymous id and refuses account or server ids', async () => {
     const { toBrowserDistinctId } = await import('@/lib/posthog-server')
