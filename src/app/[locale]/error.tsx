@@ -1,7 +1,10 @@
 "use client"
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { useTranslations } from 'next-intl'
+import posthog from 'posthog-js'
 import { buttonVariants } from '@/components/ui/Button'
+import { getCookieConsent } from '@/lib/cookie-consent'
 
 export default function GlobalError({
   error,
@@ -14,6 +17,15 @@ export default function GlobalError({
 
   useEffect(() => {
     console.error(error)
+    // A segment error boundary swallows the error before Sentry's global handlers see it.
+    Sentry.captureException(error)
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+      process.env.NODE_ENV === 'production' &&
+      getCookieConsent() === 'accepted'
+    ) {
+      posthog.captureException(error)
+    }
   }, [error])
 
   return (

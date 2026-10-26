@@ -248,7 +248,8 @@ function SignUpContent() {
         {accepted ? signUp : (
           <p className="flex items-center gap-2 text-sm text-(--muted)">
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {t('acceptToContinue')}
+            {/* Own element: Chrome's auto-translate swaps bare text nodes for <font>, and React's insertBefore then throws */}
+            <span>{t('acceptToContinue')}</span>
           </p>
         )}
       </div>
