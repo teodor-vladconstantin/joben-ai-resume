@@ -5,6 +5,8 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
+import { isDuplicateKeyError } from '@/lib/cron-utils'
+import { sendTemplateLeadConfirmEmail, toAnonScanEmailLocale } from '@/lib/resend'
 
 export const runtime = 'nodejs'
 
@@ -99,6 +101,47 @@ export async function POST(req: Request) {
 
       if (optInError) {
         logger.warn('Template lead marketing opt-in update failed', { requestId, route: '/api/public/template-lead', error: optInError.message })
+      }
+    }
+
+    // Double opt-in: the sequence starts after the inbox owner confirms. The
+    // email_events lock allows one confirmation mail per address, so a
+    // stranger re-submitting someone else's email cannot spam them.
+    if (marketingConsent) {
+      const { data: lead } = await supabase
+        .from('template_leads')
+        .select('id, locale, marketing_consent, email_confirmed_at')
+        .eq('email', email)
+        .maybeSingle()
+
+      if (lead?.marketing_consent && !lead.email_confirmed_at) {
+        const sourceEventId = `template-confirm:${lead.id}`
+        const { error: lockError } = await supabase.from('email_events').insert({
+          user_clerk_id: `lead:${lead.id}`,
+          email,
+          email_type: 'template_confirm',
+          status: 'processing',
+          source_event_id: sourceEventId,
+          metadata: { source: 'api.public.template-lead' },
+        })
+
+        if (!lockError) {
+          const result = await sendTemplateLeadConfirmEmail({
+            to: email,
+            leadId: lead.id,
+            locale: toAnonScanEmailLocale(lead.locale),
+          })
+          await supabase
+            .from('email_events')
+            .update(
+              result.success
+                ? { status: result.suppressed ? 'suppressed' : 'sent', provider_id: result.providerId || null }
+                : { status: 'failed', error: result.error || 'Send failed', source_event_id: null }
+            )
+            .eq('source_event_id', sourceEventId)
+        } else if (!isDuplicateKeyError(lockError)) {
+          logger.warn('Template lead confirm lock failed', { requestId, route: '/api/public/template-lead', error: lockError.message })
+        }
       }
     }
 
