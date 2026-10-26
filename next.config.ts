@@ -146,7 +146,7 @@ const nextConfig: NextConfig = {
   // binary, and an unconditional `new DOMMatrix()` later in the same module
   // then throws. Marking both external makes Next use plain `require()` from
   // node_modules at runtime, the same way a non-bundled Node app would.
-  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas', '@sentry/profiling-node'],
+  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas'],
   // serverExternalPackages alone stops Turbopack bundling @napi-rs/canvas,
   // but Vercel's output file tracer (@vercel/nft) still misses its
   // platform-specific native binary package because @napi-rs/canvas
