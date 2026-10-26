@@ -1,0 +1,19 @@
+name: Template Lead Sequence
+
+# Daily. The route sends at most one step per confirmed lead and is idempotent
+# (email_events lock per lead and step), so a rerun only sends what is due.
+# Same pattern as pass-day10.yml.
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  template-lead-sequence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/template-lead-sequence
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/template-lead-sequence" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
