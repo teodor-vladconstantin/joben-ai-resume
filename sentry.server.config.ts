@@ -25,7 +25,8 @@ Sentry.init({
 
   // Profile a sample of sessions, only while a trace is active.
   integrations: profilingIntegrations(),
-  profileSessionSampleRate: 0.1,
+  // TEMPORARY: 1.0 to confirm server profiles arrive; revert to 0.1.
+  profileSessionSampleRate: 1.0,
   profileLifecycle: "trace",
 
   // Enable logs to be sent to Sentry
