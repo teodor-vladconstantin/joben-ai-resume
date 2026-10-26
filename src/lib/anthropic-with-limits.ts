@@ -96,6 +96,9 @@ function buildResetMonthLabel(resetAt: string): string {
 }
 
 function throwRateLimit(payload: RateLimitError): never {
+  Sentry.metrics.count('ai.limit_hit', 1, {
+    attributes: { limit_type: payload.limitType, feature: payload.feature ?? 'none' },
+  })
   throw new RateLimitExceededError(payload)
 }
 
@@ -298,6 +301,11 @@ export async function callAnthropicWithLimits(params: {
   const usedOutputTokens = response.usage?.output_tokens ?? 0
 
   await recordTokenUsage(params.userId, usedInputTokens, usedOutputTokens)
+
+  // Low-cardinality attributes only (feature, direction); never user ids.
+  const feature = params.feature ?? 'none'
+  Sentry.metrics.distribution('ai.tokens', usedInputTokens, { attributes: { feature, direction: 'input' } })
+  Sentry.metrics.distribution('ai.tokens', usedOutputTokens, { attributes: { feature, direction: 'output' } })
 
   if (params.feature) {
     await incrementFeatureCounter(params.userId, params.feature)
