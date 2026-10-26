@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import posthog from 'posthog-js'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
@@ -12,6 +12,27 @@ import { pushGtmEvent } from '@/lib/gtm-events'
 import { useServerError } from '@/hooks/useServerError'
 
 const GATE_PASSED_KEY = 'joben_template_gate_passed'
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+
+type TurnstileApi = {
+  render: (el: HTMLElement, opts: { sitekey: string; callback: (token: string) => void; 'expired-callback': () => void; 'error-callback': () => void }) => string
+  remove: (id: string) => void
+}
+
+function loadTurnstile(): Promise<TurnstileApi> {
+  const w = window as unknown as { turnstile?: TurnstileApi }
+  if (w.turnstile) return Promise.resolve(w.turnstile)
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = TURNSTILE_SRC
+    script.async = true
+    script.onload = () => (w.turnstile ? resolve(w.turnstile) : reject(new Error('turnstile missing')))
+    script.onerror = () => reject(new Error('turnstile failed to load'))
+    document.head.appendChild(script)
+  })
+}
+
 const legalLinkClass = 'text-(--foreground) underline decoration-(--border) underline-offset-2 hover:decoration-(--accent) transition-colors duration-150 ease-out'
 
 type TemplateDownloadGateProps = {
@@ -65,6 +86,42 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   const [marketingConsent, setMarketingConsent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captchaRef = useRef<HTMLDivElement>(null)
+
+  // Without a site key (local dev) the server skips the check, so the button
+  // must not wait for a token that will never come.
+  const captchaRequired = Boolean(TURNSTILE_SITE_KEY)
+
+  useEffect(() => {
+    if (!open || !captchaRequired || !TURNSTILE_SITE_KEY) return
+    let widgetId: string | null = null
+    let api: TurnstileApi | null = null
+    let cancelled = false
+    // The modal content mounts after `open` flips, so wait a frame for the ref.
+    const frame = requestAnimationFrame(() => {
+      const el = captchaRef.current
+      if (!el) return
+      loadTurnstile()
+        .then((turnstile) => {
+          if (cancelled) return
+          api = turnstile
+          widgetId = turnstile.render(el, {
+            sitekey: TURNSTILE_SITE_KEY,
+            callback: setCaptchaToken,
+            'expired-callback': () => setCaptchaToken(null),
+            'error-callback': () => setCaptchaToken(null),
+          })
+        })
+        .catch(() => setError(t('error')))
+    })
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(frame)
+      if (api && widgetId) api.remove(widgetId)
+      setCaptchaToken(null)
+    }
+  }, [open, captchaRequired, t])
 
   function handleClick() {
     if (gatePassed()) {
@@ -76,7 +133,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    if (!acceptedTerms || submitting) return
+    if (!acceptedTerms || submitting || (captchaRequired && !captchaToken)) return
     setSubmitting(true)
     setError(null)
     try {
@@ -89,6 +146,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
           locale,
           termsAccepted: true,
           marketingConsent,
+          captchaToken: captchaToken ?? 'dev',
           posthogDistinctId: consentedDistinctId(),
         }),
       })
@@ -160,10 +218,11 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
             />
             <span>{t('marketingLabel')}</span>
           </label>
+          {captchaRequired ? <div ref={captchaRef} className="min-h-[65px]" /> : null}
           {error ? <p role="alert" className="text-xs text-red-500">{error}</p> : null}
           <button
             type="submit"
-            disabled={!email || !acceptedTerms || submitting}
+            disabled={!email || !acceptedTerms || submitting || (captchaRequired && !captchaToken)}
             className={`w-full inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${buttonVariants('primary', 'md')}`}
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

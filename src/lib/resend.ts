@@ -1,9 +1,7 @@
 import { Resend } from 'resend'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
-import { signTemplateLeadConfirmToken } from '@/lib/template-lead-confirm'
 import {
-  TEMPLATE_CONFIRM_COPY,
   TEMPLATE_SEQUENCE_COPY,
   TEMPLATE_SEQUENCE_FOOTER,
   type TemplateSequenceStep,
@@ -505,32 +503,6 @@ export async function sendPassDay10Email(input: {
   <p style="margin:0 0 12px 0;">${copy.body(input.daysLeft)}</p>
   <p style="margin:0 0 18px 0;">${copy.pitch}</p>
   ${anonCtaButton(href, copy.cta)}
-</div>`,
-  })
-}
-
-// Double opt-in mail for the template-download list: the sequence only starts
-// once the inbox owner confirms (see /api/public/template-lead/confirm).
-export async function sendTemplateLeadConfirmEmail(input: {
-  to: string
-  leadId: string
-  locale: AnonScanEmailLocale
-}): Promise<EmailResult> {
-  const copy = TEMPLATE_CONFIRM_COPY[input.locale]
-  const token = signTemplateLeadConfirmToken(input.leadId, input.to)
-  if (!token) return { success: false, error: 'Could not build a confirmation link for this address.' }
-  const href = `${appUrl}/api/public/template-lead/confirm?leadId=${input.leadId}&token=${token}`
-
-  return sendEmail({
-    from: automationFromEmail,
-    to: input.to,
-    subject: copy.subject,
-    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 18px 0;">${copy.body}</p>
-  ${anonCtaButton(href, copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.footer}</p>
 </div>`,
   })
 }
