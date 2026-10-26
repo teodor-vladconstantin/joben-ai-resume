@@ -17,6 +17,7 @@ import { ClientProviders } from '@/components/ClientProviders'
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
+import { TranslateSafeDom } from '@/components/TranslateSafeDom'
 import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
 validateEnv()
@@ -195,6 +196,7 @@ export default async function RootLayout({
             }}
           />
           <NextIntlClientProvider locale={locale}>
+            <TranslateSafeDom />
             <ClientProviders>
               {children}
             </ClientProviders>
