@@ -1,4 +1,5 @@
 import { Anthropic } from '@posthog/ai/anthropic'
+import * as Sentry from '@sentry/nextjs'
 import type AnthropicOriginal from '@anthropic-ai/sdk'
 import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { randomUUID } from 'crypto'
@@ -20,11 +21,13 @@ import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 // SECURITY: CLAUDE.md High #6 — cap the provider call at 30 s so a slow
 // upstream cannot tie up Next.js request handlers indefinitely.
 const ANTHROPIC_TIMEOUT_MS = 30_000
-const anthropic = new Anthropic({
+// Sentry gen_ai spans: tokens, latency and errors only. Resume text and
+// completions stay out (same policy as posthogAi privacyMode).
+const anthropic = Sentry.instrumentAnthropicAiClient(new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
   posthog: posthogAi,
-})
+}), { recordInputs: false, recordOutputs: false })
 const primaryClaudeModel = 'claude-haiku-5-5'
 const fallbackClaudeModel = 'claude-haiku-4-5-20251001'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel
