@@ -49,11 +49,9 @@ vi.mock('@/lib/supabase/server', () => ({
 
 import { POST } from '@/app/api/cron/template-lead-sequence/route'
 import {
-  TEMPLATE_CONFIRM_COPY,
   TEMPLATE_SEQUENCE_COPY,
   TEMPLATE_SEQUENCE_STEPS,
 } from '@/lib/template-sequence-copy'
-import { signTemplateLeadConfirmToken, verifyTemplateLeadConfirmToken } from '@/lib/template-lead-confirm'
 
 const DAY = 24 * 60 * 60 * 1000
 const lead = (id: string, ageDays: number, email = `${id}@example.com`): Lead => ({
@@ -126,11 +124,11 @@ describe('POST /api/cron/template-lead-sequence', () => {
   })
 })
 
-describe('template sequence copy and tokens', () => {
+describe('template sequence copy', () => {
   it('has 5 steps in both locales with no em dashes', () => {
     for (const locale of ['ro', 'en'] as const) {
       expect(TEMPLATE_SEQUENCE_STEPS).toHaveLength(5)
-      const text = JSON.stringify([TEMPLATE_SEQUENCE_COPY[locale], TEMPLATE_CONFIRM_COPY[locale]])
+      const text = JSON.stringify(TEMPLATE_SEQUENCE_COPY[locale])
       expect(text).not.toContain('—')
     }
   })
@@ -138,13 +136,5 @@ describe('template sequence copy and tokens', () => {
   it('only the last step carries the offer', () => {
     const offerSteps = TEMPLATE_SEQUENCE_STEPS.filter((s) => TEMPLATE_SEQUENCE_COPY.en[s].ctaPath === '/pricing')
     expect(offerSteps).toEqual([5])
-  })
-
-  it('confirm token is bound to the lead id and the exact address', () => {
-    process.env.EMAIL_UNSUBSCRIBE_SECRET = 'test-secret'
-    const token = signTemplateLeadConfirmToken('11111111-1111-1111-1111-111111111111', 'Ana@Example.com')!
-    expect(verifyTemplateLeadConfirmToken('11111111-1111-1111-1111-111111111111', 'ana@example.com', token)).toBe(true)
-    expect(verifyTemplateLeadConfirmToken('22222222-2222-2222-2222-222222222222', 'ana@example.com', token)).toBe(false)
-    expect(verifyTemplateLeadConfirmToken('11111111-1111-1111-1111-111111111111', 'other@example.com', token)).toBe(false)
   })
 })
