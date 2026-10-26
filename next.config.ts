@@ -50,6 +50,8 @@ const SECURITY_HEADERS = [
   // Pages and the Markdown variant share URLs (see src/proxy.ts), so caches must key on Accept.
   { key: 'Vary', value: 'Accept' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Lets the Sentry browser profiler start (Chrome only).
+  { key: 'Document-Policy', value: 'js-profiling' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.stripe.com")' },
@@ -144,7 +146,7 @@ const nextConfig: NextConfig = {
   // binary, and an unconditional `new DOMMatrix()` later in the same module
   // then throws. Marking both external makes Next use plain `require()` from
   // node_modules at runtime, the same way a non-bundled Node app would.
-  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas'],
+  serverExternalPackages: ['pdfjs-dist', '@napi-rs/canvas', '@sentry/profiling-node'],
   // serverExternalPackages alone stops Turbopack bundling @napi-rs/canvas,
   // but Vercel's output file tracer (@vercel/nft) still misses its
   // platform-specific native binary package because @napi-rs/canvas
