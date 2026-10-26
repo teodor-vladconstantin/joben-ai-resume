@@ -6,7 +6,7 @@ import { Eyebrow } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { TrackedLink } from '@/components/ui/TrackedLink'
-import { TrackedDownload } from '@/components/ui/TrackedDownload'
+import { TemplateDownloadGate } from '@/components/seo/TemplateDownloadGate'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
@@ -265,22 +265,24 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
                 </ul>
               </div>
               <div className="flex flex-wrap gap-3 pt-2">
-                <TrackedDownload
+                <TemplateDownloadGate
                   href={t.file(locale)}
                   ctaId={`template_${t.id}_${locale}`}
+                  templateId={t.id}
                   className={`${buttonVariants('primary', 'md')} text-sm font-semibold inline-flex items-center gap-1.5`}
                 >
                   <Download className="h-4 w-4" />
                   <span>{copy.downloadThis}</span>
-                </TrackedDownload>
-                <TrackedDownload
+                </TemplateDownloadGate>
+                <TemplateDownloadGate
                   href={t.file(other)}
                   ctaId={`template_${t.id}_${other}`}
+                  templateId={t.id}
                   className={`${buttonVariants('secondary', 'md')} text-sm font-semibold inline-flex items-center gap-1.5`}
                 >
                   <Download className="h-4 w-4" />
                   <span>{copy.downloadOther}</span>
-                </TrackedDownload>
+                </TemplateDownloadGate>
               </div>
             </Card>
           ))}

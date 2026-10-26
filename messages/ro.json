@@ -1658,5 +1658,14 @@
     "shareText": "Folosesc Joben.eu, un editor de CV-uri cu AI care îți verifică CV-ul pentru filtrele ATS. Dacă îți faci cont prin linkul meu, primești {friendDays} zile Pro gratuit:",
     "pending": "Contul tău se pregătește. Linkul de recomandare apare aici în curând, așa că reîncarcă pagina peste câteva momente.",
     "loading": "Se încarcă linkul de recomandare"
+  },
+  "TemplateGate": {
+    "title": "Descarcă șablonul gratuit",
+    "body": "Lasă-ne adresa ta de email și descărcarea pornește imediat.",
+    "emailPlaceholder": "adresa@email.com",
+    "termsLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "marketingLabel": "Vreau să primesc pe email sfaturi pentru CV și căutarea unui job, precum și oferte Joben. Mă pot dezabona oricând.",
+    "submit": "Descarcă șablonul",
+    "error": "Nu am putut salva adresa. Încearcă din nou."
   }
 }
