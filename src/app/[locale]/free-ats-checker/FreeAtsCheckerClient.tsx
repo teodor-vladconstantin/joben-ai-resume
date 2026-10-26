@@ -175,6 +175,7 @@ export function FreeAtsCheckerClient() {
       const distinctId = consentedDistinctId()
       if (distinctId) {
         formData.append('distinctId', distinctId)
+        formData.append('sessionId', posthog.get_session_id())
       }
 
       const response = await fetch('/api/public/ats-check', {

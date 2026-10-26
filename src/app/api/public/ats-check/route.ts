@@ -17,7 +17,7 @@ import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
-import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
+import { capturePostHogEvent, toBrowserDistinctId, toBrowserSessionId } from '@/lib/posthog-server'
 import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
@@ -238,6 +238,7 @@ export async function POST(req: Request) {
     // visitor accepted analytics cookies, so its presence IS the consent
     // signal. It links AI traces and server-side events to the browser history.
     const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+    const browserSessionId = toBrowserSessionId(formData.get('sessionId'))
     const file = formData.get('file')
     if (!(file instanceof File)) {
       return withDeviceCookie(
@@ -495,7 +496,7 @@ export async function POST(req: Request) {
     }
     await capturePostHogEvent(
       browserDistinctId
-        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId } }
+        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId, ...(browserSessionId ? { $session_id: browserSessionId } : {}) } }
         : { distinctId: `anon:${ipHash || 'unknown'}`, event: 'anonymous_ats_check_completed', properties: scanStats }
     )
 
