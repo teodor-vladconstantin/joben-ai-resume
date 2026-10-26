@@ -1,4 +1,5 @@
 import { Anthropic } from '@posthog/ai/anthropic'
+import * as Sentry from '@sentry/nextjs'
 import { z } from 'zod'
 import { randomUUID } from 'crypto'
 import { NextResponse } from 'next/server'
@@ -30,11 +31,13 @@ export const maxDuration = 30
 // into `anonymous_scans` (see migration 20260816000000). Uploaded PDF/DOCX
 // bytes and extracted text are never written to disk or a DB.
 const ANTHROPIC_TIMEOUT_MS = 30_000
-const anthropic = new Anthropic({
+// Sentry gen_ai spans: tokens, latency and errors only. Resume text and
+// completions stay out (same policy as posthogAi privacyMode).
+const anthropic = Sentry.instrumentAnthropicAiClient(new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
   posthog: posthogAi,
-})
+}), { recordInputs: false, recordOutputs: false })
 const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5'
 
 // SECURITY: align with the in-builder upload guard (5 MB). Both formats are
