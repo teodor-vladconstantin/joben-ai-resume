@@ -133,44 +133,6 @@ export const TEMPLATE_SEQUENCE_COPY: Record<AnonScanEmailLocale, Record<Template
   },
 }
 
-export const TEMPLATE_CONFIRM_COPY: Record<AnonScanEmailLocale, {
-  subject: string
-  heading: string
-  body: string
-  cta: string
-  footer: string
-  pagePrompt: string
-  pageButton: string
-  pageDone: string
-  pageAlready: string
-  pageInvalid: string
-}> = {
-  en: {
-    subject: 'Confirm your email to get CV tips from Joben',
-    heading: 'One click to confirm your email.',
-    body: 'Confirm that this address is yours and you get five short emails over two weeks with CV tips. If you did not ask for this, you can ignore this message.',
-    cta: 'Confirm my email',
-    footer: 'You are receiving this because you downloaded a CV template on joben.eu and ticked the box for tips by email.',
-    pagePrompt: 'Confirm that this email address is yours to receive CV tips from Joben.',
-    pageButton: 'Confirm my email',
-    pageDone: 'Confirmed. Your first tips email is on its way.',
-    pageAlready: 'Your email is already confirmed.',
-    pageInvalid: 'This confirmation link is invalid or has expired.',
-  },
-  ro: {
-    subject: 'Confirmă emailul ca să primești sfaturi de CV de la Joben',
-    heading: 'Un click pentru a-ți confirma emailul.',
-    body: 'Confirmă că adresa îți aparține și primești cinci emailuri scurte în două săptămâni, cu sfaturi pentru CV. Dacă nu ai cerut asta, poți ignora mesajul.',
-    cta: 'Confirmă emailul',
-    footer: 'Primești acest email pentru că ai descărcat un șablon de CV pe joben.eu și ai bifat căsuța pentru sfaturi pe email.',
-    pagePrompt: 'Confirmă că această adresă de email îți aparține, ca să primești sfaturi de CV de la Joben.',
-    pageButton: 'Confirmă emailul',
-    pageDone: 'Confirmat. Primul email cu sfaturi e pe drum.',
-    pageAlready: 'Emailul tău este deja confirmat.',
-    pageInvalid: 'Linkul de confirmare este invalid sau a expirat.',
-  },
-}
-
 export const TEMPLATE_SEQUENCE_FOOTER: Record<AnonScanEmailLocale, string> = {
   en: 'You are receiving this because you downloaded a CV template on joben.eu and agreed to tips by email.',
   ro: 'Primești acest email pentru că ai descărcat un șablon de CV pe joben.eu și ai acceptat sfaturi pe email.',
