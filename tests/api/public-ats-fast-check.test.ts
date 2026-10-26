@@ -22,6 +22,7 @@ vi.mock('@/lib/pdf-text-extract', () => ({
 vi.mock('@/lib/posthog-server', () => ({
   capturePostHogEvent: captureMock,
   toBrowserDistinctId: (v: unknown) => (typeof v === 'string' && v ? v : null),
+  toBrowserSessionId: (v: unknown) => (typeof v === 'string' && v ? v : null),
 }))
 
 import { POST } from '@/app/api/public/ats-fast-check/route'
