@@ -47,6 +47,10 @@ Sentry.init({
   // Define how likely Replay events are sampled when an error occurs.
   replaysOnErrorSampleRate: 1.0,
 
+  // Browser profiling is added after analytics consent (see enableSentryReplay).
+  profileSessionSampleRate: 0.1,
+  profileLifecycle: 'trace',
+
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
