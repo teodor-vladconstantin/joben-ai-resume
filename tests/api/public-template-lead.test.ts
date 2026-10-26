@@ -1,18 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { checkRouteRateLimitMock, upsertMock, updateMock, captureMock, insertMock, confirmEmailMock } = vi.hoisted(() => ({
+const { checkRouteRateLimitMock, upsertMock, updateMock, captureMock, captchaMock } = vi.hoisted(() => ({
   checkRouteRateLimitMock: vi.fn(),
   upsertMock: vi.fn(),
   updateMock: vi.fn(),
   captureMock: vi.fn(),
-  insertMock: vi.fn(),
-  confirmEmailMock: vi.fn(),
+  captchaMock: vi.fn(),
 }))
 
-vi.mock('@/lib/resend', () => ({
-  sendTemplateLeadConfirmEmail: confirmEmailMock,
-  toAnonScanEmailLocale: (v: string | null) => (v === 'en' ? 'en' : 'ro'),
-}))
+vi.mock('@/lib/security/turnstile', () => ({ verifyTurnstileToken: captchaMock }))
 
 vi.mock('@/lib/security/route-rate-limit', () => ({
   checkRouteRateLimit: checkRouteRateLimitMock,
@@ -26,16 +22,9 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
     from: () => ({
       upsert: upsertMock,
-      insert: insertMock,
-      select: () => ({
-        eq: () => ({
-          maybeSingle: () =>
-            Promise.resolve({ data: { id: 'lead-1', locale: 'ro', marketing_consent: true, email_confirmed_at: null } }),
-        }),
-      }),
       update: (values: unknown) => {
         updateMock(values)
-        return { eq: () => ({ eq: () => Promise.resolve({ error: null }) }) }
+        return { eq: () => ({ is: () => Promise.resolve({ error: null }) }) }
       },
     }),
   }),
@@ -43,7 +32,7 @@ vi.mock('@supabase/supabase-js', () => ({
 
 import { POST } from '@/app/api/public/template-lead/route'
 
-const valid = { email: 'Ana@Example.com', templateId: 'classic', locale: 'ro', termsAccepted: true, marketingConsent: false }
+const valid = { email: 'Ana@Example.com', templateId: 'classic', locale: 'ro', termsAccepted: true, marketingConsent: false, captchaToken: 'tok' }
 
 function request(body: unknown) {
   return new Request('http://localhost/api/public/template-lead', { method: 'POST', body: JSON.stringify(body) })
@@ -55,23 +44,29 @@ describe('POST /api/public/template-lead', () => {
     upsertMock.mockReset().mockResolvedValue({ error: null })
     updateMock.mockReset()
     captureMock.mockReset()
-    insertMock.mockReset().mockResolvedValue({ error: null })
-    confirmEmailMock.mockReset().mockResolvedValue({ success: true, providerId: 'p1' })
+    captchaMock.mockReset().mockResolvedValue(true)
   })
 
-  it('sends one confirmation email only when marketing consent is ticked', async () => {
-    await POST(request({ ...valid, marketingConsent: false }))
-    expect(confirmEmailMock).not.toHaveBeenCalled()
-
+  it('confirms a consenting lead on the spot, with no confirmation email', async () => {
     await POST(request({ ...valid, marketingConsent: true }))
-    expect(confirmEmailMock).toHaveBeenCalledWith({ to: 'ana@example.com', leadId: 'lead-1', locale: 'ro' })
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ marketing_consent: true, email_confirmed_at: expect.any(String) }))
+
+    updateMock.mockReset()
+    await POST(request({ ...valid, marketingConsent: false }))
+    expect(updateMock).not.toHaveBeenCalled()
   })
 
-  it('skips the confirmation email when the lock shows one was already sent', async () => {
-    insertMock.mockResolvedValue({ error: { code: '23505', message: 'duplicate' } })
+  it('rejects a failed captcha before touching the database', async () => {
+    captchaMock.mockResolvedValue(false)
     const res = await POST(request({ ...valid, marketingConsent: true }))
-    expect(res.status).toBe(200)
-    expect(confirmEmailMock).not.toHaveBeenCalled()
+    expect(res.status).toBe(400)
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects a missing captcha token', async () => {
+    const res = await POST(request({ ...valid, captchaToken: undefined }))
+    expect(res.status).toBe(400)
+    expect(upsertMock).not.toHaveBeenCalled()
   })
 
   it('rejects submissions without the terms checkbox', async () => {
