@@ -21,7 +21,7 @@ const isProtectedRoute = createRouteMatcher([
 // /monitoring is Sentry's tunnel (tunnelRoute in next.config.ts) — with
 // localePrefix: 'always', next-intl was prefixing both to /ro/..., which
 // neither rewrite matches anymore, so every request 404'd.
-const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)'])
+const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)', '/clerk-proxy(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
