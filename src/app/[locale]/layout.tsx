@@ -159,6 +159,7 @@ export default async function RootLayout({
       signUpUrl={`/${locale}/sign-up`}
       signInFallbackRedirectUrl={`/${locale}/dashboard`}
       signUpFallbackRedirectUrl={`/${locale}/dashboard`}
+      proxyUrl={process.env.NEXT_PUBLIC_CLERK_PROXY_URL}
     >
       <html lang={locale} suppressHydrationWarning>
         <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
