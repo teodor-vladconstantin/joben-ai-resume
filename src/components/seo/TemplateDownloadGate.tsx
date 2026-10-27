@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import posthog from 'posthog-js'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
@@ -90,11 +91,17 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   const captchaRef = useRef<HTMLDivElement>(null)
 
   // Without a site key (local dev) the server skips the check, so the button
-  // must not wait for a token that will never come.
-  const captchaRequired = Boolean(TURNSTILE_SITE_KEY)
+  // must not wait for a token that will never come. In production the server
+  // fails closed, so a missing key must surface as an error instead.
+  const captchaRequired = Boolean(TURNSTILE_SITE_KEY) || process.env.NODE_ENV === 'production'
 
   useEffect(() => {
-    if (!open || !captchaRequired || !TURNSTILE_SITE_KEY) return
+    if (!open || !captchaRequired) return
+    if (!TURNSTILE_SITE_KEY) {
+      Sentry.captureMessage('NEXT_PUBLIC_TURNSTILE_SITE_KEY missing in production build', 'error')
+      setError(t('error'))
+      return
+    }
     let widgetId: string | null = null
     let api: TurnstileApi | null = null
     let cancelled = false
