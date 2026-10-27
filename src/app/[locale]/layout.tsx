@@ -75,6 +75,11 @@ export async function generateMetadata({
       description,
       images: ['/og-image.png'],
     },
+    verification: {
+      other: {
+        'msvalidate.01': '91BCBAAFCF33FC0C507005367378DAA3',
+      },
+    },
   }
 }
 
