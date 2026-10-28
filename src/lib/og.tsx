@@ -17,8 +17,8 @@ function card(label: string, title: string) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#0b0b0c',
-          color: '#fafafa',
+          background: '#0c121d',
+          color: '#ecfdf5',
           padding: 72,
         }}
       >

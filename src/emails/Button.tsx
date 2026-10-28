@@ -8,7 +8,7 @@ export function Button({ href, children }: { href: string; children: string }) {
       style={{
         display: 'inline-block',
         backgroundColor: EMAIL_COLORS.green,
-        color: EMAIL_COLORS.ink,
+        color: EMAIL_COLORS.white,
         borderRadius: EMAIL_RADIUS,
         padding: '12px 22px',
         fontSize: '15px',
