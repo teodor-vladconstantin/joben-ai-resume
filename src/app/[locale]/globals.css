@@ -6,39 +6,39 @@
 /* shadcn/ui token structure (from nyra) filled with Joben's palette: ink/paper + green #2cb87a.
    Text on the green fill is always the fixed dark --accent-ink (green is ~2.4:1 against paper as text). */
 @theme {
-  --color-background: #fafaf7;
-  --color-foreground: #0a0a0a;
+  --color-background: #f4fbf7;
+  --color-foreground: #111827;
   --color-card: #ffffff;
-  --color-card-foreground: #0a0a0a;
+  --color-card-foreground: #111827;
   --color-popover: #ffffff;
-  --color-popover-foreground: #0a0a0a;
-  --color-primary: #2cb87a;
-  --color-primary-foreground: #0a0a0a;
-  --color-secondary: #f1f0ea;
-  --color-secondary-foreground: #0a0a0a;
-  --color-muted: #f1f0ea;
-  --color-muted-foreground: #5c5c57;
-  --color-accent: #e8f6ef;
-  --color-accent-foreground: #0a0a0a;
-  --color-destructive: #c2362b;
+  --color-popover-foreground: #111827;
+  --color-primary: #047857;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e6f6ee;
+  --color-secondary-foreground: #111827;
+  --color-muted: #e9f5ef;
+  --color-muted-foreground: #4b5d57;
+  --color-accent: #d5f2e4;
+  --color-accent-foreground: #064e3b;
+  --color-destructive: #b91c1c;
   --color-destructive-foreground: #ffffff;
-  --color-border: #d9d8d2;
-  --color-input: #bdbcb5;
-  --color-ring: #2cb87a;
-  --color-success: #1f8a5b;
-  --color-warning: #8a6100;
-  --color-info: #2f5fb3;
-  --color-danger: #c2362b;
-  --color-brand: #1f8a5b;
-  --color-brand-foreground: #0a0a0a;
+  --color-border: #d3eadf;
+  --color-input: #a8cdbb;
+  --color-ring: #047857;
+  --color-success: #047857;
+  --color-warning: #b45309;
+  --color-info: #1d4ed8;
+  --color-danger: #b91c1c;
+  --color-brand: #047857;
+  --color-brand-foreground: #ecfdf5;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --shadow-card: 0 1px 2px rgb(10 10 10 / 0.05), 0 1px 3px rgb(10 10 10 / 0.04);
-  --shadow-pop: 0 8px 24px -6px rgb(10 10 10 / 0.16), 0 2px 6px rgb(10 10 10 / 0.06);
+  --shadow-card: 0 1px 2px rgb(17 24 39 / 0.05), 0 1px 3px rgb(17 24 39 / 0.04);
+  --shadow-pop: 0 8px 24px -6px rgb(17 24 39 / 0.16), 0 2px 6px rgb(17 24 39 / 0.06);
 
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -79,27 +79,31 @@
 }
 
 .dark {
-  --color-background: #0a0a0e;
-  --color-foreground: #f5f1eb;
-  --color-card: #12121a;
-  --color-card-foreground: #f5f1eb;
-  --color-popover: #12121a;
-  --color-popover-foreground: #f5f1eb;
-  --color-secondary: #1b1b25;
-  --color-secondary-foreground: #f5f1eb;
-  --color-muted: #1b1b25;
-  --color-muted-foreground: #8a8a92;
-  --color-accent: #16281f;
-  --color-accent-foreground: #f5f1eb;
-  --color-destructive: #e5645a;
-  --color-destructive-foreground: #0a0a0e;
-  --color-border: #2a2a33;
-  --color-input: #4a4a55;
-  --color-success: #2cb87a;
-  --color-warning: #e0a82e;
-  --color-info: #6f9be0;
-  --color-danger: #e5645a;
-  --color-brand: #2cb87a;
+  --color-primary: #34d399;
+  --color-primary-foreground: #111827;
+  --color-ring: #34d399;
+  --color-brand-foreground: #111827;
+  --color-background: #0c121d;
+  --color-foreground: #ecfdf5;
+  --color-card: #111827;
+  --color-card-foreground: #ecfdf5;
+  --color-popover: #151e2e;
+  --color-popover-foreground: #ecfdf5;
+  --color-secondary: #18222f;
+  --color-secondary-foreground: #ecfdf5;
+  --color-muted: #18222f;
+  --color-muted-foreground: #94a8a3;
+  --color-accent: #12302a;
+  --color-accent-foreground: #ecfdf5;
+  --color-destructive: #f87171;
+  --color-destructive-foreground: #111827;
+  --color-border: #223142;
+  --color-input: #3b4d60;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-info: #7db3ff;
+  --color-danger: #f87171;
+  --color-brand: #34d399;
 }
 
 @layer base {
