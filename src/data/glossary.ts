@@ -340,8 +340,8 @@ const BASE_GLOSSARY: Guide[] = [
   term(
     {
       slug: 'cv-functional',
-      title: 'Ce este un CV funcțional?',
-      description: 'CV-ul funcțional grupează informațiile pe competențe. Avantaje, dezavantaje și relația cu ATS.',
+      title: 'CV funcțional: definiție, avantaje și riscuri la ATS',
+      description: 'Definiția CV-ului funcțional: un CV grupat pe competențe, cu perioadele într-o secțiune scurtă. Când ajută, ce nu le place recrutorilor și cum îl citește un ATS.',
       answer:
         'CV-ul funcțional grupează informațiile pe competențe, iar perioadele de muncă apar într-o secțiune scurtă. Este util la schimbări de carieră, dar mulți recrutori îl găsesc greu de verificat, iar un ATS poate mapa greșit perioadele. Un CV cronologic cu un rezumat bazat pe competențe este de obicei mai sigur.',
       sections: [
@@ -371,8 +371,8 @@ const BASE_GLOSSARY: Guide[] = [
     },
     {
       slug: 'functional-resume',
-      title: 'What is a functional resume?',
-      description: 'A functional resume groups information by skills. Advantages, drawbacks and how it fares with ATS.',
+      title: 'Functional resume: definition, pros, cons and ATS risk',
+      description: 'Functional resume definition: a resume grouped by skills, with dates in a short section. When it helps, what recruiters dislike and how an ATS reads it.',
       answer:
         'A functional resume groups information by skill, with employment dates in a short section. It helps with career changes, but many recruiters find it hard to verify and an ATS may map dates wrongly. A chronological resume with a skills-based summary is usually safer.',
       sections: [

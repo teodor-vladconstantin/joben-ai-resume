@@ -30,8 +30,16 @@ gtag('consent', 'default', {
 
 export function pushConsentUpdate(accepted: boolean): void {
   if (typeof window === 'undefined') return
-  window.dataLayer = window.dataLayer || []
-  window.dataLayer.push([
+  const dataLayer = (window.dataLayer = window.dataLayer || [])
+  // GTM only runs consent commands pushed as an Arguments object (what gtag()
+  // pushes). A plain array is ignored, so Accept never granted analytics on
+  // the current page and the landing session was lost until the next load.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- typed for callers; the body reads `arguments`
+  function gtag(..._args: unknown[]) {
+    // eslint-disable-next-line prefer-rest-params
+    dataLayer.push(arguments)
+  }
+  gtag(
     'consent',
     'update',
     {
@@ -42,5 +50,5 @@ export function pushConsentUpdate(accepted: boolean): void {
       ad_personalization: 'denied',
       analytics_storage: accepted ? 'granted' : 'denied',
     },
-  ])
+  )
 }

@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next'
 import { SEO_JOBS } from './src/data/seo-jobs'
+import { localizedRedirects } from './src/lib/localized-redirects'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -199,7 +200,15 @@ const nextConfig: NextConfig = {
         destination: 'https://joben.eu/:path*',
         statusCode: 301 as const,
       },
+      // next-intl answers unprefixed paths with 307 (temporary), so Google kept
+      // indexing "/" and "/about" instead of their /ro canonicals.
+      { source: '/', destination: '/ro', statusCode: 301 as const },
+      // The unprefixed checker was Romanian; skip the /en hop the generic rule would pick.
+      { source: '/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      // The online withdrawal form was removed; the right is described in Terms section 7.
+      { source: '/:locale(ro|en)/withdrawal', destination: '/:locale/terms', statusCode: 301 as const },
       ...cvRedirects,
+      ...localizedRedirects(),
       // English cover letters moved from the Romanian segment to /cover-letter.
       { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
