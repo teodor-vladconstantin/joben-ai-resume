@@ -49,6 +49,7 @@
     "createNew": "Creează Nou"
   },
   "Home": {
+    "heroKeywords": "Verificare CV ATS și creare CV cu AI",
     "heroPrefix": "CV-ul tău e respins înainte ca un ",
     "heroRotatingWords": [
       "Recrutor",
@@ -453,7 +454,7 @@
         "label": "Ghid: CV citit de ATS"
       },
       {
-        "href": "/free-ats-checker",
+        "href": "/verificare-cv-ats",
         "label": "Evaluator ATS Gratuit"
       }
     ],

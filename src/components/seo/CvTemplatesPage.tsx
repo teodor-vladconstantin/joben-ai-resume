@@ -9,6 +9,7 @@ import { TrackedLink } from '@/components/ui/TrackedLink'
 import { TemplateDownloadGate } from '@/components/seo/TemplateDownloadGate'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { siteConfig } from '@/lib/content'
 import { CV_TEMPLATES } from '@/data/cv-templates'
 import { GUIDES, guidePath } from '@/data/guides'
@@ -303,7 +304,7 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
             <p className="text-xs text-(--muted) mt-1">{copy.atsBody}</p>
           </div>
           <TrackedLink
-            href="/free-ats-checker"
+            href={atsCheckerPath(locale)}
             ctaId="templates_ats_cta"
             className={`shrink-0 ${buttonVariants('primary', 'md')} text-sm font-semibold flex items-center gap-1.5`}
           >

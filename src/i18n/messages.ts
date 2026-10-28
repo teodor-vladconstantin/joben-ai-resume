@@ -22,6 +22,7 @@ export type Messages = {
     createNew: string
   }
   Home: {
+    heroKeywords: string
     heroPrefix: string
     heroRotatingWords: string[]
     heroSuffix: string
