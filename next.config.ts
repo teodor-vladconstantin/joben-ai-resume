@@ -32,6 +32,15 @@ if (missing.length > 0) {
 // Clerk loads from the clerk.joben.eu CNAME (allowed below). An in-app proxy
 // would need clerkMiddleware `frontendApiProxy` plus `proxyUrl`, not a plain rewrite.
 
+// The PostHog toolbar (opened from the PostHog app on this site) loads from the app
+// host and sends its own telemetry to internal-cf. Visitor tracking goes through
+// /ingest (same origin) and needs none of these.
+const POSTHOG_TOOLBAR_HOSTS = [
+  'https://eu.posthog.com',
+  'https://eu-assets.i.posthog.com',
+  'https://internal-cf.posthog.com',
+]
+
 const SECURITY_HEADERS = [
   // Pages and the Markdown variant share URLs (see src/proxy.ts), so caches must key on Accept.
   { key: 'Vary', value: 'Accept' },
@@ -69,6 +78,7 @@ const SECURITY_HEADERS = [
         'https://*.clerk.accounts.dev',
         // Clerk frontend API CNAME (serves clerk-js and the auth API).
         'https://clerk.joben.eu',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -80,6 +90,7 @@ const SECURITY_HEADERS = [
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
         'https://clerk.joben.eu',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -93,7 +104,7 @@ const SECURITY_HEADERS = [
         'https://*.supabase.co',
         'wss://*.supabase.co',
         'https://eu.i.posthog.com',
-        'https://eu-assets.i.posthog.com',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://*.ingest.sentry.io',
         'https://api.stripe.com',
         'https://www.googletagmanager.com',
