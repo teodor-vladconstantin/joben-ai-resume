@@ -31,7 +31,7 @@ const reportJsonSchema = z.object({
 
 function htmlPage(message: string, form?: { action: string; label: string }): NextResponse {
   const body = form
-    ? `<form method="POST" action="${form.action}"><button type="submit" style="background:#047857;color:#FFFFFF;border:0;padding:10px 16px;font-weight:700;cursor:pointer;">${form.label}</button></form>`
+    ? `<form method="POST" action="${form.action}"><button type="submit" style="background:#34D399;color:#111113;border:0;padding:10px 16px;font-weight:700;cursor:pointer;">${form.label}</button></form>`
     : ''
   return new NextResponse(
     `<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Joben</title></head><body style="font-family:Arial,sans-serif;max-width:480px;margin:80px auto;text-align:center;color:#0D2818;"><p>${message}</p>${body}</body></html>`,
