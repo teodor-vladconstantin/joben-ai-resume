@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Link } from '@/i18n/navigation'
+import { AppLink } from '@/components/ui/AppLink'
 import { useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
 import { COOKIE_SETTINGS_OPEN_EVENT, getCookieConsent, setCookieConsent } from '@/lib/cookie-consent'
@@ -48,9 +48,9 @@ export function CookieConsentBanner() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-(--muted)">
           {t('messagePrefix')}{' '}
-          <Link href="/cookies" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
+          <AppLink href="/cookies" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
             {t('cookiePolicyLinkText')}
-          </Link>
+          </AppLink>
           .
         </p>
         <div className="flex shrink-0 gap-3">
