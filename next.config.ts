@@ -80,6 +80,8 @@ const SECURITY_HEADERS = [
         ...(process.env.NODE_ENV === 'production' ? [] : ["'unsafe-eval'"]),
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
+        // Direct Clerk CNAME, used until NEXT_PUBLIC_CLERK_PROXY_URL enables the /clerk-proxy rewrite.
+        'https://clerk.joben.eu',
         // Clerk JS is proxied via /clerk-proxy/:path* (rewritten to CLERK_FAPI_ORIGIN),
         // so it loads from 'self' — no extra CSP host needed here.
         'https://challenges.cloudflare.com',
@@ -92,6 +94,7 @@ const SECURITY_HEADERS = [
         "'unsafe-inline'",
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
+        'https://clerk.joben.eu',
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -101,6 +104,7 @@ const SECURITY_HEADERS = [
         "'self'",
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
+        'https://clerk.joben.eu',
         // Clerk API calls go through /clerk-proxy/:path* → 'self', plus direct
         // calls to clerk.com (e.g. account portals, webhooks). No extra host needed.
         'https://*.supabase.co',
@@ -118,6 +122,7 @@ const SECURITY_HEADERS = [
         'frame-src',
         "'self'",
         'https://*.clerk.com',
+        'https://clerk.joben.eu',
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://hooks.stripe.com',
