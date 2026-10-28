@@ -16,8 +16,8 @@ export function ResumeScoreHero({ score, gradeLabel, gradeDescription, categorie
     <div className="w-full">
       <div className="mb-10">
         <div className="flex items-baseline gap-2">
-          <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{score}</span>
-          <span className="font-mono text-xl text-muted-foreground">/100</span>
+          <span className="text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{score}</span>
+          <span className="text-xl text-muted-foreground">/100</span>
         </div>
         <div className="mt-3 h-1 w-full max-w-sm bg-border">
           <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
@@ -32,7 +32,7 @@ export function ResumeScoreHero({ score, gradeLabel, gradeDescription, categorie
           <div key={category.label}>
             <div className="flex items-center justify-between gap-3 text-sm mb-2">
               <span className="text-foreground font-medium">{category.label}</span>
-              <span className="text-muted-foreground font-mono text-xs tabular-nums">{category.value}/{category.max}</span>
+              <span className="text-muted-foreground text-xs tabular-nums">{category.value}/{category.max}</span>
             </div>
             <div className="h-1 bg-border overflow-hidden">
               <div

@@ -31,7 +31,7 @@ export function ProfileCompletion({ stats, dismissed }: { stats: ChecklistStats;
   }
 
   return (
-    <div data-tour="dashboard-checklist" className="bg-card p-6 border border-border relative mb-8" suppressHydrationWarning>
+    <div data-tour="dashboard-checklist" className="bg-card p-6 rounded-lg border border-border relative mb-8" suppressHydrationWarning>
       <button
         type="button"
         onClick={handleDismiss}

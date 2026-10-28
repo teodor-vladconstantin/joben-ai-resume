@@ -5,7 +5,7 @@ import { CheckCircle2, XCircle, AlertTriangle, Check, ArrowRight } from 'lucide-
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { Navbar } from '@/components/ui/Navbar'
 import { Card } from '@/components/ui/Card'
-import { Badge, Eyebrow } from '@/components/ui/Badge'
+import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { SeoAtsScanWidget } from '@/components/seo/SeoAtsScanWidget'
 import { getResumeRole, resumeRoles } from '@/data/resume-roles'
@@ -14,6 +14,8 @@ import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
+import { PageHero, CtaCard, wrap } from '@/components/marketing/section'
+import { cn } from '@/lib/cn'
 import { JsonLd } from '@/components/seo/JsonLd'
 
 // English-only: "a {role} resume" needs "an" before a vowel sound
@@ -145,17 +147,13 @@ export default async function ResumeRolePage({
       <JsonLd data={jsonLd} />
       <Navbar />
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24">
-        <div className="text-center mb-12">
-          <Eyebrow>{messages.ResumeExamplesHub.eyebrow}</Eyebrow>
-          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            {fill(r.heading, { role: title })}
-          </h1>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
-            {fill(r.subheading, { roleLower })}
-          </p>
-        </div>
-
+      <main>
+        <PageHero
+          eyebrow={messages.ResumeExamplesHub.eyebrow}
+          title={fill(r.heading, { role: title })}
+          intro={fill(r.subheading, { roleLower })}
+        />
+        <div className={cn(wrap, 'py-12 sm:py-16')}>
         <div className="space-y-8">
           <Card radius="lg" className="p-6 sm:p-8">
             <h2 className="text-foreground font-bold text-lg mb-1">
@@ -233,14 +231,14 @@ export default async function ResumeRolePage({
             <div className="space-y-4">
               {bullets.map((bullet) => (
                 <div key={bullet.weak} className="grid gap-4 sm:grid-cols-2">
-                  <div className="border border-border bg-card p-4">
-                    <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-muted-foreground mb-2">
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <p className="flex items-center gap-2 text-(length:--text-label) text-muted-foreground mb-2">
                       <XCircle className="h-4 w-4" /> {r.weak}
                     </p>
                     <p className="text-sm text-foreground">{bullet.weak}</p>
                   </div>
-                  <div className="border border-border bg-primary/10 p-4">
-                    <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-foreground mb-2">
+                  <div className="rounded-lg border border-primary/40 bg-primary/10 p-4">
+                    <p className="flex items-center gap-2 text-(length:--text-label) text-foreground mb-2">
                       <CheckCircle2 className="h-4 w-4" /> {r.strong}
                     </p>
                     <p className="text-sm text-foreground">{bullet.strong}</p>
@@ -265,19 +263,13 @@ export default async function ResumeRolePage({
               </Link>
             </Card>
           )}
-
-          <Card elevated radius="lg" className="p-6 sm:p-8 text-center">
-            <p className="text-foreground font-semibold text-lg">
-              {fill(r.scoreCtaHeading, { role: title })}
-            </p>
-            <p className="text-muted-foreground text-sm mt-1.5 max-w-md mx-auto">
-              {r.scoreCtaSubheading}
-            </p>
-            <Link href={atsCheckerPath(locale)} className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
-              {fill(r.scoreCtaButton, { role: title })}
-            </Link>
-          </Card>
         </div>
+        </div>
+        <CtaCard title={fill(r.scoreCtaHeading, { role: title })} text={r.scoreCtaSubheading}>
+          <Link href={atsCheckerPath(locale)} className={buttonVariants('primary', 'md')}>
+            {fill(r.scoreCtaButton, { role: title })}
+          </Link>
+        </CtaCard>
       </main>
     </div>
   )

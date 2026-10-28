@@ -147,7 +147,7 @@ function Field({
 
 function ConfirmationCard({ message }: { message: string }) {
   return (
-    <div className="border border-border bg-primary/10 px-6 py-8 text-center">
+    <div className="rounded-lg border border-border bg-primary/10 px-6 py-8 text-center">
       <p className="text-base font-medium text-foreground">{message}</p>
     </div>
   )

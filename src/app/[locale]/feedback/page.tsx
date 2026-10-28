@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from '@/i18n/navigation'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
+import { AppNav } from '@/components/shell/AppNav'
 import { Card } from '@/components/ui/Card'
 import { FeedbackForm } from './FeedbackForm'
 import type { AppLocale } from '@/i18n/routing'
@@ -44,17 +45,19 @@ export default async function FeedbackPage({ params }: { params: Promise<{ local
     .maybeSingle()
 
   return (
-    <main className="min-h-screen bg-background px-4 py-16 text-foreground">
+    <>
+    <AppNav />
+    <main className="min-h-screen bg-background px-4 pb-16 pt-28 text-foreground">
       <div className="mx-auto w-full max-w-xl">
         <header className="mb-8 text-center">
-          <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('eyebrow')}</p>
+          <p className="text-(length:--text-label) text-muted-foreground">{t('eyebrow')}</p>
           <h1 className="mt-2 text-2xl font-semibold text-foreground">{t('heading')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t('intro')}</p>
         </header>
 
         <Card className="p-6 sm:p-8">
           {existing ? (
-            <div className="border border-border bg-primary/10 px-6 py-8 text-center">
+            <div className="rounded-lg border border-border bg-primary/10 px-6 py-8 text-center">
               <p className="text-base font-medium text-foreground">{t('already')}</p>
             </div>
           ) : (
@@ -63,5 +66,6 @@ export default async function FeedbackPage({ params }: { params: Promise<{ local
         </Card>
       </div>
     </main>
+    </>
   )
 }

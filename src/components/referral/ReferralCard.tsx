@@ -142,7 +142,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
 
         <dl className="shrink-0 text-left sm:text-right">
           <dt className="text-xs text-muted-foreground">{t('invitedLabel')}</dt>
-          <dd className="font-mono tabular-nums text-sm font-bold text-foreground">
+          <dd className="tabular-nums text-sm font-bold text-foreground">
             {info.referralCount} · {t('daysEarned', { days: info.referralCredits })}
           </dd>
         </dl>
@@ -165,7 +165,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
             readOnly
             value={info.referralLink}
             onFocus={(event) => event.currentTarget.select()}
-            className="w-full px-3 py-2 text-xs font-mono border border-border bg-card text-foreground focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 text-xs border border-border bg-card text-foreground focus:outline-none focus:border-primary"
           />
           <button
             type="button"

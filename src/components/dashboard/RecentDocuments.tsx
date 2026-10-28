@@ -1,9 +1,11 @@
 "use client"
 import { Link } from '@/i18n/navigation'
-import { FileText, ArrowRight } from 'lucide-react'
+import { FileText, ArrowRight, Plus } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { RecentDocument } from '@/lib/actions/db'
 import { buttonVariants } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from '@/components/ui/Table'
 
 export function RecentDocuments({ recentDocs }: { recentDocs: RecentDocument[] }) {
   const t = useTranslations('Dashboard.recentDocuments')
@@ -18,36 +20,64 @@ export function RecentDocuments({ recentDocs }: { recentDocs: RecentDocument[] }
   }
 
   return (
-    <div className="mt-8" suppressHydrationWarning>
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-foreground">{t('heading')}</h3>
-        <Link href="/resumes" className="inline-flex items-center gap-1 text-foreground text-sm font-medium border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">
-          {t('viewAll')} <ArrowRight className="w-4 h-4" />
+    <section className="mt-8 rounded-lg border border-border bg-card shadow-card" suppressHydrationWarning>
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 className="text-base font-semibold text-foreground">{t('heading')}</h3>
+        <Link href="/resumes" className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline">
+          {t('viewAll')} <ArrowRight className="size-4" />
         </Link>
       </div>
-      <div className="grid grid-cols-1 border border-border divide-y divide-border md:grid-cols-3 md:divide-y-0 md:divide-x">
 
-        {recentDocs.length > 0 ? recentDocs.map((doc) => (
-          <Link href={getDocumentHref(doc)} key={doc.id} className="p-5 transition-colors duration-150 ease-out hover:bg-background group cursor-pointer relative block" suppressHydrationWarning>
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-10 h-10 bg-primary/10 flex items-center justify-center text-foreground">
-                <FileText className="w-5 h-5" />
-              </div>
-              {typeof doc.score === 'number' && doc.score > 0 ? <span className="font-mono text-xs font-bold text-muted-foreground tabular-nums">{t('scorePrefix')}{doc.score}</span> : null}
-            </div>
-            <h4 className="text-foreground font-medium mb-1">{doc.title || t('untitledDocument')}</h4>
-            <p className="text-xs text-muted-foreground">
-              {getDocumentTypeLabel(doc)}  -  {t('updatedPrefix')}{doc.updated_at ? new Date(doc.updated_at).toLocaleDateString(locale) : t('noDateValue')}
-            </p>
-          </Link>
-        )) : null}
-
-        {/* Empty state / Create new prompt */}
-        <div className="border border-dashed border-border flex flex-col items-center justify-center p-6 text-center" suppressHydrationWarning>
-            <p className="text-muted-foreground text-sm mb-3">{recentDocs.length === 0 ? t('noResumesYet') : t('createAnother')}</p>
-            <Link href="/resumes" className={buttonVariants('secondary', 'sm')}>{t('createNew')}</Link>
-        </div>
-      </div>
-    </div>
+      {recentDocs.length === 0 ? (
+        <EmptyState
+          icon={FileText}
+          title={t('noResumesYet')}
+          action={
+            <Link href="/resumes/new" className={buttonVariants('primary', 'sm')}>
+              <Plus className="size-4" /> {t('createNew')}
+            </Link>
+          }
+        />
+      ) : (
+        <>
+          <Table>
+            <TableHead>
+              <tr>
+                <TableHeaderCell>{t('nameColumn')}</TableHeaderCell>
+                <TableHeaderCell className="hidden sm:table-cell">{t('typeColumn')}</TableHeaderCell>
+                <TableHeaderCell className="hidden md:table-cell">{t('updatedColumn')}</TableHeaderCell>
+                <TableHeaderCell className="text-right">{t('scoreColumn')}</TableHeaderCell>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {recentDocs.map((doc) => (
+                <TableRow key={doc.id} suppressHydrationWarning>
+                  <TableCell>
+                    <Link href={getDocumentHref(doc)} className="flex items-center gap-3 font-medium text-foreground">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
+                        <FileText className="size-4" />
+                      </span>
+                      <span className="truncate">{doc.title || t('untitledDocument')}</span>
+                    </Link>
+                  </TableCell>
+                  <TableCell className="hidden text-muted-foreground sm:table-cell">{getDocumentTypeLabel(doc)}</TableCell>
+                  <TableCell className="hidden text-muted-foreground md:table-cell">
+                    {doc.updated_at ? new Date(doc.updated_at).toLocaleDateString(locale) : t('noDateValue')}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-foreground">
+                    {typeof doc.score === 'number' && doc.score > 0 ? doc.score : '-'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="border-t border-border px-5 py-3">
+            <Link href="/resumes/new" className={buttonVariants('secondary', 'sm')}>
+              <Plus className="size-4" /> {t('createAnother')}
+            </Link>
+          </div>
+        </>
+      )}
+    </section>
   )
 }

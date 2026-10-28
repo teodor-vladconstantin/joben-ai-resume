@@ -8,7 +8,7 @@ export default async function NotFound() {
   return (
     <div className="min-h-screen bg-background flex items-center px-4">
       <div className="max-w-md">
-        <p className="font-mono text-sm text-muted-foreground mb-3">404</p>
+        <p className="text-sm text-muted-foreground mb-3">404</p>
         <h1 className="text-2xl font-bold text-foreground mb-3">{t('title')}</h1>
         <p className="text-muted-foreground text-sm mb-8">{t('description')}</p>
         <Link
