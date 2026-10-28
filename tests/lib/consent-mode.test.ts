@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
+import { describe, expect, it, vi } from 'vitest'
+import { CONSENT_MODE_DEFAULT_SCRIPT, pushConsentUpdate } from '@/lib/consent-mode'
 
 // Runs the inline script the way the browser does, with a fake document and storage.
 function analyticsStorage(cookie: string, local: Record<string, string> = {}): string {
@@ -29,5 +29,20 @@ describe('consent mode default script', () => {
   it('denies by default and after 12 months', () => {
     expect(analyticsStorage('')).toBe('denied')
     expect(analyticsStorage(`joben_cookie_consent=accepted|${now - 366 * 24 * 60 * 60 * 1000}`)).toBe('denied')
+  })
+})
+
+describe('pushConsentUpdate', () => {
+  it('pushes an Arguments object, the only shape GTM runs as a consent command', () => {
+    const dataLayer: unknown[] = []
+    vi.stubGlobal('window', { dataLayer })
+    pushConsentUpdate(true)
+    vi.unstubAllGlobals()
+    const pushed = dataLayer[0]
+    expect(Array.isArray(pushed)).toBe(false)
+    expect(Object.prototype.toString.call(pushed)).toBe('[object Arguments]')
+    const [cmd, action, state] = Array.from(pushed as ArrayLike<unknown>)
+    expect([cmd, action]).toEqual(['consent', 'update'])
+    expect((state as Record<string, string>).analytics_storage).toBe('granted')
   })
 })
