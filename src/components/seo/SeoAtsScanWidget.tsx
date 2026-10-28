@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
 import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Loader2, RotateCcw, Sparkles, Upload } from 'lucide-react'
-import { Link } from '@/i18n/navigation'
+import { AppLink } from '@/components/ui/AppLink'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import type { FastAtsAnalysisResult } from '@/lib/ats-fast-parser'
@@ -252,13 +252,13 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
           )}
 
           <div className="pt-2">
-            <Link
+            <AppLink
               href="/sign-up"
               className={`w-full py-3 ${buttonVariants('primary', 'md')} text-sm font-semibold flex items-center justify-center gap-2`}
             >
               <span>{t('widget.cta')}</span>
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </AppLink>
             <p className="text-[11px] text-center text-(--muted) mt-2">{t('widget.ctaNote')}</p>
           </div>
         </div>
