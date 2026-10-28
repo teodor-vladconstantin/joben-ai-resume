@@ -5,6 +5,7 @@ import { breadcrumbJsonLd } from '@/lib/structured-data'
 import type { AppLocale } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
+import { PageHero, Section } from '@/components/marketing/section'
 import { JsonLd } from '@/components/seo/JsonLd'
 
 const CONTACT_EMAIL = 'privacy@joben.eu'
@@ -53,22 +54,21 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-20">
+    <div className="min-h-screen flex flex-col">
       <JsonLd data={jsonLd} />
       <Navbar />
 
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">{about.heading}</h1>
-        <p className="text-muted-foreground text-lg leading-relaxed mb-10">{about.intro}</p>
-
-        <h2 className="text-xl font-bold text-foreground mb-2">{about.contactHeading}</h2>
-        <p className="text-muted-foreground">
-          {about.contactBody.split('{email}')[0]}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">
-            {CONTACT_EMAIL}
-          </a>
-          {about.contactBody.split('{email}')[1]}
-        </p>
+      <main className="grow">
+        <PageHero eyebrow="Joben" title={about.heading} intro={about.intro} />
+        <Section title={about.contactHeading} className="border-t border-border">
+          <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-muted-foreground">
+            {about.contactBody.split('{email}')[0]}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-foreground transition-colors hover:text-primary">
+              {CONTACT_EMAIL}
+            </a>
+            {about.contactBody.split('{email}')[1]}
+          </div>
+        </Section>
       </main>
     </div>
   )

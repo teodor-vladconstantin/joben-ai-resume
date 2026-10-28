@@ -13,7 +13,7 @@ export async function AtsScanCard({ scan, locale }: { scan: ClaimedAtsScan; loca
   const hasIssues = scan.issues.length > 0
 
   return (
-    <section className="bg-card p-6 border border-border mb-8">
+    <section className="bg-card p-6 rounded-lg border border-border mb-8">
       <Eyebrow className="mb-3">{t('eyebrow')}</Eyebrow>
       <h2 className="text-xl font-bold text-foreground">
         {hasIssues

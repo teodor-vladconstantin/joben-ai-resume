@@ -73,7 +73,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
   }
 
   return (
-    <div className="bg-card p-6 border border-border mb-8" suppressHydrationWarning>
+    <div className="bg-card p-6 rounded-lg border border-border mb-8" suppressHydrationWarning>
       <div className="flex items-start justify-between gap-4 mb-4" suppressHydrationWarning>
         <div>
           <h3 className="text-lg font-bold text-foreground flex items-center gap-2">

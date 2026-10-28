@@ -5,8 +5,8 @@ import { ArrowRight, Briefcase, Sparkles } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { AppLink } from '@/components/ui/AppLink'
 import { Navbar } from '@/components/ui/Navbar'
-import { Eyebrow } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
+import { PageHero, CtaCard, wrap } from '@/components/marketing/section'
+import { cn } from '@/lib/cn'
 import { buttonVariants } from '@/components/ui/Button'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
@@ -93,22 +93,24 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
       <JsonLd data={jsonLd} />
       <Navbar />
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24 space-y-12">
-        <div className="text-center space-y-4">
-          <Eyebrow>{t('eyebrow')}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            {t('heading', { role })}
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('subheading')}</p>
-          <div className="flex items-center justify-center pt-2">
-            <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-semibold flex items-center gap-1.5">
-              <Briefcase className="h-3.5 w-3.5" />
-              {t('fieldLabel', { category: job.category[locale] })}
-            </span>
-          </div>
-        </div>
-
-        <Card radius="lg" className="p-8 space-y-6">
+      <main>
+        <PageHero
+          eyebrow={t('eyebrow')}
+          title={t('heading', { role })}
+          intro={
+            <>
+              {t('subheading')}
+              <span className="mt-4 flex">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
+                  <Briefcase className="h-3.5 w-3.5" />
+                  {t('fieldLabel', { category: job.category[locale] })}
+                </span>
+              </span>
+            </>
+          }
+        />
+        <div className={cn(wrap, 'space-y-8 py-12 sm:py-16')}>
+        <div className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-card sm:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border">
             <div>
               <h2 className="text-2xl font-bold text-foreground">{t('sampleHeading', { role })}</h2>
@@ -123,20 +125,20 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
             </AppLink>
           </div>
 
-          <div className="p-6 rounded-xl bg-card border border-border space-y-4 font-sans text-sm text-foreground/90 leading-relaxed">
+          <div className="space-y-4 rounded-lg border border-border bg-background p-6 text-sm leading-relaxed text-foreground/90">
             <p>{sample.intro}</p>
             <p>{sample.body}</p>
             <p>{sample.closing}</p>
             <div className="pt-2 text-xs text-muted-foreground">{t('signature')}</div>
           </div>
-        </Card>
+        </div>
 
-        <Card radius="lg" className="p-8 space-y-6">
+        <div className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-card sm:p-8">
           <h2 className="text-2xl font-bold text-foreground">{t('rulesHeading', { roleLower })}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             {rules.map((rule, i) => (
               <div key={rule.title} className="space-y-2">
-                <span className="h-7 w-7 rounded-full bg-foreground text-background font-bold text-xs flex items-center justify-center">
+                <span className="h-7 w-7 rounded-full bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center">
                   {i + 1}
                 </span>
                 <h3 className="font-bold text-sm text-foreground">{rule.title}</h3>
@@ -144,21 +146,15 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
-        <div className="p-6 rounded-2xl border border-border bg-card flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h3 className="font-bold text-lg text-foreground">{t('resumeCtaHeading', { role })}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{t('resumeCtaBody')}</p>
-          </div>
-          <Link
-            href={`/resume-examples/${job.resumeRoleSlug[locale]}`}
-            className={`shrink-0 ${buttonVariants('secondary', 'md')} text-sm font-semibold flex items-center gap-1.5`}
-          >
+        </div>
+        <CtaCard title={t('resumeCtaHeading', { role })} text={t('resumeCtaBody')}>
+          <Link href={`/resume-examples/${job.resumeRoleSlug[locale]}`} className={buttonVariants('primary', 'md')}>
             <span>{t('resumeCtaButton')}</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </div>
+        </CtaCard>
       </main>
     </div>
   )

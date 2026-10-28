@@ -77,6 +77,17 @@ export type Messages = {
     faqSubheading: string
     faqOpen: string
     faqClose: string
+    landing: {
+      pill: string
+      ctaSecondary: string
+      trust: string[]
+      how: { eyebrow: string; title: string; steps: { title: string; text: string }[] }
+      features: { eyebrow: string; title: string; items: { title: string; text: string }[] }
+      why: { eyebrow: string; title: string; items: { title: string; text: string }[] }
+      pricingMore: string
+      faqMore: string
+      cta: { title: string; text: string }
+    }
   }
   Pricing: {
     heading: string
@@ -230,6 +241,10 @@ export type Messages = {
       noResumesYet: string
       createAnother: string
       createNew: string
+      nameColumn: string
+      typeColumn: string
+      updatedColumn: string
+      scoreColumn: string
     }
     weeklyGoals: {
       title: string

@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useRouter } from '@/i18n/navigation'
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Navbar } from '@/components/ui/Navbar'
+import { AppNav } from '@/components/shell/AppNav'
 import { Modal } from '@/components/ui/Modal'
 import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
@@ -232,14 +231,11 @@ export default function AIReviewEditorPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
+    <div className="min-h-screen flex flex-col">
+      <AppNav />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
+        <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <ResumeAnalyzer
             review={review}
             comparison={comparison}
@@ -273,7 +269,7 @@ export default function AIReviewEditorPage() {
           {autoFixTokenWarning || t('errorAutoFixTokenLimit')}
         </p>
         {autoFixTokenDetails ? (
-          <div className="mt-4 border border-border px-4 py-3 text-xs text-muted-foreground space-y-1">
+          <div className="mt-4 rounded-lg border border-border px-4 py-3 text-xs text-muted-foreground space-y-1">
             {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
               <p>{t('estimatedInputTokens', { tokens: autoFixTokenDetails.estimatedInputTokens })}</p>
             ) : null}

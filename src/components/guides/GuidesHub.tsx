@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import { Navbar } from '@/components/ui/Navbar'
-import { Eyebrow } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
+import { PageHero, wrap } from '@/components/marketing/section'
+import { cn } from '@/lib/cn'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { siteConfig } from '@/lib/content'
@@ -118,25 +118,25 @@ export function GuidesHub({ kind, locale }: { kind: GuideKind; locale: AppLocale
     <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
-      <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24 space-y-10">
-        <header className="space-y-4">
-          <Eyebrow>{copy.eyebrow}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">{copy.title}</h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">{copy.intro}</p>
-        </header>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {items.map((guide) => {
-            const content = guide.content[locale]
-            return (
-              <Link key={content.slug} href={guidePath(locale, guide)} className="block">
-                <Card radius="lg" className="p-6 h-full space-y-2 hover:border-foreground/30 transition-colors">
-                  <h2 className="font-bold text-lg text-foreground">{content.title}</h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{content.description}</p>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
+      <main>
+        <PageHero eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} />
+        <section className="py-12 sm:py-16">
+          <div className={cn(wrap, 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3')}>
+            {items.map((guide) => {
+              const content = guide.content[locale]
+              return (
+                <Link
+                  key={content.slug}
+                  href={guidePath(locale, guide)}
+                  className="flex h-full flex-col rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary"
+                >
+                  <h2 className="text-lg font-semibold">{content.title}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{content.description}</p>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
       </main>
     </div>
   )

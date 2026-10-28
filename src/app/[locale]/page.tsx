@@ -1,5 +1,5 @@
 import { Navbar } from '@/components/ui/Navbar'
-import { ArrowRight, CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
+import { ArrowRight, Check, FileDown, Gauge, Languages, LayoutTemplate, Mail, ShieldCheck, Sparkles, Target, X } from 'lucide-react'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
 import { pricingPlanMeta, siteConfig, BUILD_TIME } from '@/lib/content'
@@ -7,32 +7,14 @@ import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { PlanCta } from '@/components/pricing/PlanCta'
-import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
-import { AmbientDataTexture } from '@/components/landing/AmbientDataTexture'
 import { buttonVariants } from '@/components/ui/Button'
 import { ResumeScoreCard } from '@/components/landing/ResumeScoreCard'
 import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
-import { StepSection } from '@/components/landing/StepSection'
-import { ScoreStepVisual } from '@/components/landing/steps/ScoreStepVisual'
-import { TailorStepVisual } from '@/components/landing/steps/TailorStepVisual'
-import { RewriteStepVisual } from '@/components/landing/steps/RewriteStepVisual'
-import { CoverLetterStepVisual } from '@/components/landing/steps/CoverLetterStepVisual'
-import { ExportStepVisual } from '@/components/landing/steps/ExportStepVisual'
-import { RevealWords } from '@/components/motion/RevealWords'
-import { RevealRule } from '@/components/motion/RevealRule'
-import { Reveal } from '@/components/motion/Reveal'
+import { CtaCard, FaqList, Section, wrap } from '@/components/marketing/section'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
 
-const icons: { [key: string]: React.ElementType } = {
-  Zap,
-  ShieldCheck,
-  FileText,
-  CheckCircle2,
-};
-
-const featureIconOrder = ['CheckCircle2', 'CheckCircle2', 'CheckCircle2']
-const statCardIconOrder = ['Zap', 'ShieldCheck', 'FileText']
+const featureIcons = [Gauge, Sparkles, Target, Mail, LayoutTemplate, FileDown, Languages, ShieldCheck]
 
 export default async function Home({ params }: { params: Promise<{ locale: AppLocale }> }) {
   const { locale } = await params
@@ -78,136 +60,38 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         })),
       },
     ],
-  };
+  }
 
-  const mock = home.atsPreview.mockResume
+  const lp = home.landing
+  const accent = home.heroRotatingWords[0]
 
   return (
-    <div className="flex flex-col min-h-screen" suppressHydrationWarning>
+    <div className="flex min-h-screen flex-col">
       <JsonLd data={jsonLd} />
       <Navbar />
 
-      <main className="grow pt-24 pb-16" suppressHydrationWarning>
-        {/* HERO SECTION */}
-        <section id="builder" data-section="Hero" className="relative px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto mt-6 mb-20" suppressHydrationWarning>
-          <AmbientDataTexture />
-
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-foreground max-w-4xl leading-tight">
-            <span className="block mb-4 text-sm md:text-base font-semibold tracking-normal text-muted-foreground">{home.heroKeywords}</span>
-            <RevealWords as="span" text={home.heroPrefix} />{' '}
-            <HeroWordRotate words={home.heroRotatingWords} />{' '}
-            <RevealWords as="span" text={home.heroSuffix} />
-          </h1>
-
-          <p className="text-lg text-muted-foreground mb-8 max-w-3xl">
-            {home.subheading}
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-start gap-4 mb-6" suppressHydrationWarning>
-            <AuthAwareSignupLink ctaId="home_hero" signedOutHref={atsCheckerPath(locale)} className={buttonVariants('primary', 'lg')}>
-              {home.cta} <ChevronRight className="w-5 h-5" />
-            </AuthAwareSignupLink>
-          </div>
-
-          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground" suppressHydrationWarning>
-            {home.features.map((feature, index) => {
-              const Icon = icons[featureIconOrder[index]];
-              return (
-                <span key={index} className="flex items-center gap-1.5">
-                  <Icon className="w-4 h-4 text-muted-foreground" /> {feature}
-                </span>
-              );
-            })}
-          </div>
-
-          {/* PLATFORM FEATURES */}
-          <h2 className="sr-only">{home.platformFeaturesHeading}</h2>
-          <div className="mt-20 grid grid-cols-1 border-t border-border md:grid-cols-3" suppressHydrationWarning>
-            {home.statCards.map((card, index) => {
-              const Icon = icons[statCardIconOrder[index]];
-              return (
-                <div key={index} className="border-b border-border py-8 md:border-b-0 md:border-r md:last:border-r-0 md:pr-8 md:[&:not(:first-child)]:pl-8">
-                  <Icon className="h-5 w-5 text-foreground" />
-                  <h3 className="mt-4 text-lg font-bold text-foreground">{card.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{card.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ATS PREVIEW SECTION */}
-        <section id="analysis" data-section="Analysis" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
-          <RevealRule className="mb-20" />
-          <div className="mb-12 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{home.atsPreview.heading}</h2>
-            <p className="text-muted-foreground">{home.atsPreview.subheading}</p>
-          </div>
-
-          <div className="relative flex flex-col items-center gap-6 lg:block lg:py-8" suppressHydrationWarning>
-            <Reveal className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
-              <div className="border border-border bg-card p-3 sm:p-4" suppressHydrationWarning>
-                <div className="mx-auto border border-black/10 bg-white px-4 py-3 font-serif text-[#1F2937]" suppressHydrationWarning>
-                  <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
-                    <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">{mock.name}</p>
-                    <p className="mt-0.5 text-[10px] text-gray-700">{mock.contact}</p>
-                  </div>
-
-                  <div className="mt-2 space-y-2.5 text-[10.5px] leading-relaxed" suppressHydrationWarning>
-                    <section suppressHydrationWarning>
-                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.summaryHeading}</div>
-                      <p className="mt-1 text-[#374151]">{mock.summary}</p>
-                    </section>
-
-                    <section suppressHydrationWarning>
-                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.experienceHeading}</div>
-
-                      <div className="mt-1" suppressHydrationWarning>
-                        <div className="flex justify-between gap-3" suppressHydrationWarning>
-                          <p className="font-semibold text-[#111827]">{mock.job1Title}</p>
-                          <p className="shrink-0 text-gray-600">{mock.job1Dates}</p>
-                        </div>
-                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
-                          <li>{mock.job1Bullet1}</li>
-                          <li>{mock.job1Bullet2}</li>
-                        </ul>
-                      </div>
-
-                      <div className="mt-1.5" suppressHydrationWarning>
-                        <div className="flex justify-between gap-3" suppressHydrationWarning>
-                          <p className="font-semibold text-[#111827]">{mock.job2Title}</p>
-                          <p className="shrink-0 text-gray-600">{mock.job2Dates}</p>
-                        </div>
-                        <ul className="mt-0.5 list-disc pl-4 text-[#374151]">
-                          <li>{mock.job2Bullet1}</li>
-                          <li>{mock.job2Bullet2}</li>
-                        </ul>
-                      </div>
-                    </section>
-
-                    <section suppressHydrationWarning>
-                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.educationHeading}</div>
-                      <p className="mt-1 text-[#374151]">{mock.education}</p>
-                    </section>
-
-                    <section suppressHydrationWarning>
-                      <div className="border-b border-gray-300 text-[11px] font-semibold text-[#111827]">{mock.skillsHeading}</div>
-                      <p className="mt-1 text-[#374151]">{mock.skills}</p>
-                    </section>
-                  </div>
-                </div>
+      <main className="grow pt-16">
+        <section id="builder" data-section="Hero" className="border-b border-border">
+          <div className={`${wrap} grid gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:items-center`}>
+            <div>
+              <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="size-1.5 rounded-full bg-primary" aria-hidden /> {lp.pill}
+              </p>
+              <h1 className="text-4xl font-bold leading-[1.08] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
+                <span className="mb-4 block text-sm font-semibold tracking-normal text-muted-foreground sm:text-base">{home.heroKeywords}</span>
+                {home.heroPrefix}
+                <span className="text-brand">{accent}</span>
+                {home.heroSuffix}
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">{home.subheading}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <AuthAwareSignupLink ctaId="home_hero" signedOutHref={atsCheckerPath(locale)} className={buttonVariants('primary', 'lg')}>
+                  {home.cta} <ArrowRight />
+                </AuthAwareSignupLink>
+                <a href="#how" className={buttonVariants('outline', 'lg')}>{lp.ctaSecondary}</a>
               </div>
-            </Reveal>
-
-            <Reveal className="lg:absolute lg:top-8 lg:-left-4 xl:-left-12" threshold={0.3}>
-              <ResumeFindingsCard
-                label={home.atsPreview.whatWeFoundLabel}
-                strengths={{ title: home.atsPreview.strengthsTitle, description: home.atsPreview.strengthsDescription }}
-                improvements={{ title: home.atsPreview.improvementsTitle, description: home.atsPreview.improvementsDescription }}
-              />
-            </Reveal>
-
-            <Reveal className="lg:absolute lg:top-24 lg:-right-4 xl:-right-12" threshold={0.3}>
+            </div>
+            <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-pop sm:p-5">
               <ResumeScoreCard
                 score={93}
                 scoreLabel={home.atsPreview.scoreLabel}
@@ -218,126 +102,98 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   max: [25, 35, 10, 25, 5][i],
                 }))}
               />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* PRODUCT LOOP */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto" suppressHydrationWarning>
-          {home.productLoop.map((step, index) => {
-            const visuals = [
-              <ScoreStepVisual key="score" />,
-              <TailorStepVisual key="tailor" />,
-              <RewriteStepVisual key="rewrite" />,
-              <CoverLetterStepVisual key="cover-letter" />,
-              <ExportStepVisual key="export" />,
-            ]
-            return (
-              <StepSection
-                key={step.category}
-                number={String(index + 1).padStart(2, '0')}
-                totalSteps={home.productLoop.length}
-                category={step.category}
-                heading={step.heading}
-                description={step.description}
-                bullets={step.bullets}
-                visual={visuals[index]}
-                isFirst={index === 0}
+              <ResumeFindingsCard
+                label={home.atsPreview.whatWeFoundLabel}
+                strengths={{ title: home.atsPreview.strengthsTitle, description: home.atsPreview.strengthsDescription }}
+                improvements={{ title: home.atsPreview.improvementsTitle, description: home.atsPreview.improvementsDescription }}
               />
-            )
-          })}
+            </div>
+          </div>
+          <ul className={`${wrap} grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border py-5 text-sm text-muted-foreground sm:flex sm:flex-wrap sm:justify-between`}>
+            {lp.trust.map((t) => (
+              <li key={t} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary" aria-hidden />{t}</li>
+            ))}
+          </ul>
         </section>
 
-        {/* PRICING */}
-        <section id="pricing" data-section="Pricing" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
-          <RevealRule className="mb-20" />
-          <div className="mb-16 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              <RevealWords text={home.pricingTeaserHeading} />
-            </h2>
-            <p className="text-muted-foreground">{home.pricingTeaserSubheading}</p>
-          </div>
+        <Section id="how" eyebrow={lp.how.eyebrow} title={lp.how.title}>
+          <ol className="grid gap-6 md:grid-cols-3">
+            {lp.how.steps.map((step, i) => (
+              <li key={step.title} className="rounded-xl border border-border bg-card p-6">
+                <span className="text-3xl font-bold tabular-nums text-brand">0{i + 1}</span>
+                <h3 className="mt-4 text-lg font-semibold">{step.title}</h3>
+                <p className="mt-2 leading-relaxed text-muted-foreground">{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </Section>
 
-          <div className="grid grid-cols-1 border border-border divide-y divide-border md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x" suppressHydrationWarning>
+        <Section id="features" eyebrow={lp.features.eyebrow} title={lp.features.title} className="border-t border-border bg-muted/40">
+          <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+            {lp.features.items.map((f, i) => {
+              const Icon = featureIcons[i]
+              return (
+                <div key={f.title} className="bg-card p-6">
+                  <Icon className="size-5 text-brand" aria-hidden />
+                  <h3 className="mt-4 text-base font-semibold leading-snug">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+                </div>
+              )
+            })}
+          </div>
+        </Section>
+
+        <Section eyebrow={lp.why.eyebrow} title={lp.why.title}>
+          <dl className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+            {lp.why.items.map((d) => (
+              <div key={d.title} className="border-t border-border pt-5">
+                <dt className="text-lg font-semibold">{d.title}</dt>
+                <dd className="mt-2 leading-relaxed text-muted-foreground">{d.text}</dd>
+              </div>
+            ))}
+          </dl>
+        </Section>
+
+        <Section id="pricing" eyebrow={pricing.heading} title={home.pricingTeaserHeading} intro={home.pricingTeaserSubheading} className="border-t border-border bg-muted/40">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {pricing.plans.map((plan, index) => {
               const meta = pricingPlanMeta[index]
               return (
-                <div
-                  key={index}
-                  className={`flex flex-col p-8 ${meta.isPrimary ? 'bg-primary/10' : ''}`}
-                  suppressHydrationWarning
-                >
-                  {plan.badge ? (
-                    <p className="mb-4 text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
-                  ) : null}
-
-                  <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm mt-2 mb-6">{plan.description}</p>
-                  <div className="mb-6 text-4xl font-bold tabular-nums text-foreground" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-muted-foreground font-normal">{plan.pricePeriod}</span></div>
-                  <ul className="space-y-4 mb-8 grow">
-                    {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex gap-3 text-foreground"><CheckCircle2 className="text-foreground w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                <div key={plan.name} className={`flex flex-col rounded-xl border bg-card p-6 ${meta.isPrimary ? 'border-primary shadow-card' : 'border-border'}`}>
+                  {plan.badge ? <p className="mb-3 text-xs font-semibold text-brand">{plan.badge}</p> : null}
+                  <h3 className="text-xl font-bold">{plan.name}</h3>
+                  <p className="mb-5 mt-2 text-sm text-muted-foreground">{plan.description}</p>
+                  <div className="mb-5 text-4xl font-bold tabular-nums">{plan.price}<span className="text-lg font-normal text-muted-foreground">{plan.pricePeriod}</span></div>
+                  <ul className="mb-6 grow space-y-3 text-sm">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden /> {feature}</li>
                     ))}
-                    {plan.excludedFeatures.map((feature, fIndex) => (
-                      <li key={`excluded-${fIndex}`} className="flex gap-3 text-muted-foreground line-through"><X className="text-muted-foreground w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                    {plan.excludedFeatures.map((feature) => (
+                      <li key={`x-${feature}`} className="flex gap-2 text-muted-foreground line-through"><X className="mt-0.5 size-4 shrink-0" aria-hidden /> {feature}</li>
                     ))}
                   </ul>
-                  <PlanCta
-                    label={plan.cta}
-                    plan={meta.planId}
-                    className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
-                  />
+                  <PlanCta label={plan.cta} plan={meta.planId} className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`} />
                 </div>
               )
             })}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">{pricing.vatNote}</p>
-        </section>
+          <AppLink href="/pricing" className={`mt-4 ${buttonVariants('link', 'default', 'px-0')}`}>{lp.pricingMore} <ArrowRight /></AppLink>
+        </Section>
 
-        {/* FAQ */}
-        <section id="faq" data-section="FAQ" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
-          <RevealRule className="mb-20" />
-          <div className="mb-12 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              <RevealWords text={home.faqHeading} />
-            </h2>
-            <p className="text-muted-foreground">{home.faqSubheading}</p>
+        <Section id="faq" eyebrow={home.faqHeading} title={home.faqSubheading}>
+          <div className="max-w-3xl">
+            <FaqList items={faq.map((item) => ({ q: item.question, a: item.answer }))} />
           </div>
+        </Section>
 
-          <div className="max-w-3xl" suppressHydrationWarning>
-            {faq.map((item, index) => (
-              <details
-                key={index}
-                className="group border-b border-border first:border-t"
-                suppressHydrationWarning
-              >
-                <summary
-                  className="row-invert flex cursor-pointer list-none items-center justify-between gap-4 px-2 -mx-2 py-5 text-left text-lg font-semibold [&::-webkit-details-marker]:hidden"
-                  suppressHydrationWarning
-                >
-                  <span className="flex items-center gap-3">
-                    <ArrowRight className="row-invert-arrow h-4 w-4 shrink-0" />
-                    {item.question}
-                  </span>
-                  <span className="text-xs group-open:hidden">{home.faqOpen}</span>
-                  <span className="hidden text-xs group-open:inline">{home.faqClose}</span>
-                </summary>
-                <div className="pb-5 text-muted-foreground" suppressHydrationWarning>{item.answer}</div>
-              </details>
-            ))}
-          </div>
-        </section>
+        <CtaCard title={lp.cta.title} text={lp.cta.text}>
+          <AuthAwareSignupLink ctaId="home_footer" className={buttonVariants('primary', 'lg')}>
+            {footer.ctaPrimary} <ArrowRight />
+          </AuthAwareSignupLink>
+          <AppLink href="/dashboard" className={buttonVariants('outline', 'lg')}>{footer.ctaSecondary}</AppLink>
+        </CtaCard>
       </main>
-
-      <section className="bg-background py-12 border-t border-border" suppressHydrationWarning>
-        <div className="max-w-(--container-max) mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
-          <h2 className="text-2xl font-bold text-foreground mb-4">{footer.heading}</h2>
-          <div className="flex flex-col sm:flex-row gap-4 mt-8" suppressHydrationWarning>
-            <AuthAwareSignupLink ctaId="home_footer" className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
-            <AppLink href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</AppLink>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

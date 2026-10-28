@@ -7,7 +7,7 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
   const t = useTranslations('Dashboard.statCards')
 
   return (
-    <div className="grid grid-cols-1 border border-border divide-y divide-border mb-8 sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4" suppressHydrationWarning>
+    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" suppressHydrationWarning>
       {[
         { label: t('resumes'), count: stats.resumes.toString(), icon: FileText, href: '/resumes' },
         { label: t('coverLetters'), count: stats.coverLetters.toString(), icon: Mail, href: '/cover-letters' },
@@ -17,13 +17,15 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
         <Link
           key={i}
           href={stat.href}
-          className="flex items-center justify-between gap-4 p-6 transition-colors duration-150 ease-out hover:bg-card"
+          className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-5 shadow-card transition-colors hover:border-primary"
         >
           <div>
-            <p className="text-muted-foreground text-sm font-medium mb-1">{stat.label}</p>
-            <p className="text-2xl font-bold tabular-nums text-foreground">{stat.count}</p>
+            <p className="mb-1 text-sm font-medium text-muted-foreground">{stat.label}</p>
+            <p className="text-2xl font-semibold tabular-nums text-foreground">{stat.count}</p>
           </div>
-          <stat.icon className="w-5 h-5 text-muted-foreground shrink-0" />
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground">
+            <stat.icon className="size-5" />
+          </span>
         </Link>
       ))}
     </div>
