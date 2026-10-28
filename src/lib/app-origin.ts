@@ -19,3 +19,10 @@ const APP_PATH = /^\/(?:(?:ro|en)\/)?(?:dashboard|resumes|cover-letters|ai-revie
 export function isAppPath(path: string): boolean {
   return APP_PATH.test(path)
 }
+
+// Parent domain of both hosts (".joben.eu") for cookies that must cross them;
+// undefined when the split is off.
+const appHostname = APP_ORIGIN ? new URL(APP_ORIGIN).hostname : ''
+const siteHostname = SITE_ORIGIN ? new URL(SITE_ORIGIN).hostname : ''
+export const SHARED_COOKIE_DOMAIN =
+  appHostname && siteHostname && appHostname !== siteHostname ? `.${appHostname.split('.').slice(1).join('.')}` : undefined

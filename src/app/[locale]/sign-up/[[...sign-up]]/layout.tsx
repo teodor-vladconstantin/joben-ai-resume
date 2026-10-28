@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { APP_ORIGIN } from '@/lib/app-origin'
 import { getTranslations } from 'next-intl/server'
 
 // The page is a client component, so its metadata lives here. Auth form:
@@ -8,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'SignUp' })
   return {
     title: t('eyebrow'),
-    alternates: { canonical: `/${locale}/sign-up` },
+    alternates: { canonical: `${APP_ORIGIN}/${locale}/sign-up` },
     robots: { index: false, follow: false },
   }
 }
