@@ -191,6 +191,18 @@ const nextConfig: NextConfig = {
         }))
       )
     )
+    // Unprefixed public routes: next-intl answers 307 (temporary), which keeps
+    // the bare URL indexed. 301 to the locale that owns the slug. Role slugs
+    // differ per locale, so /resume-examples/:slug is left to next-intl.
+    const roOnly = ['pricing', 'about', 'contact', 'privacy', 'terms', 'cookies', 'resume-examples', 'sabloane-cv', 'ghiduri', 'glosar', 'comparatii', 'scrisoare-intentie', 'verificare-cv-ats']
+    const enOnly = ['cv-templates', 'guides', 'glossary', 'compare', 'cover-letter']
+    const unprefixedRedirects = [
+      ...roOnly.map((p) => ({ source: `/${p}`, destination: `/ro/${p}`, statusCode: 301 as const })),
+      ...enOnly.map((p) => ({ source: `/${p}`, destination: `/en/${p}`, statusCode: 301 as const })),
+      ...roOnly.slice(8, 12).map((p) => ({ source: `/${p}/:slug`, destination: `/ro/${p}/:slug`, statusCode: 301 as const })),
+      ...enOnly.slice(1).map((p) => ({ source: `/${p}/:slug`, destination: `/en/${p}/:slug`, statusCode: 301 as const })),
+      { source: '/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+    ]
     return [
       // www is not a served host: one canonical origin. HTTP -> HTTPS is handled by the platform (plus HSTS above).
       {
@@ -200,6 +212,7 @@ const nextConfig: NextConfig = {
         statusCode: 301 as const,
       },
       ...cvRedirects,
+      ...unprefixedRedirects,
       // English cover letters moved from the Romanian segment to /cover-letter.
       { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
