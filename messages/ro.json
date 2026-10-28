@@ -46,7 +46,12 @@
     "aiReview": "Evaluare AI",
     "logIn": "Autentificare",
     "getStartedFree": "Începe Gratuit",
-    "createNew": "Creează Nou"
+    "createNew": "Creează Nou",
+    "features": "Funcționalități",
+    "guides": "Ghiduri",
+    "logInCta": "Intră în cont",
+    "checkCv": "Verifică CV Gratuit",
+    "menu": "Meniu"
   },
   "Home": {
     "heroKeywords": "Verificare CV ATS și creare CV cu AI",
@@ -330,7 +335,24 @@
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
     "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
-    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>."
+    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "steps": {
+      "upload": "Încărcare",
+      "scan": "Scanare",
+      "result": "Scor"
+    },
+    "scanningMessages": [
+      "Citim CV-ul tău...",
+      "Verificăm formatarea pentru ATS...",
+      "Potrivim cuvintele cheie și impactul...",
+      "Evaluăm structura și claritatea...",
+      "Pregătim raportul..."
+    ],
+    "scanningTitle": "Îți analizăm CV-ul",
+    "scanningHint": "De obicei durează câteva secunde.",
+    "nextStep": "Continuă",
+    "stepOf": "Pasul {current} din {total}",
+    "appCta": "Deschide Joben și rezolvă aceste probleme"
   },
   "SignUp": {
     "eyebrow": "Cont nou",
@@ -434,12 +456,8 @@
     "legalHeading": "Legal",
     "productLinks": [
       {
-        "href": "/about",
-        "label": "Despre"
-      },
-      {
-        "href": "/contact",
-        "label": "Contact"
+        "href": "/verificare-cv-ats",
+        "label": "Evaluator ATS Gratuit"
       },
       {
         "href": "/pricing",
@@ -448,14 +466,6 @@
       {
         "href": "/resume-examples",
         "label": "Exemple de CV"
-      },
-      {
-        "href": "/ghiduri/cv-citit-corect-de-ats",
-        "label": "Ghid: CV citit de ATS"
-      },
-      {
-        "href": "/verificare-cv-ats",
-        "label": "Evaluator ATS Gratuit"
       }
     ],
     "legalLinks": [
@@ -470,12 +480,31 @@
       {
         "href": "/cookies",
         "label": "Politica de Cookie-uri"
+      },
+      {
+        "href": "https://anpc.ro",
+        "label": "ANPC"
+      },
+      {
+        "href": "https://ec.europa.eu/consumers/odr",
+        "label": "SOL (soluționarea online a litigiilor)"
       }
     ],
     "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
     "productHuntLabel": "Găsește-ne pe Product Hunt",
     "creatorCredit": "Construit de un inginer software care înțelege lupta căutării unui job.",
-    "companyLine": "Joben este operat de {legalName}, CUI {cui}, Nr. Reg. Com. {regCom}, cu sediul social în {address}. Contact: {email}."
+    "companyLine": "Joben este operat de {legalName}, CUI {cui}, Nr. Reg. Com. {regCom}, cu sediul social în {address}. Contact: {email}.",
+    "companyHeading": "Companie",
+    "companyLinks": [
+      {
+        "href": "/about",
+        "label": "Despre"
+      },
+      {
+        "href": "/contact",
+        "label": "Contact"
+      }
+    ]
   },
   "About": {
     "metaTitle": "Despre Joben: ce este și cum funcționează",
@@ -549,34 +578,94 @@
     },
     "tours": {
       "dashboard": {
-        "sidebar": { "title": "Navigarea ta", "body": "De aici ajungi dintr-un click la CV-uri, scrisori, AI Review și setări." },
-        "create": { "title": "Începe un CV nou", "body": "Pornești de la un CV gol sau imporți un PDF existent direct în editor." },
-        "checklist": { "title": "Primii tăi pași", "body": "Parcurge cei patru pași și ai un CV gata, exportat. Fiecare pas te duce la pagina potrivită." },
-        "ats": { "title": "Scanarea ta ATS gratuită", "body": "Scorul și problemele găsite sunt salvate aici. Deschide editorul ca să le repari cu AI." },
-        "referral": { "title": "Invită prieteni", "body": "Trimite linkul tău: primești 7 zile Pro pentru fiecare prieten care își face cont și își confirmă emailul." }
+        "sidebar": {
+          "title": "Navigarea ta",
+          "body": "De aici ajungi dintr-un click la CV-uri, scrisori, AI Review și setări."
+        },
+        "create": {
+          "title": "Începe un CV nou",
+          "body": "Pornești de la un CV gol sau imporți un PDF existent direct în editor."
+        },
+        "checklist": {
+          "title": "Primii tăi pași",
+          "body": "Parcurge cei patru pași și ai un CV gata, exportat. Fiecare pas te duce la pagina potrivită."
+        },
+        "ats": {
+          "title": "Scanarea ta ATS gratuită",
+          "body": "Scorul și problemele găsite sunt salvate aici. Deschide editorul ca să le repari cu AI."
+        },
+        "referral": {
+          "title": "Invită prieteni",
+          "body": "Trimite linkul tău: primești 7 zile Pro pentru fiecare prieten care își face cont și își confirmă emailul."
+        }
       },
       "resumes": {
-        "create": { "title": "Creează un CV", "body": "Pornești un CV nou de aici. În editor poți importa un PDF existent." },
-        "row": { "title": "CV-urile tale", "body": "Fiecare rând arată titlul, ultima modificare și scorul unui CV." },
-        "actions": { "title": "Deschide, editează sau șterge", "body": "Ochiul și creionul deschid CV-ul în editor, coșul îl șterge." }
+        "create": {
+          "title": "Creează un CV",
+          "body": "Pornești un CV nou de aici. În editor poți importa un PDF existent."
+        },
+        "row": {
+          "title": "CV-urile tale",
+          "body": "Fiecare rând arată titlul, ultima modificare și scorul unui CV."
+        },
+        "actions": {
+          "title": "Deschide, editează sau șterge",
+          "body": "Ochiul și creionul deschid CV-ul în editor, coșul îl șterge."
+        }
       },
       "editor": {
-        "tabs": { "title": "Secțiunile CV-ului", "body": "Completează fiecare tab: date personale, experiență, educație, abilități și altele." },
-        "import": { "title": "Importă un PDF", "body": "Ai deja un CV? Importă-l și câmpurile se completează singure." },
-        "tailor": { "title": "Adaptează-l la un job", "body": "Lipești un anunț și AI propune modificări potrivite cu el." },
-        "preview": { "title": "Previzualizare live", "body": "Asta văd angajatorii. Se actualizează pe măsură ce scrii." },
-        "export": { "title": "Salvează și exportă", "body": "Salvează ce ai făcut, apoi exportă un PDF gata de trimis." }
+        "tabs": {
+          "title": "Secțiunile CV-ului",
+          "body": "Completează fiecare tab: date personale, experiență, educație, abilități și altele."
+        },
+        "import": {
+          "title": "Importă un PDF",
+          "body": "Ai deja un CV? Importă-l și câmpurile se completează singure."
+        },
+        "tailor": {
+          "title": "Adaptează-l la un job",
+          "body": "Lipești un anunț și AI propune modificări potrivite cu el."
+        },
+        "preview": {
+          "title": "Previzualizare live",
+          "body": "Asta văd angajatorii. Se actualizează pe măsură ce scrii."
+        },
+        "export": {
+          "title": "Salvează și exportă",
+          "body": "Salvează ce ai făcut, apoi exportă un PDF gata de trimis."
+        }
       },
       "coverLetters": {
-        "create": { "title": "Creează o scrisoare de intenție", "body": "Pornești o scrisoare nouă de aici." },
-        "row": { "title": "Scrisorile tale", "body": "Fiecare rând arată titlul și ultima modificare a unei scrisori." },
-        "actions": { "title": "Deschide, editează sau șterge", "body": "Ochiul și creionul deschid scrisoarea, coșul o șterge." }
+        "create": {
+          "title": "Creează o scrisoare de intenție",
+          "body": "Pornești o scrisoare nouă de aici."
+        },
+        "row": {
+          "title": "Scrisorile tale",
+          "body": "Fiecare rând arată titlul și ultima modificare a unei scrisori."
+        },
+        "actions": {
+          "title": "Deschide, editează sau șterge",
+          "body": "Ochiul și creionul deschid scrisoarea, coșul o șterge."
+        }
       },
       "aiReview": {
-        "upload": { "title": "Încarcă un CV", "body": "Aruncă aici un PDF ca să-l evaluezi fără să-l salvezi mai întâi ca CV." },
-        "jd": { "title": "Adaugă descrierea jobului", "body": "Opțional. Cu un anunț lipit aici, evaluarea verifică și cât de bine te potrivești cu el." },
-        "start": { "title": "Pornește evaluarea", "body": "Primești un scor cu îmbunătățiri concrete." },
-        "history": { "title": "CV-urile tale și evaluările anterioare", "body": "Evaluează orice CV salvat, redeschide ultimul rezultat sau rulează din nou după ce îl îmbunătățești." }
+        "upload": {
+          "title": "Încarcă un CV",
+          "body": "Aruncă aici un PDF ca să-l evaluezi fără să-l salvezi mai întâi ca CV."
+        },
+        "jd": {
+          "title": "Adaugă descrierea jobului",
+          "body": "Opțional. Cu un anunț lipit aici, evaluarea verifică și cât de bine te potrivești cu el."
+        },
+        "start": {
+          "title": "Pornește evaluarea",
+          "body": "Primești un scor cu îmbunătățiri concrete."
+        },
+        "history": {
+          "title": "CV-urile tale și evaluările anterioare",
+          "body": "Evaluează orice CV salvat, redeschide ultimul rezultat sau rulează din nou după ce îl îmbunătățești."
+        }
       }
     }
   },
@@ -1668,5 +1757,60 @@
     "marketingLabel": "Vreau să primesc pe email sfaturi pentru CV și căutarea unui job, precum și oferte Joben. Mă pot dezabona oricând.",
     "submit": "Descarcă șablonul",
     "error": "Nu am putut salva adresa. Încearcă din nou."
+  },
+  "ResumeWizard": {
+    "title": "Construiește-ți CV-ul",
+    "subtitle": "Patru pași rapizi, apoi ajungi în editor.",
+    "progress": "Pasul {current} din {total}",
+    "steps": {
+      "role": "Rol",
+      "contact": "Contact",
+      "experience": "Experiență",
+      "education": "Educație"
+    },
+    "role": {
+      "heading": "Pentru ce rol aplici?",
+      "label": "Titlul jobului dorit",
+      "placeholder": "Product Designer"
+    },
+    "contact": {
+      "heading": "Cum te pot contacta angajatorii?",
+      "firstName": "Prenume",
+      "lastName": "Nume",
+      "email": "Email",
+      "phone": "Telefon (opțional)",
+      "location": "Localitate (opțional)"
+    },
+    "experience": {
+      "heading": "Cel mai recent job",
+      "jobTitle": "Titlul jobului",
+      "company": "Companie",
+      "startYear": "Anul de început",
+      "endYear": "Anul de final",
+      "current": "Lucrez aici în prezent",
+      "description": "Ce ai realizat? (opțional)",
+      "descriptionPlaceholder": "O realizare pe fiecare rând",
+      "none": "Nu am încă experiență de muncă"
+    },
+    "education": {
+      "heading": "Educația ta",
+      "institution": "Școală sau universitate",
+      "degree": "Diplomă (opțional)",
+      "field": "Domeniu de studiu (opțional)",
+      "endYear": "Anul absolvirii (opțional)"
+    },
+    "back": "Înapoi",
+    "next": "Continuă",
+    "finish": "Creează-mi CV-ul",
+    "creating": "Se creează...",
+    "skip": "Sari peste și deschide editorul gol",
+    "errors": {
+      "required": "Acest câmp este obligatoriu.",
+      "email": "Introdu o adresă de email validă.",
+      "year": "Introdu un an din 4 cifre.",
+      "yearOrder": "Anul de final nu poate fi înaintea celui de început.",
+      "create": "Nu am putut crea CV-ul. Încearcă din nou.",
+      "limit": "Ai atins limita de CV-uri salvate din planul tău."
+    }
   }
 }

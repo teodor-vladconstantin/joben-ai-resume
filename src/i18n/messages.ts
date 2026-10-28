@@ -20,6 +20,11 @@ export type Messages = {
     logIn: string
     getStartedFree: string
     createNew: string
+    features: string
+    guides: string
+    logInCta: string
+    checkCv: string
+    menu: string
   }
   Home: {
     heroKeywords: string
@@ -102,6 +107,12 @@ export type Messages = {
       emailGeneric: string
       emailNetwork: string
     }
+    steps: { upload: string; scan: string; result: string }
+    scanningMessages: string[]
+    scanningTitle: string
+    scanningHint: string
+    stepOf: string
+    appCta: string
     wantRewriting: string
     proPrice: string
     proPricePeriod: string
@@ -174,6 +185,7 @@ export type Messages = {
     companyHeading: string
     companyBody: string // {legalName} {cui} {regCom} {address}
   }
+  ResumeWizard: Record<string, unknown>
   Grade: {
     labels: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
     descriptions: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
@@ -262,6 +274,8 @@ export type Messages = {
     tagline: string
     productHeading: string
     legalHeading: string
+    companyHeading: string
+    companyLinks: { href: string; label: string }[]
     productLinks: { href: string; label: string }[]
     legalLinks: { href: string; label: string }[]
     salBadgeAlt: string
