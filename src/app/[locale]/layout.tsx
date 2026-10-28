@@ -2,7 +2,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { Poppins, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -24,7 +24,7 @@ import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
 validateEnv()
 
-const hankenGrotesk = Hanken_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-hanken-grotesk' })
+const poppins = Poppins({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-poppins' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-jetbrains-mono' })
 
 export function generateStaticParams() {
@@ -171,7 +171,7 @@ export default async function RootLayout({
       {...(APP_ORIGIN && { afterSignOutUrl: SITE_ORIGIN, allowedRedirectOrigins: [APP_ORIGIN, SITE_ORIGIN] })}
     >
       <html lang={locale} suppressHydrationWarning>
-        <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+        <body className={`${poppins.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="motion-init"
             strategy="beforeInteractive"
