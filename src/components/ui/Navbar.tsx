@@ -4,7 +4,8 @@ import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { buttonVariants } from '@/components/ui/Button'
@@ -17,10 +18,11 @@ const NAV_LINK_CLASSES =
 export function Navbar() {
   const { isLoaded, isSignedIn } = useAuth()
   const t = useTranslations('Nav')
+  const locale = useLocale()
 
   const publicLinks = [
     { href: '/#builder', label: t('aiResumeBuilder') },
-    { href: '/free-ats-checker', label: t('atsAnalysis') },
+    { href: atsCheckerPath(locale), label: t('atsAnalysis') },
     { href: '/resume-examples', label: t('examples') },
     { href: '/#pricing', label: t('pricing') },
     { href: '/#faq', label: t('faq') },

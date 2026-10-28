@@ -7,6 +7,7 @@ import {
   type TemplateSequenceStep,
 } from '@/lib/template-sequence-copy'
 import { logger } from '@/lib/logger'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { APP_ORIGIN, isAppPath } from '@/lib/app-origin'
 
 const resendApiKey = process.env.RESEND_API_KEY
@@ -521,7 +522,8 @@ export async function sendTemplateSequenceEmail(input: {
     utm_medium: 'lifecycle',
     utm_campaign: `template_seq_${input.step}`,
   })
-  const href = `${isAppPath(copy.ctaPath) ? accountUrl : appUrl}/${input.locale}${copy.ctaPath}?${params.toString()}`
+  const ctaPath = copy.ctaPath === '/free-ats-checker' ? atsCheckerPath(input.locale) : copy.ctaPath
+  const href = `${isAppPath(ctaPath) ? accountUrl : appUrl}/${input.locale}${ctaPath}?${params.toString()}`
 
   return sendEmail({
     from: automationFromEmail,

@@ -17,7 +17,7 @@ export function GET() {
     keyPages: [
       { url: `${siteConfig.url}/ro`, description: 'Home: AI resume and cover letter builder with ATS-optimized templates.' },
       { url: `${siteConfig.url}/ro/pricing`, description: 'Free, Pro, and Recruiting plans.' },
-      { url: `${siteConfig.url}/ro/free-ats-checker`, description: 'Free 0-100 ATS score with a category breakdown, no signup required.' },
+      { url: `${siteConfig.url}/ro/verificare-cv-ats`, description: 'Free 0-100 ATS score with a category breakdown, no signup required.' },
       { url: `${siteConfig.url}/ro/resume-examples`, description: 'Role-specific ATS keywords and resume writing guidance.' },
     ],
     contentHubs: {
