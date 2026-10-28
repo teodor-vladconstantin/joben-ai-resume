@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cleanOrigin, isAppPath } from '@/lib/app-origin'
+import { cleanOrigin, isAppPath, originHref } from '@/lib/app-origin'
 
 describe('isAppPath', () => {
   it('matches account pages with or without locale, sub-paths and query', () => {
@@ -25,5 +25,17 @@ describe('cleanOrigin', () => {
     for (const v of ['https://app/joben.eu', 'app.joben.eu', 'https://joben.eu/ro', '', undefined]) {
       expect(cleanOrigin(v), String(v)).toBe('')
     }
+  })
+})
+
+describe('originHref', () => {
+  it('prefixes the locale and keeps path, query and hash', () => {
+    expect(originHref('https://joben.eu', 'ro', '/pricing')).toBe('https://joben.eu/ro/pricing')
+    expect(originHref('https://app.joben.eu', 'en', '/sign-up?from=ats')).toBe('https://app.joben.eu/en/sign-up?from=ats')
+    expect(originHref('https://joben.eu', 'ro', '/#builder')).toBe('https://joben.eu/ro/#builder')
+  })
+
+  it('maps the root path to the locale root', () => {
+    expect(originHref('https://joben.eu', 'ro', '/')).toBe('https://joben.eu/ro')
   })
 })

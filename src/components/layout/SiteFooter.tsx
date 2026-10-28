@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Link } from '@/i18n/navigation'
+import { AppLink } from '@/components/ui/AppLink'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { CompanyDetails } from '@/components/layout/CompanyDetails'
 import { CookieSettingsLink } from '@/components/layout/CookieSettingsLink'
@@ -40,9 +40,9 @@ export async function SiteFooter() {
               <ul className="mt-3 space-y-2">
                 {productLinks.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
+                    <AppLink href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
                       {link.label}
-                    </Link>
+                    </AppLink>
                   </li>
                 ))}
               </ul>
@@ -53,9 +53,9 @@ export async function SiteFooter() {
               <ul className="mt-3 space-y-2">
                 {resourceLinks.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
+                    <AppLink href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
                       {link.label}
-                    </Link>
+                    </AppLink>
                   </li>
                 ))}
               </ul>
@@ -66,9 +66,9 @@ export async function SiteFooter() {
               <ul className="mt-3 space-y-2">
                 {legalLinks.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
+                    <AppLink href={link.href} className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)">
                       {link.label}
-                    </Link>
+                    </AppLink>
                   </li>
                 ))}
                 <li>

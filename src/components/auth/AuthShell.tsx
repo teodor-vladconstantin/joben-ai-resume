@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { AppLink } from '@/components/ui/AppLink'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Badge'
 
@@ -18,12 +18,12 @@ export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellP
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16" suppressHydrationWarning>
       <div className="w-full max-w-md">
         <Card elevated className="p-8">
-          <Link href="/" className="flex items-center gap-2 mb-8">
+          <AppLink href="/" className="flex items-center gap-2 mb-8">
             <span className="relative h-8 w-8 overflow-hidden">
               <Image src="/jobeneu_logo.jpg" alt="Joben logo" fill sizes="32px" className="object-cover" />
             </span>
             <span className="text-xl font-bold tracking-tight text-(--foreground)">Joben</span>
-          </Link>
+          </AppLink>
 
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
           <h1 className="text-2xl font-bold text-(--foreground) mb-2">{heading}</h1>
@@ -33,7 +33,7 @@ export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellP
         </Card>
 
         <div className="mt-6 text-xs text-(--muted)">
-          <Link href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; {t('backToHome')}</Link>
+          <AppLink href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; {t('backToHome')}</AppLink>
         </div>
       </div>
     </div>
