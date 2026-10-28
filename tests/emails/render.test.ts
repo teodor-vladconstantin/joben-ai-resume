@@ -15,7 +15,7 @@ describe('email layout', () => {
     )
     expect(html).toContain('https://x.test/u?t=1')
     expect(html).toContain('https://x.test/go')
-    expect(html).toContain('#2cb87a')
+    expect(html).toContain('#047857')
     expect(html).not.toContain('<b>')
   })
 })
