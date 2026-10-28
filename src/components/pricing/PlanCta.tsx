@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Link } from '@/i18n/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { checkoutErrorKey, startCheckout, type PaidPlan } from '@/lib/client-billing'
 import { pushGtmEvent } from '@/lib/gtm-events'
+import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import type { AppLocale } from '@/i18n/routing'
 
@@ -37,14 +37,14 @@ export function PlanCta({ label, className, plan }: PlanCtaProps) {
   if (!isLoaded || !isSignedIn) {
     const resumeUrl = `/${locale}/pricing?startCheckout=${plan}`
     return (
-      <Link
+      <AppLink
         href={`/sign-up?redirect_url=${encodeURIComponent(resumeUrl)}`}
         className={className}
         aria-disabled={!isLoaded}
         onClick={() => pushGtmEvent('plan_cta_click', { plan })}
       >
         {label}
-      </Link>
+      </AppLink>
     )
   }
 

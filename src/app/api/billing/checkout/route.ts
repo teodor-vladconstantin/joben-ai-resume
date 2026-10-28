@@ -9,6 +9,7 @@ import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/ro
 import { getStripeClient, isStripeConfigured } from '@/lib/stripe'
 import { checkoutRequestSchema } from '@/lib/validation/schemas'
 import { PASS_14D_PRICE_BANI } from '@/lib/content'
+import { APP_ORIGIN } from '@/lib/app-origin'
 
 export const runtime = 'nodejs'
 
@@ -158,7 +159,7 @@ export async function POST(req: Request) {
         mode: isPass ? 'payment' : 'subscription',
         line_items: [lineItem],
         locale,
-        success_url: `${appUrl}/${locale}/dashboard?upgrade=success${isPass ? '&pass=14d' : ''}`,
+        success_url: `${APP_ORIGIN || appUrl}/${locale}/dashboard?upgrade=success${isPass ? '&pass=14d' : ''}`,
         cancel_url: `${appUrl}/${locale}/pricing?upgrade=cancelled`,
         metadata: {
           userId,
