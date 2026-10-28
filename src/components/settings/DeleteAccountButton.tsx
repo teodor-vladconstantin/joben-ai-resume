@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useClerk, useReverification } from '@clerk/nextjs'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { APP_ORIGIN, SITE_ORIGIN, originHref } from '@/lib/app-origin'
 
 export function DeleteAccountButton() {
   const [open, setOpen] = useState(false)
@@ -14,6 +15,7 @@ export function DeleteAccountButton() {
   const [error, setError] = useState<string | null>(null)
   const { signOut } = useClerk()
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations('SettingsPage.dangerZone')
   // Prompts for re-verification when the server answers with a Clerk reverification error.
   const requestDelete = useReverification(() =>
@@ -32,8 +34,10 @@ export function DeleteAccountButton() {
       if (!response || !response.ok) {
         throw new Error('Deletion failed')
       }
-      await signOut()
-      router.push('/')
+      // The app host has no landing page, so with the split on the user ends on the marketing site.
+      const home = APP_ORIGIN && SITE_ORIGIN ? originHref(SITE_ORIGIN, locale, '/') : null
+      await signOut(home ? { redirectUrl: home } : undefined)
+      if (!home) router.push('/')
     } catch {
       setError(t('errorMessage'))
       setDeleting(false)
