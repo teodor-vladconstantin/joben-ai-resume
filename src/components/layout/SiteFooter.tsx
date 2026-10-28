@@ -79,7 +79,7 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-start gap-4 border-t border-(--border) pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div data-nosnippet className="mt-8 flex flex-col items-start gap-4 border-t border-(--border) pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-xl space-y-2">
             <p className="text-xs text-(--muted)">{t('creatorCredit')}</p>
             <CompanyDetails className="text-xs text-(--muted)" />
