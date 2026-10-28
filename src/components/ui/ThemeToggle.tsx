@@ -19,7 +19,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       type="button"
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       aria-label={mounted ? (resolvedTheme === 'dark' ? t('switchToLight') : t('switchToDark')) : t('toggleTheme')}
-      className={`inline-flex h-8 w-8 items-center justify-center text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground) ${className}`.trim()}
+      className={`inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground ${className}`.trim()}
     >
       {mounted ? (
         resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />

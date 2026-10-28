@@ -5,6 +5,7 @@ import { Upload, Loader2, AlertTriangle, CheckCircle2, RotateCcw, FileText } fro
 import { useLocale, useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
 import { Card } from '@/components/ui/Card'
+import { Progress } from '@/components/ui/progress'
 import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
@@ -13,7 +14,7 @@ import { useServerError } from '@/hooks/useServerError'
 import { pushGtmEvent } from '@/lib/gtm-events'
 import { Link } from '@/i18n/navigation'
 
-const legalLinkClass = 'text-(--foreground) underline decoration-(--border) underline-offset-2 hover:decoration-(--accent) transition-colors duration-150 ease-out'
+const legalLinkClass = 'text-foreground underline decoration-border underline-offset-2 hover:decoration-primary transition-colors duration-150 ease-out'
 
 type AtsCategoryKey = 'ats_formatting' | 'structure' | 'keyword_impact' | 'clarity'
 type GradeKey = 'Poor' | 'Fair' | 'Good' | 'Excellent'
@@ -68,6 +69,52 @@ function getWorstCategory(categories: Record<AtsCategoryKey, AtsCategory>): AtsC
     const worstRatio = categories[worst].score / categories[worst].max
     return ratio < worstRatio ? key : worst
   }, CATEGORY_ORDER[0])
+}
+
+const STEP_KEYS = ['upload', 'scan', 'result'] as const
+
+function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
+  const t = useTranslations('AtsChecker')
+  return (
+    <div className="mb-6" aria-label={t('stepOf', { current, total: STEP_KEYS.length })}>
+      <Progress value={(current / STEP_KEYS.length) * 100} aria-label={t('stepOf', { current, total: STEP_KEYS.length })} />
+      <ol className="mt-3 grid grid-cols-3 text-xs">
+        {STEP_KEYS.map((key, index) => (
+          <li
+            key={key}
+            aria-current={index + 1 === current ? 'step' : undefined}
+            className={index + 1 <= current ? 'font-semibold text-foreground' : 'text-muted-foreground'}
+          >
+            {index + 1}. {t(`steps.${key}`)}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+// Step 2: status text cycles while the scan request is in flight.
+function ScanningStep() {
+  const t = useTranslations('AtsChecker')
+  const messages = t.raw('scanningMessages') as string[]
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => setIndex((i) => Math.min(i + 1, messages.length - 1)), 2200)
+    return () => clearInterval(timer)
+  }, [messages.length])
+
+  return (
+    <Card radius="lg" className="p-8">
+      <StepIndicator current={2} />
+      <div className="py-8 text-center" role="status" aria-live="polite">
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
+        <h2 className="mt-5 text-lg font-bold text-foreground">{t('scanningTitle')}</h2>
+        <p className="mt-2 min-h-5 text-sm text-foreground">{messages[index]}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('scanningHint')}</p>
+      </div>
+    </Card>
+  )
 }
 
 export function FreeAtsCheckerClient() {
@@ -289,6 +336,7 @@ export function FreeAtsCheckerClient() {
 
     return (
       <div className="space-y-10">
+        <StepIndicator current={3} />
         <Card elevated radius="lg" className="p-8 sm:p-10">
           <ResumeScoreHero
             score={result.overall_score}
@@ -300,20 +348,20 @@ export function FreeAtsCheckerClient() {
 
         {hasIssues && (
           <Card radius="lg" className="p-6">
-            <h2 className="text-(--foreground) font-bold mb-4">{t('whatToFix')}</h2>
+            <h2 className="text-foreground font-bold mb-4">{t('whatToFix')}</h2>
             <ul className="space-y-4">
               {visibleIssues.map((item, index) => (
                 <li key={index} className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-(--foreground) mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-foreground mt-0.5" />
                   <div>
-                    <p className="text-(--foreground) font-semibold text-sm">{item.issue}</p>
-                    <p className="text-(--muted) text-sm mt-0.5">{item.explanation}</p>
+                    <p className="text-foreground font-semibold text-sm">{item.issue}</p>
+                    <p className="text-muted-foreground text-sm mt-0.5">{item.explanation}</p>
                   </div>
                 </li>
               ))}
             </ul>
             {hiddenIssuesCount > 0 && (
-              <p className="mt-4 text-sm font-semibold text-(--foreground)">{t('moreFixesByEmail', { count: hiddenIssuesCount })}</p>
+              <p className="mt-4 text-sm font-semibold text-foreground">{t('moreFixesByEmail', { count: hiddenIssuesCount })}</p>
             )}
           </Card>
         )}
@@ -321,25 +369,25 @@ export function FreeAtsCheckerClient() {
         {scanId && (
           emailSentTo ? (
             <Card radius="lg" className="p-6 text-center">
-              <p className="text-(--foreground) font-semibold text-sm">{t('reportSentTo', { email: emailSentTo })}</p>
+              <p className="text-foreground font-semibold text-sm">{t('reportSentTo', { email: emailSentTo })}</p>
               <button
                 onClick={() => setEmailSentTo(null)}
-                className="mt-2 text-xs text-(--muted) hover:text-(--foreground) underline"
+                className="mt-2 text-xs text-muted-foreground hover:text-foreground underline"
               >
                 {t('sendDifferentEmail')}
               </button>
             </Card>
           ) : (
             <Card radius="lg" className="p-6">
-              <h2 className="text-(--foreground) font-bold mb-1">{t('getReportByEmail')}</h2>
-              <p className="text-(--muted) text-sm mb-4">{t('emailExplainer')}</p>
+              <h2 className="text-foreground font-bold mb-1">{t('getReportByEmail')}</h2>
+              <p className="text-muted-foreground text-sm mb-4">{t('emailExplainer')}</p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   value={postScanEmail}
                   onChange={(e) => setPostScanEmail(e.target.value)}
                   placeholder={t('emailPlaceholder')}
-                  className="flex-1 rounded-sm border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+                  className="flex-1 rounded-sm border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
                 />
                 <button
                   onClick={() => void handleSendReport()}
@@ -349,7 +397,7 @@ export function FreeAtsCheckerClient() {
                   {isSendingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : t('emailMeThisReport')}
                 </button>
               </div>
-              {reportError && <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2 mt-2">{reportError}</p>}
+              {reportError && <p className="text-sm text-foreground border-l-2 border-foreground pl-2 mt-2">{reportError}</p>}
             </Card>
           )
         )}
@@ -365,16 +413,16 @@ export function FreeAtsCheckerClient() {
         >
           {worstCategoryMessageKey ? (
             <>
-              <p className="text-(--foreground) font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('freeIncludes')}</p>
+              <p className="text-foreground font-semibold">{t(`ctaByCategory.${worstCategoryMessageKey}.headline`)}</p>
+              <p className="text-muted-foreground text-sm mt-1">{t('freeIncludes')}</p>
               <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
                 {t(`ctaByCategory.${worstCategoryMessageKey}.cta`)}
               </AuthAwareSignupLink>
             </>
           ) : (
             <>
-              <p className="text-(--foreground) font-semibold">{t('strongScore')}</p>
-              <p className="text-(--muted) text-sm mt-1">{t('strongScoreSubtext')}</p>
+              <p className="text-foreground font-semibold">{t('strongScore')}</p>
+              <p className="text-muted-foreground text-sm mt-1">{t('strongScoreSubtext')}</p>
               <AuthAwareSignupLink signedOutHref={signUpHref} className={`mt-4 inline-flex ${buttonVariants('primary', 'md')}`}>
                 {t('createFreeAccount')}
               </AuthAwareSignupLink>
@@ -389,10 +437,10 @@ export function FreeAtsCheckerClient() {
             if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'pro', scanId, score: result.overall_score })
           }}
         >
-          <p className="text-(--foreground) font-semibold">{t('wantRewriting')}</p>
+          <p className="text-foreground font-semibold">{t('wantRewriting')}</p>
           <p className="mt-2">
-            <span className="text-2xl text-(--foreground) font-bold">{t('proPrice')}</span>
-            <span className="text-(--muted)"> {t('proPricePeriod')}</span>
+            <span className="text-2xl text-foreground font-bold">{t('proPrice')}</span>
+            <span className="text-muted-foreground"> {t('proPricePeriod')}</span>
           </p>
           <PlanCta plan="pro" label={t(`ctaByCategory.${CATEGORY_TO_MESSAGE_KEY[worstCategory]}.cta`)} className={`mt-4 inline-flex ${buttonVariants('secondary', 'md')}`} />
         </Card>
@@ -400,7 +448,7 @@ export function FreeAtsCheckerClient() {
         <div className="text-center">
           <button
             onClick={handleReset}
-            className="inline-flex items-center gap-2 text-sm text-(--muted) hover:text-(--foreground) transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" /> {t('scanAnother')}
           </button>
@@ -418,9 +466,9 @@ export function FreeAtsCheckerClient() {
           if (isCtaClick(event)) posthog.capture('ats_result_cta_clicked', { cta: 'rate_limited', scanId: null })
         }}
       >
-        <AlertTriangle className="mx-auto h-8 w-8 text-(--foreground) mb-3" />
-        <h2 className="text-(--foreground) font-bold text-lg">{t('usedFreeScan')}</h2>
-        <p className="text-(--muted) text-sm mt-2 max-w-md mx-auto">
+        <AlertTriangle className="mx-auto h-8 w-8 text-foreground mb-3" />
+        <h2 className="text-foreground font-bold text-lg">{t('usedFreeScan')}</h2>
+        <p className="text-muted-foreground text-sm mt-2 max-w-md mx-auto">
           {t('usedFreeScanBody1')} {t('usedFreeScanBody2')}
         </p>
         <AuthAwareSignupLink
@@ -433,8 +481,11 @@ export function FreeAtsCheckerClient() {
     )
   }
 
+  if (isScanning) return <ScanningStep />
+
   return (
     <Card radius="lg" className="p-8">
+      <StepIndicator current={1} />
       <input
         ref={inputRef}
         type="file"
@@ -451,7 +502,7 @@ export function FreeAtsCheckerClient() {
         role="button"
         tabIndex={0}
         className={`border border-dashed p-10 text-center transition-colors duration-150 ease-out cursor-pointer ${
-          isDragging ? 'border-(--accent) bg-(--accent-muted)' : 'border-(--border) hover:border-(--accent)'
+          isDragging ? 'border-primary bg-primary/10' : 'border-border hover:border-primary'
         }`}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -477,24 +528,24 @@ export function FreeAtsCheckerClient() {
       >
         {file ? (
           <>
-            <FileText className="mx-auto h-7 w-7 text-(--foreground) mb-3" />
-            <p className="text-(--foreground) font-semibold">{file.name}</p>
-            <p className="text-xs text-(--muted) mt-1">{t('readyToScan')}</p>
+            <FileText className="mx-auto h-7 w-7 text-foreground mb-3" />
+            <p className="text-foreground font-semibold">{file.name}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('readyToScan')}</p>
           </>
         ) : (
           <>
-            <Upload className="mx-auto h-7 w-7 text-(--muted) mb-3" />
-            <p className="text-(--foreground) font-semibold">{t('dragAndDrop')}</p>
-            <p className="text-xs text-(--muted) mt-1">{t('fileHint')}</p>
+            <Upload className="mx-auto h-7 w-7 text-muted-foreground mb-3" />
+            <p className="text-foreground font-semibold">{t('dragAndDrop')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('fileHint')}</p>
           </>
         )}
       </div>
 
-      {error && <p className="text-sm font-medium text-(--foreground) mt-4 text-center">{error}</p>}
+      {error && <p className="text-sm font-medium text-foreground mt-4 text-center">{error}</p>}
 
       <div className="mt-6">
-        <label htmlFor="ats-check-email" className="block text-sm text-(--foreground) font-medium mb-1.5">
-          {t('getReportByEmail')} <span className="text-(--muted) font-normal">{t('optional')}</span>
+        <label htmlFor="ats-check-email" className="block text-sm text-foreground font-medium mb-1.5">
+          {t('getReportByEmail')} <span className="text-muted-foreground font-normal">{t('optional')}</span>
         </label>
         <input
           id="ats-check-email"
@@ -502,17 +553,17 @@ export function FreeAtsCheckerClient() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('emailPlaceholder')}
-          className="w-full rounded-sm border border-(--border) bg-(--surface) px-4 py-2.5 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+          className="w-full rounded-sm border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
         />
-        <p className="text-xs text-(--muted) mt-1.5">{t('neverRequired')}</p>
+        <p className="text-xs text-muted-foreground mt-1.5">{t('neverRequired')}</p>
       </div>
 
-      <label className="mt-6 flex items-start gap-3 text-xs text-(--muted)">
+      <label className="mt-6 flex items-start gap-3 text-xs text-muted-foreground">
         <input
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
+          className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border bg-card accent-primary"
         />
         <span>
           {t.rich('consentLabel', {
@@ -546,7 +597,7 @@ export function FreeAtsCheckerClient() {
         )}
       </button>
 
-      <p className="text-xs text-(--muted) text-center mt-3">{t('scanDisclaimer')}</p>
+      <p className="text-xs text-muted-foreground text-center mt-3">{t('scanDisclaimer')}</p>
     </Card>
   )
 }

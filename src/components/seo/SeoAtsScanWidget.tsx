@@ -101,20 +101,20 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
     : t('widget.matchLow')
 
   return (
-    <Card elevated radius="lg" className="p-6 sm:p-8 border-2 border-(--foreground)/20">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-(--border)">
+    <Card elevated radius="lg" className="p-6 sm:p-8 border-2 border-foreground/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-(--accent-muted) text-(--foreground) mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-primary/10 text-foreground mb-2">
             <Sparkles className="h-3.5 w-3.5" />
             {t('widget.badge', { job: jobTitle })}
           </div>
-          <h3 className="text-xl font-bold text-(--foreground)">{t('widget.title', { job: jobTitle })}</h3>
-          <p className="text-xs text-(--muted) mt-1">{t('widget.subtitle')}</p>
+          <h3 className="text-xl font-bold text-foreground">{t('widget.title', { job: jobTitle })}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{t('widget.subtitle')}</p>
         </div>
         {result && (
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 text-xs text-(--muted) hover:text-(--foreground) underline font-mono shrink-0"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline font-mono shrink-0"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             {t('widget.rescan')}
@@ -141,21 +141,21 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
             }}
             onClick={() => inputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-              file ? 'border-emerald-500 bg-emerald-500/5' : 'border-(--border) hover:border-(--foreground) bg-(--surface)'
+              file ? 'border-emerald-500 bg-emerald-500/5' : 'border-border hover:border-foreground bg-card'
             }`}
           >
             <div className="flex flex-col items-center">
               {file ? (
                 <>
                   <FileText className="h-8 w-8 text-emerald-500 mb-2" />
-                  <p className="text-sm font-semibold text-(--foreground)">{file.name}</p>
-                  <p className="text-xs text-(--muted) mt-0.5">{t('upload.change')}</p>
+                  <p className="text-sm font-semibold text-foreground">{file.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t('upload.change')}</p>
                 </>
               ) : (
                 <>
-                  <Upload className="h-8 w-8 text-(--muted) mb-2" />
-                  <p className="text-sm font-semibold text-(--foreground)">{t('widget.uploadPrompt', { job: jobTitle })}</p>
-                  <p className="text-xs text-(--muted) mt-1">{t('upload.formats')}</p>
+                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm font-semibold text-foreground">{t('widget.uploadPrompt', { job: jobTitle })}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('upload.formats')}</p>
                 </>
               )}
             </div>
@@ -183,24 +183,24 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
         <div className="pt-6 space-y-6 animate-in fade-in-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {match && (
-              <div className="p-4 rounded-xl border border-(--border) bg-(--surface) flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full border-4 border-(--foreground) flex items-center justify-center font-bold text-(--foreground)">
+              <div className="p-4 rounded-xl border border-border bg-card flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full border-4 border-foreground flex items-center justify-center font-bold text-foreground">
                   <span className="text-xl tabular-nums">{match.matchPercentage}%</span>
                 </div>
                 <div>
-                  <p className="text-xs text-(--muted)">{t('widget.match')}</p>
-                  <p className="text-sm font-bold text-(--foreground)">{matchLabel}</p>
-                  <p className="text-xs text-(--muted)">{t('widget.forJob', { job: jobTitle })}</p>
+                  <p className="text-xs text-muted-foreground">{t('widget.match')}</p>
+                  <p className="text-sm font-bold text-foreground">{matchLabel}</p>
+                  <p className="text-xs text-muted-foreground">{t('widget.forJob', { job: jobTitle })}</p>
                 </div>
               </div>
             )}
-            <div className="p-4 rounded-xl border border-(--border) bg-(--surface) flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full border-4 border-(--foreground) flex items-center justify-center font-bold text-(--foreground)">
+            <div className="p-4 rounded-xl border border-border bg-card flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full border-4 border-foreground flex items-center justify-center font-bold text-foreground">
                 <span className="text-xl tabular-nums">{result.fastAts.overallScore}</span>
               </div>
               <div>
-                <p className="text-xs text-(--muted)">{t('widget.atsScore')}</p>
-                <p className="text-sm font-bold text-(--foreground)">
+                <p className="text-xs text-muted-foreground">{t('widget.atsScore')}</p>
+                <p className="text-sm font-bold text-foreground">
                   {t('result.grade', { grade: t(`grades.${result.fastAts.grade}`) })}
                 </p>
               </div>
@@ -225,7 +225,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
 
           {match && match.foundKeywords.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs text-(--muted) font-medium">{t('widget.found')}</p>
+              <p className="text-xs text-muted-foreground font-medium">{t('widget.found')}</p>
               <div className="flex flex-wrap gap-1.5">
                 {match.foundKeywords.map((kw) => (
                   <span
@@ -241,7 +241,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
           )}
 
           {result.fastAts.issues.length > 0 && (
-            <ul className="space-y-1 text-xs text-(--foreground)">
+            <ul className="space-y-1 text-xs text-foreground">
               {result.fastAts.issues.slice(0, 3).map((issue) => (
                 <li key={issue.id} className="flex items-start gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
@@ -259,7 +259,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
               <span>{t('widget.cta')}</span>
               <ArrowRight className="h-4 w-4" />
             </AppLink>
-            <p className="text-[11px] text-center text-(--muted) mt-2">{t('widget.ctaNote')}</p>
+            <p className="text-[11px] text-center text-muted-foreground mt-2">{t('widget.ctaNote')}</p>
           </div>
         </div>
       )}

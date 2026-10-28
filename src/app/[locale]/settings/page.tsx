@@ -63,15 +63,15 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
         </div>
 
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-          <h1 className="text-3xl font-bold text-(--foreground) mb-8">{t('title')}</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-8">{t('title')}</h1>
 
           <div className="space-y-6">
             {/* Account */}
-            <div className="bg-(--surface) p-6 border border-(--border)">
+            <div className="bg-card p-6 border border-border">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-(--foreground)">{t('account.title')}</h2>
-                  <p className="text-sm text-(--muted) mt-1">
+                  <h2 className="text-lg font-bold text-foreground">{t('account.title')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
                     {t('account.description')}
                   </p>
                 </div>
@@ -80,7 +80,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
               <Divider className="my-4" />
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-(--muted)">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail size={14} />
                     {t('account.emailSettings')}
                   </div>
@@ -91,30 +91,30 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Billing */}
-            <div className="bg-(--surface) p-6 border border-(--border)">
+            <div className="bg-card p-6 border border-border">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">{t('billing.title')}</h2>
-                <p className="text-sm text-(--muted) mt-1">
+                <h2 className="text-lg font-bold text-foreground">{t('billing.title')}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   {t('billing.description')}
                 </p>
               </div>
               <Divider className="my-4" />
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-(--muted)">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CreditCard size={14} />
                     {t('billing.currentPlan')}
                   </div>
                   <Badge variant="solid">{PLAN_DEFINITIONS[plan].label}</Badge>
                 </div>
                 {grantExpiresAt ? (
-                  <p className="text-sm text-(--foreground)">
+                  <p className="text-sm text-foreground">
                     {t('billing.grantActiveUntil', { date: dateFormatter.format(grantExpiresAt) })}
                   </p>
                 ) : null}
                 {hasSubscription || plan !== 'recruiting' ? (
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-(--muted)">
+                    <div className="text-sm text-muted-foreground">
                       {hasSubscription ? t('billing.subscription') : t('billing.plan')}
                     </div>
                     <ManageBillingButton hasSubscription={hasSubscription} />
@@ -124,16 +124,16 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Notifications */}
-            <div className="bg-(--surface) p-6 border border-(--border)">
+            <div className="bg-card p-6 border border-border">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">{t('notifications.title')}</h2>
-                <p className="text-sm text-(--muted) mt-1">
+                <h2 className="text-lg font-bold text-foreground">{t('notifications.title')}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   {t('notifications.description')}
                 </p>
               </div>
               <Divider className="my-4" />
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-(--muted)">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Bell size={14} />
                   {t('notifications.emailNotifications')}
                 </div>
@@ -142,16 +142,16 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Security */}
-            <div className="bg-(--surface) p-6 border border-(--border)">
+            <div className="bg-card p-6 border border-border">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">{t('security.title')}</h2>
-                <p className="text-sm text-(--muted) mt-1">
+                <h2 className="text-lg font-bold text-foreground">{t('security.title')}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   {t('security.description')}
                 </p>
               </div>
               <Divider className="my-4" />
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-(--muted)">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Shield size={14} />
                   {t('security.twoFactor')}
                 </div>
@@ -160,10 +160,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Danger zone */}
-            <div className="bg-(--surface) p-6 border border-(--border) border-l-2 border-l-(--foreground)">
+            <div className="bg-card p-6 border border-border border-l-2 border-l-foreground">
               <div>
-                <h2 className="text-lg font-bold text-(--foreground)">{t('dangerZone.title')}</h2>
-                <p className="text-sm text-(--muted) mt-1">
+                <h2 className="text-lg font-bold text-foreground">{t('dangerZone.title')}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   {t('dangerZone.description')}
                 </p>
               </div>

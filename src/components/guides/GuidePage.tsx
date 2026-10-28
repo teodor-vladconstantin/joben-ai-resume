@@ -142,34 +142,34 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto pt-32 pb-24 space-y-12">
         <header className="space-y-4">
           <Eyebrow>{kindCopy.eyebrow}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-(--foreground)">{content.title}</h1>
-          <p className="text-xs text-(--muted) font-mono">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">{content.title}</h1>
+          <p className="text-xs text-muted-foreground font-mono">
             {copy.updated}: <time dateTime={guide.dateModified}>{guide.dateModified}</time>
           </p>
         </header>
 
         <Card radius="lg" className="p-6 sm:p-8 space-y-2">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-(--muted)">{copy.answerLabel}</p>
-          <p className="text-lg leading-relaxed text-(--foreground)">{content.answer}</p>
+          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">{copy.answerLabel}</p>
+          <p className="text-lg leading-relaxed text-foreground">{content.answer}</p>
         </Card>
 
         {content.sections.map((section) => (
           <section key={section.heading} className="space-y-4">
-            <h2 className="text-2xl font-bold text-(--foreground)">{section.heading}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{section.heading}</h2>
             {section.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="text-(--muted) leading-relaxed">
+              <p key={paragraph} className="text-muted-foreground leading-relaxed">
                 {paragraph}
               </p>
             ))}
             {section.items && (
-              <ul className="list-disc pl-5 space-y-2 text-(--muted) leading-relaxed">
+              <ul className="list-disc pl-5 space-y-2 text-muted-foreground leading-relaxed">
                 {section.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -179,19 +179,19 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
         ))}
 
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-(--foreground)">{copy.faqHeading}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{copy.faqHeading}</h2>
           {content.faq.map((item) => (
             <div key={item.question} className="space-y-2">
-              <h3 className="font-bold text-(--foreground)">{item.question}</h3>
-              <p className="text-(--muted) leading-relaxed">{item.answer}</p>
+              <h3 className="font-bold text-foreground">{item.question}</h3>
+              <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
             </div>
           ))}
         </section>
 
-        <div className="p-6 rounded-2xl border border-(--border) bg-(--surface) flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl border border-border bg-card flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h2 className="font-bold text-lg text-(--foreground)">{copy.ctaHeading}</h2>
-            <p className="text-xs text-(--muted) mt-1">{copy.ctaBody}</p>
+            <h2 className="font-bold text-lg text-foreground">{copy.ctaHeading}</h2>
+            <p className="text-xs text-muted-foreground mt-1">{copy.ctaBody}</p>
           </div>
           <TrackedLink
             href={atsCheckerPath(locale)}
@@ -204,17 +204,17 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
         </div>
         {related.length > 0 && (
           <nav aria-label={kindCopy.related} className="space-y-3">
-            <h2 className="text-lg font-bold text-(--foreground)">{kindCopy.related}</h2>
+            <h2 className="text-lg font-bold text-foreground">{kindCopy.related}</h2>
             <ul className="space-y-2">
               {related.map((g) => (
                 <li key={g.content[locale].slug}>
-                  <Link href={guidePath(locale, g)} className="text-(--foreground) underline underline-offset-4">
+                  <Link href={guidePath(locale, g)} className="text-foreground underline underline-offset-4">
                     {g.content[locale].title}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href={`/${GUIDE_SEGMENT[kind][locale]}`} className="text-(--muted) underline underline-offset-4">
+                <Link href={`/${GUIDE_SEGMENT[kind][locale]}`} className="text-muted-foreground underline underline-offset-4">
                   {kindCopy.hub}
                 </Link>
               </li>

@@ -2,11 +2,11 @@ import * as React from 'react'
 
 export type CardRadius = 'base' | 'lg'
 
-// Swiss rule: radius 0 everywhere except inputs (2px max) — 'lg' is kept as a
-// prop for callers migrating incrementally, but no longer maps to a rounder corner.
+// 'lg' is kept as a prop for callers migrating incrementally; both map to the same radius.
+
 const RADIUS_CLASSES: Record<CardRadius, string> = {
-  base: 'rounded-none',
-  lg: 'rounded-none',
+  base: 'rounded-lg',
+  lg: 'rounded-lg',
 }
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -21,7 +21,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
   return (
     <div
       ref={ref}
-      className={`border border-(--border) ${RADIUS_CLASSES[radius]} ${elevated ? 'bg-(--surface-elevated)' : 'bg-(--surface)'} ${className}`.trim()}
+      className={`border border-border ${RADIUS_CLASSES[radius]} bg-card shadow-card ${className}`.trim()}
       {...props}
     />
   )

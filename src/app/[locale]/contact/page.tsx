@@ -54,7 +54,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       ]),
     ],
   }
-  const link = 'text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out'
+  const link = 'text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out'
   const withEmail = (body: string, email: string) => {
     const [before, after] = body.split('{email}')
     return (
@@ -71,17 +71,17 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       <JsonLd data={jsonLd} />
       <Navbar />
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-6">{c.heading}</h1>
-        <p className="text-(--muted) text-lg leading-relaxed mb-10">{c.intro}</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">{c.heading}</h1>
+        <p className="text-muted-foreground text-lg leading-relaxed mb-10">{c.intro}</p>
 
-        <h2 className="text-xl font-bold text-(--foreground) mb-2">{c.generalHeading}</h2>
-        <p className="text-(--muted) mb-8">{withEmail(c.generalBody, company.email)}</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">{c.generalHeading}</h2>
+        <p className="text-muted-foreground mb-8">{withEmail(c.generalBody, company.email)}</p>
 
-        <h2 className="text-xl font-bold text-(--foreground) mb-2">{c.privacyHeading}</h2>
-        <p className="text-(--muted) mb-8">{withEmail(c.privacyBody, PRIVACY_EMAIL)}</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">{c.privacyHeading}</h2>
+        <p className="text-muted-foreground mb-8">{withEmail(c.privacyBody, PRIVACY_EMAIL)}</p>
 
-        <h2 className="text-xl font-bold text-(--foreground) mb-2">{c.companyHeading}</h2>
-        <p className="text-(--muted)">{fill(c.companyBody, company)}</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">{c.companyHeading}</h2>
+        <p className="text-muted-foreground">{fill(c.companyBody, company)}</p>
       </main>
     </div>
   )

@@ -43,11 +43,11 @@ export function ScrollProgress() {
   return (
     <>
       <div className="fixed inset-x-0 top-0 z-50 h-0.5" aria-hidden="true">
-        <div className="h-full bg-(--accent) origin-left" style={{ transform: `scaleX(${progress})` }} />
+        <div className="h-full bg-primary origin-left" style={{ transform: `scaleX(${progress})` }} />
       </div>
       {sectionLabel ? (
         <div
-          className="fixed bottom-4 right-4 z-40 hidden font-mono text-(length:--text-label) text-(--muted) lg:block"
+          className="fixed bottom-4 right-4 z-40 hidden font-mono text-(length:--text-label) text-muted-foreground lg:block"
           aria-hidden="true"
         >
           {sectionLabel}

@@ -15,7 +15,7 @@ export function LocaleSwitcher({ className = '' }: { className?: string }) {
       href={pathname}
       locale={other}
       aria-label={other === 'ro' ? t('switchToRomanian') : t('switchToEnglish')}
-      className={`inline-flex h-8 items-center px-1 text-sm font-medium text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground) ${className}`.trim()}
+      className={`inline-flex h-8 items-center px-1 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground ${className}`.trim()}
     >
       {other.toUpperCase()}
     </Link>

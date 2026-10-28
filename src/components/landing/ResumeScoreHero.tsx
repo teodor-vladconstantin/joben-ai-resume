@@ -16,27 +16,27 @@ export function ResumeScoreHero({ score, gradeLabel, gradeDescription, categorie
     <div className="w-full">
       <div className="mb-10">
         <div className="flex items-baseline gap-2">
-          <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-(--foreground)">{score}</span>
-          <span className="font-mono text-xl text-(--muted)">/100</span>
+          <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{score}</span>
+          <span className="font-mono text-xl text-muted-foreground">/100</span>
         </div>
-        <div className="mt-3 h-1 w-full max-w-sm bg-(--border)">
-          <div className="h-full bg-(--accent)" style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
+        <div className="mt-3 h-1 w-full max-w-sm bg-border">
+          <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
         </div>
 
-        <p className="mt-6 text-2xl sm:text-3xl font-bold text-(--foreground)">{gradeLabel}</p>
-        <p className="mt-2 text-(--muted) max-w-md">{gradeDescription}</p>
+        <p className="mt-6 text-2xl sm:text-3xl font-bold text-foreground">{gradeLabel}</p>
+        <p className="mt-2 text-muted-foreground max-w-md">{gradeDescription}</p>
       </div>
 
       <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
         {categories.map((category) => (
           <div key={category.label}>
             <div className="flex items-center justify-between gap-3 text-sm mb-2">
-              <span className="text-(--foreground) font-medium">{category.label}</span>
-              <span className="text-(--muted) font-mono text-xs tabular-nums">{category.value}/{category.max}</span>
+              <span className="text-foreground font-medium">{category.label}</span>
+              <span className="text-muted-foreground font-mono text-xs tabular-nums">{category.value}/{category.max}</span>
             </div>
-            <div className="h-1 bg-(--border) overflow-hidden">
+            <div className="h-1 bg-border overflow-hidden">
               <div
-                className="h-full bg-(--accent)"
+                className="h-full bg-primary"
                 style={{ width: `${(category.value / category.max) * 100}%` }}
               />
             </div>

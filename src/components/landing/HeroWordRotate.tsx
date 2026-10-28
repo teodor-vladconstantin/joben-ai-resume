@@ -28,7 +28,7 @@ export function HeroWordRotate({ words, intervalMs = 2400 }: HeroWordRotateProps
     // threshold — so the rotating word stays --foreground and the accent
     // moves to a 2px underline instead.
     <span
-      className="relative inline-grid align-baseline border-b-2 border-(--accent) text-(--foreground)"
+      className="relative inline-grid align-baseline border-b-2 border-primary text-foreground"
       style={{ minWidth: `${maxChars}ch` }}
     >
       {/* initial={false}: skip the enter animation on first mount so the

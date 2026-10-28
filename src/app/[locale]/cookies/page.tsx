@@ -53,20 +53,20 @@ function CookieTable({ headers, rows }: { headers: { name: string; provider: str
     <div className="mt-3 overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-(--border)">
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-(--muted)">{headers.name}</th>
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-(--muted)">{headers.provider}</th>
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-(--muted)">{headers.purpose}</th>
-            <th className="pb-2 font-mono text-(length:--text-label) font-normal text-(--muted)">{headers.duration}</th>
+          <tr className="border-b border-border">
+            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.name}</th>
+            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.provider}</th>
+            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.purpose}</th>
+            <th className="pb-2 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.duration}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.name} className="border-b border-(--border)">
-              <td className="py-2 pr-4 font-mono text-xs text-(--foreground)">{row.name}</td>
-              <td className="py-2 pr-4 text-(--muted)">{row.provider}</td>
-              <td className="py-2 pr-4 text-(--muted)">{row.purpose}</td>
-              <td className="py-2 text-(--muted)">{row.duration}</td>
+            <tr key={row.name} className="border-b border-border">
+              <td className="py-2 pr-4 font-mono text-xs text-foreground">{row.name}</td>
+              <td className="py-2 pr-4 text-muted-foreground">{row.provider}</td>
+              <td className="py-2 pr-4 text-muted-foreground">{row.purpose}</td>
+              <td className="py-2 text-muted-foreground">{row.duration}</td>
             </tr>
           ))}
         </tbody>
@@ -97,42 +97,42 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <header className="mb-8 pb-8 border-b border-(--border)">
-          <h1 className="text-3xl font-bold text-(--foreground)">{cookies.heading}</h1>
-          <p className="mt-2 font-mono text-xs text-(--muted)">{t('lastUpdated')}: {cookies.lastUpdated}</p>
-          <p className="mt-4 text-(--muted)">{cookies.intro}</p>
-          <CompanyDetails className="mt-4 text-sm text-(--muted)" />
+        <header className="mb-8 pb-8 border-b border-border">
+          <h1 className="text-3xl font-bold text-foreground">{cookies.heading}</h1>
+          <p className="mt-2 font-mono text-xs text-muted-foreground">{t('lastUpdated')}: {cookies.lastUpdated}</p>
+          <p className="mt-4 text-muted-foreground">{cookies.intro}</p>
+          <CompanyDetails className="mt-4 text-sm text-muted-foreground" />
         </header>
 
-        <article className="divide-y divide-(--border)">
+        <article className="divide-y divide-border">
           <section className="py-8 first:pt-0">
-            <h2 className="text-lg font-semibold text-(--foreground)">{cookies.necessaryHeading}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{cookies.necessaryHeading}</h2>
             <LegalText text={cookies.necessaryBody} />
             <CookieTable headers={cookies.tableHeaders} rows={cookies.necessaryCookies} />
           </section>
 
           <section className="py-8">
-            <h2 className="text-lg font-semibold text-(--foreground)">{cookies.analyticsHeading}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{cookies.analyticsHeading}</h2>
             <LegalText text={cookies.analyticsBody} />
             <CookieTable headers={cookies.tableHeaders} rows={cookies.analyticsCookies} />
           </section>
 
           <section className="py-8">
-            <h2 className="text-lg font-semibold text-(--foreground)">{cookies.marketingHeading}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{cookies.marketingHeading}</h2>
             <LegalText text={cookies.marketingBody} />
           </section>
 
           {cookies.sections?.map((section) => (
             <section key={section.title} className="py-8">
-              <h2 className="text-lg font-semibold text-(--foreground)">{section.title}</h2>
+              <h2 className="text-lg font-semibold text-foreground">{section.title}</h2>
               <LegalText text={section.content} />
             </section>
           ))}
         </article>
 
-        <p className="mt-8 text-sm text-(--muted)">
+        <p className="mt-8 text-sm text-muted-foreground">
           {cookies.footerPrefix}
-          <Link href="/privacy" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{cookies.footerLinkLabel}</Link>
+          <Link href="/privacy" className="text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">{cookies.footerLinkLabel}</Link>
           {cookies.footerSuffix}
         </p>
       </main>

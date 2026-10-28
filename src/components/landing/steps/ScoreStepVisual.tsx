@@ -9,20 +9,20 @@ const MINI_CATEGORIES = [
 export function ScoreStepVisual() {
   return (
     <Card elevated radius="lg" className="p-6 w-full max-w-sm">
-      <p className="font-mono text-(length:--text-label) text-(--muted) mb-4">resume.pdf · scored</p>
+      <p className="font-mono text-(length:--text-label) text-muted-foreground mb-4">resume.pdf · scored</p>
       <div className="flex items-baseline gap-2 mb-6">
-        <span className="font-mono text-5xl font-bold tabular-nums text-(--foreground)">93</span>
-        <span className="text-sm text-(--muted)">/ 100 · Excellent</span>
+        <span className="font-mono text-5xl font-bold tabular-nums text-foreground">93</span>
+        <span className="text-sm text-muted-foreground">/ 100 · Excellent</span>
       </div>
       <div className="space-y-3">
         {MINI_CATEGORIES.map((category) => (
           <div key={category.label}>
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-(--foreground)">{category.label}</span>
-              <span className="text-(--muted) font-mono">{category.value}%</span>
+              <span className="text-foreground">{category.label}</span>
+              <span className="text-muted-foreground font-mono">{category.value}%</span>
             </div>
-            <div className="h-1 bg-(--border) overflow-hidden">
-              <div className="h-full bg-(--accent)" style={{ width: `${category.value}%` }} />
+            <div className="h-1 bg-border overflow-hidden">
+              <div className="h-full bg-primary" style={{ width: `${category.value}%` }} />
             </div>
           </div>
         ))}
