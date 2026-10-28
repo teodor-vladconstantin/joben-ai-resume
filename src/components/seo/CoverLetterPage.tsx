@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { ArrowRight, Briefcase, Sparkles } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { AppLink } from '@/components/ui/AppLink'
 import { Navbar } from '@/components/ui/Navbar'
 import { Eyebrow } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -113,13 +114,13 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
               <h2 className="text-2xl font-bold text-(--foreground)">{t('sampleHeading', { role })}</h2>
               <p className="text-xs text-(--muted) mt-1">{t('sampleHint')}</p>
             </div>
-            <Link
+            <AppLink
               href="/sign-up"
               className={`shrink-0 ${buttonVariants('primary', 'sm')} text-xs font-semibold flex items-center gap-1.5`}
             >
               <Sparkles className="h-3.5 w-3.5" />
               <span>{t('generateCta')}</span>
-            </Link>
+            </AppLink>
           </div>
 
           <div className="p-6 rounded-xl bg-(--surface) border border-(--border) space-y-4 font-sans text-sm text-(--foreground)/90 leading-relaxed">

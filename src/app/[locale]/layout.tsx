@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import { clerkAppearance } from '@/lib/clerk-appearance'
+import { APP_ORIGIN, SITE_ORIGIN } from '@/lib/app-origin'
 import { validateEnv } from '@/lib/env'
 import { siteConfig, BUILD_TIME } from '@/lib/content'
 import { organizationJsonLd } from '@/lib/structured-data'
@@ -164,6 +165,8 @@ export default async function RootLayout({
       signUpUrl={`/${locale}/sign-up`}
       signInFallbackRedirectUrl={`/${locale}/dashboard`}
       signUpFallbackRedirectUrl={`/${locale}/dashboard`}
+      // Split hosts: sign-out on app.joben.eu returns to the marketing site.
+      {...(APP_ORIGIN && { afterSignOutUrl: SITE_ORIGIN, allowedRedirectOrigins: [APP_ORIGIN, SITE_ORIGIN] })}
       proxyUrl={process.env.NEXT_PUBLIC_CLERK_PROXY_URL}
     >
       <html lang={locale} suppressHydrationWarning>
