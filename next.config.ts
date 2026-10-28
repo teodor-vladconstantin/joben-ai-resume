@@ -192,13 +192,24 @@ const nextConfig: NextConfig = {
       )
     )
     return [
+      // www is not a served host: one canonical origin. HTTP -> HTTPS is handled by the platform (plus HSTS above).
+      {
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: 'www.joben.eu' }],
+        destination: 'https://joben.eu/:path*',
+        statusCode: 301 as const,
+      },
       ...cvRedirects,
       // English cover letters moved from the Romanian segment to /cover-letter.
       { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
       // The instant checker was folded into the single ATS checker (lead magnet).
-      { source: '/:locale(ro|en)/verificare-cv', destination: '/:locale/free-ats-checker', statusCode: 301 as const },
-      { source: '/verificare-cv', destination: '/ro/free-ats-checker', statusCode: 301 as const },
+      { source: '/ro/verificare-cv', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      { source: '/en/verificare-cv', destination: '/en/free-ats-checker', statusCode: 301 as const },
+      { source: '/verificare-cv', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      // Romanian slug only exists under /ro; English keeps /free-ats-checker.
+      { source: '/ro/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      { source: '/en/verificare-cv-ats', destination: '/en/free-ats-checker', statusCode: 301 as const },
     ]
   },
   async rewrites() {

@@ -11,6 +11,7 @@ import { SeoAtsScanWidget } from '@/components/seo/SeoAtsScanWidget'
 import { getResumeRole, resumeRoles } from '@/data/resume-roles'
 import { getSeoJobForResumeRole } from '@/data/seo-jobs'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { routing, type AppLocale } from '@/i18n/routing'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -272,7 +273,7 @@ export default async function ResumeRolePage({
             <p className="text-(--muted) text-sm mt-1.5 max-w-md mx-auto">
               {r.scoreCtaSubheading}
             </p>
-            <Link href="/free-ats-checker" className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
+            <Link href={atsCheckerPath(locale)} className={`mt-5 inline-flex ${buttonVariants('primary', 'md')}`}>
               {fill(r.scoreCtaButton, { role: title })}
             </Link>
           </Card>

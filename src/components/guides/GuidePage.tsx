@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { siteConfig } from '@/lib/content'
 import { GUIDE_SEGMENT, guidePath, guidesOfKind, kindOf, type Guide, type GuideKind } from '@/data/guides'
 import { routing, type AppLocale } from '@/i18n/routing'
@@ -193,7 +194,7 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
             <p className="text-xs text-(--muted) mt-1">{copy.ctaBody}</p>
           </div>
           <TrackedLink
-            href="/free-ats-checker"
+            href={atsCheckerPath(locale)}
             ctaId={`${kind}_ats_cta`}
             className={`shrink-0 ${buttonVariants('primary', 'md')} text-sm font-semibold flex items-center gap-1.5`}
           >

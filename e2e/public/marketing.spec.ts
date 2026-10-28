@@ -16,7 +16,7 @@ test.describe('Marketing site (unauthenticated)', () => {
   })
 
   test('free ATS checker page loads and accepts no file gracefully', async ({ page }) => {
-    await page.goto('/free-ats-checker')
+    await page.goto('/ro/verificare-cv-ats')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   })
 
