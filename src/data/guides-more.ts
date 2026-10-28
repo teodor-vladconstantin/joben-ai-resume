@@ -367,13 +367,13 @@ const A: Guide[] = [
   },
   {
     datePublished: '2026-10-16',
-    dateModified: '2026-10-16',
+    dateModified: '2026-10-28',
     content: {
       ro: {
         slug: 'structura-scrisorii-de-intentie',
-        title: 'Cum scrii o scrisoare de intenție în 4 paragrafe',
+        title: 'Structura scrisorii de intenție: model, titlu și încheiere',
         description:
-          'Structura unei scrisori de intenție care se citește: formula de deschidere, dovada, potrivirea cu firma și încheierea, cu exemple și greșeli de evitat.',
+          'Cum se scrie o scrisoare de intenție în 4 paragrafe: deschiderea, dovada, potrivirea cu firma și încheierea. Plus titlul și subiectul e-mailului, formule de încheiere și semnătura.',
         answer:
           'O scrisoare de intenție bună are o jumătate de pagină și patru părți: deschiderea cu postul și motivul, dovada cu o realizare măsurabilă, potrivirea cu firma și o încheiere cu pasul următor. Scrie-o pentru fiecare post, cu numele companiei și cu cel puțin un detaliu din anunț.',
         sections: [
@@ -404,7 +404,25 @@ const A: Guide[] = [
           {
             heading: 'Cum închei scrisoarea?',
             paragraphs: [
-              'Încheie cu disponibilitatea ta pentru un interviu și cu mulțumirea pentru timp. Un singur rând, politicos și direct. Semnează cu numele complet și cu datele de contact.',
+              'Încheie cu disponibilitatea ta pentru un interviu și cu mulțumirea pentru timp. Un singur rând, politicos și direct, urmat de formula de salut și de numele complet.',
+            ],
+            items: [
+              'Vă mulțumesc pentru timpul acordat și aștept cu interes o discuție.',
+              'Sunt disponibil pentru un interviu în zilele care vă sunt convenabile.',
+              'Cu stimă, urmat pe rândul următor de numele complet.',
+            ],
+          },
+          {
+            heading: 'Ce titlu pun pe scrisoare și în subiectul e-mailului?',
+            paragraphs: [
+              'Scrisoarea nu are nevoie de un titlu mare. Sus pui numele și datele tale de contact, data, apoi numele companiei și, dacă îl știi, numele persoanei care recrutează.',
+              'Pe e-mail, subiectul spune postul și numele tău, de exemplu: „Candidatură Specialist Marketing Digital, Ana Popescu”. Dacă anunțul are un cod de referință, adaugă-l în subiect.',
+            ],
+          },
+          {
+            heading: 'Se semnează scrisoarea de intenție?',
+            paragraphs: [
+              'Pe hârtie semnezi de mână sub formula de încheiere. Trimisă electronic, numele complet scris sub formulă ține loc de semnătură, deci o semnătură scanată este opțională.',
             ],
           },
         ],
@@ -423,13 +441,18 @@ const A: Guide[] = [
             question: 'Scrisoarea trebuie să fie PDF?',
             answer: 'PDF cu text selectabil este alegerea sigură. Dacă platforma cere text lipit într-un câmp, folosește același conținut, fără formatări speciale.',
           },
+          {
+            question: 'Cum scriu o scrisoare de intenție fără experiență?',
+            answer:
+              'Păstrezi aceeași structură și înlocuiești realizările de la job cu proiecte din facultate, voluntariat sau stagii, fiecare cu un rezultat concret. Ghidul despre scrisoarea fără experiență are exemple pentru fiecare paragraf.',
+          },
         ],
       },
       en: {
         slug: 'cover-letter-structure',
-        title: 'How to write a cover letter in 4 paragraphs',
+        title: 'Cover letter structure: format, subject line and closing',
         description:
-          'The structure of a cover letter that gets read: the opening, the proof, the fit with the company and the close, with examples and mistakes to avoid.',
+          'How to write a cover letter in 4 paragraphs: the opening, the proof, the fit with the company and the close. Plus the header, the email subject line, closing lines and the signature.',
         answer:
           'A good cover letter runs half a page across four parts: an opening with the role and your reason, proof with one measurable achievement, the fit with the company and a close with the next step. Write it per role, with the company name and at least one detail from the posting.',
         sections: [
@@ -460,7 +483,25 @@ const A: Guide[] = [
           {
             heading: 'How do I close the letter?',
             paragraphs: [
-              'Close with your availability for an interview and thanks for the time. One polite, direct line. Sign with your full name and contact details.',
+              'Close with your availability for an interview and thanks for the time. One polite, direct line, followed by the sign-off and your full name.',
+            ],
+            items: [
+              'Thank you for your time; I look forward to discussing the role.',
+              'I am available for an interview on any day that suits you.',
+              'Kind regards, with your full name on the next line.',
+            ],
+          },
+          {
+            heading: 'What goes at the top and in the email subject line?',
+            paragraphs: [
+              'The letter needs no big title. At the top put your name and contact details, the date, then the company name and, if you know it, the hiring manager\'s name.',
+              'By email, the subject line states the role and your name, for example: "Application: Digital Marketing Specialist, Ana Popescu". If the posting has a reference code, add it to the subject.',
+            ],
+          },
+          {
+            heading: 'Do you sign a cover letter?',
+            paragraphs: [
+              'On paper, sign by hand under the sign-off. Sent electronically, your typed full name under the sign-off works as the signature, so a scanned signature is optional.',
             ],
           },
         ],
@@ -478,6 +519,11 @@ const A: Guide[] = [
           {
             question: 'Should the cover letter be a PDF?',
             answer: 'A PDF with selectable text is the safe choice. If the platform asks for text in a field, paste the same content without special formatting.',
+          },
+          {
+            question: 'How do I write a cover letter with no experience?',
+            answer:
+              'Keep the same structure and replace job achievements with university projects, volunteering or internships, each with a concrete result. The guide on cover letters with no experience has examples for each paragraph.',
           },
         ],
       },
