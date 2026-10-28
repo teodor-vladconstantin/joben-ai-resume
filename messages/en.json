@@ -184,7 +184,101 @@
     "faqHeading": "Frequently Asked Questions",
     "faqSubheading": "Everything you need to know before building your next resume.",
     "faqOpen": "Open",
-    "faqClose": "Close"
+    "faqClose": "Close",
+    "landing": {
+      "pill": "Free to start, no account needed",
+      "ctaSecondary": "How it works",
+      "trust": [
+        "Score in seconds",
+        "No account needed",
+        "Romanian and English",
+        "File deleted after the scan"
+      ],
+      "how": {
+        "eyebrow": "How it works",
+        "title": "From a rejected resume to one that passes the ATS in three steps.",
+        "steps": [
+          {
+            "title": "Upload your resume",
+            "text": "Drop in a PDF or DOCX. Joben reads it the way an applicant tracking system does."
+          },
+          {
+            "title": "Get your score and fixes",
+            "text": "See a 0-100 score across five categories, plus the exact lines to improve with AI rewrites."
+          },
+          {
+            "title": "Tailor and export",
+            "text": "Match the resume to a job description, add a cover letter and export a clean PDF."
+          }
+        ]
+      },
+      "features": {
+        "eyebrow": "Features",
+        "title": "Everything between your first draft and the interview.",
+        "items": [
+          {
+            "title": "ATS score",
+            "text": "A 0-100 score across five categories before you apply."
+          },
+          {
+            "title": "AI rewrite",
+            "text": "Weak bullet points become measurable results in your own voice."
+          },
+          {
+            "title": "Tailor to the job",
+            "text": "Paste a job description and add the missing keywords."
+          },
+          {
+            "title": "Cover letters",
+            "text": "A letter that matches your resume and the role."
+          },
+          {
+            "title": "Templates",
+            "text": "Clean layouts designed to parse well in ATS systems."
+          },
+          {
+            "title": "PDF export",
+            "text": "Download a polished PDF and keep every version organized."
+          },
+          {
+            "title": "Romanian and English",
+            "text": "Write and score resumes in both languages."
+          },
+          {
+            "title": "Privacy",
+            "text": "Free scans delete your file right after the analysis."
+          }
+        ]
+      },
+      "why": {
+        "eyebrow": "Why Joben",
+        "title": "Built for the way resumes actually get screened.",
+        "items": [
+          {
+            "title": "Scored like an ATS",
+            "text": "The score follows the checks that parsers and recruiters run, so you fix what matters."
+          },
+          {
+            "title": "Your voice stays",
+            "text": "Rewrites add numbers and strong verbs without sounding like generic AI."
+          },
+          {
+            "title": "Free to start",
+            "text": "Check your score without an account, then upgrade only if you need more."
+          },
+          {
+            "title": "Made for Romania",
+            "text": "Prices in RON, a Romanian interface and support for local resume habits."
+          }
+        ]
+      },
+      "pricingMore": "Compare all plans",
+      "faqMore": "Pricing details",
+      "cta": {
+        "title": "Find out your ATS score in under a minute.",
+        "text": "Upload your resume and see what the recruiter's software sees. It is free."
+      }
+    }
   },
   "Pricing": {
     "heading": "Simple, transparent pricing",
@@ -775,7 +869,11 @@
       "noDateValue": "N/A",
       "noResumesYet": "No resumes yet",
       "createAnother": "Create another tailored resume",
-      "createNew": "Create New"
+      "createNew": "Create New",
+      "nameColumn": "Name",
+      "typeColumn": "Type",
+      "updatedColumn": "Updated",
+      "scoreColumn": "Score"
     },
     "weeklyGoals": {
       "title": "Weekly Goals",

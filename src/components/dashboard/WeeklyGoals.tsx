@@ -65,12 +65,12 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
   ]
 
   return (
-    <div className="bg-card p-6 border border-border flex flex-col" suppressHydrationWarning>
+    <div className="bg-card p-6 rounded-lg border border-border flex flex-col" suppressHydrationWarning>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
           <Target className="text-muted-foreground w-5 h-5" /> {t('title')}
         </h3>
-        <div className="flex items-center gap-1.5 font-mono text-sm text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Flame className="w-4 h-4" />
           {streak} {streak === 1 ? t('dayLabel') : t('daysLabel')}
         </div>
@@ -83,7 +83,7 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
               <span className={`text-sm ${goal.done ? 'text-foreground' : 'text-muted-foreground'}`}>
                 {goal.done && <CheckCircle2 className="w-4 h-4 inline mr-1.5" />}{goal.label}
               </span>
-              <span className="text-muted-foreground text-xs font-mono tabular-nums">
+              <span className="text-muted-foreground text-xs tabular-nums">
                 {Math.min(goal.current, goal.target)}/{goal.target}
               </span>
             </div>

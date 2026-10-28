@@ -54,7 +54,7 @@ export function BenchmarkChart({ userScore }: Props) {
               if (!active || !payload?.length) return null
               const d = payload[0].payload as { score: number; frequency: number }
               return (
-                <div className="bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground">
+                <div className="bg-card rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground">
                   {t('scorePrefix')}{d.score}: {d.frequency}{t('ofResumesSuffix')}
                 </div>
               )

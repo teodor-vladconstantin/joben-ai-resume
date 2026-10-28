@@ -28,7 +28,7 @@ export function MobileHandoffCard() {
   }
 
   return (
-    <section className="lg:hidden bg-card p-6 border border-border mb-8">
+    <section className="lg:hidden bg-card p-6 rounded-lg border border-border mb-8">
       <p className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
         <Laptop className="h-4 w-4" /> {t('title')}
       </p>

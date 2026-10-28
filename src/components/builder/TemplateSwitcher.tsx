@@ -17,7 +17,7 @@ export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
 
   return (
     <div className="bg-card border border-border p-4">
-      <p className="font-mono text-(length:--text-label) text-muted-foreground mb-3">{t('heading')}</p>
+      <p className="text-(length:--text-label) text-muted-foreground mb-3">{t('heading')}</p>
       <div className="grid grid-cols-1 gap-2.5">
         {templates.map((template) => (
           <button

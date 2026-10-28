@@ -2,8 +2,8 @@
 
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
-import { useAuth, UserButton } from '@clerk/nextjs'
-import { Menu, Plus } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
+import { Menu } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { GUIDE_SEGMENT } from '@/data/guides'
@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TrackedLink } from '@/components/ui/TrackedLink'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher'
+import { AppNav } from '@/components/shell/AppNav'
 
 const NAV_LINK_CLASSES = 'text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
 
@@ -22,6 +23,7 @@ export function Navbar() {
   const t = useTranslations('Nav')
   const locale = useLocale()
   const signedIn = isLoaded && isSignedIn
+  if (signedIn) return <AppNav />
 
   const publicLinks = [
     { href: atsCheckerPath(locale), label: t('features') },
@@ -29,14 +31,7 @@ export function Navbar() {
     { href: `/${GUIDE_SEGMENT.guide[locale as AppLocale] ?? 'ghiduri'}`, label: t('guides') },
   ]
 
-  const appLinks = [
-    { href: '/dashboard', label: t('dashboard') },
-    { href: '/resumes', label: t('resumes') },
-    { href: '/cover-letters', label: t('coverLetters') },
-    { href: '/ai-review', label: t('aiReview') },
-  ]
-
-  const links = signedIn ? appLinks : publicLinks
+  const links = publicLinks
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-border bg-background">
@@ -76,15 +71,6 @@ export function Navbar() {
             </>
           )}
 
-          {signedIn && (
-            <>
-              <AppLink href="/resumes/new" className={`hidden sm:inline-flex ${buttonVariants('default', 'sm')}`}>
-                <Plus />
-                <span>{t('createNew')}</span>
-              </AppLink>
-              <UserButton appearance={{ elements: { avatarBox: 'h-9 w-9 border border-border' } }} />
-            </>
-          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -109,11 +95,6 @@ export function Navbar() {
                     </TrackedLink>
                   </DropdownMenuItem>
                 </>
-              )}
-              {signedIn && (
-                <DropdownMenuItem asChild>
-                  <AppLink href="/resumes/new">{t('createNew')}</AppLink>
-                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
