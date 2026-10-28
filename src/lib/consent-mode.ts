@@ -10,8 +10,15 @@ window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 var accepted = false;
 try {
-  var at = Number(localStorage.getItem('joben_cookie_consent_at'));
-  accepted = localStorage.getItem('joben_cookie_consent') === 'accepted' && !(at && Date.now() - at > 365 * 24 * 60 * 60 * 1000);
+  var ck = document.cookie.split('; ').filter(function (c) { return c.indexOf('joben_cookie_consent=') === 0; })[0];
+  var parts = ck ? ck.slice(21).split('|') : [];
+  if (parts[0] === 'accepted' || parts[0] === 'rejected') {
+    var savedAt = Number(parts[1]);
+    accepted = parts[0] === 'accepted' && !(savedAt && Date.now() - savedAt > 365 * 24 * 60 * 60 * 1000);
+  } else {
+    var at = Number(localStorage.getItem('joben_cookie_consent_at'));
+    accepted = localStorage.getItem('joben_cookie_consent') === 'accepted' && !(at && Date.now() - at > 365 * 24 * 60 * 60 * 1000);
+  }
 } catch (e) {}
 gtag('consent', 'default', {
   'ad_storage': 'denied',

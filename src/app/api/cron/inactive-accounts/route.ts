@@ -5,6 +5,7 @@ import { isAuthorizedCronRequest, isDuplicateKeyError, parseCronOptions } from '
 import { sendTransactionalEmail } from '@/lib/resend'
 import { deleteAccount } from '@/lib/account-deletion'
 import { buildInactivityWarningEmail, inactivityStage } from '@/lib/account-inactivity'
+import { APP_ORIGIN } from '@/lib/app-origin'
 
 export const runtime = 'nodejs'
 
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
         if (!isDuplicateKeyError(lockError)) summary.failed += 1
         continue
       }
-      const result = await sendTransactionalEmail({ to: email, ...buildInactivityWarningEmail(appUrl) })
+      const result = await sendTransactionalEmail({ to: email, ...buildInactivityWarningEmail(APP_ORIGIN || appUrl) })
       await supabase
         .from('email_events')
         .update(result.success ? { status: 'sent', provider_id: result.providerId } : { status: 'failed', error: result.error, source_event_id: null })

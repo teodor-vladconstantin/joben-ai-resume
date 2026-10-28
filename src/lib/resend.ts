@@ -7,11 +7,14 @@ import {
   type TemplateSequenceStep,
 } from '@/lib/template-sequence-copy'
 import { logger } from '@/lib/logger'
+import { APP_ORIGIN, isAppPath } from '@/lib/app-origin'
 
 const resendApiKey = process.env.RESEND_API_KEY
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'Joben <onboarding@resend.dev>'
 const automationFromEmail = 'Joben <no-reply@joben.eu>'
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+// Account pages live on the app host when the split is on.
+const accountUrl = APP_ORIGIN || appUrl
 
 function getResendClient() {
   if (!resendApiKey) return null
@@ -130,7 +133,7 @@ export async function sendWelcomeEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">Welcome to Joben, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">Your account is ready. Start building ATS-optimized resumes and cover letters in minutes.</p>
   <p style="margin:0 0 18px 0;">You can also run an AI review to identify quick wins before your next application.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
+  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a Joben account.</p>
 </div>`,
   })
@@ -150,7 +153,7 @@ export async function sendSevenDayFollowupEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">One-week check-in, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">If you have not done it yet, run one AI review and tailor one resume to a target role.</p>
   <p style="margin:0 0 18px 0;">These two steps usually produce the biggest quality jump in less than 10 minutes.</p>
-  <a href="${appUrl}/ai-review" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Run AI Review</a>
+  <a href="${accountUrl}/ai-review" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Run AI Review</a>
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">Need help? Reply to this email and we will point you to the fastest workflow.</p>
 </div>`,
   })
@@ -170,7 +173,7 @@ export async function sendFirstResumeEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">Nice work, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">Your first resume is now in Joben. Keep refining it or export a clean PDF anytime.</p>
   <p style="margin:0 0 18px 0;">Ready to share it? Head to your dashboard and export the PDF in one click.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
+  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a resume on Joben.</p>
 </div>`,
   })
@@ -190,7 +193,7 @@ export async function sendInactivityEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">Quick reminder, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">You created a Joben account recently, and your resume is still waiting for you.</p>
   <p style="margin:0 0 18px 0;">Jump back in to generate your resume in minutes and export a PDF when ready.</p>
-  <a href="${appUrl}/resumes/new" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Generate Resume</a>
+  <a href="${accountUrl}/resumes/new" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Generate Resume</a>
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already finished, you can ignore this email.</p>
 </div>`,
   })
@@ -228,7 +231,7 @@ export function anonScanCtaUrl(locale: AnonScanEmailLocale, type: AnonScanEmailT
     utm_campaign: `anon_scan_${type}`,
     scan: scanId,
   })
-  return `${appUrl}/${locale}/sign-up?${params.toString()}`
+  return `${accountUrl}/${locale}/sign-up?${params.toString()}`
 }
 
 function anonCtaButton(href: string, label: string): string {
@@ -518,7 +521,7 @@ export async function sendTemplateSequenceEmail(input: {
     utm_medium: 'lifecycle',
     utm_campaign: `template_seq_${input.step}`,
   })
-  const href = `${appUrl}/${input.locale}${copy.ctaPath}?${params.toString()}`
+  const href = `${isAppPath(copy.ctaPath) ? accountUrl : appUrl}/${input.locale}${copy.ctaPath}?${params.toString()}`
 
   return sendEmail({
     from: automationFromEmail,
@@ -548,7 +551,7 @@ export async function sendExportFollowupEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">A couple of weeks ago you exported a resume, ${firstName}.</h1>
   <p style="margin:0 0 12px 0;">Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.</p>
   <p style="margin:0 0 18px 0;">While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Tailor for Another Role</a>
+  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Tailor for Another Role</a>
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already heard back either way, you can ignore this. This is the only email you'll get about this export.</p>
 </div>`,
   })
@@ -642,7 +645,7 @@ export async function sendReferralRewardEmail(input: {
   <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
   <p style="margin:0 0 12px 0;">${escapeHtml(input.hasSubscription ? copy.bodySubscribed(input.days) : copy.body(input.days, date))}</p>
   <p style="margin:0 0 18px 0;">${input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached}</p>
-  ${anonCtaButton(`${appUrl}/${input.locale}/dashboard`, copy.cta)}
+  ${anonCtaButton(`${accountUrl}/${input.locale}/dashboard`, copy.cta)}
   <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.footer}</p>
 </div>`,
   })
@@ -676,7 +679,7 @@ export async function sendMobileHandoffEmail(input: {
   locale: AnonScanEmailLocale
 }): Promise<EmailResult> {
   const copy = MOBILE_HANDOFF_COPY[input.locale]
-  const href = `${appUrl}/${input.locale}/dashboard?utm_source=email&utm_medium=handoff&utm_campaign=mobile_handoff`
+  const href = `${accountUrl}/${input.locale}/dashboard?utm_source=email&utm_medium=handoff&utm_campaign=mobile_handoff`
   return sendTransactionalEmail({
     to: input.to,
     subject: copy.subject,
