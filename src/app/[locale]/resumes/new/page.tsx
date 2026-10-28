@@ -7,7 +7,7 @@ import { ResumeWizard } from '@/components/builder/ResumeWizard'
 export default async function NewResumePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const showEditor = Object.keys(await searchParams).length > 0
   return (
-    <div className="min-h-screen flex flex-col bg-(--background) overflow-hidden print:bg-white print:overflow-visible">
+    <div className="min-h-screen flex flex-col bg-background overflow-hidden print:bg-white print:overflow-visible">
       <div className="print:hidden">
         <Navbar />
       </div>

@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn'
 export function Divider({ className, ...props }: React.HTMLAttributes<HTMLHRElement>) {
   return (
     <hr
-      className={cn('border-(--border)', className)}
+      className={cn('border-border', className)}
       {...props}
     />
   )

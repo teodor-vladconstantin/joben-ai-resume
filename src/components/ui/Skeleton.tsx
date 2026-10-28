@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn'
 // A single pulsing block — animate-pulse is opacity-only, so it's already
 // within the transform/opacity/clip-path-only motion rule.
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-(--border)', className)} />
+  return <div className={cn('animate-pulse rounded-md bg-muted', className)} />
 }
 
 export function SkeletonRow({ className = '' }: { className?: string }) {

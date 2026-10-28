@@ -123,10 +123,10 @@ export default async function DashboardPage({
         return (
           <Link key={index} href={action.href} className={`${
             action.isPrimary
-              ? 'bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong)'
-              : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)'
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'bg-card border border-border text-foreground hover:border-primary'
           } p-6 font-bold flex items-center justify-between transition-colors duration-150 ease-out`} suppressHydrationWarning>
-            <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-(--muted)'}`} />
+            <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-muted-foreground'}`} />
           </Link>
         );
       })}
@@ -143,12 +143,12 @@ export default async function DashboardPage({
 
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="mb-8" suppressHydrationWarning>
-            <h1 className="text-3xl font-bold text-(--foreground) mb-2">{greeting}, {firstName}</h1>
-            <p className="text-(--muted)">{d.subGreeting}</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{greeting}, {firstName}</h1>
+            <p className="text-muted-foreground">{d.subGreeting}</p>
           </div>
 
           {passNoticeText ? (
-            <p role="status" className="mb-8 border-l-2 border-(--accent) bg-(--surface) px-4 py-3 text-sm text-(--foreground)">
+            <p role="status" className="mb-8 border-l-2 border-primary bg-card px-4 py-3 text-sm text-foreground">
               {passNoticeText}
             </p>
           ) : null}
@@ -167,21 +167,21 @@ export default async function DashboardPage({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Industry Benchmark */}
-            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-2">{d.industryBenchmark.title}</h3>
-              <p className="text-sm text-(--muted) mb-6">{d.industryBenchmark.description}</p>
+            <div className="bg-card p-6 border border-border" suppressHydrationWarning>
+              <h3 className="text-lg font-bold text-foreground mb-2">{d.industryBenchmark.title}</h3>
+              <p className="text-sm text-muted-foreground mb-6">{d.industryBenchmark.description}</p>
               {hasReviewData ? (
                 <BenchmarkChart userScore={totalScore} />
               ) : (
-                <div className="h-48 flex items-center justify-center border border-dashed border-(--border) text-(--muted) text-sm">
+                <div className="h-48 flex items-center justify-center border border-dashed border-border text-muted-foreground text-sm">
                   {d.industryBenchmark.noData}
                 </div>
               )}
             </div>
 
             {/* Score Breakdown */}
-            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-6">{d.scoreBreakdown.title}</h3>
+            <div className="bg-card p-6 border border-border" suppressHydrationWarning>
+              <h3 className="text-lg font-bold text-foreground mb-6">{d.scoreBreakdown.title}</h3>
               {hasReviewData ? (
                 <>
                   <div className="space-y-5">
@@ -191,23 +191,23 @@ export default async function DashboardPage({
                        return (
                          <div key={i}>
                            <div className="flex justify-between gap-3 text-sm mb-1">
-                             <span className="text-(--foreground)">{item.label}</span>
-                             <span className="text-(--muted) font-mono tabular-nums">{score}/{item.max}</span>
+                             <span className="text-foreground">{item.label}</span>
+                             <span className="text-muted-foreground font-mono tabular-nums">{score}/{item.max}</span>
                            </div>
-                           <div className="w-full bg-(--border) h-1 mb-1">
-                             <div className="bg-(--accent) h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
+                           <div className="w-full bg-border h-1 mb-1">
+                             <div className="bg-primary h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
                            </div>
-                             {isWarning && <p className="text-xs text-(--foreground) border-l-2 border-(--foreground) pl-1.5">{d.scoreBreakdown.warningMatch}</p>}
+                             {isWarning && <p className="text-xs text-foreground border-l-2 border-foreground pl-1.5">{d.scoreBreakdown.warningMatch}</p>}
                          </div>
                        );
                      })}
                   </div>
-                  <p className="mt-4 text-xs text-(--muted)">{d.scoreBreakdown.latestGradePrefix}{gradeLabel(latestReview?.grade, d.scoreBreakdown.unknownGrade)}</p>
-                  <Link href="/ai-review" className="inline-block mt-2 text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.scoreBreakdown.cta}</Link>
+                  <p className="mt-4 text-xs text-muted-foreground">{d.scoreBreakdown.latestGradePrefix}{gradeLabel(latestReview?.grade, d.scoreBreakdown.unknownGrade)}</p>
+                  <Link href="/ai-review" className="inline-block mt-2 text-foreground text-sm font-medium border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">{d.scoreBreakdown.cta}</Link>
                 </>
               ) : (
                 <div className="min-h-50 grid place-items-center">
-                  <div className="w-full border border-dashed border-(--border) px-4 py-10 text-center text-sm text-(--muted)">
+                  <div className="w-full border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
                     {d.scoreBreakdown.noData}
                   </div>
                 </div>
@@ -221,21 +221,21 @@ export default async function DashboardPage({
           {/* Bottom cards: 3-wide normally, 2-wide for isNewUser since Weekly Goals is hidden */}
           <div className={`grid grid-cols-1 ${isNewUser ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
             {/* Your Score */}
-            <div className="bg-(--surface) p-6 border border-(--border) flex flex-col" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-6 w-full text-left">{d.yourScore.title}</h3>
+            <div className="bg-card p-6 border border-border flex flex-col" suppressHydrationWarning>
+              <h3 className="text-lg font-bold text-foreground mb-6 w-full text-left">{d.yourScore.title}</h3>
               {hasReviewData ? (
                 <>
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-(--foreground)">{totalScore}</span>
-                  <div className="mt-3 h-1 w-full bg-(--border)">
-                    <div className="h-full bg-(--accent)" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
+                  <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{totalScore}</span>
+                  <div className="mt-3 h-1 w-full bg-border">
+                    <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
                   </div>
-                  <p className="mt-4 text-(--foreground) font-bold text-sm">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
-                  <p className="text-(--muted) text-xs mb-4">{latestReviewLabel}</p>
-                  <Link href="/ai-review" className="inline-block self-start text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.yourScore.cta}</Link>
+                  <p className="mt-4 text-foreground font-bold text-sm">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
+                  <p className="text-muted-foreground text-xs mb-4">{latestReviewLabel}</p>
+                  <Link href="/ai-review" className="inline-block self-start text-foreground text-sm font-medium border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">{d.yourScore.cta}</Link>
                 </>
               ) : (
-                <div className="w-full grow flex flex-col items-center justify-center text-center text-(--muted)">
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none text-(--border)">{d.yourScore.noDataSub}</span>
+                <div className="w-full grow flex flex-col items-center justify-center text-center text-muted-foreground">
+                  <span className="font-mono text-(length:--text-score) font-bold leading-none text-border">{d.yourScore.noDataSub}</span>
                   <p className="mt-4 text-sm">{d.yourScore.noData}</p>
                 </div>
               )}

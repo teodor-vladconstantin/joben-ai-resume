@@ -450,12 +450,12 @@ export function CoverLetterBuilder() {
 
   return (
     <div className="w-full h-full flex flex-col lg:flex-row">
-      <div className="w-full lg:w-112.5 bg-(--surface) border-r border-(--border) flex flex-col h-full z-10">
-        <div className="p-6 border-b border-(--border)">
-          <h2 className="text-xl font-bold text-(--foreground) flex items-center gap-2"><Sparkles className="text-(--muted) w-5 h-5"/> {t('heading')}</h2>
-          <p className="text-sm text-(--muted) mt-2">{t('progress', { completed: completedSections, total: sectionItems.length })}</p>
-          <div className="mt-3 h-1 w-full bg-(--border)">
-            <div className="h-1 bg-(--accent)" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
+      <div className="w-full lg:w-112.5 bg-card border-r border-border flex flex-col h-full z-10">
+        <div className="p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2"><Sparkles className="text-muted-foreground w-5 h-5"/> {t('heading')}</h2>
+          <p className="text-sm text-muted-foreground mt-2">{t('progress', { completed: completedSections, total: sectionItems.length })}</p>
+          <div className="mt-3 h-1 w-full bg-border">
+            <div className="h-1 bg-primary" style={{ width: `${(completedSections / sectionItems.length) * 100}%` }}></div>
           </div>
         </div>
 
@@ -463,39 +463,39 @@ export function CoverLetterBuilder() {
           <SectionList sections={sectionItems} onSelect={openSectionEditor} />
 
           <div className="space-y-2 pt-5">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Building2 className="w-4 h-4 text-(--muted)" /> {t('companyLabel')}</label>
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Building2 className="w-4 h-4 text-muted-foreground" /> {t('companyLabel')}</label>
             <input
               value={sections.company}
               onChange={(e) => setSections((prev) => ({ ...prev, company: e.target.value }))}
               type="text"
-              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent)"
+              className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground transition-colors duration-150 ease-out focus:outline-none focus:border-primary"
               placeholder={t('companyPlaceholder')}
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><Briefcase className="w-4 h-4 text-(--muted)" /> {t('positionLabel')}</label>
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Briefcase className="w-4 h-4 text-muted-foreground" /> {t('positionLabel')}</label>
             <input
               value={sections.position}
               onChange={(e) => setSections((prev) => ({ ...prev, position: e.target.value }))}
               type="text"
-              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent)"
+              className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground transition-colors duration-150 ease-out focus:outline-none focus:border-primary"
               placeholder={t('positionPlaceholder')}
             />
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted) flex items-center gap-2"><FileText className="w-4 h-4 text-(--muted)" /> {t('jobDescriptionLabel')}</label>
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-2"><FileText className="w-4 h-4 text-muted-foreground" /> {t('jobDescriptionLabel')}</label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) transition-colors duration-150 ease-out focus:outline-none focus:border-(--accent) h-32 resize-none text-sm"
+              className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground transition-colors duration-150 ease-out focus:outline-none focus:border-primary h-32 resize-none text-sm"
               placeholder={t('jobDescriptionPlaceholder')}
             ></textarea>
           </div>
 
           <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-(--muted)">{t('toneLabel')}</label>
+            <label className="text-sm font-medium text-muted-foreground">{t('toneLabel')}</label>
             <div className="grid grid-cols-3 gap-2">
               {(['formal', 'professional', 'conversational'] as const).map((tone) => (
                 <button
@@ -503,8 +503,8 @@ export function CoverLetterBuilder() {
                   onClick={() => setSections((prev) => ({ ...prev, tone }))}
                   className={`border px-3 py-2 text-sm transition-colors duration-150 ease-out ${
                     sections.tone === tone
-                      ? 'border-(--border) bg-(--accent-muted) text-(--foreground)'
-                      : 'border-(--border) bg-(--surface) text-(--muted)'
+                      ? 'border-border bg-primary/10 text-foreground'
+                      : 'border-border bg-card text-muted-foreground'
                   }`}
                 >
                   {t(`toneOptions.${tone}`)}
@@ -520,7 +520,7 @@ export function CoverLetterBuilder() {
             className={`mt-6 w-full ${buttonVariants('primary', 'md')}`}
           >
             {isGenerating ? (
-              <div className="w-5 h-5 border-2 border-(--accent-ink)/30 border-t-(--accent-ink) rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current" /> {t('generateDraftButton')}
@@ -529,7 +529,7 @@ export function CoverLetterBuilder() {
           </FeatureButton>
         </div>
 
-        <div className="p-4 border-t border-(--border) bg-(--background) flex justify-between items-center gap-4">
+        <div className="p-4 border-t border-border bg-background flex justify-between items-center gap-4">
           <button
             onClick={() => void persistLetter()}
             disabled={isLoading || saveStatus === 'saving' || isExportingPdf}
@@ -547,8 +547,8 @@ export function CoverLetterBuilder() {
         </div>
       </div>
 
-      <div className="grow bg-(--background) h-full flex flex-col p-4 lg:p-8 overflow-hidden relative">
-        <div className="w-full max-w-200 h-full bg-white border border-(--border) mx-auto overflow-hidden">
+      <div className="grow bg-background h-full flex flex-col p-4 lg:p-8 overflow-hidden relative">
+        <div className="w-full max-w-200 h-full bg-white border border-border mx-auto overflow-hidden">
           <div className="h-full overflow-y-auto p-12 text-black font-serif text-[15px] leading-relaxed">
             <div className="mb-8 text-sm text-gray-700">
               <p className="font-semibold">{sections.headerName}</p>
@@ -576,7 +576,7 @@ export function CoverLetterBuilder() {
           </div>
         </div>
 
-        <div className="absolute top-3 right-4 text-xs text-(--muted) bg-(--surface) border border-(--border) px-2 py-1">
+        <div className="absolute top-3 right-4 text-xs text-muted-foreground bg-card border border-border px-2 py-1">
           {saveStatus === 'saving' ? t('saveStatus.saving') : saveStatus === 'saved' ? t('saveStatus.saved') : saveStatus === 'error' ? t('saveStatus.error') : t('saveStatus.idle')}
         </div>
       </div>
@@ -607,9 +607,9 @@ export function CoverLetterBuilder() {
         <textarea
           value={modalDraft}
           onChange={(e) => setModalDraft(e.target.value)}
-          className="h-52 w-full resize-none rounded-sm border border-(--border) bg-(--background) px-3 py-2 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+          className="h-52 w-full resize-none rounded-sm border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
         />
-        <p className="mt-2 text-xs text-(--muted)">
+        <p className="mt-2 text-xs text-muted-foreground">
           {t('editSectionModal.helperText')}
         </p>
       </Modal>

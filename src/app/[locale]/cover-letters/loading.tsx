@@ -24,7 +24,7 @@ export default function CoverLettersLoading() {
             <Skeleton className="h-10 w-full lg:max-w-3xl" />
           </div>
 
-          <div className="border border-(--border) divide-y divide-(--border)">
+          <div className="border border-border divide-y divide-border">
             {Array.from({ length: 5 }).map((_, i) => (
               <SkeletonRow key={i} />
             ))}

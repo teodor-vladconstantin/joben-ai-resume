@@ -93,7 +93,7 @@ function sanitizeReturnBackUrl(value: string | null, fallback: string): string {
   return trimmed
 }
 
-const legalLinkClass = 'text-(--foreground) underline decoration-(--border) underline-offset-2 hover:decoration-(--accent) transition-colors duration-150 ease-out'
+const legalLinkClass = 'text-foreground underline decoration-border underline-offset-2 hover:decoration-primary transition-colors duration-150 ease-out'
 
 function SignUpContent() {
   const t = useTranslations('SignUp')
@@ -206,7 +206,7 @@ function SignUpContent() {
   return (
     <AuthShell eyebrow={t('eyebrow')} heading={t('heading')} subheading={t('subheading')}>
       <div className="space-y-6">
-        <label className="flex items-start gap-3 border border-(--border) bg-(--surface) p-4 text-sm text-(--foreground)">
+        <label className="flex items-start gap-3 border border-border bg-card p-4 text-sm text-foreground">
           <input
             type="checkbox"
             name="accept_legal"
@@ -223,7 +223,7 @@ function SignUpContent() {
                 setConsentToken(null)
               }
             }}
-            className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
+            className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border bg-card accent-primary"
           />
           <span>
             {t.rich('consentLabel', {
@@ -242,11 +242,11 @@ function SignUpContent() {
         </label>
 
         {rateLimitError ? (
-          <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{t('rateLimited')}</p>
+          <p className="text-sm text-foreground border-l-2 border-foreground pl-2">{t('rateLimited')}</p>
         ) : null}
 
         {accepted ? signUp : (
-          <p className="flex items-center gap-2 text-sm text-(--muted)">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {/* Own element: Chrome's auto-translate swaps bare text nodes for <font>, and React's insertBefore then throws */}
             <span>{t('acceptToContinue')}</span>

@@ -180,14 +180,14 @@ export function ResumeWizard() {
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-(--foreground)">{t('title')}</h1>
-      <p className="mt-1 text-sm text-(--muted)">{t('subtitle')}</p>
+      <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
 
       <div className="mt-6">
         <Progress value={((step + 1) / STEPS.length) * 100} aria-label={t('progress', { current: step + 1, total: STEPS.length })} />
         <ol className="mt-3 grid grid-cols-4 text-xs">
           {STEPS.map((s, i) => (
-            <li key={s.key} aria-current={i === step ? 'step' : undefined} className={i <= step ? 'font-semibold text-(--foreground)' : 'text-(--muted)'}>
+            <li key={s.key} aria-current={i === step ? 'step' : undefined} className={i <= step ? 'font-semibold text-foreground' : 'text-muted-foreground'}>
               {t(`steps.${s.key}`)}
             </li>
           ))}
@@ -203,7 +203,7 @@ export function ResumeWizard() {
           }}
           className="space-y-4"
         >
-          <h2 className="font-bold text-(--foreground)">{t(`${STEPS[step].key}.heading` as 'role.heading')}</h2>
+          <h2 className="font-bold text-foreground">{t(`${STEPS[step].key}.heading` as 'role.heading')}</h2>
 
           {step === 0 && field('jobRole', t('role.label'), { placeholder: t('role.placeholder') })}
 
@@ -269,7 +269,7 @@ export function ResumeWizard() {
       </Card>
 
       <p className="mt-4 text-center text-xs">
-        <Link href="/resumes/new?blank=1" className="text-(--muted) underline hover:text-(--foreground)">{t('skip')}</Link>
+        <Link href="/resumes/new?blank=1" className="text-muted-foreground underline hover:text-foreground">{t('skip')}</Link>
       </p>
     </div>
   )

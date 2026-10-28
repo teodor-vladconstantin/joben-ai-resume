@@ -32,11 +32,11 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'lg' 
         elevated
         className={`relative flex w-full ${MAX_WIDTH_CLASSES[maxWidth]} max-h-[85vh] flex-col`}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-(--border) px-6 py-4">
-          <h3 className="font-mono text-(length:--text-label) font-semibold text-(--foreground)">{title}</h3>
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+          <h3 className="font-mono text-(length:--text-label) font-semibold text-foreground">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1 text-(--muted) hover:text-(--foreground) transition-colors duration-150 ease-out"
+            className="p-1 text-muted-foreground hover:text-foreground transition-colors duration-150 ease-out"
             aria-label={t('close')}
           >
             <X className="h-4 w-4" />
@@ -45,7 +45,7 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'lg' 
 
         <div className="min-h-0 grow overflow-y-auto px-6 py-5">{children}</div>
 
-        {footer ? <div className="shrink-0 border-t border-(--border) px-6 py-4">{footer}</div> : null}
+        {footer ? <div className="shrink-0 border-t border-border px-6 py-4">{footer}</div> : null}
       </Card>
     </div>
   )

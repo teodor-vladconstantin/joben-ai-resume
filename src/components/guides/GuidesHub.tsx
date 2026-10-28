@@ -115,23 +115,23 @@ export function GuidesHub({ kind, locale }: { kind: GuideKind; locale: AppLocale
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24 space-y-10">
         <header className="space-y-4">
           <Eyebrow>{copy.eyebrow}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-(--foreground)">{copy.title}</h1>
-          <p className="text-lg text-(--muted) leading-relaxed">{copy.intro}</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">{copy.title}</h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">{copy.intro}</p>
         </header>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {items.map((guide) => {
             const content = guide.content[locale]
             return (
               <Link key={content.slug} href={guidePath(locale, guide)} className="block">
-                <Card radius="lg" className="p-6 h-full space-y-2 hover:border-(--foreground)/30 transition-colors">
-                  <h2 className="font-bold text-lg text-(--foreground)">{content.title}</h2>
-                  <p className="text-sm text-(--muted) leading-relaxed">{content.description}</p>
+                <Card radius="lg" className="p-6 h-full space-y-2 hover:border-foreground/30 transition-colors">
+                  <h2 className="font-bold text-lg text-foreground">{content.title}</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{content.description}</p>
                 </Card>
               </Link>
             )

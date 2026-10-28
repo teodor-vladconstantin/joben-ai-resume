@@ -54,7 +54,7 @@ export function FeedbackForm({ email }: { email: string }) {
           value={likes}
           onChange={(e) => setLikes(e.target.value)}
           rows={4}
-          className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
+          className="w-full resize-y rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 ease-out focus:border-primary"
           placeholder={t('likesPlaceholder')}
         />
       </Field>
@@ -66,7 +66,7 @@ export function FeedbackForm({ email }: { email: string }) {
           value={improvements}
           onChange={(e) => setImprovements(e.target.value)}
           rows={4}
-          className="w-full resize-y rounded-sm border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--foreground) outline-none transition-colors duration-150 ease-out focus:border-(--accent)"
+          className="w-full resize-y rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 ease-out focus:border-primary"
           placeholder={t('improvementsPlaceholder')}
         />
       </Field>
@@ -84,8 +84,8 @@ export function FeedbackForm({ email }: { email: string }) {
                 onClick={() => setNps(value)}
                 className={`h-10 w-10 rounded-sm border text-sm font-medium transition-colors duration-150 ease-out ${
                   selected
-                    ? 'border-(--accent) bg-(--accent) text-(--accent-ink)'
-                    : 'border-(--border) bg-(--surface) text-(--foreground)/75 hover:border-(--accent)'
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-card text-foreground/75 hover:border-primary'
                 }`}
               >
                 {value}
@@ -93,7 +93,7 @@ export function FeedbackForm({ email }: { email: string }) {
             )
           })}
         </div>
-        <div className="mt-1.5 flex justify-between text-xs text-(--muted)">
+        <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
           <span>{t('notLikely')}</span>
           <span>{t('veryLikely')}</span>
         </div>
@@ -105,12 +105,12 @@ export function FeedbackForm({ email }: { email: string }) {
           type="email"
           value={email}
           readOnly
-          className="w-full cursor-not-allowed rounded-sm border border-(--border) bg-(--surface-elevated) px-3 py-2 text-sm text-(--muted) outline-none"
+          className="w-full cursor-not-allowed rounded-sm border border-border bg-card px-3 py-2 text-sm text-muted-foreground outline-none"
         />
       </Field>
 
       {error ? (
-        <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2" role="alert">
+        <p className="text-sm text-foreground border-l-2 border-foreground pl-2" role="alert">
           {error}
         </p>
       ) : null}
@@ -137,7 +137,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-(--foreground)">
+      <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
         {label}
       </label>
       {children}
@@ -147,8 +147,8 @@ function Field({
 
 function ConfirmationCard({ message }: { message: string }) {
   return (
-    <div className="border border-(--border) bg-(--accent-muted) px-6 py-8 text-center">
-      <p className="text-base font-medium text-(--foreground)">{message}</p>
+    <div className="border border-border bg-primary/10 px-6 py-8 text-center">
+      <p className="text-base font-medium text-foreground">{message}</p>
     </div>
   )
 }

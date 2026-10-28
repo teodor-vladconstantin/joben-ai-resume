@@ -49,11 +49,11 @@ export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
   }
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-lg gap-3 border border-(--border) bg-(--surface) px-4 py-3 shadow-xl">
-      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-(--muted)" />
+    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-lg gap-3 border border-border bg-card px-4 py-3 shadow-xl">
+      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm text-(--foreground)/90 font-medium">{message}</p>
-        {error ? <p className="mt-1 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-1.5">{error}</p> : null}
+        <p className="text-sm text-foreground/90 font-medium">{message}</p>
+        {error ? <p className="mt-1 text-sm text-foreground border-l-2 border-foreground pl-1.5">{error}</p> : null}
         <div className="mt-2.5 flex flex-wrap gap-2">
           {isFreePlan ? (
             <button
@@ -75,7 +75,7 @@ export function UpgradeBanner({ open, message, onClose }: UpgradeBannerProps) {
       </div>
       <button
         onClick={onClose}
-        className="text-(--muted) hover:text-(--foreground) text-xs shrink-0 transition-colors duration-150 ease-out"
+        className="text-muted-foreground hover:text-foreground text-xs shrink-0 transition-colors duration-150 ease-out"
       >
         x
       </button>

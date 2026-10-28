@@ -54,7 +54,7 @@ export function BenchmarkChart({ userScore }: Props) {
               if (!active || !payload?.length) return null
               const d = payload[0].payload as { score: number; frequency: number }
               return (
-                <div className="bg-(--surface) border border-(--border) px-3 py-1.5 text-xs text-(--muted)">
+                <div className="bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground">
                   {t('scorePrefix')}{d.score}: {d.frequency}{t('ofResumesSuffix')}
                 </div>
               )
@@ -85,9 +85,9 @@ export function BenchmarkChart({ userScore }: Props) {
         </AreaChart>
       </ResponsiveContainer>
 
-      <p className="text-xs text-(--muted) mt-3">
-        {t('footerPrefix')}<span className="text-(--foreground) font-medium">{userScore}</span>{t('footerMiddle')}
-        <span className="text-(--foreground) font-medium">{percentile}%</span>{t('footerSuffix')}
+      <p className="text-xs text-muted-foreground mt-3">
+        {t('footerPrefix')}<span className="text-foreground font-medium">{userScore}</span>{t('footerMiddle')}
+        <span className="text-foreground font-medium">{percentile}%</span>{t('footerSuffix')}
       </p>
     </div>
   )
