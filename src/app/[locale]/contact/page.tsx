@@ -6,6 +6,8 @@ import { company } from '@/lib/content'
 import type { AppLocale } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
+import { PageHero, wrap } from '@/components/marketing/section'
+import { cn } from '@/lib/cn'
 import { JsonLd } from '@/components/seo/JsonLd'
 
 const PRIVACY_EMAIL = 'privacy@joben.eu'
@@ -54,7 +56,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       ]),
     ],
   }
-  const link = 'text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out'
+  const link = 'font-medium text-foreground transition-colors hover:text-primary'
   const withEmail = (body: string, email: string) => {
     const [before, after] = body.split('{email}')
     return (
@@ -67,21 +69,25 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-20">
+    <div className="min-h-screen flex flex-col">
       <JsonLd data={jsonLd} />
       <Navbar />
-      <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">{c.heading}</h1>
-        <p className="text-muted-foreground text-lg leading-relaxed mb-10">{c.intro}</p>
-
-        <h2 className="text-xl font-bold text-foreground mb-2">{c.generalHeading}</h2>
-        <p className="text-muted-foreground mb-8">{withEmail(c.generalBody, company.email)}</p>
-
-        <h2 className="text-xl font-bold text-foreground mb-2">{c.privacyHeading}</h2>
-        <p className="text-muted-foreground mb-8">{withEmail(c.privacyBody, PRIVACY_EMAIL)}</p>
-
-        <h2 className="text-xl font-bold text-foreground mb-2">{c.companyHeading}</h2>
-        <p className="text-muted-foreground">{fill(c.companyBody, company)}</p>
+      <main className="grow">
+        <PageHero eyebrow="Joben" title={c.heading} intro={c.intro} />
+        <section className="border-t border-border py-16 sm:py-20">
+          <div className={cn(wrap, 'grid gap-5 md:grid-cols-3')}>
+            {[
+              { h: c.generalHeading, body: withEmail(c.generalBody, company.email) },
+              { h: c.privacyHeading, body: withEmail(c.privacyBody, PRIVACY_EMAIL) },
+              { h: c.companyHeading, body: fill(c.companyBody, company) },
+            ].map((card) => (
+              <div key={card.h} className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary">
+                <h2 className="text-lg font-semibold">{card.h}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{card.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   )

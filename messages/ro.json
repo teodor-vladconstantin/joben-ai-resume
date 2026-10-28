@@ -184,7 +184,101 @@
     "faqHeading": "Întrebări Frecvente",
     "faqSubheading": "Tot ce trebuie să știi înainte să îți construiești următorul CV.",
     "faqOpen": "Deschide",
-    "faqClose": "Închide"
+    "faqClose": "Închide",
+    "landing": {
+      "pill": "Gratuit la început, fără cont",
+      "ctaSecondary": "Cum funcționează",
+      "trust": [
+        "Scor în câteva secunde",
+        "Fără cont",
+        "Română și engleză",
+        "Fișierul se șterge după scanare"
+      ],
+      "how": {
+        "eyebrow": "Cum funcționează",
+        "title": "De la un CV respins la unul care trece de ATS, în trei pași.",
+        "steps": [
+          {
+            "title": "Încarci CV-ul",
+            "text": "Adaugi un PDF sau DOCX. Joben îl citește așa cum o face un sistem ATS."
+          },
+          {
+            "title": "Primești scorul și îmbunătățirile",
+            "text": "Vezi un scor de la 0 la 100 pe cinci categorii și exact rândurile de corectat, cu rescrieri AI."
+          },
+          {
+            "title": "Adaptezi și exporți",
+            "text": "Potrivești CV-ul la un job description, adaugi o scrisoare de intenție și exporți un PDF curat."
+          }
+        ]
+      },
+      "features": {
+        "eyebrow": "Funcții",
+        "title": "Tot ce ai nevoie între prima ciornă și interviu.",
+        "items": [
+          {
+            "title": "Scor ATS",
+            "text": "Un scor de la 0 la 100 pe cinci categorii, înainte să aplici."
+          },
+          {
+            "title": "Rescriere cu AI",
+            "text": "Punctele slabe devin rezultate măsurabile, cu vocea ta."
+          },
+          {
+            "title": "Adaptare la job",
+            "text": "Lipești job description-ul și adaugi cuvintele cheie lipsă."
+          },
+          {
+            "title": "Scrisori de intenție",
+            "text": "O scrisoare potrivită cu CV-ul și cu rolul."
+          },
+          {
+            "title": "Șabloane",
+            "text": "Machete curate, făcute să fie citite corect de sistemele ATS."
+          },
+          {
+            "title": "Export PDF",
+            "text": "Descarci un PDF îngrijit și ții fiecare variantă organizată."
+          },
+          {
+            "title": "Română și engleză",
+            "text": "Scrii și evaluezi CV-uri în ambele limbi."
+          },
+          {
+            "title": "Confidențialitate",
+            "text": "La scanările gratuite fișierul se șterge imediat după analiză."
+          }
+        ]
+      },
+      "why": {
+        "eyebrow": "De ce Joben",
+        "title": "Făcut pentru felul în care sunt filtrate CV-urile.",
+        "items": [
+          {
+            "title": "Evaluat ca de un ATS",
+            "text": "Scorul urmărește verificările făcute de parsere și recrutori, deci repari ce contează."
+          },
+          {
+            "title": "Rămâi cu vocea ta",
+            "text": "Rescrierile adaugă cifre și verbe puternice fără să sune a AI generic."
+          },
+          {
+            "title": "Gratuit la început",
+            "text": "Îți verifici scorul fără cont și treci la un plan doar dacă ai nevoie de mai mult."
+          },
+          {
+            "title": "Gândit pentru România",
+            "text": "Prețuri în RON, interfață în română și suport pentru obiceiurile locale de CV."
+          }
+        ]
+      },
+      "pricingMore": "Compară toate planurile",
+      "faqMore": "Detalii despre prețuri",
+      "cta": {
+        "title": "Află scorul ATS în mai puțin de un minut.",
+        "text": "Încarcă CV-ul și vezi ce vede software-ul recrutorului. Este gratuit."
+      }
+    }
   },
   "Pricing": {
     "heading": "Prețuri simple, transparente",
@@ -775,7 +869,11 @@
       "noDateValue": "N/A",
       "noResumesYet": "Niciun CV încă",
       "createAnother": "Creează un alt CV adaptat",
-      "createNew": "Creează Nou"
+      "createNew": "Creează Nou",
+      "nameColumn": "Nume",
+      "typeColumn": "Tip",
+      "updatedColumn": "Actualizat",
+      "scoreColumn": "Scor"
     },
     "weeklyGoals": {
       "title": "Obiective Săptămânale",

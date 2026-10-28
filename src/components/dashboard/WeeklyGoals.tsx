@@ -65,9 +65,9 @@ export function WeeklyGoals({ stats }: { stats?: Stats }) {
   ]
 
   return (
-    <div className="bg-card p-6 border border-border flex flex-col" suppressHydrationWarning>
+    <div className="bg-card p-6 rounded-lg border border-border flex flex-col" suppressHydrationWarning>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
           <Target className="text-muted-foreground w-5 h-5" /> {t('title')}
         </h3>
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { CheckCircle2, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { Metadata } from 'next'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import { Navbar } from '@/components/ui/Navbar'
@@ -12,6 +12,8 @@ import type { AppLocale } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { PageHero, wrap } from '@/components/marketing/section'
+import { cn } from '@/lib/cn'
 import { TrackOnView } from '@/components/analytics/TrackOnView'
 
 function priceAmount(price: string): string {
@@ -97,58 +99,58 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
       </Suspense>
       <Navbar />
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto pt-32 pb-24">
-        <div className="mb-12 max-w-xl">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            {pricing.heading}
-          </h1>
-          <p className="mt-4 text-muted-foreground text-lg">
-            {pricing.subheading}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 border border-border divide-y divide-border md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
-          {pricing.plans.map((plan, index) => {
-            const meta = pricingPlanMeta[index]
-            return (
-              <div
-                key={index}
-                className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-primary/10' : ''}`}
-              >
-                {plan.badge ? (
-                  <p className="mb-4 text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
-                ) : null}
-
-                <h3 className="text-xl font-semibold text-foreground">{plan.name}</h3>
-                <p className="text-muted-foreground text-xs mt-1">{plan.description}</p>
-                <div className="mt-4 mb-6">
-                  <span className="text-3xl text-foreground font-bold tabular-nums">{plan.price}</span>
-                  <span className="font-sans text-muted-foreground"> {plan.pricePeriod}</span>
-                </div>
-                <ul className="space-y-2 mb-6 grow">
-                  {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-sm text-foreground">
-                      <CheckCircle2 size={14} className="text-foreground mt-0.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                  {plan.excludedFeatures.map((feature, fIndex) => (
-                    <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-muted-foreground line-through">
-                      <X size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <PlanCta
-                  label={plan.cta}
-                  plan={meta.planId}
-                  className={`w-full text-center ${buttonVariants(meta.isPrimary ? 'primary' : 'secondary', 'md')}`}
-                />
-              </div>
-            )
-          })}
-        </div>
-        <p className="mt-4 text-xs text-muted-foreground">{pricing.vatNote}</p>
+      <main>
+        <PageHero eyebrow="Joben" title={pricing.heading} intro={pricing.subheading} />
+        <section className="py-12 sm:py-16">
+          <div className={wrap}>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {pricing.plans.map((plan, index) => {
+                const meta = pricingPlanMeta[index]
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      'relative flex flex-col rounded-xl border bg-card p-6 shadow-card',
+                      meta.isPrimary ? 'border-primary ring-1 ring-primary' : 'border-border',
+                    )}
+                  >
+                    {plan.badge ? (
+                      <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                        {plan.badge}
+                      </span>
+                    ) : null}
+                    <h2 className="text-lg font-semibold">{plan.name}</h2>
+                    <p className="mt-1 min-h-10 text-sm text-muted-foreground">{plan.description}</p>
+                    <div className="mt-5 mb-6 flex items-baseline gap-1">
+                      <span className="text-4xl font-bold tabular-nums tracking-[-0.03em]">{plan.price}</span>
+                      <span className="text-sm text-muted-foreground">{plan.pricePeriod}</span>
+                    </div>
+                    <ul className="mb-6 grow space-y-2.5">
+                      {plan.features.map((feature, fIndex) => (
+                        <li key={fIndex} className="flex items-start gap-2 text-sm">
+                          <Check size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden />
+                          {feature}
+                        </li>
+                      ))}
+                      {plan.excludedFeatures.map((feature, fIndex) => (
+                        <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-muted-foreground line-through">
+                          <X size={16} className="mt-0.5 shrink-0" aria-hidden />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <PlanCta
+                      label={plan.cta}
+                      plan={meta.planId}
+                      className={cn('w-full text-center', buttonVariants(meta.isPrimary ? 'primary' : 'outline', 'md'))}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+            <p className="mt-6 text-center text-sm text-muted-foreground">{pricing.vatNote}</p>
+          </div>
+        </section>
       </main>
     </div>
   )

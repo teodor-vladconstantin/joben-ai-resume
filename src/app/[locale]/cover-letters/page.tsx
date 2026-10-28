@@ -1,7 +1,6 @@
 "use client"
 
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Navbar } from '@/components/ui/Navbar'
+import { AppNav } from '@/components/shell/AppNav'
 import { buttonVariants } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Link } from '@/i18n/navigation'
@@ -87,14 +86,11 @@ export default function CoverLettersPage() {
   }, [letters, query, sortMode, t])
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
+    <div className="min-h-screen flex flex-col">
+      <AppNav />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
+        <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>

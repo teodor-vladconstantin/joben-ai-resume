@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from '@/i18n/navigation'
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Navbar } from '@/components/ui/Navbar'
+import { AppNav } from '@/components/shell/AppNav'
 import { AccountUserButton } from '@/components/settings/AccountUserButton'
 import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
 import { ExportDataButton } from '@/components/settings/ExportDataButton'
@@ -55,19 +54,16 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ro' ? 'ro-RO' : 'en-GB', { dateStyle: 'long' })
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
+    <div className="min-h-screen flex flex-col">
+      <AppNav />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-          <h1 className="text-3xl font-bold text-foreground mb-8">{t('title')}</h1>
+        <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
+          <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{t('title')}</h1>
 
-          <div className="space-y-6">
+          <div className="mt-6 space-y-6">
             {/* Account */}
-            <div className="bg-card p-6 border border-border">
+            <div className="bg-card p-6 rounded-lg border border-border shadow-card">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-foreground">{t('account.title')}</h2>
@@ -91,7 +87,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Billing */}
-            <div className="bg-card p-6 border border-border">
+            <div className="bg-card p-6 rounded-lg border border-border shadow-card">
               <div>
                 <h2 className="text-lg font-bold text-foreground">{t('billing.title')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -124,7 +120,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Notifications */}
-            <div className="bg-card p-6 border border-border">
+            <div className="bg-card p-6 rounded-lg border border-border shadow-card">
               <div>
                 <h2 className="text-lg font-bold text-foreground">{t('notifications.title')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -142,7 +138,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Security */}
-            <div className="bg-card p-6 border border-border">
+            <div className="bg-card p-6 rounded-lg border border-border shadow-card">
               <div>
                 <h2 className="text-lg font-bold text-foreground">{t('security.title')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -160,7 +156,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Danger zone */}
-            <div className="bg-card p-6 border border-border border-l-2 border-l-foreground">
+            <div className="bg-card p-6 rounded-lg border border-border shadow-card border-l-2 border-l-foreground">
               <div>
                 <h2 className="text-lg font-bold text-foreground">{t('dangerZone.title')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">

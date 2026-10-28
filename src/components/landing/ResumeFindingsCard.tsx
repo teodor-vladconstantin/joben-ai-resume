@@ -9,7 +9,7 @@ export interface ResumeFindingsCardProps {
 
 export function ResumeFindingsCard({ label, strengths, improvements }: ResumeFindingsCardProps) {
   return (
-    <Card elevated radius="lg" className="p-6 w-full max-w-xs space-y-6">
+    <Card radius="lg" className="p-6 w-full max-w-none space-y-6">
       <Eyebrow>{label}</Eyebrow>
 
       <div>
