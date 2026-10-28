@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/Card'
 export function CoverLetterStepVisual() {
   return (
     <Card elevated radius="lg" className="p-6 w-full max-w-sm">
-      <p className="font-mono text-(length:--text-label) text-muted-foreground mb-4">Cover letter · Stripe</p>
+      <p className="text-(length:--text-label) text-muted-foreground mb-4">Cover letter · Stripe</p>
       <div className="bg-white p-4 text-[#1F2937] text-xs leading-relaxed space-y-2">
         <p>Dear Hiring Manager,</p>
         <p>

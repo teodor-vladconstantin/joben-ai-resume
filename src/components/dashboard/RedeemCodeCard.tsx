@@ -84,7 +84,7 @@ export function RedeemCodeCard({ currentPlan }: RedeemCodeCardProps) {
           </p>
         </div>
         {alreadyRecruiting ? (
-          <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-foreground">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground">
             <CheckCircle2 className="w-3.5 h-3.5" /> {t('alreadyActiveBadge')}
           </span>
         ) : null}

@@ -125,7 +125,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
 
               <div className="p-4 space-y-2">
                 <div>
-                  <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('beforeLabel')}</p>
+                  <p className="text-(length:--text-label) text-muted-foreground mb-1.5">{t('beforeLabel')}</p>
                   <p className="text-sm text-muted-foreground border-l-2 border-border px-3 py-2 leading-relaxed">
                     {patch.originalBullet || <span className="italic opacity-60">{t('emptyPlaceholder')}</span>}
                   </p>
@@ -136,7 +136,7 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
                 </div>
 
                 <div>
-                  <p className="font-mono text-(length:--text-label) text-foreground mb-1.5">{t('afterLabel')}</p>
+                  <p className="text-(length:--text-label) text-foreground mb-1.5">{t('afterLabel')}</p>
                   <p className="text-sm bg-primary/10 text-foreground border-l-2 border-foreground px-3 py-2 leading-relaxed">
                     {renderWithHighlights(patch.updatedBullet, claims)}
                   </p>

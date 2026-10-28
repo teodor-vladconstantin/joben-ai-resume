@@ -21,7 +21,7 @@ export function StatCards({ stats }: { stats: { resumes: number, coverLetters: n
         >
           <div>
             <p className="text-muted-foreground text-sm font-medium mb-1">{stat.label}</p>
-            <p className="font-mono text-2xl font-bold tabular-nums text-foreground">{stat.count}</p>
+            <p className="text-2xl font-bold tabular-nums text-foreground">{stat.count}</p>
           </div>
           <stat.icon className="w-5 h-5 text-muted-foreground shrink-0" />
         </Link>

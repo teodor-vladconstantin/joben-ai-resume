@@ -240,7 +240,7 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
         <header className="space-y-4">
           <Eyebrow>{copy.eyebrow}</Eyebrow>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">{copy.title}</h1>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-xs text-muted-foreground">
             {copy.updated}: <time dateTime={DATE_MODIFIED}>{DATE_MODIFIED}</time>
           </p>
         </header>

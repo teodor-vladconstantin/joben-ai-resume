@@ -37,7 +37,7 @@ export function MonthYearRangeField({
 
   return (
     <div className="border border-border bg-card px-3 py-2.5">
-      <p className="font-mono text-(length:--text-label) text-muted-foreground">{resolvedLabel}</p>
+      <p className="text-(length:--text-label) text-muted-foreground">{resolvedLabel}</p>
       <div className="mt-2 flex items-center gap-1 flex-wrap">
         <div className="relative">
           <select

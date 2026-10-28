@@ -54,16 +54,16 @@ function CookieTable({ headers, rows }: { headers: { name: string; provider: str
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.name}</th>
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.provider}</th>
-            <th className="pb-2 pr-4 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.purpose}</th>
-            <th className="pb-2 font-mono text-(length:--text-label) font-normal text-muted-foreground">{headers.duration}</th>
+            <th className="pb-2 pr-4 text-(length:--text-label) font-normal text-muted-foreground">{headers.name}</th>
+            <th className="pb-2 pr-4 text-(length:--text-label) font-normal text-muted-foreground">{headers.provider}</th>
+            <th className="pb-2 pr-4 text-(length:--text-label) font-normal text-muted-foreground">{headers.purpose}</th>
+            <th className="pb-2 text-(length:--text-label) font-normal text-muted-foreground">{headers.duration}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr key={row.name} className="border-b border-border">
-              <td className="py-2 pr-4 font-mono text-xs text-foreground">{row.name}</td>
+              <td className="py-2 pr-4 text-xs text-foreground">{row.name}</td>
               <td className="py-2 pr-4 text-muted-foreground">{row.provider}</td>
               <td className="py-2 pr-4 text-muted-foreground">{row.purpose}</td>
               <td className="py-2 text-muted-foreground">{row.duration}</td>
@@ -99,7 +99,7 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
         <header className="mb-8 pb-8 border-b border-border">
           <h1 className="text-3xl font-bold text-foreground">{cookies.heading}</h1>
-          <p className="mt-2 font-mono text-xs text-muted-foreground">{t('lastUpdated')}: {cookies.lastUpdated}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t('lastUpdated')}: {cookies.lastUpdated}</p>
           <p className="mt-4 text-muted-foreground">{cookies.intro}</p>
           <CompanyDetails className="mt-4 text-sm text-muted-foreground" />
         </header>

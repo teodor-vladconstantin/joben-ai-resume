@@ -93,7 +93,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
           <AmbientDataTexture />
 
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-foreground max-w-4xl leading-tight">
-            <span className="block mb-4 font-mono text-sm md:text-base font-semibold tracking-normal text-muted-foreground">{home.heroKeywords}</span>
+            <span className="block mb-4 text-sm md:text-base font-semibold tracking-normal text-muted-foreground">{home.heroKeywords}</span>
             <RevealWords as="span" text={home.heroPrefix} />{' '}
             <HeroWordRotate words={home.heroRotatingWords} />{' '}
             <RevealWords as="span" text={home.heroSuffix} />
@@ -268,12 +268,12 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   suppressHydrationWarning
                 >
                   {plan.badge ? (
-                    <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
+                    <p className="mb-4 text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
                   ) : null}
 
                   <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
                   <p className="text-muted-foreground text-sm mt-2 mb-6">{plan.description}</p>
-                  <div className="mb-6 font-mono text-4xl font-bold tabular-nums text-foreground" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-muted-foreground font-normal">{plan.pricePeriod}</span></div>
+                  <div className="mb-6 text-4xl font-bold tabular-nums text-foreground" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-muted-foreground font-normal">{plan.pricePeriod}</span></div>
                   <ul className="space-y-4 mb-8 grow">
                     {plan.features.map((feature, fIndex) => (
                       <li key={fIndex} className="flex gap-3 text-foreground"><CheckCircle2 className="text-foreground w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
@@ -319,8 +319,8 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                     <ArrowRight className="row-invert-arrow h-4 w-4 shrink-0" />
                     {item.question}
                   </span>
-                  <span className="font-mono text-xs group-open:hidden">{home.faqOpen}</span>
-                  <span className="hidden font-mono text-xs group-open:inline">{home.faqClose}</span>
+                  <span className="text-xs group-open:hidden">{home.faqOpen}</span>
+                  <span className="hidden text-xs group-open:inline">{home.faqClose}</span>
                 </summary>
                 <div className="pb-5 text-muted-foreground" suppressHydrationWarning>{item.answer}</div>
               </details>

@@ -135,11 +135,11 @@ export function ResumeAnalyzer({
       {/* Left panel */}
       <div className="lg:col-span-1 space-y-8">
         <div className="border border-border p-8">
-          <h3 className="font-mono text-(length:--text-label) text-muted-foreground">{t('overallMatchScore')}</h3>
+          <h3 className="text-(length:--text-label) text-muted-foreground">{t('overallMatchScore')}</h3>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{overallScore}</span>
-            <span className="font-mono text-lg text-muted-foreground">/100</span>
+            <span className="text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{overallScore}</span>
+            <span className="text-lg text-muted-foreground">/100</span>
           </div>
           <div className="mt-4 h-1 w-full bg-border">
             <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, overallScore))}%` }} />
@@ -150,7 +150,7 @@ export function ResumeAnalyzer({
 
           {comparison ? (
             <div className="mt-6 border-t border-border pt-4">
-              <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('vsPreviousReview')}</p>
+              <p className="text-(length:--text-label) text-muted-foreground">{t('vsPreviousReview')}</p>
               {comparison.delta === null ? (
                 <p className="mt-1 text-sm text-muted-foreground">{t('firstReviewForResume')}</p>
               ) : (
@@ -195,7 +195,7 @@ export function ResumeAnalyzer({
                 <div key={`${item.label || 'cat'}-${idx}`}>
                   <div className="flex justify-between gap-3 text-sm mb-1.5">
                     <span className="text-muted-foreground">{item.label || t('categoryFallback')}</span>
-                    <span className="text-foreground font-mono tabular-nums">{score}/{max}</span>
+                    <span className="text-foreground tabular-nums">{score}/{max}</span>
                   </div>
                   <div className="h-1 w-full bg-border">
                     <div className="h-1 bg-primary" style={{ width: `${width}%` }} />
@@ -214,7 +214,7 @@ export function ResumeAnalyzer({
 
           {/* Priority Improvements: index + 2px black rule, per the brief */}
           <div className="mb-8">
-            <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('priorityImprovements')}</h3>
+            <h3 className="text-(length:--text-label) text-muted-foreground mb-4">{t('priorityImprovements')}</h3>
             {improvements.length === 0 ? (
               <div className="border border-border p-4 text-sm text-muted-foreground">
                 {t('noImprovementSuggestions')}
@@ -230,17 +230,17 @@ export function ResumeAnalyzer({
                       key={`${imp.issue || 'issue'}-${idx}`}
                       className="flex gap-4 border-l-2 border-foreground py-5 pl-4"
                     >
-                      <span className="font-mono text-sm text-muted-foreground shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                      <span className="text-sm text-muted-foreground shrink-0">{String(idx + 1).padStart(2, '0')}</span>
                       <div className="flex-1 space-y-3">
                         <p className="text-sm text-foreground">{imp.issue || t('defaultIssue')}</p>
                         <div>
-                          <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('current')}</p>
+                          <p className="text-(length:--text-label) text-muted-foreground mb-1.5">{t('current')}</p>
                           <p className="text-sm text-muted-foreground border border-border px-3 py-2">
                             {imp.weak_example || t('notAvailable')}
                           </p>
                         </div>
                         <div>
-                          <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('suggested')}</p>
+                          <p className="text-(length:--text-label) text-muted-foreground mb-1.5">{t('suggested')}</p>
                           <p className="text-sm text-foreground bg-primary/10 px-3 py-2">
                             {imp.strong_example || t('notAvailable')}
                           </p>
@@ -278,7 +278,7 @@ export function ResumeAnalyzer({
 
           {/* Strengths */}
           <div>
-            <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('strengths')}</h3>
+            <h3 className="text-(length:--text-label) text-muted-foreground mb-4">{t('strengths')}</h3>
             <div className="border border-border p-4">
               {strengths.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{t('noStrengthsReturned')}</p>
@@ -297,7 +297,7 @@ export function ResumeAnalyzer({
           {/* Category Insights */}
           {categories.some((c) => c.feedback) ? (
             <div className="mt-8">
-              <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('categoryInsights')}</h3>
+              <h3 className="text-(length:--text-label) text-muted-foreground mb-4">{t('categoryInsights')}</h3>
               <div className="divide-y divide-border border-t border-border">
                 {categories.map((c, idx) =>
                   c.feedback ? (

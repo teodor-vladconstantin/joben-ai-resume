@@ -19,7 +19,7 @@ export function AmbientDataTexture() {
       {SNIPPETS.map((snippet) => (
         <span
           key={snippet.text}
-          className="absolute whitespace-nowrap font-mono text-[11px] text-foreground/[0.06]"
+          className="absolute whitespace-nowrap text-[11px] text-foreground/[0.06]"
           style={{ top: snippet.top, left: snippet.left }}
         >
           {snippet.text}
