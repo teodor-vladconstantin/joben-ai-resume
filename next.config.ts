@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next'
 import { SEO_JOBS } from './src/data/seo-jobs'
+import { localizedRedirects } from './src/lib/localized-redirects'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -191,18 +192,6 @@ const nextConfig: NextConfig = {
         }))
       )
     )
-    // Unprefixed public routes: next-intl answers 307 (temporary), which keeps
-    // the bare URL indexed. 301 to the locale that owns the slug. Role slugs
-    // differ per locale, so /resume-examples/:slug is left to next-intl.
-    const roOnly = ['pricing', 'about', 'contact', 'privacy', 'terms', 'cookies', 'resume-examples', 'sabloane-cv', 'ghiduri', 'glosar', 'comparatii', 'scrisoare-intentie', 'verificare-cv-ats']
-    const enOnly = ['cv-templates', 'guides', 'glossary', 'compare', 'cover-letter']
-    const unprefixedRedirects = [
-      ...roOnly.map((p) => ({ source: `/${p}`, destination: `/ro/${p}`, statusCode: 301 as const })),
-      ...enOnly.map((p) => ({ source: `/${p}`, destination: `/en/${p}`, statusCode: 301 as const })),
-      ...roOnly.slice(8, 12).map((p) => ({ source: `/${p}/:slug`, destination: `/ro/${p}/:slug`, statusCode: 301 as const })),
-      ...enOnly.slice(1).map((p) => ({ source: `/${p}/:slug`, destination: `/en/${p}/:slug`, statusCode: 301 as const })),
-      { source: '/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
-    ]
     return [
       // www is not a served host: one canonical origin. HTTP -> HTTPS is handled by the platform (plus HSTS above).
       {
@@ -211,8 +200,15 @@ const nextConfig: NextConfig = {
         destination: 'https://joben.eu/:path*',
         statusCode: 301 as const,
       },
+      // next-intl answers unprefixed paths with 307 (temporary), so Google kept
+      // indexing "/" and "/about" instead of their /ro canonicals.
+      { source: '/', destination: '/ro', statusCode: 301 as const },
+      // The unprefixed checker was Romanian; skip the /en hop the generic rule would pick.
+      { source: '/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      // The online withdrawal form was removed; the right is described in Terms section 7.
+      { source: '/:locale(ro|en)/withdrawal', destination: '/:locale/terms', statusCode: 301 as const },
       ...cvRedirects,
-      ...unprefixedRedirects,
+      ...localizedRedirects(),
       // English cover letters moved from the Romanian segment to /cover-letter.
       { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
