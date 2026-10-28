@@ -29,21 +29,8 @@ if (missing.length > 0) {
 // 'unsafe-eval' is development-only. X-XSS-Protection is intentionally
 // omitted: it is deprecated and can introduce XSS in legacy browsers.
 //
-// Clerk JS and all Clerk API calls are routed through the Next.js rewrite
-// at /clerk-proxy/:path* (see rewrites() below) rather than through the
-// external clerk.joben.eu CNAME proxy. This eliminates the CNAME as a
-// single point of failure: the rewrite runs on Vercel's edge (same SLA as
-// the app itself) and forwards to the Clerk instance's native Frontend API.
-//
-// Required env vars (set in Vercel, never commit real values):
-//   NEXT_PUBLIC_CLERK_PROXY_URL=https://joben.eu/clerk-proxy  (client-visible)
-//   CLERK_FAPI_ORIGIN=https://<instance>.clerk.accounts.dev   (server-only)
-//
-// Migration: in the Clerk Dashboard remove the clerk.joben.eu satellite
-// domain, then set these two vars and redeploy. Until then, CLERK_FAPI_ORIGIN
-// can temporarily point to clerk.joben.eu to keep the CNAME as the upstream.
-const CLERK_FAPI_ORIGIN =
-  process.env.CLERK_FAPI_ORIGIN || 'https://clerk.joben.eu'
+// Clerk loads from the clerk.joben.eu CNAME (allowed below). An in-app proxy
+// would need clerkMiddleware `frontendApiProxy` plus `proxyUrl`, not a plain rewrite.
 
 const SECURITY_HEADERS = [
   // Pages and the Markdown variant share URLs (see src/proxy.ts), so caches must key on Accept.
@@ -80,10 +67,8 @@ const SECURITY_HEADERS = [
         ...(process.env.NODE_ENV === 'production' ? [] : ["'unsafe-eval'"]),
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
-        // Direct Clerk CNAME, used until NEXT_PUBLIC_CLERK_PROXY_URL enables the /clerk-proxy rewrite.
+        // Clerk frontend API CNAME (serves clerk-js and the auth API).
         'https://clerk.joben.eu',
-        // Clerk JS is proxied via /clerk-proxy/:path* (rewritten to CLERK_FAPI_ORIGIN),
-        // so it loads from 'self' — no extra CSP host needed here.
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -105,8 +90,6 @@ const SECURITY_HEADERS = [
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
         'https://clerk.joben.eu',
-        // Clerk API calls go through /clerk-proxy/:path* → 'self', plus direct
-        // calls to clerk.com (e.g. account portals, webhooks). No extra host needed.
         'https://*.supabase.co',
         'wss://*.supabase.co',
         'https://eu.i.posthog.com',
@@ -209,14 +192,6 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      // Clerk JS + API calls are proxied through /clerk-proxy/:path* so the
-      // browser never needs to reach clerk.joben.eu directly. The rewrite
-      // forwards to the Clerk instance's native Frontend API (CLERK_FAPI_ORIGIN).
-      // This eliminates the clerk.joben.eu CNAME as a single point of failure.
-      {
-        source: '/clerk-proxy/:path*',
-        destination: `${CLERK_FAPI_ORIGIN}/:path*`,
-      },
       {
         source: '/ingest/static/:path*',
         destination: 'https://eu-assets.i.posthog.com/static/:path*',
