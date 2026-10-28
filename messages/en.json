@@ -46,7 +46,12 @@
     "aiReview": "AI Review",
     "logIn": "Log in",
     "getStartedFree": "Get Started Free",
-    "createNew": "Create New"
+    "createNew": "Create New",
+    "features": "Features",
+    "guides": "Guides",
+    "logInCta": "Log in",
+    "checkCv": "Check your resume free",
+    "menu": "Menu"
   },
   "Home": {
     "heroKeywords": "ATS resume checker and AI resume builder",
@@ -330,7 +335,24 @@
     "scanning": "Scanning your resume...",
     "scanButton": "Scan My Resume, Free",
     "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan",
-    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>."
+    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "steps": {
+      "upload": "Upload",
+      "scan": "Scan",
+      "result": "Score"
+    },
+    "scanningMessages": [
+      "Reading your resume...",
+      "Checking ATS formatting...",
+      "Matching keywords and impact...",
+      "Scoring structure and clarity...",
+      "Preparing your report..."
+    ],
+    "scanningTitle": "Analyzing your resume",
+    "scanningHint": "This usually takes a few seconds.",
+    "nextStep": "Continue",
+    "stepOf": "Step {current} of {total}",
+    "appCta": "Open Joben and fix these issues"
   },
   "SignUp": {
     "eyebrow": "Sign up",
@@ -434,12 +456,8 @@
     "legalHeading": "Legal",
     "productLinks": [
       {
-        "href": "/about",
-        "label": "About"
-      },
-      {
-        "href": "/contact",
-        "label": "Contact"
+        "href": "/free-ats-checker",
+        "label": "Free ATS Checker"
       },
       {
         "href": "/pricing",
@@ -448,14 +466,6 @@
       {
         "href": "/resume-examples",
         "label": "Resume Examples"
-      },
-      {
-        "href": "/guides/cv-readable-by-ats",
-        "label": "Guide: Resume read by ATS"
-      },
-      {
-        "href": "/free-ats-checker",
-        "label": "Free ATS Checker"
       }
     ],
     "legalLinks": [
@@ -470,12 +480,31 @@
       {
         "href": "/cookies",
         "label": "Cookie Policy"
+      },
+      {
+        "href": "https://anpc.ro",
+        "label": "ANPC (Romanian consumer authority)"
+      },
+      {
+        "href": "https://ec.europa.eu/consumers/odr",
+        "label": "EU Online Dispute Resolution"
       }
     ],
     "salBadgeAlt": "SAL (Alternative Dispute Resolution) - ANPC",
     "productHuntLabel": "Find us on Product Hunt",
     "creatorCredit": "Built by a software engineer who understands the job search struggle.",
-    "companyLine": "Joben is operated by {legalName}, tax ID (CUI) {cui}, Trade Register no. {regCom}, registered office at {address}. Contact: {email}."
+    "companyLine": "Joben is operated by {legalName}, tax ID (CUI) {cui}, Trade Register no. {regCom}, registered office at {address}. Contact: {email}.",
+    "companyHeading": "Company",
+    "companyLinks": [
+      {
+        "href": "/about",
+        "label": "About"
+      },
+      {
+        "href": "/contact",
+        "label": "Contact"
+      }
+    ]
   },
   "About": {
     "metaTitle": "About Joben: what it is and how it works",
@@ -549,34 +578,94 @@
     },
     "tours": {
       "dashboard": {
-        "sidebar": { "title": "Your navigation", "body": "Resumes, cover letters, AI Review and settings are one click away from here." },
-        "create": { "title": "Start a new resume", "body": "Begin with a blank resume or import an existing PDF inside the editor." },
-        "checklist": { "title": "Your first steps", "body": "Complete these four steps and you have a finished, exported resume. Each step links to the right page." },
-        "ats": { "title": "Your free ATS scan", "body": "The score and issues from your scan are saved here. Open the editor to fix them with AI." },
-        "referral": { "title": "Invite friends", "body": "Share your link: you get 7 Pro days for every friend who joins and confirms their email." }
+        "sidebar": {
+          "title": "Your navigation",
+          "body": "Resumes, cover letters, AI Review and settings are one click away from here."
+        },
+        "create": {
+          "title": "Start a new resume",
+          "body": "Begin with a blank resume or import an existing PDF inside the editor."
+        },
+        "checklist": {
+          "title": "Your first steps",
+          "body": "Complete these four steps and you have a finished, exported resume. Each step links to the right page."
+        },
+        "ats": {
+          "title": "Your free ATS scan",
+          "body": "The score and issues from your scan are saved here. Open the editor to fix them with AI."
+        },
+        "referral": {
+          "title": "Invite friends",
+          "body": "Share your link: you get 7 Pro days for every friend who joins and confirms their email."
+        }
       },
       "resumes": {
-        "create": { "title": "Create a resume", "body": "Start a new resume from here. You can import an existing PDF in the editor." },
-        "row": { "title": "Your resumes", "body": "Each row shows the title, the last update and the score of a resume." },
-        "actions": { "title": "Open, edit or delete", "body": "The eye and the pencil open the resume in the editor, the bin deletes it." }
+        "create": {
+          "title": "Create a resume",
+          "body": "Start a new resume from here. You can import an existing PDF in the editor."
+        },
+        "row": {
+          "title": "Your resumes",
+          "body": "Each row shows the title, the last update and the score of a resume."
+        },
+        "actions": {
+          "title": "Open, edit or delete",
+          "body": "The eye and the pencil open the resume in the editor, the bin deletes it."
+        }
       },
       "editor": {
-        "tabs": { "title": "Resume sections", "body": "Fill in each tab: personal details, experience, education, skills and more." },
-        "import": { "title": "Import a PDF", "body": "Already have a resume? Import it and the fields fill themselves." },
-        "tailor": { "title": "Tailor it to a job", "body": "Paste a job posting and AI suggests changes that match it." },
-        "preview": { "title": "Live preview", "body": "This is the page employers see. It updates as you type." },
-        "export": { "title": "Save and export", "body": "Save your work, then export a PDF ready to send." }
+        "tabs": {
+          "title": "Resume sections",
+          "body": "Fill in each tab: personal details, experience, education, skills and more."
+        },
+        "import": {
+          "title": "Import a PDF",
+          "body": "Already have a resume? Import it and the fields fill themselves."
+        },
+        "tailor": {
+          "title": "Tailor it to a job",
+          "body": "Paste a job posting and AI suggests changes that match it."
+        },
+        "preview": {
+          "title": "Live preview",
+          "body": "This is the page employers see. It updates as you type."
+        },
+        "export": {
+          "title": "Save and export",
+          "body": "Save your work, then export a PDF ready to send."
+        }
       },
       "coverLetters": {
-        "create": { "title": "Create a cover letter", "body": "Start a new cover letter from here." },
-        "row": { "title": "Your cover letters", "body": "Each row shows the title and the last update of a letter." },
-        "actions": { "title": "Open, edit or delete", "body": "The eye and the pencil open the letter, the bin deletes it." }
+        "create": {
+          "title": "Create a cover letter",
+          "body": "Start a new cover letter from here."
+        },
+        "row": {
+          "title": "Your cover letters",
+          "body": "Each row shows the title and the last update of a letter."
+        },
+        "actions": {
+          "title": "Open, edit or delete",
+          "body": "The eye and the pencil open the letter, the bin deletes it."
+        }
       },
       "aiReview": {
-        "upload": { "title": "Upload a resume", "body": "Drop a PDF here to review it without saving it as a resume first." },
-        "jd": { "title": "Add the job description", "body": "Optional. With a posting pasted here, the review also checks how well you match it." },
-        "start": { "title": "Run the review", "body": "You get a score with concrete fixes." },
-        "history": { "title": "Your resumes and past reviews", "body": "Review any saved resume, reopen the latest result, or run it again after you improve it." }
+        "upload": {
+          "title": "Upload a resume",
+          "body": "Drop a PDF here to review it without saving it as a resume first."
+        },
+        "jd": {
+          "title": "Add the job description",
+          "body": "Optional. With a posting pasted here, the review also checks how well you match it."
+        },
+        "start": {
+          "title": "Run the review",
+          "body": "You get a score with concrete fixes."
+        },
+        "history": {
+          "title": "Your resumes and past reviews",
+          "body": "Review any saved resume, reopen the latest result, or run it again after you improve it."
+        }
       }
     }
   },
@@ -1668,5 +1757,60 @@
     "marketingLabel": "I want to receive CV and job search tips and Joben offers by email. I can unsubscribe at any time.",
     "submit": "Download template",
     "error": "We could not save your address. Please try again."
+  },
+  "ResumeWizard": {
+    "title": "Build your resume",
+    "subtitle": "Four quick steps, then you land in the editor.",
+    "progress": "Step {current} of {total}",
+    "steps": {
+      "role": "Job role",
+      "contact": "Contact",
+      "experience": "Experience",
+      "education": "Education"
+    },
+    "role": {
+      "heading": "Which role are you applying for?",
+      "label": "Target job title",
+      "placeholder": "Product Designer"
+    },
+    "contact": {
+      "heading": "How can employers reach you?",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone (optional)",
+      "location": "Location (optional)"
+    },
+    "experience": {
+      "heading": "Your most recent job",
+      "jobTitle": "Job title",
+      "company": "Company",
+      "startYear": "Start year",
+      "endYear": "End year",
+      "current": "I currently work here",
+      "description": "What did you achieve? (optional)",
+      "descriptionPlaceholder": "One achievement per line",
+      "none": "I have no work experience yet"
+    },
+    "education": {
+      "heading": "Your education",
+      "institution": "School or university",
+      "degree": "Degree (optional)",
+      "field": "Field of study (optional)",
+      "endYear": "Graduation year (optional)"
+    },
+    "back": "Back",
+    "next": "Next",
+    "finish": "Create my resume",
+    "creating": "Creating...",
+    "skip": "Skip and open the blank editor",
+    "errors": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "year": "Enter a 4 digit year.",
+      "yearOrder": "End year cannot be before the start year.",
+      "create": "We could not create your resume. Please try again.",
+      "limit": "You reached the saved resume limit on your plan."
+    }
   }
 }

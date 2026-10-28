@@ -5,6 +5,7 @@ import { Upload, Loader2, AlertTriangle, CheckCircle2, RotateCcw, FileText } fro
 import { useLocale, useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
 import { Card } from '@/components/ui/Card'
+import { Progress } from '@/components/ui/progress'
 import { buttonVariants } from '@/components/ui/Button'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { ResumeScoreHero } from '@/components/landing/ResumeScoreHero'
@@ -68,6 +69,52 @@ function getWorstCategory(categories: Record<AtsCategoryKey, AtsCategory>): AtsC
     const worstRatio = categories[worst].score / categories[worst].max
     return ratio < worstRatio ? key : worst
   }, CATEGORY_ORDER[0])
+}
+
+const STEP_KEYS = ['upload', 'scan', 'result'] as const
+
+function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
+  const t = useTranslations('AtsChecker')
+  return (
+    <div className="mb-6" aria-label={t('stepOf', { current, total: STEP_KEYS.length })}>
+      <Progress value={(current / STEP_KEYS.length) * 100} aria-label={t('stepOf', { current, total: STEP_KEYS.length })} />
+      <ol className="mt-3 grid grid-cols-3 text-xs">
+        {STEP_KEYS.map((key, index) => (
+          <li
+            key={key}
+            aria-current={index + 1 === current ? 'step' : undefined}
+            className={index + 1 <= current ? 'font-semibold text-(--foreground)' : 'text-(--muted)'}
+          >
+            {index + 1}. {t(`steps.${key}`)}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+// Step 2: status text cycles while the scan request is in flight.
+function ScanningStep() {
+  const t = useTranslations('AtsChecker')
+  const messages = t.raw('scanningMessages') as string[]
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => setIndex((i) => Math.min(i + 1, messages.length - 1)), 2200)
+    return () => clearInterval(timer)
+  }, [messages.length])
+
+  return (
+    <Card radius="lg" className="p-8">
+      <StepIndicator current={2} />
+      <div className="py-8 text-center" role="status" aria-live="polite">
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-(--accent)" />
+        <h2 className="mt-5 text-lg font-bold text-(--foreground)">{t('scanningTitle')}</h2>
+        <p className="mt-2 min-h-5 text-sm text-(--foreground)">{messages[index]}</p>
+        <p className="mt-1 text-xs text-(--muted)">{t('scanningHint')}</p>
+      </div>
+    </Card>
+  )
 }
 
 export function FreeAtsCheckerClient() {
@@ -289,6 +336,7 @@ export function FreeAtsCheckerClient() {
 
     return (
       <div className="space-y-10">
+        <StepIndicator current={3} />
         <Card elevated radius="lg" className="p-8 sm:p-10">
           <ResumeScoreHero
             score={result.overall_score}
@@ -433,8 +481,11 @@ export function FreeAtsCheckerClient() {
     )
   }
 
+  if (isScanning) return <ScanningStep />
+
   return (
     <Card radius="lg" className="p-8">
+      <StepIndicator current={1} />
       <input
         ref={inputRef}
         type="file"
