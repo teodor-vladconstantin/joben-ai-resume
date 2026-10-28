@@ -3,6 +3,7 @@ import createMiddleware from 'next-intl/middleware'
 import { NextResponse } from 'next/server'
 import { routing } from '@/i18n/routing'
 import { resolveMarkdownTarget, wantsMarkdown } from '@/lib/agent-markdown'
+import { CLERK_PROXY_ENABLED, CLERK_PROXY_PATH } from '@/lib/clerk-proxy'
 import { APP_ORIGIN, SITE_ORIGIN, isAppPath } from '@/lib/app-origin'
 
 // Two hosts, one deployment: joben.eu serves the marketing/SEO pages and
@@ -31,7 +32,7 @@ const isProtectedRoute = createRouteMatcher([
 // /monitoring is Sentry's tunnel (tunnelRoute in next.config.ts) — with
 // localePrefix: 'always', next-intl was prefixing both to /ro/..., which
 // neither rewrite matches anymore, so every request 404'd.
-const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)', '/clerk-proxy(.*)'])
+const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (splitHosts && req.method === 'GET' && !isUnlocalizedRoute(req)) {
@@ -93,8 +94,9 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   return res
-})
+}, { frontendApiProxy: { enabled: CLERK_PROXY_ENABLED, path: CLERK_PROXY_PATH } })
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)'],
+  // /__clerk is listed on its own: its script URLs contain dots, which the first pattern skips.
+  matcher: ['/((?!_next|.*\\..*).*)', '/__clerk/(.*)'],
 }
