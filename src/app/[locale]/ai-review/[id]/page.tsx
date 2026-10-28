@@ -269,11 +269,11 @@ export default function AIReviewEditorPage() {
           </div>
         }
       >
-        <p className="text-sm text-(--muted)">
+        <p className="text-sm text-muted-foreground">
           {autoFixTokenWarning || t('errorAutoFixTokenLimit')}
         </p>
         {autoFixTokenDetails ? (
-          <div className="mt-4 border border-(--border) px-4 py-3 text-xs text-(--muted) space-y-1">
+          <div className="mt-4 border border-border px-4 py-3 text-xs text-muted-foreground space-y-1">
             {typeof autoFixTokenDetails.estimatedInputTokens === 'number' ? (
               <p>{t('estimatedInputTokens', { tokens: autoFixTokenDetails.estimatedInputTokens })}</p>
             ) : null}

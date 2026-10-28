@@ -22,18 +22,18 @@ export function AuthShell({ eyebrow, heading, subheading, children }: AuthShellP
             <span className="relative h-8 w-8 overflow-hidden">
               <Image src="/jobeneu_logo.jpg" alt="Joben logo" fill sizes="32px" className="object-cover" />
             </span>
-            <span className="text-xl font-bold tracking-tight text-(--foreground)">Joben</span>
+            <span className="text-xl font-bold tracking-tight text-foreground">Joben</span>
           </AppLink>
 
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
-          <h1 className="text-2xl font-bold text-(--foreground) mb-2">{heading}</h1>
-          <p className="text-sm text-(--muted) mb-8">{subheading}</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{heading}</h1>
+          <p className="text-sm text-muted-foreground mb-8">{subheading}</p>
 
           {children}
         </Card>
 
-        <div className="mt-6 text-xs text-(--muted)">
-          <AppLink href="/" className="hover:text-(--foreground) transition-colors duration-150 ease-out">&larr; {t('backToHome')}</AppLink>
+        <div className="mt-6 text-xs text-muted-foreground">
+          <AppLink href="/" className="hover:text-foreground transition-colors duration-150 ease-out">&larr; {t('backToHome')}</AppLink>
         </div>
       </div>
     </div>

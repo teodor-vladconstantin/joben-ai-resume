@@ -43,12 +43,12 @@ export function CookieConsentBanner() {
     <div
       role="dialog"
       aria-label={t('ariaLabel')}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-(--border) bg-(--surface) px-4 py-4 sm:px-6"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card px-4 py-4 sm:px-6"
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-(--muted)">
+        <p className="text-sm text-muted-foreground">
           {t('messagePrefix')}{' '}
-          <AppLink href="/cookies" className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
+          <AppLink href="/cookies" className="text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">
             {t('cookiePolicyLinkText')}
           </AppLink>
           .
@@ -56,13 +56,13 @@ export function CookieConsentBanner() {
         <div className="flex shrink-0 gap-3">
           <button
             onClick={handleReject}
-            className="flex-1 rounded-none border border-(--border) px-4 py-2 text-sm font-medium text-(--foreground) transition-colors duration-150 ease-out hover:bg-(--surface-elevated) sm:flex-none"
+            className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-150 ease-out hover:bg-card sm:flex-none"
           >
             {t('rejectNonEssential')}
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 rounded-none border border-(--border) px-4 py-2 text-sm font-medium text-(--foreground) transition-colors duration-150 ease-out hover:bg-(--surface-elevated) sm:flex-none"
+            className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-150 ease-out hover:bg-card sm:flex-none"
           >
             {t('acceptAll')}
           </button>

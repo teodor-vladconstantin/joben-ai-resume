@@ -78,17 +78,17 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24">
         <div className="text-center mb-12">
           <Eyebrow>{atsChecker.eyebrow}</Eyebrow>
-          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
+          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             {atsChecker.heading}
           </h1>
-          <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
             {atsChecker.subheading}
           </p>
         </div>

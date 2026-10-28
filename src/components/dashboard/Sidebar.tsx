@@ -24,18 +24,18 @@ export function Sidebar() {
   ]
 
   return (
-    <aside data-tour="dashboard-sidebar" className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-(--border) bg-(--surface) min-h-screen sticky top-0">
+    <aside data-tour="dashboard-sidebar" className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-border bg-card min-h-screen sticky top-0">
       <div className="flex items-center justify-between px-5 py-5">
         <Link href="/" className="flex items-center gap-2">
           <span className="relative h-8 w-8 overflow-hidden">
             <Image src="/jobeneu_logo.jpg" alt="Joben logo" fill sizes="32px" className="object-cover" />
           </span>
-          <span className="text-lg font-bold tracking-tight text-(--foreground)">Joben</span>
+          <span className="text-lg font-bold tracking-tight text-foreground">Joben</span>
         </Link>
         {isLoaded && isSignedIn ? (
-          <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8 border border-(--border)' } }} />
+          <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8 border border-border' } }} />
         ) : (
-          <div className="h-8 w-8 rounded-full bg-(--surface-elevated)" />
+          <div className="h-8 w-8 rounded-full bg-card" />
         )}
       </div>
 
@@ -54,7 +54,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-150 ease-out ${
-                isActive ? 'bg-(--accent-muted) text-(--foreground)' : 'text-(--muted) hover:bg-(--surface-elevated) hover:text-(--foreground)'
+                isActive ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-card hover:text-foreground'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -64,8 +64,8 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="flex items-center justify-between border-t border-(--border) px-5 py-4">
-        <span className="text-xs text-(--muted)">{tCommon('theme')}</span>
+      <div className="flex items-center justify-between border-t border-border px-5 py-4">
+        <span className="text-xs text-muted-foreground">{tCommon('theme')}</span>
         <ThemeToggle />
       </div>
     </aside>

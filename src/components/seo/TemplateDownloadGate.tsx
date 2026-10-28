@@ -34,7 +34,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
   })
 }
 
-const legalLinkClass = 'text-(--foreground) underline decoration-(--border) underline-offset-2 hover:decoration-(--accent) transition-colors duration-150 ease-out'
+const legalLinkClass = 'text-foreground underline decoration-border underline-offset-2 hover:decoration-primary transition-colors duration-150 ease-out'
 
 type TemplateDownloadGateProps = {
   href: string
@@ -184,7 +184,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title={t('title')} maxWidth="md">
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-          <p className="text-sm text-(--muted)">{t('body')}</p>
+          <p className="text-sm text-muted-foreground">{t('body')}</p>
           <Input
             type="email"
             required
@@ -194,12 +194,12 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
             placeholder={t('emailPlaceholder')}
             aria-label={t('emailPlaceholder')}
           />
-          <label className="flex items-start gap-3 text-xs text-(--muted)">
+          <label className="flex items-start gap-3 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={acceptedTerms}
               onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border bg-card accent-primary"
             />
             <span>
               {t.rich('termsLabel', {
@@ -216,12 +216,12 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
               })}
             </span>
           </label>
-          <label className="flex items-start gap-3 text-xs text-(--muted)">
+          <label className="flex items-start gap-3 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={marketingConsent}
               onChange={(e) => setMarketingConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-(--border) bg-(--surface-elevated) accent-(--accent)"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border bg-card accent-primary"
             />
             <span>{t('marketingLabel')}</span>
           </label>

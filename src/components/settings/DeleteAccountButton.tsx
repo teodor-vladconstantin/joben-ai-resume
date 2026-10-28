@@ -47,14 +47,14 @@ export function DeleteAccountButton() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-(--muted)">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Trash2 size={14} />
           {t('deleteAccountLabel')}
         </div>
         <Button
           variant="secondary"
           size="sm"
-          className="border-(--foreground)"
+          className="border-foreground"
           onClick={() => setOpen(true)}
         >
           {t('deleteAccountButton')}
@@ -62,10 +62,10 @@ export function DeleteAccountButton() {
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title={t('modalTitle')}>
-        <p className="text-sm text-(--muted)">
+        <p className="text-sm text-muted-foreground">
           {t('modalBody')}
         </p>
-        {error ? <p className="mt-3 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-foreground border-l-2 border-foreground pl-2">{error}</p> : null}
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={deleting}>
             {t('cancel')}
@@ -73,7 +73,7 @@ export function DeleteAccountButton() {
           <Button
             variant="secondary"
             size="sm"
-            className="border-(--foreground)"
+            className="border-foreground"
             onClick={handleDelete}
             disabled={deleting}
           >

@@ -85,7 +85,7 @@ export function ResumeAnalyzer({
 
   if (isLoading) {
     return (
-      <div className="border border-(--border) p-10 text-center">
+      <div className="border border-border p-10 text-center">
         <AILoadingState stage="generating" />
       </div>
     )
@@ -93,7 +93,7 @@ export function ResumeAnalyzer({
 
   if (error) {
     return (
-      <div className="border-l-2 border-(--foreground) p-10 text-(--foreground)">
+      <div className="border-l-2 border-foreground p-10 text-foreground">
         {error}
       </div>
     )
@@ -101,7 +101,7 @@ export function ResumeAnalyzer({
 
   if (!review) {
     return (
-      <div className="border border-(--border) p-10 text-center text-(--muted)">
+      <div className="border border-border p-10 text-center text-muted-foreground">
         {t('noReviewData')}
       </div>
     )
@@ -134,29 +134,29 @@ export function ResumeAnalyzer({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left panel */}
       <div className="lg:col-span-1 space-y-8">
-        <div className="border border-(--border) p-8">
-          <h3 className="font-mono text-(length:--text-label) text-(--muted)">{t('overallMatchScore')}</h3>
+        <div className="border border-border p-8">
+          <h3 className="font-mono text-(length:--text-label) text-muted-foreground">{t('overallMatchScore')}</h3>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-(--foreground)">{overallScore}</span>
-            <span className="font-mono text-lg text-(--muted)">/100</span>
+            <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{overallScore}</span>
+            <span className="font-mono text-lg text-muted-foreground">/100</span>
           </div>
-          <div className="mt-4 h-1 w-full bg-(--border)">
-            <div className="h-full bg-(--accent)" style={{ width: `${Math.max(0, Math.min(100, overallScore))}%` }} />
+          <div className="mt-4 h-1 w-full bg-border">
+            <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, overallScore))}%` }} />
           </div>
 
-          <p className="mt-6 text-(--foreground) font-bold text-xl">{grade}</p>
-          <p className="mt-1 text-sm text-(--muted)">{t('reviewFor', { title: getResumeTitle(review.resumes, t('resumeFallback')) })}</p>
+          <p className="mt-6 text-foreground font-bold text-xl">{grade}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('reviewFor', { title: getResumeTitle(review.resumes, t('resumeFallback')) })}</p>
 
           {comparison ? (
-            <div className="mt-6 border-t border-(--border) pt-4">
-              <p className="font-mono text-(length:--text-label) text-(--muted)">{t('vsPreviousReview')}</p>
+            <div className="mt-6 border-t border-border pt-4">
+              <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('vsPreviousReview')}</p>
               {comparison.delta === null ? (
-                <p className="mt-1 text-sm text-(--muted)">{t('firstReviewForResume')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('firstReviewForResume')}</p>
               ) : (
-                <p className="mt-1 text-sm font-semibold tabular-nums text-(--foreground)">
+                <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">
                   {comparison.delta >= 0 ? '+' : ''}{comparison.delta} {t('pts')}
-                  <span className="ml-2 text-xs font-normal text-(--muted)">
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
                     ({t('prevScore', { score: comparison.previousScore ?? 0 })})
                   </span>
                 </p>
@@ -178,14 +178,14 @@ export function ResumeAnalyzer({
               </button>
             )}
             {autoFixError ? (
-              <p className="mt-2 border-l-2 border-(--foreground) pl-2 text-xs text-(--foreground)">{autoFixError}</p>
+              <p className="mt-2 border-l-2 border-foreground pl-2 text-xs text-foreground">{autoFixError}</p>
             ) : null}
           </div>
         </div>
 
         {/* Score breakdown */}
-        <div className="border border-(--border) p-6">
-          <h3 className="text-(--foreground) font-bold mb-4">{tScore('title')}</h3>
+        <div className="border border-border p-6">
+          <h3 className="text-foreground font-bold mb-4">{tScore('title')}</h3>
           <div className="space-y-4">
             {categories.map((item, idx) => {
               const score = Number(item.score || 0)
@@ -194,11 +194,11 @@ export function ResumeAnalyzer({
               return (
                 <div key={`${item.label || 'cat'}-${idx}`}>
                   <div className="flex justify-between gap-3 text-sm mb-1.5">
-                    <span className="text-(--muted)">{item.label || t('categoryFallback')}</span>
-                    <span className="text-(--foreground) font-mono tabular-nums">{score}/{max}</span>
+                    <span className="text-muted-foreground">{item.label || t('categoryFallback')}</span>
+                    <span className="text-foreground font-mono tabular-nums">{score}/{max}</span>
                   </div>
-                  <div className="h-1 w-full bg-(--border)">
-                    <div className="h-1 bg-(--accent)" style={{ width: `${width}%` }} />
+                  <div className="h-1 w-full bg-border">
+                    <div className="h-1 bg-primary" style={{ width: `${width}%` }} />
                   </div>
                 </div>
               )
@@ -209,18 +209,18 @@ export function ResumeAnalyzer({
 
       {/* Right panel */}
       <div className="lg:col-span-2 space-y-8">
-        <div className="border border-(--border) p-8">
-          <h2 className="text-2xl font-bold text-(--foreground) mb-6 border-b border-(--border) pb-4">{t('actionableFeedback')}</h2>
+        <div className="border border-border p-8">
+          <h2 className="text-2xl font-bold text-foreground mb-6 border-b border-border pb-4">{t('actionableFeedback')}</h2>
 
           {/* Priority Improvements: index + 2px black rule, per the brief */}
           <div className="mb-8">
-            <h3 className="font-mono text-(length:--text-label) text-(--muted) mb-4">{t('priorityImprovements')}</h3>
+            <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('priorityImprovements')}</h3>
             {improvements.length === 0 ? (
-              <div className="border border-(--border) p-4 text-sm text-(--muted)">
+              <div className="border border-border p-4 text-sm text-muted-foreground">
                 {t('noImprovementSuggestions')}
               </div>
             ) : (
-              <div className="divide-y divide-(--border) border-t border-(--border)">
+              <div className="divide-y divide-border border-t border-border">
                 {improvements.map((imp, idx) => {
                   const isThisLoading = loadingImprovementIndex === idx
                   const thisError = fixErrors[idx]
@@ -228,39 +228,39 @@ export function ResumeAnalyzer({
                   return (
                     <div
                       key={`${imp.issue || 'issue'}-${idx}`}
-                      className="flex gap-4 border-l-2 border-(--foreground) py-5 pl-4"
+                      className="flex gap-4 border-l-2 border-foreground py-5 pl-4"
                     >
-                      <span className="font-mono text-sm text-(--muted) shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                      <span className="font-mono text-sm text-muted-foreground shrink-0">{String(idx + 1).padStart(2, '0')}</span>
                       <div className="flex-1 space-y-3">
-                        <p className="text-sm text-(--foreground)">{imp.issue || t('defaultIssue')}</p>
+                        <p className="text-sm text-foreground">{imp.issue || t('defaultIssue')}</p>
                         <div>
-                          <p className="font-mono text-(length:--text-label) text-(--muted) mb-1.5">{t('current')}</p>
-                          <p className="text-sm text-(--muted) border border-(--border) px-3 py-2">
+                          <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('current')}</p>
+                          <p className="text-sm text-muted-foreground border border-border px-3 py-2">
                             {imp.weak_example || t('notAvailable')}
                           </p>
                         </div>
                         <div>
-                          <p className="font-mono text-(length:--text-label) text-(--muted) mb-1.5">{t('suggested')}</p>
-                          <p className="text-sm text-(--foreground) bg-(--accent-muted) px-3 py-2">
+                          <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('suggested')}</p>
+                          <p className="text-sm text-foreground bg-primary/10 px-3 py-2">
                             {imp.strong_example || t('notAvailable')}
                           </p>
                         </div>
 
                         <div className="pt-1">
                           {isThisLoading ? (
-                            <span className="inline-flex items-center gap-2 text-sm text-(--muted)">
+                            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                               <Loader2 className="w-4 h-4 animate-spin" /> {t('applyingFix')}
                             </span>
                           ) : (
                             <>
                               {thisError ? (
-                                <p className="text-xs text-(--foreground) mb-2">{thisError}</p>
+                                <p className="text-xs text-foreground mb-2">{thisError}</p>
                               ) : null}
                               {onApplyFix ? (
                                 <button
                                   onClick={() => void onApplyFix(idx)}
                                   disabled={anyFixLoading}
-                                  className="text-(--foreground) text-sm font-medium hover:text-(--muted) flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ease-out"
+                                  className="text-foreground text-sm font-medium hover:text-muted-foreground flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ease-out"
                                 >
                                   {t('applyThisFix')} <ArrowRight className="w-4 h-4" />
                                 </button>
@@ -278,15 +278,15 @@ export function ResumeAnalyzer({
 
           {/* Strengths */}
           <div>
-            <h3 className="font-mono text-(length:--text-label) text-(--muted) mb-4">{t('strengths')}</h3>
-            <div className="border border-(--border) p-4">
+            <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('strengths')}</h3>
+            <div className="border border-border p-4">
               {strengths.length === 0 ? (
-                <p className="text-sm text-(--muted)">{t('noStrengthsReturned')}</p>
+                <p className="text-sm text-muted-foreground">{t('noStrengthsReturned')}</p>
               ) : (
-                <ul className="space-y-3 text-sm text-(--muted)">
+                <ul className="space-y-3 text-sm text-muted-foreground">
                   {strengths.map((s, idx) => (
                     <li key={`${s}-${idx}`} className="flex gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-(--foreground) shrink-0 mt-0.5" /> {s}
+                      <CheckCircle2 className="w-4 h-4 text-foreground shrink-0 mt-0.5" /> {s}
                     </li>
                   ))}
                 </ul>
@@ -297,13 +297,13 @@ export function ResumeAnalyzer({
           {/* Category Insights */}
           {categories.some((c) => c.feedback) ? (
             <div className="mt-8">
-              <h3 className="font-mono text-(length:--text-label) text-(--muted) mb-4">{t('categoryInsights')}</h3>
-              <div className="divide-y divide-(--border) border-t border-(--border)">
+              <h3 className="font-mono text-(length:--text-label) text-muted-foreground mb-4">{t('categoryInsights')}</h3>
+              <div className="divide-y divide-border border-t border-border">
                 {categories.map((c, idx) =>
                   c.feedback ? (
                     <div key={`${c.label || 'insight'}-${idx}`} className="py-4">
-                      <p className="text-(--foreground) font-medium mb-1">{c.label || t('categoryFallback')}</p>
-                      <p className="text-sm text-(--muted)">{c.feedback}</p>
+                      <p className="text-foreground font-medium mb-1">{c.label || t('categoryFallback')}</p>
+                      <p className="text-sm text-muted-foreground">{c.feedback}</p>
                     </div>
                   ) : null
                 )}

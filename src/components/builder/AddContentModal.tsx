@@ -54,10 +54,10 @@ export function AddContentModal({ open, onClose, onAdd }: AddContentModalProps) 
           <button
             key={item.type}
             onClick={() => onAdd(item)}
-            className="border border-(--border) bg-(--surface) p-4 text-left transition-colors duration-150 ease-out hover:border-(--accent) hover:bg-(--surface-elevated)"
+            className="border border-border bg-card p-4 text-left transition-colors duration-150 ease-out hover:border-primary hover:bg-card"
           >
-            <p className="text-sm font-semibold text-(--foreground)">{item.title}</p>
-            <p className="mt-1 text-xs text-(--muted)">{item.description}</p>
+            <p className="text-sm font-semibold text-foreground">{item.title}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
           </button>
         ))}
       </div>

@@ -36,7 +36,7 @@ export function ManageBillingButton({ hasSubscription }: ManageBillingButtonProp
       <Button variant="secondary" size="sm" onClick={handleClick} disabled={loading}>
         {loading ? '...' : hasSubscription ? t('manageBilling') : t('upgradeToPro')}
       </Button>
-      {error ? <p className="mt-2 text-xs text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-foreground border-l-2 border-foreground pl-2">{error}</p> : null}
     </div>
   )
 }

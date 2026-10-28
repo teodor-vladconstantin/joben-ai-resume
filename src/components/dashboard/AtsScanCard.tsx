@@ -13,9 +13,9 @@ export async function AtsScanCard({ scan, locale }: { scan: ClaimedAtsScan; loca
   const hasIssues = scan.issues.length > 0
 
   return (
-    <section className="bg-(--surface-elevated) p-6 border border-(--border) mb-8">
+    <section className="bg-card p-6 border border-border mb-8">
       <Eyebrow className="mb-3">{t('eyebrow')}</Eyebrow>
-      <h2 className="text-xl font-bold text-(--foreground)">
+      <h2 className="text-xl font-bold text-foreground">
         {hasIssues
           ? t('headlineWithIssues', { score: scan.score, count: scan.issues.length })
           : t('headlineNoIssues', { score: scan.score })}
@@ -25,17 +25,17 @@ export async function AtsScanCard({ scan, locale }: { scan: ClaimedAtsScan; loca
         <ul className="mt-4 space-y-3">
           {scan.issues.map((item, index) => (
             <li key={index} className="flex gap-3">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-(--foreground) mt-0.5" />
+              <AlertTriangle className="h-5 w-5 shrink-0 text-foreground mt-0.5" />
               <div>
-                <p className="text-(--foreground) font-semibold text-sm">{item.issue}</p>
-                <p className="text-(--muted) text-sm mt-0.5">{item.explanation}</p>
+                <p className="text-foreground font-semibold text-sm">{item.issue}</p>
+                <p className="text-muted-foreground text-sm mt-0.5">{item.explanation}</p>
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      <p className="text-(--muted) text-sm mt-4">{hasIssues ? t('hint') : t('hintNoIssues')}</p>
+      <p className="text-muted-foreground text-sm mt-4">{hasIssues ? t('hint') : t('hintNoIssues')}</p>
       <Link href="/resumes/new" className={`mt-4 inline-flex items-center gap-2 ${buttonVariants('primary', 'md')}`}>
         {t('cta')} <ArrowRight className="h-4 w-4" />
       </Link>

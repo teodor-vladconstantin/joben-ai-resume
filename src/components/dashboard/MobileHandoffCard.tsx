@@ -28,24 +28,24 @@ export function MobileHandoffCard() {
   }
 
   return (
-    <section className="lg:hidden bg-(--surface-elevated) p-6 border border-(--border) mb-8">
-      <p className="flex items-center gap-2 text-sm font-bold text-(--foreground) mb-2">
+    <section className="lg:hidden bg-card p-6 border border-border mb-8">
+      <p className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
         <Laptop className="h-4 w-4" /> {t('title')}
       </p>
-      <p className="text-sm text-(--muted) mb-4">{t('body')}</p>
+      <p className="text-sm text-muted-foreground mb-4">{t('body')}</p>
       {status === 'sent' ? (
-        <p role="status" className="text-sm text-(--foreground)">{t('sent')}</p>
+        <p role="status" className="text-sm text-foreground">{t('sent')}</p>
       ) : (
         <button
           type="button"
           onClick={send}
           disabled={status === 'sending'}
-          className="bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong) px-4 py-2 text-sm font-bold transition-colors duration-150 ease-out disabled:opacity-60"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm font-bold transition-colors duration-150 ease-out disabled:opacity-60"
         >
           {t('cta')}
         </button>
       )}
-      {status === 'error' && <p role="alert" className="mt-2 text-sm text-(--foreground)">{t('error')}</p>}
+      {status === 'error' && <p role="alert" className="mt-2 text-sm text-foreground">{t('error')}</p>}
     </section>
   )
 }

@@ -83,14 +83,14 @@ export function ReferralCard({ className = '' }: { className?: string }) {
     }
   }, [])
 
-  const boxClass = `bg-(--surface) p-6 border border-(--accent) ${className}`
+  const boxClass = `bg-card p-6 border border-primary ${className}`
 
   if (state.kind === 'error') return null
 
   if (state.kind === 'loading') {
     return (
       <div className={`${boxClass} flex justify-center`} role="status" aria-label={t('loading')}>
-        <Loader2 className="h-5 w-5 animate-spin text-(--muted)" />
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -98,8 +98,8 @@ export function ReferralCard({ className = '' }: { className?: string }) {
   if (state.kind === 'pending') {
     return (
       <div className={boxClass}>
-        <h3 className="text-lg font-bold text-(--foreground) mb-2">{t('title')}</h3>
-        <p className="text-sm text-(--muted)">{t('pending')}</p>
+        <h3 className="text-lg font-bold text-foreground mb-2">{t('title')}</h3>
+        <p className="text-sm text-muted-foreground">{t('pending')}</p>
       </div>
     )
   }
@@ -124,13 +124,13 @@ export function ReferralCard({ className = '' }: { className?: string }) {
     <section className={`${boxClass} space-y-5`} aria-labelledby="referral-card-title">
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <Gift className="h-5 w-5 mt-1 shrink-0 text-(--accent)" aria-hidden="true" />
+          <Gift className="h-5 w-5 mt-1 shrink-0 text-primary" aria-hidden="true" />
           <div className="space-y-1">
-            <h3 id="referral-card-title" className="text-lg font-bold text-(--foreground)">{t('title')}</h3>
-            <p className="text-sm text-(--muted)">
+            <h3 id="referral-card-title" className="text-lg font-bold text-foreground">{t('title')}</h3>
+            <p className="text-sm text-muted-foreground">
               {t('description', { referrerDays: REFERRER_REWARD_DAYS, friendDays: REFERRED_REWARD_DAYS })}
             </p>
-            <p className="text-xs text-(--muted)">
+            <p className="text-xs text-muted-foreground">
               {t('conditions', {
                 maxTotal: MAX_REWARDED_REFERRALS_TOTAL,
                 maxMonthly: MAX_REWARDED_REFERRALS_PER_30D,
@@ -141,15 +141,15 @@ export function ReferralCard({ className = '' }: { className?: string }) {
         </div>
 
         <dl className="shrink-0 text-left sm:text-right">
-          <dt className="text-xs text-(--muted)">{t('invitedLabel')}</dt>
-          <dd className="font-mono tabular-nums text-sm font-bold text-(--foreground)">
+          <dt className="text-xs text-muted-foreground">{t('invitedLabel')}</dt>
+          <dd className="font-mono tabular-nums text-sm font-bold text-foreground">
             {info.referralCount} · {t('daysEarned', { days: info.referralCredits })}
           </dd>
         </dl>
       </div>
 
       {proUntil ? (
-        <p className="text-sm text-(--foreground) border-l-2 border-(--accent) pl-2">
+        <p className="text-sm text-foreground border-l-2 border-primary pl-2">
           {info.hasSubscription
             ? t('daysSavedForLater')
             : t('proUntil', { date: format.dateTime(proUntil, { dateStyle: 'long' }) })}
@@ -157,7 +157,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="referral-link" className="text-xs font-semibold text-(--foreground)">{t('linkLabel')}</label>
+        <label htmlFor="referral-link" className="text-xs font-semibold text-foreground">{t('linkLabel')}</label>
         <div className="flex items-center gap-2">
           <input
             id="referral-link"
@@ -165,7 +165,7 @@ export function ReferralCard({ className = '' }: { className?: string }) {
             readOnly
             value={info.referralLink}
             onFocus={(event) => event.currentTarget.select()}
-            className="w-full px-3 py-2 text-xs font-mono border border-(--border) bg-(--surface-elevated) text-(--foreground) focus:outline-none focus:border-(--accent)"
+            className="w-full px-3 py-2 text-xs font-mono border border-border bg-card text-foreground focus:outline-none focus:border-primary"
           />
           <button
             type="button"
@@ -178,8 +178,8 @@ export function ReferralCard({ className = '' }: { className?: string }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-(--border)">
-        <span className="text-xs text-(--muted) mr-1">{t('shareLabel')}</span>
+      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-border">
+        <span className="text-xs text-muted-foreground mr-1">{t('shareLabel')}</span>
         <a
           href={whatsappUrl}
           target="_blank"

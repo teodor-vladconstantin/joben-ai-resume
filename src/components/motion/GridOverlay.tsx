@@ -33,7 +33,7 @@ export function GridOverlay() {
     <div className="pointer-events-none fixed inset-0 z-9999" aria-hidden="true">
       <div className="mx-auto grid h-full max-w-(--container-max) grid-cols-12 gap-4 px-4 sm:px-6 lg:px-8">
         {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="h-full bg-(--accent)/[0.06]" />
+          <div key={i} className="h-full bg-primary/[0.06]" />
         ))}
       </div>
       <div

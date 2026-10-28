@@ -58,13 +58,13 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <Navbar />
 
       <main className="grow pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-6">{about.heading}</h1>
-        <p className="text-(--muted) text-lg leading-relaxed mb-10">{about.intro}</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">{about.heading}</h1>
+        <p className="text-muted-foreground text-lg leading-relaxed mb-10">{about.intro}</p>
 
-        <h2 className="text-xl font-bold text-(--foreground) mb-2">{about.contactHeading}</h2>
-        <p className="text-(--muted)">
+        <h2 className="text-xl font-bold text-foreground mb-2">{about.contactHeading}</h2>
+        <p className="text-muted-foreground">
           {about.contactBody.split('{email}')[0]}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-(--foreground) border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">
             {CONTACT_EMAIL}
           </a>
           {about.contactBody.split('{email}')[1]}

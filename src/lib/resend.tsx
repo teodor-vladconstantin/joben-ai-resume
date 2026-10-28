@@ -1,4 +1,8 @@
+import type { ReactElement } from 'react'
 import { Resend } from 'resend'
+import { render } from '@react-email/render'
+import { Layout } from '@/emails/Layout'
+import { ScanReportBody, SimpleBody } from '@/emails/bodies'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
 import {
@@ -48,7 +52,7 @@ async function sendEmail(input: {
   from: string
   to: string
   subject: string
-  html: string
+  body: ReactElement
   unsubscribeLabel?: string
 }): Promise<EmailResult> {
   const client = getResendClient()
@@ -95,15 +99,19 @@ async function sendEmail(input: {
     return { success: false, error: 'Could not build an unsubscribe link for this address.' }
   }
   const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?email=${encodeURIComponent(input.to)}&token=${token}`
-  const htmlWithFooter = `${input.html}
-<p style="margin-top:16px;text-align:center;"><a href="${unsubscribeUrl}" style="color:#5C5C57;font-size:12px;text-decoration:underline;">${input.unsubscribeLabel || 'Unsubscribe from these emails'}</a></p>`
+  // The unsubscribe link lives in the Layout footer, so no template can omit it.
+  const html = await render(
+    <Layout unsubscribe={{ url: unsubscribeUrl, label: input.unsubscribeLabel || 'Unsubscribe from these emails' }}>
+      {input.body}
+    </Layout>,
+  )
 
   try {
     const response = (await client.emails.send({
       from: input.from,
       to: input.to,
       subject: input.subject,
-      html: htmlWithFooter,
+      html,
       headers: {
         'List-Unsubscribe': `<${unsubscribeUrl}>`,
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
@@ -130,13 +138,15 @@ export async function sendWelcomeEmail(input: {
     from: fromEmail,
     to: input.to,
     subject: 'Welcome to Joben',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Welcome to Joben, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Your account is ready. Start building ATS-optimized resumes and cover letters in minutes.</p>
-  <p style="margin:0 0 18px 0;">You can also run an AI review to identify quick wins before your next application.</p>
-  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a Joben account.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`Welcome to Joben, ${firstName}.`}
+        paragraphs={['Your account is ready. Start building ATS-optimized resumes and cover letters in minutes.', 'You can also run an AI review to identify quick wins before your next application.']}
+        ctaHref={`${accountUrl}/dashboard`}
+        ctaLabel={'Open Dashboard'}
+        note={'You are receiving this because you created a Joben account.'}
+      />
+    ),
   })
 }
 
@@ -150,13 +160,15 @@ export async function sendSevenDayFollowupEmail(input: {
     from: fromEmail,
     to: input.to,
     subject: '7-day check-in: boost your resume outcomes',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">One-week check-in, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">If you have not done it yet, run one AI review and tailor one resume to a target role.</p>
-  <p style="margin:0 0 18px 0;">These two steps usually produce the biggest quality jump in less than 10 minutes.</p>
-  <a href="${accountUrl}/ai-review" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Run AI Review</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">Need help? Reply to this email and we will point you to the fastest workflow.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`One-week check-in, ${firstName}.`}
+        paragraphs={['If you have not done it yet, run one AI review and tailor one resume to a target role.', 'These two steps usually produce the biggest quality jump in less than 10 minutes.']}
+        ctaHref={`${accountUrl}/ai-review`}
+        ctaLabel={'Run AI Review'}
+        note={'Need help? Reply to this email and we will point you to the fastest workflow.'}
+      />
+    ),
   })
 }
 
@@ -170,13 +182,15 @@ export async function sendFirstResumeEmail(input: {
     from: automationFromEmail,
     to: input.to,
     subject: 'Your first resume is ready',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Nice work, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Your first resume is now in Joben. Keep refining it or export a clean PDF anytime.</p>
-  <p style="margin:0 0 18px 0;">Ready to share it? Head to your dashboard and export the PDF in one click.</p>
-  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a resume on Joben.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`Nice work, ${firstName}.`}
+        paragraphs={['Your first resume is now in Joben. Keep refining it or export a clean PDF anytime.', 'Ready to share it? Head to your dashboard and export the PDF in one click.']}
+        ctaHref={`${accountUrl}/dashboard`}
+        ctaLabel={'Open Dashboard'}
+        note={'You are receiving this because you created a resume on Joben.'}
+      />
+    ),
   })
 }
 
@@ -190,13 +204,15 @@ export async function sendInactivityEmail(input: {
     from: automationFromEmail,
     to: input.to,
     subject: 'Your Joben resume is waiting',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Quick reminder, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">You created a Joben account recently, and your resume is still waiting for you.</p>
-  <p style="margin:0 0 18px 0;">Jump back in to generate your resume in minutes and export a PDF when ready.</p>
-  <a href="${accountUrl}/resumes/new" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Generate Resume</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already finished, you can ignore this email.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`Quick reminder, ${firstName}.`}
+        paragraphs={['You created a Joben account recently, and your resume is still waiting for you.', 'Jump back in to generate your resume in minutes and export a PDF when ready.']}
+        ctaHref={`${accountUrl}/resumes/new`}
+        ctaLabel={'Generate Resume'}
+        note={'If you already finished, you can ignore this email.'}
+      />
+    ),
   })
 }
 
@@ -233,10 +249,6 @@ export function anonScanCtaUrl(locale: AnonScanEmailLocale, type: AnonScanEmailT
     scan: scanId,
   })
   return `${accountUrl}/${locale}/sign-up?${params.toString()}`
-}
-
-function anonCtaButton(href: string, label: string): string {
-  return `<a href="${escapeHtml(href)}" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">${label}</a>`
 }
 
 const CATEGORY_LABELS: Record<AnonScanEmailLocale, Record<AtsCategoryKey, string>> = {
@@ -310,28 +322,28 @@ export async function sendAnonymousScanReportEmail(input: {
   const labels = CATEGORY_LABELS[input.locale]
   const grade = input.locale === 'ro' ? GRADE_LABELS_RO[input.grade] || input.grade : input.grade
 
-  const categoryRows = (Object.keys(labels) as AtsCategoryKey[])
-    .map((key) => `<li style="margin:0 0 4px 0;">${labels[key]}: ${input.categories[key].score}/${input.categories[key].max}</li>`)
-    .join('')
-
-  const issueRows = input.issues
-    .slice(0, 3)
-    .map((item) => `<li style="margin:0 0 10px 0;"><strong>${escapeHtml(item.issue)}</strong><br/><span style="color:#5C5C57;font-size:13px;">${escapeHtml(item.explanation)}</span></li>`)
-    .join('')
+  const categoryLines = (Object.keys(labels) as AtsCategoryKey[]).map(
+    (key) => `${labels[key]}: ${input.categories[key].score}/${input.categories[key].max}`,
+  )
+  const issues = input.issues.slice(0, 3)
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: copy.subject(input.overallScore),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${escapeHtml(copy.heading(input.overallScore, grade))}</h1>
-  <p style="margin:0 0 12px 0;">${copy.intro}</p>
-  <ul style="margin:0 0 18px 18px;padding:0;">${categoryRows}</ul>
-  ${issueRows ? `<p style="margin:0 0 8px 0;">${copy.topFixes}</p><ul style="margin:0 0 18px 18px;padding:0;">${issueRows}</ul>` : ''}
-  ${anonCtaButton(anonScanCtaUrl(input.locale, 'report', input.scanId), copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
-</div>`,
+    body: (
+      <ScanReportBody
+        heading={copy.heading(input.overallScore, grade)}
+        intro={copy.intro}
+        categoryLines={categoryLines}
+        topFixes={copy.topFixes}
+        issues={issues}
+        ctaHref={anonScanCtaUrl(input.locale, 'report', input.scanId)}
+        ctaLabel={copy.cta}
+        note={ANON_FOOTER[input.locale]}
+      />
+    ),
   })
 }
 
@@ -411,13 +423,15 @@ export async function sendAnonymousScan48hEmail(input: {
     to: input.to,
     subject: copy?.subject || base.fallbackSubject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${base.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy?.body || base.fallbackBody}</p>
-  <p style="margin:0 0 18px 0;">${base.pitch}</p>
-  ${anonCtaButton(anonScanCtaUrl(input.locale, '48h', input.scanId), base.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={base.heading}
+        paragraphs={[copy?.body || base.fallbackBody, base.pitch]}
+        ctaHref={anonScanCtaUrl(input.locale, '48h', input.scanId)}
+        ctaLabel={base.cta}
+        note={ANON_FOOTER[input.locale]}
+      />
+    ),
   })
 }
 
@@ -457,12 +471,15 @@ export async function sendAnonymousScan7dEmail(input: {
     to: input.to,
     subject: copy.subject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy.body}</p>
-  ${anonCtaButton(anonScanCtaUrl(input.locale, '7d', input.scanId), copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]} ${copy.lastReminder}</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={copy.heading}
+        paragraphs={[copy.body]}
+        ctaHref={anonScanCtaUrl(input.locale, '7d', input.scanId)}
+        ctaLabel={copy.cta}
+        note={`${ANON_FOOTER[input.locale]} ${copy.lastReminder}`}
+      />
+    ),
   })
 }
 
@@ -502,12 +519,14 @@ export async function sendPassDay10Email(input: {
     to: input.to,
     subject: copy.subject(input.daysLeft),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy.body(input.daysLeft)}</p>
-  <p style="margin:0 0 18px 0;">${copy.pitch}</p>
-  ${anonCtaButton(href, copy.cta)}
-</div>`,
+    body: (
+      <SimpleBody
+        heading={copy.heading}
+        paragraphs={[copy.body(input.daysLeft), copy.pitch]}
+        ctaHref={href}
+        ctaLabel={copy.cta}
+      />
+    ),
   })
 }
 
@@ -530,12 +549,15 @@ export async function sendTemplateSequenceEmail(input: {
     to: input.to,
     subject: copy.subject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  ${copy.body.map((paragraph) => `<p style="margin:0 0 12px 0;">${paragraph}</p>`).join('\n  ')}
-  ${anonCtaButton(href, copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${TEMPLATE_SEQUENCE_FOOTER[input.locale]}</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={copy.heading}
+        paragraphs={[...copy.body]}
+        ctaHref={href}
+        ctaLabel={copy.cta}
+        note={TEMPLATE_SEQUENCE_FOOTER[input.locale]}
+      />
+    ),
   })
 }
 
@@ -549,13 +571,15 @@ export async function sendExportFollowupEmail(input: {
     from: automationFromEmail,
     to: input.to,
     subject: 'Applied with that resume? A few things worth checking',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">A couple of weeks ago you exported a resume, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.</p>
-  <p style="margin:0 0 18px 0;">While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes.</p>
-  <a href="${accountUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Tailor for Another Role</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already heard back either way, you can ignore this. This is the only email you'll get about this export.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`A couple of weeks ago you exported a resume, ${firstName}.`}
+        paragraphs={['Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.', "While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes."]}
+        ctaHref={`${accountUrl}/dashboard`}
+        ctaLabel={'Tailor for Another Role'}
+        note={"If you already heard back either way, you can ignore this. This is the only email you'll get about this export."}
+      />
+    ),
   })
 }
 
@@ -569,18 +593,16 @@ export async function sendRateLimitEmail(input: {
     from: automationFromEmail,
     to: input.to,
     subject: 'You reached the free plan limit',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Heads up, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">You just reached a free plan limit on Joben.</p>
-  <p style="margin:0 0 18px 0;">Upgrade to Pro to unlock:</p>
-  <ul style="margin:0 0 18px 18px;padding:0;">
-    <li>Save up to 3 CVs and unlimited PDF exports</li>
-    <li>Much higher AI limits for reviews and rewrites</li>
-    <li>Priority support when you need help</li>
-  </ul>
-  <a href="${appUrl}/pricing" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Upgrade to Pro</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">Thanks for building with Joben.</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={`Heads up, ${firstName}.`}
+        paragraphs={['You just reached a free plan limit on Joben.', 'Upgrade to Pro to unlock:']}
+        bullets={['Save up to 3 CVs and unlimited PDF exports', 'Much higher AI limits for reviews and rewrites', 'Priority support when you need help']}
+        ctaHref={`${appUrl}/pricing`}
+        ctaLabel={'Upgrade to Pro'}
+        note={'Thanks for building with Joben.'}
+      />
+    ),
   })
 }
 
@@ -643,13 +665,15 @@ export async function sendReferralRewardEmail(input: {
     to: input.to,
     subject: copy.subject(input.days),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${escapeHtml(input.hasSubscription ? copy.bodySubscribed(input.days) : copy.body(input.days, date))}</p>
-  <p style="margin:0 0 18px 0;">${input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached}</p>
-  ${anonCtaButton(`${accountUrl}/${input.locale}/dashboard`, copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.footer}</p>
-</div>`,
+    body: (
+      <SimpleBody
+        heading={copy.heading}
+        paragraphs={[input.hasSubscription ? copy.bodySubscribed(input.days) : copy.body(input.days, date), input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached]}
+        ctaHref={`${accountUrl}/${input.locale}/dashboard`}
+        ctaLabel={copy.cta}
+        note={copy.footer}
+      />
+    ),
   })
 }
 
@@ -685,11 +709,7 @@ export async function sendMobileHandoffEmail(input: {
   return sendTransactionalEmail({
     to: input.to,
     subject: copy.subject,
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 18px 0;">${copy.body}</p>
-  ${anonCtaButton(href, copy.cta)}
-</div>`,
+    body: <SimpleBody heading={copy.heading} paragraphs={[copy.body]} ctaHref={href} ctaLabel={copy.cta} />,
   })
 }
 
@@ -699,17 +719,19 @@ export async function sendMobileHandoffEmail(input: {
 export async function sendTransactionalEmail(input: {
   to: string
   subject: string
-  html: string
+  html?: string
+  body?: ReactElement
   replyTo?: string
 }): Promise<EmailResult> {
   const client = getResendClient()
   if (!client) return { success: false, error: 'RESEND_API_KEY is not configured.' }
   try {
+    const html = input.body ? await render(<Layout>{input.body}</Layout>) : input.html || ''
     const response = (await client.emails.send({
       from: automationFromEmail,
       to: input.to,
       subject: input.subject,
-      html: input.html,
+      html,
       replyTo: input.replyTo,
     })) as ResendResponse
     if (response.error) return { success: false, error: response.error.message || 'Resend send failed.' }

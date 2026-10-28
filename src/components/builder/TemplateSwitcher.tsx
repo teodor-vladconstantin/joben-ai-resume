@@ -16,8 +16,8 @@ export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
   ]
 
   return (
-    <div className="bg-(--surface) border border-(--border) p-4">
-      <p className="font-mono text-(length:--text-label) text-(--muted) mb-3">{t('heading')}</p>
+    <div className="bg-card border border-border p-4">
+      <p className="font-mono text-(length:--text-label) text-muted-foreground mb-3">{t('heading')}</p>
       <div className="grid grid-cols-1 gap-2.5">
         {templates.map((template) => (
           <button
@@ -25,12 +25,12 @@ export function TemplateSwitcher({ value, onChange }: TemplateSwitcherProps) {
             onClick={() => onChange(template.id)}
             className={`text-left border px-3.5 py-2.5 transition-colors duration-150 ease-out ${
               value === template.id
-                ? 'bg-(--accent-muted) border-(--border) text-(--foreground)'
-                : 'bg-(--surface) border-(--border) text-(--foreground)/72 hover:border-(--accent)'
+                ? 'bg-primary/10 border-border text-foreground'
+                : 'bg-card border-border text-foreground/72 hover:border-primary'
             }`}
           >
             <p className="text-sm font-semibold">{template.name}</p>
-            <p className="text-[11px] text-(--muted) mt-0.5">{template.description}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{template.description}</p>
           </button>
         ))}
       </div>

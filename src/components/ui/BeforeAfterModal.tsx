@@ -40,7 +40,7 @@ function renderWithHighlights(text: string, claims: string[]): ReactNode {
   const pattern = new RegExp(`(${unique.map(escapeRegExp).join('|')})`, 'g')
   return text.split(pattern).map((part, index) =>
     unique.includes(part) ? (
-      <mark key={index} className="bg-transparent px-0 font-semibold text-(--foreground) underline decoration-(--accent) decoration-2 underline-offset-2">
+      <mark key={index} className="bg-transparent px-0 font-semibold text-foreground underline decoration-primary decoration-2 underline-offset-2">
         {part}
       </mark>
     ) : (
@@ -113,11 +113,11 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
           return (
             <div
               key={`${key}-${idx}`}
-              className="border border-(--border)"
+              className="border border-border"
             >
               {(patch.experienceTitle || patch.company) && (
-                <div className="px-4 py-2 bg-(--surface-elevated) border-b border-(--border)">
-                  <p className="text-xs font-medium text-(--muted)">
+                <div className="px-4 py-2 bg-card border-b border-border">
+                  <p className="text-xs font-medium text-muted-foreground">
                     {[patch.experienceTitle, patch.company].filter(Boolean).join(' · ')}
                   </p>
                 </div>
@@ -125,32 +125,32 @@ export function BeforeAfterModal({ patches, onClose, onConfirm }: BeforeAfterMod
 
               <div className="p-4 space-y-2">
                 <div>
-                  <p className="font-mono text-(length:--text-label) text-(--muted) mb-1.5">{t('beforeLabel')}</p>
-                  <p className="text-sm text-(--muted) border-l-2 border-(--border) px-3 py-2 leading-relaxed">
+                  <p className="font-mono text-(length:--text-label) text-muted-foreground mb-1.5">{t('beforeLabel')}</p>
+                  <p className="text-sm text-muted-foreground border-l-2 border-border px-3 py-2 leading-relaxed">
                     {patch.originalBullet || <span className="italic opacity-60">{t('emptyPlaceholder')}</span>}
                   </p>
                 </div>
 
                 <div className="flex justify-center">
-                  <ArrowDown className="w-4 h-4 text-(--muted)" />
+                  <ArrowDown className="w-4 h-4 text-muted-foreground" />
                 </div>
 
                 <div>
-                  <p className="font-mono text-(length:--text-label) text-(--foreground) mb-1.5">{t('afterLabel')}</p>
-                  <p className="text-sm bg-(--accent-muted) text-(--foreground) border-l-2 border-(--foreground) px-3 py-2 leading-relaxed">
+                  <p className="font-mono text-(length:--text-label) text-foreground mb-1.5">{t('afterLabel')}</p>
+                  <p className="text-sm bg-primary/10 text-foreground border-l-2 border-foreground px-3 py-2 leading-relaxed">
                     {renderWithHighlights(patch.updatedBullet, claims)}
                   </p>
                 </div>
 
                 {claims.length > 0 ? (
-                  <label className="mt-2 flex cursor-pointer items-start gap-2 border-l-2 border-(--foreground) px-3 py-2">
+                  <label className="mt-2 flex cursor-pointer items-start gap-2 border-l-2 border-foreground px-3 py-2">
                     <input
                       type="checkbox"
                       checked={confirmedKeys.has(key)}
                       onChange={() => toggleConfirmed(key)}
-                      className="mt-0.5 accent-(--accent)"
+                      className="mt-0.5 accent-primary"
                     />
-                    <span className="text-xs text-(--foreground)">
+                    <span className="text-xs text-foreground">
                       {t('claimsWarning', { claims: claims.join(', ') })}
                     </span>
                   </label>
