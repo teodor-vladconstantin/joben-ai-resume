@@ -1,10 +1,10 @@
 // Email-safe design tokens (no CSS variables): mirrors the app palette.
 export const EMAIL_COLORS = {
-  ink: '#111827',
-  paper: '#f4fbf7',
-  line: '#d3eadf',
-  muted: '#4b5d57',
-  green: '#047857',
+  ink: '#111113',
+  paper: '#f6f5f0',
+  line: '#e2e0d6',
+  muted: '#5f5f66',
+  green: '#34d399',
   white: '#ffffff',
 } as const
 
