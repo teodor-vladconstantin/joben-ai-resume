@@ -1,73 +1,114 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* shadcn/ui token structure (from nyra) filled with Joben's palette: ink/paper + green #2cb87a.
+   Text on the green fill is always the fixed dark --accent-ink (green is ~2.4:1 against paper as text). */
+@theme {
+  --color-background: #fafaf7;
+  --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #2cb87a;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #f1f0ea;
+  --color-secondary-foreground: #0a0a0a;
+  --color-muted: #f1f0ea;
+  --color-muted-foreground: #5c5c57;
+  --color-accent: #e8f6ef;
+  --color-accent-foreground: #0a0a0a;
+  --color-destructive: #c2362b;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #d9d8d2;
+  --color-input: #bdbcb5;
+  --color-ring: #2cb87a;
+  --color-success: #1f8a5b;
+  --color-warning: #8a6100;
+  --color-info: #2f5fb3;
+  --color-danger: #c2362b;
+  --color-brand: #1f8a5b;
+  --color-brand-foreground: #0a0a0a;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-card: 0 1px 2px rgb(10 10 10 / 0.05), 0 1px 3px rgb(10 10 10 / 0.04);
+  --shadow-pop: 0 8px 24px -6px rgb(10 10 10 / 0.16), 0 2px 6px rgb(10 10 10 / 0.06);
+
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
 
 :root {
-  /* ---- Swiss palette ---- */
-  --ink: #0a0a0a;
-  --ink-muted: #5c5c57;
-  --paper: #fafaf7;
-  --paper-strong: #ffffff;
-  --line: #d9d8d2;
-  --green: #2cb87a; /* existing brand accent, reused exactly — do not invent a new green */
-
-  /* Accent measures ~2.4:1 on --paper (light) as text, but ~7.5:1 on --paper
-     (dark) — it sits in a mid-luminance band where only dark text ever
-     passes against it, in EITHER theme. So text drawn on a full-strength
-     accent fill always uses this fixed ink, never the theme's --foreground
-     (which flips light/dark and would fail in dark mode). Not used as
-     foreground text anywhere else — see the never-as-text rule below. */
-  --accent-ink: #0a0a0a;
-  --green-strong: color-mix(in srgb, var(--green) 82%, black);
-  --green-muted: color-mix(in srgb, var(--green) 12%, transparent);
-
-  --background: var(--paper);
-  --surface: var(--paper-strong);
-  --surface-strong: var(--paper-strong);
-  --surface-elevated: var(--paper-strong);
-  --foreground: var(--ink);
-  --muted: var(--ink-muted);
-  --muted-2: color-mix(in srgb, var(--ink-muted) 70%, var(--paper));
-  --border: var(--line);
-  --accent: var(--green);
-  --accent-strong: var(--green-strong);
-  --accent-muted: var(--green-muted);
-
-  /* ---- Layout ---- */
+  --radius: 0.625rem;
   --container-max: 1200px;
 
-  /* ---- Type scale: 8px-baseline rem steps, fluid where the brief calls
-     for a hero-scale number (the score). Named by role, not by t-shirt
-     size, so usage stays intentional. ---- */
-  --text-label: 0.75rem;   /* 12px — mono eyebrow/table labels */
-  --text-body: 1rem;       /* 16px */
-  --text-body-lg: 1.25rem; /* 20px */
-  --text-h3: 1.75rem;      /* 28px */
-  --text-h2: 2.5rem;       /* 40px */
-  --text-h1: clamp(2.5rem, 2rem + 2.5vw, 3.5rem);   /* 40–56px */
-  --text-score: clamp(4rem, 3rem + 6vw, 7rem);      /* the score number itself */
+  /* Legacy aliases: older components read these names via bg-(--accent) etc.
+     Remove as they migrate to semantic classes (bg-primary, text-muted-foreground). */
+  --foreground: var(--color-foreground);
+  --background: var(--color-background);
+  --border: var(--color-border);
+  --muted: var(--color-muted-foreground);
+  --muted-2: color-mix(in srgb, var(--color-muted-foreground) 70%, var(--color-background));
+  --surface: var(--color-card);
+  --surface-strong: var(--color-card);
+  --surface-elevated: var(--color-card);
+  --accent: var(--color-primary);
+  --accent-strong: color-mix(in srgb, var(--color-primary) 82%, black);
+  --accent-ink: var(--color-primary-foreground);
+  --accent-muted: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  --ink: var(--color-foreground);
+  --paper: var(--color-background);
+  --green: var(--color-primary);
+  --green-strong: var(--accent-strong);
+  --green-muted: var(--accent-muted);
 
-  /* ---- Motion: one global easing, everywhere ---- */
+  --text-label: 0.75rem;
+  --text-body: 1rem;
+  --text-body-lg: 1.25rem;
+  --text-h3: 1.75rem;
+  --text-h2: 2.5rem;
+  --text-h1: clamp(2.5rem, 2rem + 2.5vw, 3.5rem);
+  --text-score: clamp(4rem, 3rem + 6vw, 7rem);
   --ease-swiss: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Dark mode: same Swiss rules (0 radius, single accent, mono/sans split),
-   same --green unchanged. Only the base tokens are redefined here — every
-   derived token (--background, --foreground, --border, --surface*, ...)
-   cascades automatically since :root only assigns them once via var().
-   On this dark background --green clears 4.5:1 as text too (~7.5:1), but
-   components still only ever use it as a fill/underline — that convention
-   costs nothing here and keeps both themes visually consistent. */
 .dark {
-  --ink: #f5f1eb;
-  --ink-muted: #8a8a92;
-  --paper: #0a0a0e;
-  --paper-strong: #12121a;
-  --line: color-mix(in srgb, var(--ink) 14%, var(--paper));
+  --color-background: #0a0a0e;
+  --color-foreground: #f5f1eb;
+  --color-card: #12121a;
+  --color-card-foreground: #f5f1eb;
+  --color-popover: #12121a;
+  --color-popover-foreground: #f5f1eb;
+  --color-secondary: #1b1b25;
+  --color-secondary-foreground: #f5f1eb;
+  --color-muted: #1b1b25;
+  --color-muted-foreground: #8a8a92;
+  --color-accent: #16281f;
+  --color-accent-foreground: #f5f1eb;
+  --color-destructive: #e5645a;
+  --color-destructive-foreground: #0a0a0e;
+  --color-border: #2a2a33;
+  --color-input: #4a4a55;
+  --color-success: #2cb87a;
+  --color-warning: #e0a82e;
+  --color-info: #6f9be0;
+  --color-danger: #e5645a;
+  --color-brand: #2cb87a;
 }
 
-@theme inline {
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --font-sans: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; font-family: var(--font-sans); }
+  :focus-visible { @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background; }
+  ::selection { background: color-mix(in oklab, var(--color-ring) 30%, transparent); }
 }
+
 
 /* ============================================================
    Motion primitives — transform/opacity/clip-path only, one
