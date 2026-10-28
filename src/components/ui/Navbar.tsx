@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { buttonVariants } from '@/components/ui/Button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -52,9 +53,9 @@ export function Navbar() {
 
           <section className="hidden items-center space-x-6 md:flex">
             {(isLoaded && isSignedIn ? appLinks : publicLinks).map((link) => (
-              <Link key={link.href} href={link.href} className={NAV_LINK_CLASSES}>
+              <AppLink key={link.href} href={link.href} className={NAV_LINK_CLASSES}>
                 {link.label}
-              </Link>
+              </AppLink>
             ))}
           </section>
         </section>
@@ -64,9 +65,9 @@ export function Navbar() {
           <ThemeToggle />
           {isLoaded && !isSignedIn && (
             <>
-              <Link href="/sign-in" className={NAV_LINK_CLASSES}>
+              <AppLink href="/sign-in" className={NAV_LINK_CLASSES}>
                 {t('logIn')}
-              </Link>
+              </AppLink>
               <AuthAwareSignupLink className={buttonVariants('primary', 'sm')}>
                 {t('getStartedFree')}
               </AuthAwareSignupLink>
@@ -75,13 +76,13 @@ export function Navbar() {
 
           {isLoaded && isSignedIn && (
             <>
-              <Link
+              <AppLink
                 href="/resumes/new"
                 className={`hidden sm:flex items-center gap-1.5 ${buttonVariants('primary', 'sm')}`}
               >
                 <Plus className="h-4 w-4" />
                 <span>{t('createNew')}</span>
-              </Link>
+              </AppLink>
               <UserButton
                 appearance={{
                   elements: {

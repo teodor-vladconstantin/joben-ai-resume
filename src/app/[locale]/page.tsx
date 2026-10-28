@@ -1,9 +1,9 @@
 import { Navbar } from '@/components/ui/Navbar'
-import { Link } from '@/i18n/navigation'
 import { ArrowRight, CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap } from 'lucide-react'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
 import { pricingPlanMeta, siteConfig, BUILD_TIME } from '@/lib/content'
+import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { PlanCta } from '@/components/pricing/PlanCta'
 import { HeroWordRotate } from '@/components/landing/HeroWordRotate'
@@ -332,7 +332,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
           <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footer.heading}</h2>
           <div className="flex flex-col sm:flex-row gap-4 mt-8" suppressHydrationWarning>
             <AuthAwareSignupLink ctaId="home_footer" className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
-            <Link href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</Link>
+            <AppLink href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</AppLink>
           </div>
         </div>
       </section>
