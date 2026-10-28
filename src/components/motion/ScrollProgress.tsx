@@ -47,7 +47,7 @@ export function ScrollProgress() {
       </div>
       {sectionLabel ? (
         <div
-          className="fixed bottom-4 right-4 z-40 hidden font-mono text-(length:--text-label) text-muted-foreground lg:block"
+          className="fixed bottom-4 right-4 z-40 hidden text-(length:--text-label) text-muted-foreground lg:block"
           aria-hidden="true"
         >
           {sectionLabel}

@@ -10,7 +10,7 @@ const DOCUMENTS = [
 export function ExportStepVisual() {
   return (
     <Card elevated radius="lg" className="p-6 w-full max-w-sm">
-      <p className="font-mono text-(length:--text-label) text-muted-foreground mb-4">Your documents</p>
+      <p className="text-(length:--text-label) text-muted-foreground mb-4">Your documents</p>
       <div className="space-y-3">
         {DOCUMENTS.map((doc) => (
           <div key={doc.name} className="flex items-center justify-between gap-3 border border-border px-3 py-2.5">

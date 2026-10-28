@@ -24,7 +24,7 @@ export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTable
 export function TableHeaderCell({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn('py-3 pr-6 font-mono text-(length:--text-label) font-normal opacity-70', className)}
+      className={cn('py-3 pr-6 text-(length:--text-label) font-normal opacity-70', className)}
       {...props}
     />
   )

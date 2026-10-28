@@ -233,19 +233,19 @@ export default function AIReviewPage() {
           <div className="grid grid-cols-1 border border-border divide-y divide-border mb-6 md:grid-cols-4 md:divide-y-0 md:divide-x">
             <div className="p-4">
               <p className="text-xs text-muted-foreground flex items-center gap-2"><Target className="w-4 h-4 text-muted-foreground" /> {t('targetScoreLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-foreground mt-2">{targetScore}<span className="font-sans text-sm text-muted-foreground ml-2">+ {t('hireZoneSuffix')}</span></p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{targetScore}<span className="font-sans text-sm text-muted-foreground ml-2">+ {t('hireZoneSuffix')}</span></p>
             </div>
             <div className="p-4">
               <p className="text-xs text-muted-foreground flex items-center gap-2"><Star className="w-4 h-4 text-muted-foreground" /> {t('yourBestLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-foreground mt-2">{bestScore}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{bestScore}</p>
             </div>
             <div className="p-4">
               <p className="text-xs text-muted-foreground flex items-center gap-2"><History className="w-4 h-4 text-muted-foreground" /> {t('reviewsLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-foreground mt-2">{reviews.length}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{reviews.length}</p>
             </div>
             <div className="p-4">
               <p className="text-xs text-muted-foreground flex items-center gap-2"><Gauge className="w-4 h-4 text-muted-foreground" /> {t('avgScoreLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-foreground mt-2">{averageScore}<span className="font-sans text-sm text-muted-foreground"> {t('outOf100')}</span></p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{averageScore}<span className="font-sans text-sm text-muted-foreground"> {t('outOf100')}</span></p>
             </div>
           </div>
 

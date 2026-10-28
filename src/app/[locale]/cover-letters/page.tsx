@@ -145,7 +145,7 @@ export default function CoverLettersPage() {
                       <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(letter.updated_at).toLocaleDateString(locale)}</p>
                     </div>
                     <div data-tour={index === 0 ? 'letters-actions' : undefined} className="flex items-center gap-3 shrink-0">
-                      <span className="font-mono text-xs font-bold opacity-70">{t('badgeLabel')}</span>
+                      <span className="text-xs font-bold opacity-70">{t('badgeLabel')}</span>
                       <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(letter.updated_at, locale)}</span>
                       <Link href={`/cover-letters/${letter.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Eye className="w-4 h-4" /></Link>
                       <Link href={`/cover-letters/${letter.id}`} className="opacity-70 hover:opacity-100 transition-opacity duration-150 ease-out"><Edit className="w-4 h-4" /></Link>

@@ -47,7 +47,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ local
     <main className="min-h-screen bg-background px-4 py-16 text-foreground">
       <div className="mx-auto w-full max-w-xl">
         <header className="mb-8 text-center">
-          <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('eyebrow')}</p>
+          <p className="text-(length:--text-label) text-muted-foreground">{t('eyebrow')}</p>
           <h1 className="mt-2 text-2xl font-semibold text-foreground">{t('heading')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t('intro')}</p>
         </header>

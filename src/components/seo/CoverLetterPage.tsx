@@ -101,7 +101,7 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('subheading')}</p>
           <div className="flex items-center justify-center pt-2">
-            <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-mono font-semibold flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-semibold flex items-center gap-1.5">
               <Briefcase className="h-3.5 w-3.5" />
               {t('fieldLabel', { category: job.category[locale] })}
             </span>
@@ -127,7 +127,7 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
             <p>{sample.intro}</p>
             <p>{sample.body}</p>
             <p>{sample.closing}</p>
-            <div className="pt-2 text-xs text-muted-foreground font-mono">{t('signature')}</div>
+            <div className="pt-2 text-xs text-muted-foreground">{t('signature')}</div>
           </div>
         </Card>
 
@@ -136,7 +136,7 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             {rules.map((rule, i) => (
               <div key={rule.title} className="space-y-2">
-                <span className="h-7 w-7 rounded-full bg-foreground text-background font-bold text-xs flex items-center justify-center font-mono">
+                <span className="h-7 w-7 rounded-full bg-foreground text-background font-bold text-xs flex items-center justify-center">
                   {i + 1}
                 </span>
                 <h3 className="font-bold text-sm text-foreground">{rule.title}</h3>

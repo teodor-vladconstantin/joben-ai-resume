@@ -33,7 +33,7 @@ export function RecentDocuments({ recentDocs }: { recentDocs: RecentDocument[] }
               <div className="w-10 h-10 bg-primary/10 flex items-center justify-center text-foreground">
                 <FileText className="w-5 h-5" />
               </div>
-              {typeof doc.score === 'number' && doc.score > 0 ? <span className="font-mono text-xs font-bold text-muted-foreground tabular-nums">{t('scorePrefix')}{doc.score}</span> : null}
+              {typeof doc.score === 'number' && doc.score > 0 ? <span className="text-xs font-bold text-muted-foreground tabular-nums">{t('scorePrefix')}{doc.score}</span> : null}
             </div>
             <h4 className="text-foreground font-medium mb-1">{doc.title || t('untitledDocument')}</h4>
             <p className="text-xs text-muted-foreground">

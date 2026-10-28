@@ -234,13 +234,13 @@ export default async function ResumeRolePage({
               {bullets.map((bullet) => (
                 <div key={bullet.weak} className="grid gap-4 sm:grid-cols-2">
                   <div className="border border-border bg-card p-4">
-                    <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-muted-foreground mb-2">
+                    <p className="flex items-center gap-2 text-(length:--text-label) text-muted-foreground mb-2">
                       <XCircle className="h-4 w-4" /> {r.weak}
                     </p>
                     <p className="text-sm text-foreground">{bullet.weak}</p>
                   </div>
                   <div className="border border-border bg-primary/10 p-4">
-                    <p className="flex items-center gap-2 font-mono text-(length:--text-label) text-foreground mb-2">
+                    <p className="flex items-center gap-2 text-(length:--text-label) text-foreground mb-2">
                       <CheckCircle2 className="h-4 w-4" /> {r.strong}
                     </p>
                     <p className="text-sm text-foreground">{bullet.strong}</p>

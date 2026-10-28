@@ -104,7 +104,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
     <Card elevated radius="lg" className="p-6 sm:p-8 border-2 border-foreground/20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-primary/10 text-foreground mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-foreground mb-2">
             <Sparkles className="h-3.5 w-3.5" />
             {t('widget.badge', { job: jobTitle })}
           </div>
@@ -114,7 +114,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
         {result && (
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline font-mono shrink-0"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline shrink-0"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             {t('widget.rescan')}
@@ -215,7 +215,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
               </div>
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {match.missingKeywords.map((kw) => (
-                  <span key={kw} className="px-2 py-0.5 rounded text-xs font-mono bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <span key={kw} className="px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-500 border border-amber-500/20">
                     {kw}
                   </span>
                 ))}
@@ -230,7 +230,7 @@ export function SeoAtsScanWidget({ jobSlug, jobTitle }: SeoAtsScanWidgetProps) {
                 {match.foundKeywords.map((kw) => (
                   <span
                     key={kw}
-                    className="px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1"
+                    className="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1"
                   >
                     <CheckCircle2 className="h-3 w-3" />
                     {kw}

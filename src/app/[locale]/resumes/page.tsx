@@ -163,7 +163,7 @@ export default function ResumesPage() {
                       <p className="text-xs opacity-70">{t('updatedPrefix')}{new Date(resume.updated_at).toLocaleDateString(locale)}</p>
                     </div>
                     <div data-tour={index === 0 ? 'resumes-actions' : undefined} className="flex items-center gap-3 shrink-0">
-                      <span className="font-mono text-xs font-bold tabular-nums">
+                      <span className="text-xs font-bold tabular-nums">
                         {Number(resume.score || 0)}
                       </span>
                       <span className="text-xs opacity-70 hidden md:flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(resume.updated_at, locale)}</span>

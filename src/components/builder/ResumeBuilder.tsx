@@ -1806,7 +1806,7 @@ export function ResumeBuilder() {
                           transition={{ duration: 0.22, ease: 'easeOut' }}
                           className="rounded-md border border-primary/30 bg-primary/8 p-3 space-y-2"
                         >
-                          <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('ai.aiDraft')}</p>
+                          <p className="text-(length:--text-label) text-muted-foreground">{t('ai.aiDraft')}</p>
                           <p className="text-sm text-foreground/95 leading-relaxed">{generatedSummaryDraft}</p>
                           {summaryDraftClaims.length > 0 ? (
                             <label className="flex cursor-pointer items-start gap-2 border-l-2 border-foreground px-3 py-2">
@@ -1903,7 +1903,7 @@ export function ResumeBuilder() {
 
                      <div className="space-y-2">
                        <div className="flex items-center justify-between">
-                         <p className="font-mono text-(length:--text-label) text-muted-foreground">{t('experience.impactBulletsLabel')}</p>
+                         <p className="text-(length:--text-label) text-muted-foreground">{t('experience.impactBulletsLabel')}</p>
                          <button
                            onClick={() => addExperienceBullet(exp.id)}
                            className="text-xs font-medium text-foreground border-b border-transparent hover:border-primary transition-colors duration-150 ease-out"
@@ -1984,7 +1984,7 @@ export function ResumeBuilder() {
                                  className="ml-5 rounded-md border border-primary/30 bg-primary/8 p-3 space-y-2"
                                >
                                  <div className="flex items-center justify-between gap-2">
-                                   <p className="font-mono text-[11px] text-muted-foreground">{t('ai.aiDraft')}</p>
+                                   <p className="text-[11px] text-muted-foreground">{t('ai.aiDraft')}</p>
                                    <p className="text-[11px] text-muted-foreground">{t('ai.regenerateUsesCredit')}</p>
                                  </div>
                                  <p className="text-sm text-foreground/95 leading-relaxed">{draftState?.draft}</p>

@@ -150,13 +150,13 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
         <header className="space-y-4">
           <Eyebrow>{kindCopy.eyebrow}</Eyebrow>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">{content.title}</h1>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-xs text-muted-foreground">
             {copy.updated}: <time dateTime={guide.dateModified}>{guide.dateModified}</time>
           </p>
         </header>
 
         <Card radius="lg" className="p-6 sm:p-8 space-y-2">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">{copy.answerLabel}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{copy.answerLabel}</p>
           <p className="text-lg leading-relaxed text-foreground">{content.answer}</p>
         </Card>
 

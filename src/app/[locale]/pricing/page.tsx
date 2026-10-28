@@ -116,12 +116,12 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
                 className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-primary/10' : ''}`}
               >
                 {plan.badge ? (
-                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
+                  <p className="mb-4 text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
                 ) : null}
 
                 <h3 className="text-xl font-semibold text-foreground">{plan.name}</h3>
                 <p className="text-muted-foreground text-xs mt-1">{plan.description}</p>
-                <div className="mt-4 mb-6 font-mono">
+                <div className="mt-4 mb-6">
                   <span className="text-3xl text-foreground font-bold tabular-nums">{plan.price}</span>
                   <span className="font-sans text-muted-foreground"> {plan.pricePeriod}</span>
                 </div>

@@ -192,7 +192,7 @@ export default async function DashboardPage({
                          <div key={i}>
                            <div className="flex justify-between gap-3 text-sm mb-1">
                              <span className="text-foreground">{item.label}</span>
-                             <span className="text-muted-foreground font-mono tabular-nums">{score}/{item.max}</span>
+                             <span className="text-muted-foreground tabular-nums">{score}/{item.max}</span>
                            </div>
                            <div className="w-full bg-border h-1 mb-1">
                              <div className="bg-primary h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
@@ -225,7 +225,7 @@ export default async function DashboardPage({
               <h3 className="text-lg font-bold text-foreground mb-6 w-full text-left">{d.yourScore.title}</h3>
               {hasReviewData ? (
                 <>
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{totalScore}</span>
+                  <span className="text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{totalScore}</span>
                   <div className="mt-3 h-1 w-full bg-border">
                     <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
                   </div>
@@ -235,7 +235,7 @@ export default async function DashboardPage({
                 </>
               ) : (
                 <div className="w-full grow flex flex-col items-center justify-center text-center text-muted-foreground">
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none text-border">{d.yourScore.noDataSub}</span>
+                  <span className="text-(length:--text-score) font-bold leading-none text-border">{d.yourScore.noDataSub}</span>
                   <p className="mt-4 text-sm">{d.yourScore.noData}</p>
                 </div>
               )}

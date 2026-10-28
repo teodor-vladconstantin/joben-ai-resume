@@ -21,9 +21,9 @@ export function StepSection({ number, totalSteps, category, heading, description
       <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-16">
         <div>
           <div className="flex items-center gap-4 mb-6">
-            <span className="font-mono text-xs text-muted-foreground">{number} / {String(totalSteps).padStart(2, '0')}</span>
+            <span className="text-xs text-muted-foreground">{number} / {String(totalSteps).padStart(2, '0')}</span>
             <span className="h-px flex-1 bg-border" />
-            <span className="font-mono text-xs text-foreground">{category}</span>
+            <span className="text-xs text-foreground">{category}</span>
           </div>
           <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             <RevealWords text={heading} />
