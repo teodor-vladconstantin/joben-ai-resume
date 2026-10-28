@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { routing } from '@/i18n/routing'
 import { resolveMarkdownTarget, wantsMarkdown } from '@/lib/agent-markdown'
 import { CLERK_PROXY_ENABLED, CLERK_PROXY_PATH } from '@/lib/clerk-proxy'
-import { APP_ORIGIN, SITE_ORIGIN, isAppPath } from '@/lib/app-origin'
+import { APP_ORIGIN, SHARED_COOKIE_DOMAIN, SITE_ORIGIN, isAppPath } from '@/lib/app-origin'
 
 // Two hosts, one deployment: joben.eu serves the marketing/SEO pages and
 // app.joben.eu the account pages. The split is active only when both origins
@@ -13,7 +13,7 @@ const appHost = APP_ORIGIN ? new URL(APP_ORIGIN).host : ''
 const siteHost = SITE_ORIGIN ? new URL(SITE_ORIGIN).host : ''
 const splitHosts = Boolean(appHost && siteHost && appHost !== siteHost)
 // Shared parent domain (".joben.eu") so cookies set on one host reach the other.
-const cookieDomain = splitHosts ? `.${appHost.split('.').slice(1).join('.')}` : undefined
+const cookieDomain = SHARED_COOKIE_DOMAIN
 
 const intlMiddleware = createMiddleware(routing)
 
