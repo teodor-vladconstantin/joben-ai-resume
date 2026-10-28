@@ -1,9 +1,9 @@
 // Link cu UTM pentru o postare: node scripts/utm.mjs <sursa> <id-postare> [cale]
-// ex: node scripts/utm.mjs reddit r-cv-feedback-01 /ro/free-ats-checker
+// ex: node scripts/utm.mjs reddit r-cv-feedback-01 /ro/verificare-cv-ats
 // Convenție: utm_source = platforma, utm_medium = tipul, utm_content = id postare (unic, ales de tine).
 const MEDIUM = { reddit: 'community', facebook: 'community', linkedin: 'social', ig: 'social', tiktok: 'social', dm: 'direct', uni: 'partner' }
 
-const [source, content, path = '/ro/free-ats-checker'] = process.argv.slice(2)
+const [source, content, path = '/ro/verificare-cv-ats'] = process.argv.slice(2)
 if (!source || !content) {
   console.error('Folosire: node scripts/utm.mjs <sursa> <id-postare> [cale]')
   process.exit(1)

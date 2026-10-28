@@ -5,10 +5,12 @@ describe('sitemap', () => {
   const entries = sitemap()
   const urls = entries.map((e) => e.url)
 
-  it('drops the merged /cv pages and the removed /verificare-cv checker', () => {
+  it('drops the merged /cv pages and the old /verificare-cv checker', () => {
     expect(urls.some((u) => u.includes('/cv/'))).toBe(false)
-    expect(urls.some((u) => u.includes('verificare-cv'))).toBe(false)
-    expect(urls).toContain('https://joben.eu/ro/free-ats-checker')
+    expect(urls.some((u) => u.endsWith('/verificare-cv'))).toBe(false)
+    expect(urls).toContain('https://joben.eu/ro/verificare-cv-ats')
+    expect(urls).toContain('https://joben.eu/en/free-ats-checker')
+    expect(urls).not.toContain('https://joben.eu/ro/free-ats-checker')
     expect(urls).toContain('https://joben.eu/en/cover-letter/software-engineer')
   })
 

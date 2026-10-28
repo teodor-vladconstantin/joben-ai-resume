@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, ChevronRight, FileText, ShieldCheck, X, Zap }
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
 import { pricingPlanMeta, siteConfig, BUILD_TIME } from '@/lib/content'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { AppLink } from '@/components/ui/AppLink'
 import { AuthAwareSignupLink } from '@/components/ui/AuthAwareSignupLink'
 import { PlanCta } from '@/components/pricing/PlanCta'
@@ -92,6 +93,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
           <AmbientDataTexture />
 
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-(--foreground) max-w-4xl leading-tight">
+            <span className="block mb-4 font-mono text-sm md:text-base font-semibold tracking-normal text-(--muted)">{home.heroKeywords}</span>
             <RevealWords as="span" text={home.heroPrefix} />{' '}
             <HeroWordRotate words={home.heroRotatingWords} />{' '}
             <RevealWords as="span" text={home.heroSuffix} />
@@ -102,7 +104,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
           </p>
 
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-6" suppressHydrationWarning>
-            <AuthAwareSignupLink ctaId="home_hero" signedOutHref="/free-ats-checker" className={buttonVariants('primary', 'lg')}>
+            <AuthAwareSignupLink ctaId="home_hero" signedOutHref={atsCheckerPath(locale)} className={buttonVariants('primary', 'lg')}>
               {home.cta} <ChevronRight className="w-5 h-5" />
             </AuthAwareSignupLink>
           </div>

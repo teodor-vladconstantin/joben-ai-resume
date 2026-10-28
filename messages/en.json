@@ -49,6 +49,7 @@
     "createNew": "Create New"
   },
   "Home": {
+    "heroKeywords": "ATS resume checker and AI resume builder",
     "heroPrefix": "Your Resume Is Getting Rejected Before a ",
     "heroRotatingWords": [
       "Recruiter",

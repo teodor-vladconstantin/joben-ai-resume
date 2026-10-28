@@ -5,6 +5,7 @@ import { Eyebrow } from '@/components/ui/Badge'
 import { FreeAtsCheckerClient } from './FreeAtsCheckerClient'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { routing, type AppLocale } from '@/i18n/routing'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -22,16 +23,16 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: `/${locale}/free-ats-checker`,
+      canonical: `/${locale}${atsCheckerPath(locale)}`,
       languages: {
-        ...Object.fromEntries(routing.locales.map((l) => [l, `/${l}/free-ats-checker`])),
-        'x-default': '/ro/free-ats-checker',
+        ...Object.fromEntries(routing.locales.map((l) => [l, `/${l}${atsCheckerPath(l)}`])),
+        'x-default': `/ro${atsCheckerPath('ro')}`,
       },
     },
     openGraph: {
       title,
       description,
-      url: `/${locale}/free-ats-checker`,
+      url: `/${locale}${atsCheckerPath(locale)}`,
       siteName: 'Joben',
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Joben Free ATS Resume Checker' }],
       locale: locale === 'ro' ? 'ro_RO' : 'en_US',
@@ -57,7 +58,7 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
     '@graph': [
       breadcrumbJsonLd([
         { name: Common.home, path: `/${locale}` },
-        { name: atsChecker.heading, path: `/${locale}/free-ats-checker` },
+        { name: atsChecker.heading, path: `/${locale}${atsCheckerPath(locale)}` },
       ]),
       {
         '@type': 'WebApplication',
