@@ -47,11 +47,11 @@ export function AILoadingState({ stage, done = false }: AILoadingStateProps) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-10">
-      <div className="w-12 h-12 rounded-full border-4 border-(--border) border-t-(--accent) animate-spin" />
-      <p className="text-(--foreground) font-semibold">{t(stage)}</p>
-      <div className="w-64 h-1 bg-(--border) overflow-hidden">
+      <div className="w-12 h-12 rounded-full border-4 border-border border-t-primary animate-spin" />
+      <p className="text-foreground font-semibold">{t(stage)}</p>
+      <div className="w-64 h-1 bg-border overflow-hidden">
         <div
-          className="h-full bg-(--accent) transition-[width] duration-300"
+          className="h-full bg-primary transition-[width] duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>

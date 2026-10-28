@@ -2,7 +2,7 @@
 // paragraphs, where a block whose lines all start with "- " renders as a list.
 export function LegalText({ text }: { text: string }) {
   return (
-    <div className="mt-2 space-y-3 text-sm leading-6 text-(--muted)">
+    <div className="mt-2 space-y-3 text-sm leading-6 text-muted-foreground">
       {text.split('\n\n').map((block) => {
         const lines = block.split('\n')
         if (lines.every((line) => line.startsWith('- '))) {

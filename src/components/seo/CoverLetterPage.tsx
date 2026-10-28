@@ -89,19 +89,19 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-32 pb-24 space-y-12">
         <div className="text-center space-y-4">
           <Eyebrow>{t('eyebrow')}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-(--foreground)">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
             {t('heading', { role })}
           </h1>
-          <p className="text-(--muted) text-lg max-w-2xl mx-auto">{t('subheading')}</p>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('subheading')}</p>
           <div className="flex items-center justify-center pt-2">
-            <span className="px-3 py-1 rounded-full bg-(--accent-muted) text-xs font-mono font-semibold flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-mono font-semibold flex items-center gap-1.5">
               <Briefcase className="h-3.5 w-3.5" />
               {t('fieldLabel', { category: job.category[locale] })}
             </span>
@@ -109,10 +109,10 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
         </div>
 
         <Card radius="lg" className="p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-(--border)">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border">
             <div>
-              <h2 className="text-2xl font-bold text-(--foreground)">{t('sampleHeading', { role })}</h2>
-              <p className="text-xs text-(--muted) mt-1">{t('sampleHint')}</p>
+              <h2 className="text-2xl font-bold text-foreground">{t('sampleHeading', { role })}</h2>
+              <p className="text-xs text-muted-foreground mt-1">{t('sampleHint')}</p>
             </div>
             <AppLink
               href="/sign-up"
@@ -123,33 +123,33 @@ export async function CoverLetterPage({ locale, slug }: { locale: AppLocale; slu
             </AppLink>
           </div>
 
-          <div className="p-6 rounded-xl bg-(--surface) border border-(--border) space-y-4 font-sans text-sm text-(--foreground)/90 leading-relaxed">
+          <div className="p-6 rounded-xl bg-card border border-border space-y-4 font-sans text-sm text-foreground/90 leading-relaxed">
             <p>{sample.intro}</p>
             <p>{sample.body}</p>
             <p>{sample.closing}</p>
-            <div className="pt-2 text-xs text-(--muted) font-mono">{t('signature')}</div>
+            <div className="pt-2 text-xs text-muted-foreground font-mono">{t('signature')}</div>
           </div>
         </Card>
 
         <Card radius="lg" className="p-8 space-y-6">
-          <h2 className="text-2xl font-bold text-(--foreground)">{t('rulesHeading', { roleLower })}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t('rulesHeading', { roleLower })}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             {rules.map((rule, i) => (
               <div key={rule.title} className="space-y-2">
-                <span className="h-7 w-7 rounded-full bg-(--foreground) text-(--background) font-bold text-xs flex items-center justify-center font-mono">
+                <span className="h-7 w-7 rounded-full bg-foreground text-background font-bold text-xs flex items-center justify-center font-mono">
                   {i + 1}
                 </span>
-                <h3 className="font-bold text-sm text-(--foreground)">{rule.title}</h3>
-                <p className="text-xs text-(--muted)">{rule.body}</p>
+                <h3 className="font-bold text-sm text-foreground">{rule.title}</h3>
+                <p className="text-xs text-muted-foreground">{rule.body}</p>
               </div>
             ))}
           </div>
         </Card>
 
-        <div className="p-6 rounded-2xl border border-(--border) bg-(--surface) flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl border border-border bg-card flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="font-bold text-lg text-(--foreground)">{t('resumeCtaHeading', { role })}</h3>
-            <p className="text-xs text-(--muted) mt-1">{t('resumeCtaBody')}</p>
+            <h3 className="font-bold text-lg text-foreground">{t('resumeCtaHeading', { role })}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{t('resumeCtaBody')}</p>
           </div>
           <Link
             href={`/resume-examples/${job.resumeRoleSlug[locale]}`}

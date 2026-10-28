@@ -154,7 +154,7 @@ export function TourLauncher({ tourId }: { tourId: TourId }) {
       onClick={() => void start('manual')}
       aria-label={t('ui.help')}
       title={t('ui.help')}
-      className="fixed bottom-5 right-5 z-40 grid h-10 w-10 place-items-center border border-(--border) bg-(--surface) text-(--foreground) transition-colors duration-150 ease-out hover:border-(--accent)"
+      className="fixed bottom-5 right-5 z-40 grid h-10 w-10 place-items-center border border-border bg-card text-foreground transition-colors duration-150 ease-out hover:border-primary"
     >
       <HelpCircle className="h-5 w-5" />
     </button>

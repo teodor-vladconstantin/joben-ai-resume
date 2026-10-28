@@ -27,8 +27,8 @@ export function AtsScanCardPending() {
   if (gaveUp) return null
 
   return (
-    <section aria-busy="true" className="bg-(--surface-elevated) p-6 border border-(--border) mb-8">
-      <p className="flex items-center gap-2 text-sm text-(--muted)">
+    <section aria-busy="true" className="bg-card p-6 border border-border mb-8">
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" /> {t('loading')}
       </p>
     </section>

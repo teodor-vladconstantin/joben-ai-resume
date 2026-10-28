@@ -11,7 +11,7 @@ export function RevealRule({ className = '' }: { className?: string }) {
   return (
     <hr
       ref={ref}
-      className={`reveal-rule${revealed ? ' is-revealed' : ''} border-(--border) ${className}`.trim()}
+      className={`reveal-rule${revealed ? ' is-revealed' : ''} border-border ${className}`.trim()}
     />
   )
 }

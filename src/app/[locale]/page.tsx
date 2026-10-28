@@ -92,14 +92,14 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         <section id="builder" data-section="Hero" className="relative px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto mt-6 mb-20" suppressHydrationWarning>
           <AmbientDataTexture />
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-(--foreground) max-w-4xl leading-tight">
-            <span className="block mb-4 font-mono text-sm md:text-base font-semibold tracking-normal text-(--muted)">{home.heroKeywords}</span>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 text-foreground max-w-4xl leading-tight">
+            <span className="block mb-4 font-mono text-sm md:text-base font-semibold tracking-normal text-muted-foreground">{home.heroKeywords}</span>
             <RevealWords as="span" text={home.heroPrefix} />{' '}
             <HeroWordRotate words={home.heroRotatingWords} />{' '}
             <RevealWords as="span" text={home.heroSuffix} />
           </h1>
 
-          <p className="text-lg text-(--muted) mb-8 max-w-3xl">
+          <p className="text-lg text-muted-foreground mb-8 max-w-3xl">
             {home.subheading}
           </p>
 
@@ -109,12 +109,12 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
             </AuthAwareSignupLink>
           </div>
 
-          <div className="flex flex-wrap gap-6 text-sm text-(--muted)" suppressHydrationWarning>
+          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground" suppressHydrationWarning>
             {home.features.map((feature, index) => {
               const Icon = icons[featureIconOrder[index]];
               return (
                 <span key={index} className="flex items-center gap-1.5">
-                  <Icon className="w-4 h-4 text-(--muted)" /> {feature}
+                  <Icon className="w-4 h-4 text-muted-foreground" /> {feature}
                 </span>
               );
             })}
@@ -122,14 +122,14 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
 
           {/* PLATFORM FEATURES */}
           <h2 className="sr-only">{home.platformFeaturesHeading}</h2>
-          <div className="mt-20 grid grid-cols-1 border-t border-(--border) md:grid-cols-3" suppressHydrationWarning>
+          <div className="mt-20 grid grid-cols-1 border-t border-border md:grid-cols-3" suppressHydrationWarning>
             {home.statCards.map((card, index) => {
               const Icon = icons[statCardIconOrder[index]];
               return (
-                <div key={index} className="border-b border-(--border) py-8 md:border-b-0 md:border-r md:last:border-r-0 md:pr-8 md:[&:not(:first-child)]:pl-8">
-                  <Icon className="h-5 w-5 text-(--foreground)" />
-                  <h3 className="mt-4 text-lg font-bold text-(--foreground)">{card.title}</h3>
-                  <p className="mt-2 text-sm text-(--muted)">{card.description}</p>
+                <div key={index} className="border-b border-border py-8 md:border-b-0 md:border-r md:last:border-r-0 md:pr-8 md:[&:not(:first-child)]:pl-8">
+                  <Icon className="h-5 w-5 text-foreground" />
+                  <h3 className="mt-4 text-lg font-bold text-foreground">{card.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{card.description}</p>
                 </div>
               );
             })}
@@ -140,13 +140,13 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         <section id="analysis" data-section="Analysis" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
           <RevealRule className="mb-20" />
           <div className="mb-12 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">{home.atsPreview.heading}</h2>
-            <p className="text-(--muted)">{home.atsPreview.subheading}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{home.atsPreview.heading}</h2>
+            <p className="text-muted-foreground">{home.atsPreview.subheading}</p>
           </div>
 
           <div className="relative flex flex-col items-center gap-6 lg:block lg:py-8" suppressHydrationWarning>
             <Reveal className="w-full max-w-md lg:mx-auto" suppressHydrationWarning>
-              <div className="border border-(--border) bg-(--surface) p-3 sm:p-4" suppressHydrationWarning>
+              <div className="border border-border bg-card p-3 sm:p-4" suppressHydrationWarning>
                 <div className="mx-auto border border-black/10 bg-white px-4 py-3 font-serif text-[#1F2937]" suppressHydrationWarning>
                   <div className="border-b border-gray-300 pb-1.5 text-center" suppressHydrationWarning>
                     <p className="text-base font-semibold uppercase tracking-wide text-[#111827]">{mock.name}</p>
@@ -252,34 +252,34 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         <section id="pricing" data-section="Pricing" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
           <RevealRule className="mb-20" />
           <div className="mb-16 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               <RevealWords text={home.pricingTeaserHeading} />
             </h2>
-            <p className="text-(--muted)">{home.pricingTeaserSubheading}</p>
+            <p className="text-muted-foreground">{home.pricingTeaserSubheading}</p>
           </div>
 
-          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x" suppressHydrationWarning>
+          <div className="grid grid-cols-1 border border-border divide-y divide-border md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x" suppressHydrationWarning>
             {pricing.plans.map((plan, index) => {
               const meta = pricingPlanMeta[index]
               return (
                 <div
                   key={index}
-                  className={`flex flex-col p-8 ${meta.isPrimary ? 'bg-(--accent-muted)' : ''}`}
+                  className={`flex flex-col p-8 ${meta.isPrimary ? 'bg-primary/10' : ''}`}
                   suppressHydrationWarning
                 >
                   {plan.badge ? (
-                    <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{plan.badge}</p>
+                    <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
                   ) : null}
 
-                  <h3 className="text-xl font-bold text-(--foreground)">{plan.name}</h3>
-                  <p className="text-(--muted) text-sm mt-2 mb-6">{plan.description}</p>
-                  <div className="mb-6 font-mono text-4xl font-bold tabular-nums text-(--foreground)" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-(--muted) font-normal">{plan.pricePeriod}</span></div>
+                  <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+                  <p className="text-muted-foreground text-sm mt-2 mb-6">{plan.description}</p>
+                  <div className="mb-6 font-mono text-4xl font-bold tabular-nums text-foreground" suppressHydrationWarning>{plan.price}<span className="font-sans text-lg text-muted-foreground font-normal">{plan.pricePeriod}</span></div>
                   <ul className="space-y-4 mb-8 grow">
                     {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex gap-3 text-(--foreground)"><CheckCircle2 className="text-(--foreground) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                      <li key={fIndex} className="flex gap-3 text-foreground"><CheckCircle2 className="text-foreground w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                     ))}
                     {plan.excludedFeatures.map((feature, fIndex) => (
-                      <li key={`excluded-${fIndex}`} className="flex gap-3 text-(--muted) line-through"><X className="text-(--muted) w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
+                      <li key={`excluded-${fIndex}`} className="flex gap-3 text-muted-foreground line-through"><X className="text-muted-foreground w-5 h-5 shrink-0 mt-0.5" /> {feature}</li>
                     ))}
                   </ul>
                   <PlanCta
@@ -291,24 +291,24 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
               )
             })}
           </div>
-          <p className="mt-4 text-xs text-(--muted)">{pricing.vatNote}</p>
+          <p className="mt-4 text-xs text-muted-foreground">{pricing.vatNote}</p>
         </section>
 
         {/* FAQ */}
         <section id="faq" data-section="FAQ" className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto py-20" suppressHydrationWarning>
           <RevealRule className="mb-20" />
           <div className="mb-12 max-w-xl" suppressHydrationWarning>
-            <h2 className="text-3xl md:text-4xl font-bold text-(--foreground) mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               <RevealWords text={home.faqHeading} />
             </h2>
-            <p className="text-(--muted)">{home.faqSubheading}</p>
+            <p className="text-muted-foreground">{home.faqSubheading}</p>
           </div>
 
           <div className="max-w-3xl" suppressHydrationWarning>
             {faq.map((item, index) => (
               <details
                 key={index}
-                className="group border-b border-(--border) first:border-t"
+                className="group border-b border-border first:border-t"
                 suppressHydrationWarning
               >
                 <summary
@@ -322,16 +322,16 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                   <span className="font-mono text-xs group-open:hidden">{home.faqOpen}</span>
                   <span className="hidden font-mono text-xs group-open:inline">{home.faqClose}</span>
                 </summary>
-                <div className="pb-5 text-(--muted)" suppressHydrationWarning>{item.answer}</div>
+                <div className="pb-5 text-muted-foreground" suppressHydrationWarning>{item.answer}</div>
               </details>
             ))}
           </div>
         </section>
       </main>
 
-      <section className="bg-(--background) py-12 border-t border-(--border)" suppressHydrationWarning>
+      <section className="bg-background py-12 border-t border-border" suppressHydrationWarning>
         <div className="max-w-(--container-max) mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
-          <h2 className="text-2xl font-bold text-(--foreground) mb-4">{footer.heading}</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">{footer.heading}</h2>
           <div className="flex flex-col sm:flex-row gap-4 mt-8" suppressHydrationWarning>
             <AuthAwareSignupLink ctaId="home_footer" className={buttonVariants('primary', 'md')}>{footer.ctaPrimary}</AuthAwareSignupLink>
             <AppLink href="/dashboard" className={buttonVariants('secondary', 'md')}>{footer.ctaSecondary}</AppLink>

@@ -89,7 +89,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <TrackOnView event="pricing_viewed" />
       <Suspense fallback={null}>
@@ -99,42 +99,42 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto pt-32 pb-24">
         <div className="mb-12 max-w-xl">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             {pricing.heading}
           </h1>
-          <p className="mt-4 text-(--muted) text-lg">
+          <p className="mt-4 text-muted-foreground text-lg">
             {pricing.subheading}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
+        <div className="grid grid-cols-1 border border-border divide-y divide-border md:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
           {pricing.plans.map((plan, index) => {
             const meta = pricingPlanMeta[index]
             return (
               <div
                 key={index}
-                className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-(--accent-muted)' : ''}`}
+                className={`flex flex-col p-6 ${meta.isPrimary ? 'bg-primary/10' : ''}`}
               >
                 {plan.badge ? (
-                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-(--foreground)">{plan.badge}</p>
+                  <p className="mb-4 font-mono text-(length:--text-label) font-semibold text-foreground">{plan.badge}</p>
                 ) : null}
 
-                <h3 className="text-xl font-semibold text-(--foreground)">{plan.name}</h3>
-                <p className="text-(--muted) text-xs mt-1">{plan.description}</p>
+                <h3 className="text-xl font-semibold text-foreground">{plan.name}</h3>
+                <p className="text-muted-foreground text-xs mt-1">{plan.description}</p>
                 <div className="mt-4 mb-6 font-mono">
-                  <span className="text-3xl text-(--foreground) font-bold tabular-nums">{plan.price}</span>
-                  <span className="font-sans text-(--muted)"> {plan.pricePeriod}</span>
+                  <span className="text-3xl text-foreground font-bold tabular-nums">{plan.price}</span>
+                  <span className="font-sans text-muted-foreground"> {plan.pricePeriod}</span>
                 </div>
                 <ul className="space-y-2 mb-6 grow">
                   {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-sm text-(--foreground)">
-                      <CheckCircle2 size={14} className="text-(--foreground) mt-0.5 shrink-0" />
+                    <li key={fIndex} className="flex items-start gap-2 text-sm text-foreground">
+                      <CheckCircle2 size={14} className="text-foreground mt-0.5 shrink-0" />
                       {feature}
                     </li>
                   ))}
                   {plan.excludedFeatures.map((feature, fIndex) => (
-                    <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-(--muted) line-through">
-                      <X size={14} className="text-(--muted) mt-0.5 shrink-0" />
+                    <li key={`excluded-${fIndex}`} className="flex items-start gap-2 text-sm text-muted-foreground line-through">
+                      <X size={14} className="text-muted-foreground mt-0.5 shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -148,7 +148,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
             )
           })}
         </div>
-        <p className="mt-4 text-xs text-(--muted)">{pricing.vatNote}</p>
+        <p className="mt-4 text-xs text-muted-foreground">{pricing.vatNote}</p>
       </main>
     </div>
   )

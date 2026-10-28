@@ -171,7 +171,7 @@ export default async function RootLayout({
       {...(APP_ORIGIN && { afterSignOutUrl: SITE_ORIGIN, allowedRedirectOrigins: [APP_ORIGIN, SITE_ORIGIN] })}
     >
       <html lang={locale} suppressHydrationWarning>
-        <body className={`${poppins.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+        <body className={`${poppins.variable} ${jetbrainsMono.variable} bg-background text-foreground min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="motion-init"
             strategy="beforeInteractive"

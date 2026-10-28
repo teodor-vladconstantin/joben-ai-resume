@@ -73,17 +73,17 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
 
       <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pt-32 pb-24">
         <div className="text-center mb-12">
           <Eyebrow>{hub.eyebrow}</Eyebrow>
-          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-(--foreground)">
+          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             {hub.heading}
           </h1>
-          <p className="mt-4 text-(--muted) max-w-2xl mx-auto text-lg">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
             {hub.subheading}
           </p>
         </div>
@@ -91,12 +91,12 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {resumeRoles.map((role) => (
             <Link key={role.slug[locale]} href={`/resume-examples/${role.slug[locale]}`}>
-              <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
-                <p className="text-(--foreground) font-semibold">{role.title[locale]}</p>
-                <p className="mt-1.5 text-sm text-(--muted)">
+              <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-primary">
+                <p className="text-foreground font-semibold">{role.title[locale]}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">
                   {role.keywords[locale].slice(0, 3).join(', ')}
                 </p>
-                <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
+                <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                   {hub.seeExamples} <ArrowRight className="h-3.5 w-3.5" />
                 </p>
               </Card>
@@ -106,14 +106,14 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
 
         {GUIDES.length > 0 && (
           <section className="mt-16 space-y-4">
-            <h2 className="text-2xl font-bold text-(--foreground)">{locale === 'ro' ? 'Ghiduri' : 'Guides'}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{locale === 'ro' ? 'Ghiduri' : 'Guides'}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {GUIDES.map((guide) => (
                 <Link key={guide.content[locale].slug} href={guidePath(locale, guide)}>
-                  <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
-                    <p className="text-(--foreground) font-semibold">{guide.content[locale].title}</p>
-                    <p className="mt-1.5 text-sm text-(--muted)">{guide.content[locale].description}</p>
-                    <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
+                  <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-primary">
+                    <p className="text-foreground font-semibold">{guide.content[locale].title}</p>
+                    <p className="mt-1.5 text-sm text-muted-foreground">{guide.content[locale].description}</p>
+                    <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                       {locale === 'ro' ? 'Citește ghidul' : 'Read the guide'} <ArrowRight className="h-3.5 w-3.5" />
                     </p>
                   </Card>
@@ -124,15 +124,15 @@ export default async function ResumeExamplesIndexPage({ params }: { params: Prom
         )}
 
         <section className="mt-16 space-y-4">
-          <h2 className="text-2xl font-bold text-(--foreground)">
+          <h2 className="text-2xl font-bold text-foreground">
             {locale === 'ro' ? 'Scrisori de intenție pe roluri' : 'Cover letter examples by role'}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SEO_JOBS.map((job) => (
               <Link key={job.slug[locale]} href={coverLetterPath(locale, job)}>
-                <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-(--accent)">
-                  <p className="text-(--foreground) font-semibold">{job.title[locale]}</p>
-                  <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-(--foreground)">
+                <Card className="p-6 h-full transition-colors duration-150 ease-out hover:border-primary">
+                  <p className="text-foreground font-semibold">{job.title[locale]}</p>
+                  <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                     {locale === 'ro' ? 'Vezi scrisoarea' : 'See the cover letter'} <ArrowRight className="h-3.5 w-3.5" />
                   </p>
                 </Card>

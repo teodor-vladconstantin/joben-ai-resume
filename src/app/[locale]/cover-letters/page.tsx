@@ -97,8 +97,8 @@ export default function CoverLettersPage() {
         <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-7">
             <div>
-              <h1 className="text-3xl font-bold text-(--foreground) mb-2">{t('title')}</h1>
-              <p className="text-(--muted)">{t('letterCount', { count: letters.length })}</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>
+              <p className="text-muted-foreground">{t('letterCount', { count: letters.length })}</p>
             </div>
             <Link href="/cover-letters/new" data-tour="letters-create" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
               <Plus className="w-5 h-5" /> {t('createCoverLetter')}
@@ -107,26 +107,26 @@ export default function CoverLettersPage() {
 
           <div className="mb-4 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
             <div className="relative w-full lg:max-w-3xl">
-              <Search className="w-4 h-4 text-(--muted) absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full rounded-sm border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+                className="w-full rounded-sm border border-border bg-card py-2 pl-10 pr-3 text-sm text-foreground transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'newest' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortNewest')}</button>
-              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'oldest' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortOldest')}</button>
-              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'az' ? 'border-(--accent) text-(--foreground)' : 'border-transparent text-(--muted)'}`}>{t('sortAZ')}</button>
+              <button onClick={() => setSortMode('newest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'newest' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>{t('sortNewest')}</button>
+              <button onClick={() => setSortMode('oldest')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'oldest' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>{t('sortOldest')}</button>
+              <button onClick={() => setSortMode('az')} className={`px-3 py-1.5 border-b transition-colors duration-150 ease-out ${sortMode === 'az' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>{t('sortAZ')}</button>
             </div>
           </div>
 
-          <div className="border border-(--border) bg-(--surface)">
+          <div className="border border-border bg-card">
             {loadState === 'loading' ? (
-              <p className="px-4 py-10 text-center text-sm text-(--muted)">{t('loading')}</p>
+              <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t('loading')}</p>
             ) : loadState === 'error' ? (
-              <p className="px-4 py-10 text-center text-sm text-(--foreground)">{t('loadFailed')}</p>
+              <p className="px-4 py-10 text-center text-sm text-foreground">{t('loadFailed')}</p>
             ) : visibleLetters.length === 0 ? (
               <EmptyState
                 title={t('noCoverLettersFound')}
@@ -137,7 +137,7 @@ export default function CoverLettersPage() {
                 }
               />
             ) : (
-              <div className="divide-y divide-(--border)">
+              <div className="divide-y divide-border">
                 {visibleLetters.map((letter, index) => (
                   <div key={letter.id} data-tour={index === 0 ? 'letters-row' : undefined} className="row-invert flex items-center justify-between gap-4 px-4 py-3">
                     <div className="min-w-0">

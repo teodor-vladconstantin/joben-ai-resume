@@ -10,7 +10,7 @@ type ExportDataButtonProps = {
 export function ExportDataButton({ label, buttonLabel }: ExportDataButtonProps) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-sm text-(--muted)">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Download size={14} />
         {label}
       </div>

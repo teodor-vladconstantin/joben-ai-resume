@@ -18,12 +18,12 @@ export function SectionList({ sections, onSelect }: SectionListProps) {
         <button
           key={section.id}
           onClick={() => onSelect(section.id)}
-          className="w-full border border-(--border) bg-(--surface) px-3 py-2 text-left transition-colors duration-150 ease-out hover:border-(--accent)"
+          className="w-full border border-border bg-card px-3 py-2 text-left transition-colors duration-150 ease-out hover:border-primary"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-(--foreground)">{section.label}</span>
+            <span className="text-sm font-medium text-foreground">{section.label}</span>
             <span
-              className={`h-2.5 w-2.5 rounded-full ${section.completed ? 'bg-(--accent)' : 'bg-(--border)'}`}
+              className={`h-2.5 w-2.5 rounded-full ${section.completed ? 'bg-primary' : 'bg-border'}`}
               aria-hidden
             />
           </div>
