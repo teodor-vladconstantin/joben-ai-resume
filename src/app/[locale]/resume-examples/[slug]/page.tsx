@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { SeoAtsScanWidget } from '@/components/seo/SeoAtsScanWidget'
 import { getResumeRole, resumeRoles } from '@/data/resume-roles'
-import { getSeoJobForResumeRole } from '@/data/seo-jobs'
+import { coverLetterPath, getSeoJobForResumeRole } from '@/data/seo-jobs'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { routing, type AppLocale } from '@/i18n/routing'
@@ -255,7 +255,7 @@ export default async function ResumeRolePage({
                 <p className="text-muted-foreground text-sm mt-1">{t('coverLetterBody', { role: job.title[locale] })}</p>
               </div>
               <Link
-                href={`/scrisoare-intentie/${job.slug[locale]}`}
+                href={coverLetterPath(locale, job)}
                 className={`shrink-0 inline-flex items-center gap-1.5 ${buttonVariants('secondary', 'md')}`}
               >
                 {t('coverLetterButton')}
