@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
-import { Layout } from '@/emails/Layout'
+import { Layout, type EmailLocale } from '@/emails/Layout'
 import { ScanReportBody, SimpleBody } from '@/emails/bodies'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
@@ -54,6 +54,7 @@ async function sendEmail(input: {
   subject: string
   body: ReactElement
   unsubscribeLabel?: string
+  locale?: EmailLocale
 }): Promise<EmailResult> {
   const client = getResendClient()
   if (!client) {
@@ -101,7 +102,7 @@ async function sendEmail(input: {
   const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?email=${encodeURIComponent(input.to)}&token=${token}`
   // The unsubscribe link lives in the Layout footer, so no template can omit it.
   const html = await render(
-    <Layout unsubscribe={{ url: unsubscribeUrl, label: input.unsubscribeLabel || 'Unsubscribe from these emails' }}>
+    <Layout locale={input.locale} unsubscribe={{ url: unsubscribeUrl, label: input.unsubscribeLabel || 'Unsubscribe from these emails' }}>
       {input.body}
     </Layout>,
   )
@@ -332,6 +333,7 @@ export async function sendAnonymousScanReportEmail(input: {
     to: input.to,
     subject: copy.subject(input.overallScore),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <ScanReportBody
         heading={copy.heading(input.overallScore, grade)}
@@ -423,6 +425,7 @@ export async function sendAnonymousScan48hEmail(input: {
     to: input.to,
     subject: copy?.subject || base.fallbackSubject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <SimpleBody
         heading={base.heading}
@@ -471,6 +474,7 @@ export async function sendAnonymousScan7dEmail(input: {
     to: input.to,
     subject: copy.subject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <SimpleBody
         heading={copy.heading}
@@ -519,6 +523,7 @@ export async function sendPassDay10Email(input: {
     to: input.to,
     subject: copy.subject(input.daysLeft),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <SimpleBody
         heading={copy.heading}
@@ -549,6 +554,7 @@ export async function sendTemplateSequenceEmail(input: {
     to: input.to,
     subject: copy.subject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <SimpleBody
         heading={copy.heading}
@@ -665,6 +671,7 @@ export async function sendReferralRewardEmail(input: {
     to: input.to,
     subject: copy.subject(input.days),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    locale: input.locale,
     body: (
       <SimpleBody
         heading={copy.heading}
@@ -707,6 +714,7 @@ export async function sendMobileHandoffEmail(input: {
   const copy = MOBILE_HANDOFF_COPY[input.locale]
   const href = `${accountUrl}/${input.locale}/dashboard?utm_source=email&utm_medium=handoff&utm_campaign=mobile_handoff`
   return sendTransactionalEmail({
+    locale: input.locale,
     to: input.to,
     subject: copy.subject,
     body: <SimpleBody heading={copy.heading} paragraphs={[copy.body]} ctaHref={href} ctaLabel={copy.cta} />,
@@ -722,11 +730,12 @@ export async function sendTransactionalEmail(input: {
   html?: string
   body?: ReactElement
   replyTo?: string
+  locale?: EmailLocale
 }): Promise<EmailResult> {
   const client = getResendClient()
   if (!client) return { success: false, error: 'RESEND_API_KEY is not configured.' }
   try {
-    const html = input.body ? await render(<Layout>{input.body}</Layout>) : input.html || ''
+    const html = input.body ? await render(<Layout locale={input.locale}>{input.body}</Layout>) : input.html || ''
     const response = (await client.emails.send({
       from: automationFromEmail,
       to: input.to,
