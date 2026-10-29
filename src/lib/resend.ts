@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
+import { emailLayout, emailList, emailParagraph, UNSUBSCRIBE_MARKER } from '@/lib/email-layout'
 import { logger } from '@/lib/logger'
 
 const resendApiKey = process.env.RESEND_API_KEY
@@ -86,8 +87,13 @@ async function sendEmail(input: {
     return { success: false, error: 'Could not build an unsubscribe link for this address.' }
   }
   const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?email=${encodeURIComponent(input.to)}&token=${token}`
-  const htmlWithFooter = `${input.html}
-<p style="margin-top:16px;text-align:center;"><a href="${unsubscribeUrl}" style="color:#5C5C57;font-size:12px;text-decoration:underline;">${input.unsubscribeLabel || 'Unsubscribe from these emails'}</a></p>`
+  const unsubscribeLink = `<a href="${unsubscribeUrl}" style="color:#5C5C57;text-decoration:underline;">${input.unsubscribeLabel || 'Unsubscribe from these emails'}</a>`
+  // emailLayout puts the marker in its footer; the append is a safety net for
+  // any html that bypasses the layout.
+  const htmlWithFooter = input.html.includes(UNSUBSCRIBE_MARKER)
+    ? input.html.replace(UNSUBSCRIBE_MARKER, unsubscribeLink)
+    : `${input.html}
+<p style="text-align:center;font-size:12px;">${unsubscribeLink}</p>`
 
   try {
     const response = (await client.emails.send({
@@ -115,19 +121,21 @@ export async function sendWelcomeEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: fromEmail,
     to: input.to,
     subject: 'Welcome to Joben',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Welcome to Joben, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Your account is ready. Start building ATS-optimized resumes and cover letters in minutes.</p>
-  <p style="margin:0 0 18px 0;">You can also run an AI review to identify quick wins before your next application.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a Joben account.</p>
-</div>`,
+    html: emailLayout({
+      heading: `Welcome to Joben, ${firstName}.`,
+      preheader: 'Your account is ready.',
+      bodyHtml:
+        emailParagraph('Your account is ready. Start building ATS-optimized resumes and cover letters in minutes.') +
+        emailParagraph('You can also run an AI review to identify quick wins before your next application.'),
+      cta: { href: `${appUrl}/dashboard`, label: 'Open Dashboard' },
+      note: 'You are receiving this because you created a Joben account.',
+    }),
   })
 }
 
@@ -135,19 +143,20 @@ export async function sendSevenDayFollowupEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: fromEmail,
     to: input.to,
     subject: '7-day check-in: boost your resume outcomes',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">One-week check-in, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">If you have not done it yet, run one AI review and tailor one resume to a target role.</p>
-  <p style="margin:0 0 18px 0;">These two steps usually produce the biggest quality jump in less than 10 minutes.</p>
-  <a href="${appUrl}/ai-review" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Run AI Review</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">Need help? Reply to this email and we will point you to the fastest workflow.</p>
-</div>`,
+    html: emailLayout({
+      heading: `One-week check-in, ${firstName}.`,
+      bodyHtml:
+        emailParagraph('If you have not done it yet, run one AI review and tailor one resume to a target role.') +
+        emailParagraph('These two steps usually produce the biggest quality jump in less than 10 minutes.'),
+      cta: { href: `${appUrl}/ai-review`, label: 'Run AI Review' },
+      note: 'Need help? Reply to this email and we will point you to the fastest workflow.',
+    }),
   })
 }
 
@@ -155,19 +164,20 @@ export async function sendFirstResumeEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: 'Your first resume is ready',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Nice work, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Your first resume is now in Joben. Keep refining it or export a clean PDF anytime.</p>
-  <p style="margin:0 0 18px 0;">Ready to share it? Head to your dashboard and export the PDF in one click.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Open Dashboard</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">You are receiving this because you created a resume on Joben.</p>
-</div>`,
+    html: emailLayout({
+      heading: `Nice work, ${firstName}.`,
+      bodyHtml:
+        emailParagraph('Your first resume is now in Joben. Keep refining it or export a clean PDF anytime.') +
+        emailParagraph('Ready to share it? Head to your dashboard and export the PDF in one click.'),
+      cta: { href: `${appUrl}/dashboard`, label: 'Open Dashboard' },
+      note: 'You are receiving this because you created a resume on Joben.',
+    }),
   })
 }
 
@@ -175,19 +185,20 @@ export async function sendInactivityEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: 'Your Joben resume is waiting',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Quick reminder, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">You created a Joben account recently, and your resume is still waiting for you.</p>
-  <p style="margin:0 0 18px 0;">Jump back in to generate your resume in minutes and export a PDF when ready.</p>
-  <a href="${appUrl}/resumes/new" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Generate Resume</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already finished, you can ignore this email.</p>
-</div>`,
+    html: emailLayout({
+      heading: `Quick reminder, ${firstName}.`,
+      bodyHtml:
+        emailParagraph('You created a Joben account recently, and your resume is still waiting for you.') +
+        emailParagraph('Jump back in to generate your resume in minutes and export a PDF when ready.'),
+      cta: { href: `${appUrl}/resumes/new`, label: 'Generate Resume' },
+      note: 'If you already finished, you can ignore this email.',
+    }),
   })
 }
 
@@ -224,10 +235,6 @@ export function anonScanCtaUrl(locale: AnonScanEmailLocale, type: AnonScanEmailT
     scan: scanId,
   })
   return `${appUrl}/${locale}/sign-up?${params.toString()}`
-}
-
-function anonCtaButton(href: string, label: string): string {
-  return `<a href="${escapeHtml(href)}" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">${label}</a>`
 }
 
 const CATEGORY_LABELS: Record<AnonScanEmailLocale, Record<AtsCategoryKey, string>> = {
@@ -301,28 +308,35 @@ export async function sendAnonymousScanReportEmail(input: {
   const labels = CATEGORY_LABELS[input.locale]
   const grade = input.locale === 'ro' ? GRADE_LABELS_RO[input.grade] || input.grade : input.grade
 
-  const categoryRows = (Object.keys(labels) as AtsCategoryKey[])
-    .map((key) => `<li style="margin:0 0 4px 0;">${labels[key]}: ${input.categories[key].score}/${input.categories[key].max}</li>`)
-    .join('')
-
-  const issueRows = input.issues
-    .slice(0, 3)
-    .map((item) => `<li style="margin:0 0 10px 0;"><strong>${escapeHtml(item.issue)}</strong><br/><span style="color:#5C5C57;font-size:13px;">${escapeHtml(item.explanation)}</span></li>`)
-    .join('')
-
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: copy.subject(input.overallScore),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${escapeHtml(copy.heading(input.overallScore, grade))}</h1>
-  <p style="margin:0 0 12px 0;">${copy.intro}</p>
-  <ul style="margin:0 0 18px 18px;padding:0;">${categoryRows}</ul>
-  ${issueRows ? `<p style="margin:0 0 8px 0;">${copy.topFixes}</p><ul style="margin:0 0 18px 18px;padding:0;">${issueRows}</ul>` : ''}
-  ${anonCtaButton(anonScanCtaUrl(input.locale, 'report', input.scanId), copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: escapeHtml(copy.heading(input.overallScore, grade)),
+      bodyHtml:
+        emailParagraph(copy.intro) +
+        emailList(
+          (Object.keys(labels) as AtsCategoryKey[]).map(
+            (key) => `${labels[key]}: <strong>${input.categories[key].score}/${input.categories[key].max}</strong>`
+          )
+        ) +
+        (input.issues.length
+          ? emailParagraph(`<strong>${copy.topFixes}</strong>`) +
+            emailList(
+              input.issues
+                .slice(0, 3)
+                .map(
+                  (item) =>
+                    `<strong>${escapeHtml(item.issue)}</strong><br/><span style="color:#5C5C57;font-size:14px;">${escapeHtml(item.explanation)}</span>`
+                )
+            )
+          : ''),
+      cta: { href: anonScanCtaUrl(input.locale, 'report', input.scanId), label: copy.cta },
+      note: ANON_FOOTER[input.locale],
+    }),
   })
 }
 
@@ -402,13 +416,13 @@ export async function sendAnonymousScan48hEmail(input: {
     to: input.to,
     subject: copy?.subject || base.fallbackSubject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${base.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy?.body || base.fallbackBody}</p>
-  <p style="margin:0 0 18px 0;">${base.pitch}</p>
-  ${anonCtaButton(anonScanCtaUrl(input.locale, '48h', input.scanId), base.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]}</p>
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: base.heading,
+      bodyHtml: emailParagraph(copy?.body || base.fallbackBody) + emailParagraph(base.pitch),
+      cta: { href: anonScanCtaUrl(input.locale, '48h', input.scanId), label: base.cta },
+      note: ANON_FOOTER[input.locale],
+    }),
   })
 }
 
@@ -448,12 +462,13 @@ export async function sendAnonymousScan7dEmail(input: {
     to: input.to,
     subject: copy.subject,
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy.body}</p>
-  ${anonCtaButton(anonScanCtaUrl(input.locale, '7d', input.scanId), copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${ANON_FOOTER[input.locale]} ${copy.lastReminder}</p>
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: copy.heading,
+      bodyHtml: emailParagraph(copy.body),
+      cta: { href: anonScanCtaUrl(input.locale, '7d', input.scanId), label: copy.cta },
+      note: `${ANON_FOOTER[input.locale]} ${copy.lastReminder}`,
+    }),
   })
 }
 
@@ -493,12 +508,12 @@ export async function sendPassDay10Email(input: {
     to: input.to,
     subject: copy.subject(input.daysLeft),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${copy.body(input.daysLeft)}</p>
-  <p style="margin:0 0 18px 0;">${copy.pitch}</p>
-  ${anonCtaButton(href, copy.cta)}
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: copy.heading,
+      bodyHtml: emailParagraph(copy.body(input.daysLeft)) + emailParagraph(copy.pitch),
+      cta: { href, label: copy.cta },
+    }),
   })
 }
 
@@ -506,19 +521,20 @@ export async function sendExportFollowupEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: 'Applied with that resume? A few things worth checking',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">A couple of weeks ago you exported a resume, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.</p>
-  <p style="margin:0 0 18px 0;">While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes.</p>
-  <a href="${appUrl}/dashboard" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Tailor for Another Role</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">If you already heard back either way, you can ignore this. This is the only email you'll get about this export.</p>
-</div>`,
+    html: emailLayout({
+      heading: `A couple of weeks ago you exported a resume, ${firstName}.`,
+      bodyHtml:
+        emailParagraph('Most applications take two to three weeks to get any response, so a quiet inbox right now is expected.') +
+        emailParagraph("While you wait: tailoring the same resume to each specific job posting is the single biggest lever for getting past the initial screen. If you're applying somewhere new, it takes a couple of minutes."),
+      cta: { href: `${appUrl}/dashboard`, label: 'Tailor for Another Role' },
+      note: "If you already heard back either way, you can ignore this. This is the only email you'll get about this export.",
+    }),
   })
 }
 
@@ -526,24 +542,25 @@ export async function sendRateLimitEmail(input: {
   to: string
   firstName?: string | null
 }): Promise<EmailResult> {
-  const firstName = input.firstName?.trim() || 'there'
+  const firstName = escapeHtml(input.firstName?.trim() || 'there')
 
   return sendEmail({
     from: automationFromEmail,
     to: input.to,
     subject: 'You reached the free plan limit',
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">Heads up, ${firstName}.</h1>
-  <p style="margin:0 0 12px 0;">You just reached a free plan limit on Joben.</p>
-  <p style="margin:0 0 18px 0;">Upgrade to Pro to unlock:</p>
-  <ul style="margin:0 0 18px 18px;padding:0;">
-    <li>Save up to 3 CVs and unlimited PDF exports</li>
-    <li>Much higher AI limits for reviews and rewrites</li>
-    <li>Priority support when you need help</li>
-  </ul>
-  <a href="${appUrl}/pricing" style="display:inline-block;background:#2CB87A;color:#0A0A0A;text-decoration:none;padding:10px 16px;border-radius:0;font-weight:700;">Upgrade to Pro</a>
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">Thanks for building with Joben.</p>
-</div>`,
+    html: emailLayout({
+      heading: `Heads up, ${firstName}.`,
+      bodyHtml:
+        emailParagraph('You just reached a free plan limit on Joben.') +
+        emailParagraph('Upgrade to Pro to unlock:') +
+        emailList([
+          'Save up to 3 CVs and unlimited PDF exports',
+          'Much higher AI limits for reviews and rewrites',
+          'Priority support when you need help',
+        ]),
+      cta: { href: `${appUrl}/pricing`, label: 'Upgrade to Pro' },
+      note: 'Thanks for building with Joben.',
+    }),
   })
 }
 
@@ -606,13 +623,15 @@ export async function sendReferralRewardEmail(input: {
     to: input.to,
     subject: copy.subject(input.days),
     unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 12px 0;">${escapeHtml(input.hasSubscription ? copy.bodySubscribed(input.days) : copy.body(input.days, date))}</p>
-  <p style="margin:0 0 18px 0;">${input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached}</p>
-  ${anonCtaButton(`${appUrl}/${input.locale}/dashboard`, copy.cta)}
-  <p style="margin-top:18px;color:#5C5C57;font-size:13px;">${copy.footer}</p>
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: copy.heading,
+      bodyHtml:
+        emailParagraph(escapeHtml(input.hasSubscription ? copy.bodySubscribed(input.days) : copy.body(input.days, date))) +
+        emailParagraph(input.remainingRewards > 0 ? copy.remaining(input.remainingRewards) : copy.limitReached),
+      cta: { href: `${appUrl}/${input.locale}/dashboard`, label: copy.cta },
+      note: copy.footer,
+    }),
   })
 }
 
@@ -648,11 +667,13 @@ export async function sendMobileHandoffEmail(input: {
   return sendTransactionalEmail({
     to: input.to,
     subject: copy.subject,
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0A0A0A;max-width:560px;margin:0 auto;">
-  <h1 style="font-size:22px;margin-bottom:8px;">${copy.heading}</h1>
-  <p style="margin:0 0 18px 0;">${copy.body}</p>
-  ${anonCtaButton(href, copy.cta)}
-</div>`,
+    html: emailLayout({
+      locale: input.locale,
+      heading: copy.heading,
+      bodyHtml: emailParagraph(copy.body),
+      cta: { href, label: copy.cta },
+      unsubscribe: false,
+    }),
   })
 }
 
