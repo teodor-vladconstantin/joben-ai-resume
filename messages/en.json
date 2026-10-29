@@ -1712,7 +1712,11 @@
     "notFound": {
       "title": "Page not found",
       "description": "The page you're looking for doesn't exist or was moved.",
-      "cta": "Go to the homepage"
+      "cta": "Go to the homepage",
+      "popular": "Popular pages",
+      "linkAts": "Free ATS checker",
+      "linkTemplates": "CV templates",
+      "linkExamples": "Resume examples"
     }
   },
   "Feedback": {
