@@ -1712,7 +1712,11 @@
     "notFound": {
       "title": "Pagina nu a fost găsită",
       "description": "Pagina pe care o cauți nu există sau a fost mutată.",
-      "cta": "Mergi la pagina principală"
+      "cta": "Mergi la pagina principală",
+      "popular": "Pagini populare",
+      "linkAts": "Verificare CV ATS gratuită",
+      "linkTemplates": "Șabloane CV",
+      "linkExamples": "Exemple de CV"
     }
   },
   "Feedback": {

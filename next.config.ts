@@ -137,6 +137,8 @@ const PDF_EXTRACTION_TRACE_INCLUDES = [
 
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
+  // src/app/global-not-found.tsx renders URLs that match no route (no locale layout).
+  experimental: { globalNotFound: true },
   // pdfjs-dist (used by /api/public/ats-check for local PDF text extraction)
   // does a runtime `require("@napi-rs/canvas")` to polyfill DOMMatrix at
   // module load. Neither package is in Next's default serverExternalPackages
