@@ -205,6 +205,11 @@ const nextConfig: NextConfig = {
       { source: '/', destination: '/ro', statusCode: 301 as const },
       // The unprefixed checker was Romanian; skip the /en hop the generic rule would pick.
       { source: '/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      // Old WordPress job board that lived on this domain (GSC 404 list). Pages
+      // with a counterpart redirect; /job/*, /job-tag/* etc. stay 404 (gone for good).
+      ...[['/home', '/ro'], ['/about-us', '/ro/about'], ['/login', '/ro/sign-in']].flatMap(([from, to]) =>
+        [from, `${from}/`].map((source) => ({ source, destination: to, statusCode: 301 as const })),
+      ),
       // The online withdrawal form was removed; the right is described in Terms section 7.
       { source: '/:locale(ro|en)/withdrawal', destination: '/:locale/terms', statusCode: 301 as const },
       ...cvRedirects,
