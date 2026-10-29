@@ -1869,7 +1869,7 @@
     "role": {
       "heading": "Which role are you applying for?",
       "label": "Target job title",
-      "placeholder": "Product Designer"
+      "placeholder": "e.g. Product Designer"
     },
     "contact": {
       "heading": "How can employers reach you?",
