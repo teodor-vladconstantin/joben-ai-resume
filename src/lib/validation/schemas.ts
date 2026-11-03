@@ -94,7 +94,8 @@ export const analyzeSchema = z
   .object({
     resumeText: nonEmptyTrimmedString(RESUME_TEXT_MAX),
     jobDescription: optionalTrimmedString(LONG_TEXT_MAX),
-    resumeId: uuidLike.optional(),
+    // Older clients send null for an uploaded PDF (no saved resume).
+    resumeId: uuidLike.nullish().transform((value) => value ?? undefined),
     locale: z.enum(['en', 'ro']).optional(),
   })
   .strict()

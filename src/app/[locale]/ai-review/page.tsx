@@ -167,7 +167,7 @@ export default function AIReviewPage() {
         body: JSON.stringify({
           resumeText,
           jobDescription,
-          resumeId: resumeId || null,
+          resumeId: resumeId || undefined,
           locale,
         }),
       })
