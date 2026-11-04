@@ -291,15 +291,6 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
           ))}
         </div>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-foreground">{copy.howHeading}</h2>
-          <ol className="list-decimal pl-5 space-y-2 text-muted-foreground leading-relaxed">
-            {copy.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </section>
-
         <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-border bg-card p-6 shadow-card sm:flex-row sm:items-center">
           <div>
             <h2 className="text-lg font-bold">{copy.atsHeading}</h2>
@@ -314,6 +305,15 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
             <ArrowRight className="h-4 w-4" />
           </TrackedLink>
         </div>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground">{copy.howHeading}</h2>
+          <ol className="list-decimal pl-5 space-y-2 text-muted-foreground leading-relaxed">
+            {copy.steps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
 
         <section className="space-y-6">
           <h2 className="text-2xl font-bold text-foreground">{copy.faqHeading}</h2>
