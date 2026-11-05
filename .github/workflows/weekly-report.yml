@@ -2,7 +2,7 @@ name: Weekly Source Report
 
 # Luni 07:00 UTC (10:00 în România): funnel pe sursă din PostHog, trimis pe email.
 # Secrete necesare: POSTHOG_PERSONAL_API_KEY (cheie personală, scope query:read),
-# RESEND_API_KEY. Destinatar: user@example.com (implicit în script).
+# RESEND_API_KEY, REPORT_EMAIL (destinatarul raportului).
 on:
   schedule:
     - cron: '0 7 * * 1'
@@ -21,3 +21,4 @@ jobs:
         env:
           POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          REPORT_EMAIL: ${{ secrets.REPORT_EMAIL }}

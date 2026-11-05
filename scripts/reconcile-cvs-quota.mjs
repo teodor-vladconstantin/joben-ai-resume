@@ -38,7 +38,12 @@ const EXECUTE = process.argv.includes('--execute')
 const CVS_LIMIT_BY_PLAN = { free: 1, pro: 3, recruiting: 15 }
 
 // Keep in sync with src/lib/plans.ts GOD_MODE_EMAILS
-const GOD_MODE_EMAILS = new Set(['user@example.com'])
+const GOD_MODE_EMAILS = new Set(
+  (process.env.GOD_MODE_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+)
 
 function normalizeEmail(email) {
   return (email || '').trim().toLowerCase()

@@ -7,8 +7,8 @@ const PROJECT_ID = '163757'
 // Secrets pasted from a clipboard often carry a trailing CRLF, which invalidates an Authorization header.
 const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY?.trim()
 const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim()
-const REPORT_EMAIL = process.env.REPORT_EMAIL || 'user@example.com'
-for (const [name, value] of Object.entries({ POSTHOG_PERSONAL_API_KEY, RESEND_API_KEY })) {
+const REPORT_EMAIL = process.env.REPORT_EMAIL?.trim()
+for (const [name, value] of Object.entries({ POSTHOG_PERSONAL_API_KEY, RESEND_API_KEY, REPORT_EMAIL })) {
   if (!value) throw new Error(`${name} lipsește`)
 }
 

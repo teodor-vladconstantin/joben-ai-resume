@@ -9,7 +9,12 @@ import { normalizePlan, PLAN_DEFINITIONS, type UserPlan } from '@/lib/plan-defin
 // getUserPlan, quota checks, GOD MODE resolution).
 export * from '@/lib/plan-definitions'
 
-const GOD_MODE_EMAILS = new Set(['user@example.com'])
+const GOD_MODE_EMAILS = new Set(
+  (process.env.GOD_MODE_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+)
 
 function normalizeEmail(email: string | null | undefined): string {
   return (email || '').trim().toLowerCase()
