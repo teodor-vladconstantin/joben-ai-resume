@@ -221,7 +221,7 @@
     Dockerfile-urile originale, neschimbate, via `docker-compose.prod.yml` (identic cu Hetzner —
     Oracle fiind un VM real, nu serverless, e cea mai apropiată migrare 1:1). Zero cod Next.js
     modificat.
-  - Infra creată (tenancy `dukuconstantin`, regiune `eu-amsterdam-1`): VCN + subnet public +
+  - Infra creată (tenancy `<tenancy>`, regiune `eu-amsterdam-1`): VCN + subnet public +
     internet gateway + security list (porturi 22/3001/8000) + instanță `VM.Standard.A1.Flex`
     (2 OCPU/12GB, Ubuntu 24.04 ARM) — **prinsă din prima încercare** (capacitatea A1.Flex e
     notoriu instabilă, nu era garantat). IP public: `158.178.149.78`. SSH key dedicată:
@@ -872,7 +872,7 @@
 - [DONE] Enforced Upstash API monthly limits on AI endpoints (analyze, tailor, improve-bullet, cover-letter) with plan-aware caps
 - [DONE] Hardened GOD MODE resolution via Clerk session email hint so admin keeps unlimited plan capabilities even if DB email is stale
 - [DONE] Builder desktop layout fixed with stable column widths and non-squeezing preview pane
-- [DONE] Added GOD MODE override for user@example.com with full plan access
+- [DONE] Added GOD MODE override for <GOD_MODE_EMAILS> with full plan access
 - [DONE] Fix Experience tab visual shrink by stabilizing tab width and scrollbar gutter in builder editor
 - [DONE] Centralized plan definitions and enforced per-plan quotas (Free: 3 resumes, 1 export) plus AI gating by plan
 - [DONE] Full roadmap closure: phases 0-6 implemented with tests, observability, analytics, and operational documentation
