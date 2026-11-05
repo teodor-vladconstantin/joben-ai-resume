@@ -7,7 +7,7 @@ Status: proposed
 
 Joben is still in a testing phase. Three changes are needed:
 
-1. Replace the public contact address `admin@joben.eu` with `duku@joben.eu` everywhere it's user-facing.
+1. Replace the public contact address `admin@joben.eu` with `hello@joben.eu` everywhere it's user-facing.
 2. Disable real payments: every "Upgrade to Pro" entry point should explain we're still testing, that no payment is being charged, and ask for feedback instead — in a personal tone, not a generic system notice.
 3. Add a Resend automation that asks users for feedback shortly after two actions (resume created, resume/cover-letter downloaded), capped at one feedback email per user per day.
 
@@ -15,7 +15,7 @@ All copy introduced by this spec is written in Romanian, matching the tone the r
 
 ## Part 1 — Contact email swap
 
-Replace `admin@joben.eu` → `duku@joben.eu` in the three files that reference it as a live contact address:
+Replace `admin@joben.eu` → `hello@joben.eu` in the three files that reference it as a live contact address:
 
 - `src/app/privacy/page.tsx`
 - `src/app/terms/page.tsx`
@@ -74,7 +74,7 @@ All four call sites (`ResumeBuilder.tsx`, `CoverLetterBuilder.tsx`, `ai-review/p
 
 New `sendFeedbackRequestEmail()` in `src/lib/resend.ts`:
 
-- From: `Duku from Joben <duku@joben.eu>` (a real reply-to address, not `no-reply@`, since the email explicitly asks the user to reply).
+- From: `Duku from Joben <hello@joben.eu>` (a real reply-to address, not `no-reply@`, since the email explicitly asks the user to reply).
 - Subject: "Cum a fost experiența cu Joben?"
 - Body: personal tone, one line referencing the specific trigger (e.g. "Văd că tocmai ai creat un CV pe Joben" vs. "Văd că tocmai ai descărcat un CV/o scrisoare de intenție de pe Joben"), asks the user to hit reply directly with thoughts, and a footer with a secondary link to `https://app.youform.com/forms/vorotlgc`.
 
