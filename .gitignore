@@ -94,3 +94,8 @@ supabase/.temp/
 security-audit-results/
 cleanup-reports/
 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*.txt
+
+# sabloane de env fara valori reale (trebuie sa ramana ultimele, dupa regulile .env*)
+!.env.example
+!.env.prod.example
+!.env.test.local.example
