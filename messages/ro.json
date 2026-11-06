@@ -2017,5 +2017,8 @@
     "accept": "Accept și continui",
     "settings": "Mergi la Setări (export sau ștergere cont)",
     "error": "Nu am putut salva acceptarea. Încearcă din nou."
+  },
+  "AiNotice": {
+    "text": "Scorul și sugestiile de mai jos sunt generate de un sistem de inteligență artificială. Sunt estimări orientative și pot conține erori, verifică-le înainte de a le folosi."
   }
 }

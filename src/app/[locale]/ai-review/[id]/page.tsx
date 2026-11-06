@@ -10,6 +10,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { ResumeAnalyzer, type AnalyzerReview, type Improvement } from '@/components/analyzer/ResumeAnalyzer'
 import type { FixPatchWithContext } from '@/components/ui/BeforeAfterModal'
 import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
+import { AiNotice } from '@/components/legal/AiNotice'
 import { useServerError } from '@/hooks/useServerError'
 
 const SESSION_KEY = 'ai-fix-patches'
@@ -236,6 +237,7 @@ export default function AIReviewEditorPage() {
       <div className="flex-1 flex flex-col min-w-0">
 
         <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
+          <AiNotice />
           <ResumeAnalyzer
             review={review}
             comparison={comparison}
