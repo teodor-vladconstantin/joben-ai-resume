@@ -309,6 +309,11 @@ export type Messages = {
   Legal: {
     privacy: LegalPolicy
     terms: LegalPolicy
+    refunds: LegalPolicy
+    subprocessors: LegalPolicy & {
+      tableHeaders: { name: string; purpose: string; data: string; location: string }
+      optionalLabel: string
+    }
     cookies: LegalPolicy & {
       necessaryHeading: string
       necessaryBody: string

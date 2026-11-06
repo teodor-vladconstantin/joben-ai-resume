@@ -576,12 +576,16 @@
         "label": "Politica de Cookie-uri"
       },
       {
-        "href": "https://anpc.ro",
-        "label": "ANPC"
+        "href": "/refunds",
+        "label": "Rambursări și retragere"
       },
       {
-        "href": "https://ec.europa.eu/consumers/odr",
-        "label": "SOL (soluționarea online a litigiilor)"
+        "href": "/subprocessors",
+        "label": "Subprocesatori"
+      },
+      {
+        "href": "https://anpc.ro",
+        "label": "ANPC"
       }
     ],
     "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
@@ -940,7 +944,7 @@
       "metaTitle": "Politica de confidențialitate",
       "metaDescription": "Cum prelucrează Joben datele tale personale și datele din CV: scopuri, temeiuri legale, destinatari, termene de păstrare și drepturile tale conform RGPD.",
       "heading": "Politica de Confidențialitate",
-      "lastUpdated": "22 octombrie 2026",
+      "lastUpdated": "6 noiembrie 2026",
       "intro": "Această politică explică ce date prelucrăm când folosești Joben, de ce le prelucrăm, cu cine le partajăm, cât timp le păstrăm și ce drepturi ai.",
       "breadcrumbLabel": "Politica de Confidențialitate",
       "footerPrefix": "Citește ",
@@ -957,11 +961,11 @@
         },
         {
           "title": "3. Procesarea prin inteligență artificială",
-          "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la un job, scrisoarea de intenție, rescrierea punctelor, importul unui fișier CV), trimitem textul relevant și, la import, fișierul către Anthropic (modelele Claude), furnizorul nostru de AI, exclusiv pentru a genera rezultatul cerut. Nu trimitem datele contului (email, ID de utilizator). Textul CV-ului conține însă ceea ce ai scris tu în el, inclusiv numele și datele de contact. Conform condițiilor comerciale ale API-ului Anthropic, datele trimise prin API nu sunt folosite pentru antrenarea modelelor. Anthropic șterge intrările și ieșirile API în cel mult 30 de zile, cu excepția cazurilor în care legea sau aplicarea politicii sale de utilizare impun o păstrare mai lungă.\n\nNu folosim CV-urile tale pentru a antrena modele proprii sau ale altora.\n\nScorul ATS, evaluările și sugestiile sunt estimări orientative generate automat. Ele nu produc efecte juridice asupra ta, nu sunt trimise angajatorilor și nu constituie decizii bazate exclusiv pe prelucrare automată în sensul art. 22 RGPD. Tu decizi ce folosești din ele. Rezultatele sunt generate de un sistem de inteligență artificială și pot conține erori, de aceea trebuie verificate înainte de utilizare.\n\nTe rugăm să nu incluzi în CV date din categorii speciale (sănătate, convingeri religioase sau politice, origine etnică, viață sexuală). Dacă alegi totuși să le incluzi, le prelucrăm doar pentru a-ți furniza serviciul, pe baza consimțământului tău explicit (art. 9 alin. 2 lit. a RGPD), pe care îl poți retrage ștergând informația sau contul."
+          "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la un job, scrisoarea de intenție, rescrierea punctelor, importul unui fișier CV), trimitem textul relevant și, la import, fișierul către Anthropic (modelele Claude), furnizorul nostru de AI, exclusiv pentru a genera rezultatul cerut. Nu trimitem datele contului (email, ID de utilizator). Textul CV-ului conține însă ceea ce ai scris tu în el, inclusiv numele și datele de contact. Conform condițiilor comerciale ale API-ului Anthropic, datele trimise prin API nu sunt folosite pentru antrenarea modelelor. Anthropic șterge intrările și ieșirile API în cel mult 30 de zile, cu excepția cazurilor în care legea sau aplicarea politicii sale de utilizare impun o păstrare mai lungă.\n\nNu folosim CV-urile tale pentru a antrena modele proprii sau ale altora.\n\nScorul ATS, evaluările și sugestiile sunt estimări orientative generate automat. Ele nu produc efecte juridice asupra ta, nu sunt trimise angajatorilor și nu constituie decizii bazate exclusiv pe prelucrare automată în sensul art. 22 RGPD. Tu decizi ce folosești din ele. Rezultatele sunt generate de un sistem de inteligență artificială și pot conține erori, de aceea trebuie verificate înainte de utilizare.\n\nTe rugăm să nu incluzi în CV date din categorii speciale (sănătate, convingeri religioase sau politice, origine etnică, viață sexuală). Dacă alegi totuși să le incluzi, le prelucrăm doar pentru a-ți furniza serviciul, pe baza consimțământului tău explicit (art. 9 alin. 2 lit. a RGPD), pe care îl poți retrage ștergând informația sau contul.\n\nLa importul unui fișier CV, fișierul este citit mai întâi de serverul nostru de procesare (Oracle Cloud Infrastructure), care extrage textul și, pentru structurare, îl trimite către Anthropic."
         },
         {
           "title": "4. Cu cine partajăm datele",
-          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS SUA-Est)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate."
+          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS SUA-Est)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate.\n\nLista furnizorilor, cu scopul și locația fiecăruia, se află pe pagina Subprocesatori din subsolul site-ului."
         },
         {
           "title": "5. Transferuri în afara Spațiului Economic European",
@@ -985,7 +989,7 @@
         },
         {
           "title": "10. Minori",
-          "content": "Joben se adresează persoanelor de cel puțin 16 ani, vârsta consimțământului digital în România. Nu colectăm cu bună știință date de la persoane sub această vârstă. Dacă ai motive să crezi că un minor ne-a furnizat date, scrie-ne la privacy@joben.eu și le ștergem."
+          "content": "Joben se adresează persoanelor de cel puțin 16 ani (pragul din art. 8 RGPD, aplicabil în România). Nu colectăm cu bună știință date de la persoane sub această vârstă. Dacă ai motive să crezi că un minor ne-a furnizat date, scrie-ne la privacy@joben.eu și le ștergem."
         },
         {
           "title": "11. Linkuri către alte site-uri",
@@ -1208,6 +1212,75 @@
         {
           "title": "Contact",
           "content": "Întrebări despre cookie-uri: privacy@joben.eu."
+        }
+      ]
+    },
+    "refunds": {
+      "metaTitle": "Politica de rambursare și dreptul de retragere | Joben",
+      "metaDescription": "Cum te retragi dintr-un contract Joben în 14 zile, cum funcționează rambursarea și ce se întâmplă cu Pass-ul Interviu și cu abonamentele.",
+      "heading": "Politica de rambursare și dreptul de retragere",
+      "lastUpdated": "6 noiembrie 2026",
+      "intro": "Această pagină explică dreptul tău de retragere de 14 zile, cum îl exerciți și cum rambursăm sumele. Face parte din Termenii și Condițiile.",
+      "breadcrumbLabel": "Rambursări și retragere",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica de Confidențialitate",
+      "footerSuffix": " pentru modul în care tratăm datele tale.",
+      "sections": [
+        {
+          "title": "1. Dreptul de retragere în 14 zile",
+          "content": "Dacă ești consumator și cumperi un plan plătit Joben online, ai dreptul să te retragi din contract în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014).\n\nDreptul se aplică și când cumperi un serviciu digital, cu excepțiile din secțiunile 3 și 4."
+        },
+        {
+          "title": "2. Cum te retragi",
+          "content": "Cel mai simplu: intră în Setări, la secțiunea Facturare, și apasă «Retrage-te din contract aici». Verifici numele și datele contractului, apoi apeși butonul de confirmare. Primești pe email o confirmare cu data și ora retragerii. Funcția este disponibilă pe toată durata perioadei de retragere (art. 111 din OUG nr. 34/2014).\n\nPoți să ne scrii și la hello@joben.eu, cu numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014."
+        },
+        {
+          "title": "3. Pass-ul Interviu de 14 zile",
+          "content": "Pass-ul oferă acces Pro imediat. La finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere, în măsura în care legea permite această excepție (art. 16 din OUG nr. 34/2014).\n\nDacă excepția nu se aplică în cazul tău, se aplică regulile din secțiunea 2 și din secțiunea 5."
+        },
+        {
+          "title": "4. Abonamentele Pro și Plan Recrutare",
+          "content": "Abonamentele încep imediat, la cererea ta. Dacă te retragi în primele 14 zile, plătești o sumă proporțională cu perioada de acces folosită până la retragere, iar restul se rambursează. Retragerea oprește și reînnoirile viitoare."
+        },
+        {
+          "title": "5. Cum și când rambursăm",
+          "content": "Îți confirmăm primirea declarației de retragere și rambursăm sumele cuvenite în cel mult 14 zile de la primirea ei, prin aceeași metodă de plată folosită la comandă (Stripe), fără costuri suplimentare pentru tine."
+        },
+        {
+          "title": "6. Alte situații",
+          "content": "Sumele plătite pentru o perioadă de acces deja începută se rambursează doar în cadrul dreptului de retragere și al drepturilor din garanția legală pentru conținut digital și servicii digitale (OUG nr. 141/2021).\n\nDacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne la hello@joben.eu și îl remediem sau îți rambursăm proporțional, conform legii."
+        },
+        {
+          "title": "7. Reclamații",
+          "content": "Pentru orice problemă scrie-ne la hello@joben.eu. Ca consumator poți apela și la ANPC (anpc.ro) sau la o entitate de soluționare alternativă a litigiilor (SAL) listată pe anpc.ro. Aceste căi sunt opționale și nu îți afectează dreptul de a te adresa instanței."
+        }
+      ]
+    },
+    "subprocessors": {
+      "lastUpdated": "6 noiembrie 2026",
+      "metaTitle": "Subprocesatori și furnizori de date | Joben",
+      "metaDescription": "Lista furnizorilor care prelucrează date personale pentru Joben, cu scopul, datele și locația fiecăruia.",
+      "heading": "Subprocesatori și furnizori de date",
+      "intro": "Joben folosește furnizorii de mai jos pentru a-ți oferi serviciul. Ei prelucrează datele în numele nostru, pe baza unor acorduri de prelucrare a datelor.",
+      "breadcrumbLabel": "Subprocesatori",
+      "tableHeaders": {
+        "name": "Furnizor",
+        "purpose": "Scop",
+        "data": "Date",
+        "location": "Locație"
+      },
+      "optionalLabel": "Se încarcă doar cu consimțământul tău.",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica de Confidențialitate",
+      "footerSuffix": " pentru transferurile în afara SEE și garanțiile aplicate.",
+      "sections": [
+        {
+          "title": "Transferuri în afara SEE",
+          "content": "Unii furnizori prelucrează date în Statele Unite sau în alte țări din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind cadrul UE-SUA pentru confidențialitatea datelor, pentru furnizorii certificați, sau pe clauzele contractuale standard (Decizia (UE) 2021/914). Poți cere o copie a garanțiilor la privacy@joben.eu."
+        },
+        {
+          "title": "Modificări ale listei",
+          "content": "Actualizăm această pagină când adăugăm sau schimbăm un furnizor. Data ultimei actualizări apare în partea de sus."
         }
       ]
     }

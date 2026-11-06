@@ -1,0 +1,23 @@
+# Surse legale verificate
+
+Verificat 2026-11-06 pe surse primare (EUR-Lex, Monitorul Oficial, ANPC, ANSPDCP, Comisia Europeana, Anthropic). Ce nu a putut fi verificat pe text primar este marcat explicit. Nu este aviz juridic.
+
+## Verificat pe text primar
+
+| Subiect | Concluzie | Sursa |
+|---|---|---|
+| Varsta consimtamant digital | GDPR art. 8(1): 16 ani implicit, statele pot cobori pana la 13. Legea 190/2018 **nu** contine o derogare: art. 8 din lege trateaza cercetarea/arhivarea, nu varsta. Romania aplica deci pragul GDPR de 16 ani. (Concluzie din textul extras din PDF-ul ANSPDCP al legii: cautarea dupa "16 ani", "minor", "copil", "varsta" nu gaseste nicio derogare de varsta.) COMPLIANCE.md citeaza gresit "Law 190/2018 age 16". Proiectele de lege privind conturile minorilor sub 16 ani sunt doar propuneri. | Regulamentul (UE) 2016/679 art. 8; Legea 190/2018 (https://www.dataprotection.ro/servlet/ViewDocument?id=1520) |
+| Butonul de retragere | OUG 18/2026 (MO 236/26.03.2026) introduce **art. 11^1 in OUG 34/2014**: pentru contracte la distanta incheiate printr-o interfata online, profesionistul asigura o functie de retragere etichetata "retrageti-va din contract aici", disponibila permanent in perioada de retragere, cu declaratie online (nume, identificare contract, mijloc electronic de confirmare) si functie de confirmare. Se aplica din **19.06.2026**. Amenda: 5.000-15.000 lei. Se aplica contractelor la distanta cu interfata online in general (nu doar servicii financiare). | MO 236/26.03.2026; https://eur-lex.europa.eu/eli/dir/2023/2673/oj (art. 11a nou din Dir. 2011/83, art. 2(1): aplicare din 19.06.2026) |
+| Drept de retragere, continut digital | Dir. 2011/83/UE: art. 16(m) exceptie pentru continut digital nelivrat pe suport material daca executarea a inceput cu acordul prealabil expres si cu recunoasterea pierderii dreptului; art. 16(a) servicii dupa executarea completa; art. 14(3) plata proportionala. Numerotarea articolelor corespunzatoare din OUG 34/2014 **nu** a fost verificata pe text romanesc. | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011L0083 (textul 2011; exista versiune consolidata 27.09.2026 neverificata) |
+| Platforma ODR | Platforma europeana ODR a fost desfiintata: Reg. (UE) 2024/3228; depunerea reclamatiilor inchisa 20.03.2025; Reg. 524/2013 abrogat din 20.07.2025. Obligatia de link catre ODR nu mai exista. Ramane obligatia de informare ADR din Dir. 2013/11/UE art. 13 (entitatile ADR cu care comerciantul se angajeaza sa lucreze). | https://eur-lex.europa.eu/eli/reg/2024/3228/oj/eng ; https://eur-lex.europa.eu/eli/dir/2013/11/oj/eng |
+| AI Act, transparenta (art. 50) | Reg. (UE) 2026/1744 (Digital Omnibus on AI), in vigoare din 27.07.2026. Art. 50 (1), (2), (4) se aplica de la data generala 2.08.2026. Singura amanare relevanta: art. 111(4) nou, pentru furnizorii de sisteme generative de continut sintetic **puse pe piata inainte de 2.08.2026**, conformarea cu art. 50(2) (marcare machine-readable) pana la 2.12.2026. Art. 4 (alfabetizare AI) devine obligatie de "a lua masuri". | https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng ; https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng |
+| Digital Omnibus GDPR/ePrivacy | COM(2025) 837: procedura 2025/0360(COD) inca "Ongoing" pe EUR-Lex la 2026-11-06. Este propunere, nu drept in vigoare. | https://eur-lex.europa.eu/legal-content/EN/HIS/?uri=CELEX:52025PC0837 |
+| Anthropic, antrenare si retentie | API comercial: datele nu sunt folosite la antrenare implicit; stergere din backend in 30 zile; ZDR optional pe endpointuri eligibile; modelele "Covered" au retentie de 30 zile obligatorie. Textul DPA nu a fost citit. | https://platform.claude.com/docs/en/manage-claude/api-and-data-retention ; https://support.claude.com/en/articles/15425996-data-retention-practices-for-covered-models |
+| ANPC / SAL | Pagina ANPC SAL (https://anpc.ro/sal) ofera ghid, pictograma si plachete. Temeiul legal al afisarii SAL (Ordin ANPC 449/2022) **nu a putut fi confirmat** pe anpc.ro; ANPC listeaza si plachete cu Ordinele 330/2025 si 331/2025, neanalizate. | https://anpc.ro/sal |
+
+## Neverificat (de facut de avocat)
+- Numerotarea art. din OUG 34/2014 pentru plata proportionala si exceptiile de la retragere.
+- Ordinul ANPC aplicabil afisarii SAL in 2026 si continutul placutei.
+- Sanctiunea si regimul ANSPDCP pentru cookie-uri (art. 4(5) Legea 506/2004): amenzile 2025-2026 citate in COMPLIANCE.md vin din presa, nu din decizii ANSPDCP citite.
+- Reglementari romanesti privind continutul minim al informatiilor comerciantului (CUI, email) in comert electronic (Legea 365/2002).
+- Modificarile din versiunea consolidata 27.09.2026 a Directivei 2011/83 si ale OUG 34/2014.
