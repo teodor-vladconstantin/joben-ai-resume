@@ -59,6 +59,8 @@ const EXPECTED_SCOPING: EqCall[] = [
   { table: 'anonymous_scans', column: 'claimed_by', value: 'user_123' },
   { table: 'referrals', column: 'referrer_id', value: 'user_123' },
   { table: 'referrals', column: 'referred_user_id', value: 'user_123' },
+  { table: 'legal_acceptances', column: 'user_clerk_id', value: 'user_123' },
+  { table: 'withdrawal_requests', column: 'user_clerk_id', value: 'user_123' },
 ]
 
 const MOCK_DATA: Record<string, unknown[] | Record<string, unknown>> = {

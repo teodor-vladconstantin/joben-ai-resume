@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/cn'
+import { TermsReacceptance } from '@/components/legal/TermsReacceptance'
 
 // Signed-in top bar: brand, nav links with an active pill, then locale, theme,
 // primary action and account menu. Mobile folds the links into a dropdown.
@@ -28,6 +29,8 @@ export function AppNav() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
+    <>
+    <TermsReacceptance />
     <header className="fixed top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-(--container-max) items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
@@ -94,5 +97,6 @@ export function AppNav() {
         </div>
       </div>
     </header>
+    </>
   )
 }

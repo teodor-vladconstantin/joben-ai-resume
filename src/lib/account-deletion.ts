@@ -2,6 +2,7 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { getStripeClient, isStripeConfigured } from '@/lib/stripe'
+import { purgeUserRateLimitData } from '@/lib/ratelimit'
 
 export const OWNED_TABLES = ['resume_analyses', 'ai_reviews', 'resumes', 'cover_letters', 'feedback'] as const
 
@@ -11,6 +12,7 @@ export const OWNED_TABLES = ['resume_analyses', 'ai_reviews', 'resumes', 'cover_
 export const OTHER_OWNED_TABLES = [
   { table: 'email_events', column: 'user_clerk_id' },
   { table: 'product_events', column: 'user_clerk_id' },
+  { table: 'legal_acceptances', column: 'user_clerk_id' },
   { table: 'anonymous_scans', column: 'claimed_by' },
   // Both sides of a referral: who this user invited and who invited them.
   { table: 'referrals', column: 'referrer_id' },
@@ -91,6 +93,10 @@ export async function deleteAccount(userId: string, context: { requestId: string
     logger.error('Account deletion: users row delete failed', { requestId, userId, error: userDeleteError.message })
     return { ok: false, reason: 'data' }
   }
+
+  // Counters and cached plan in Redis are keyed by the Clerk id. Best effort:
+  // they also expire on their own within a month.
+  await purgeUserRateLimitData(userId)
 
   try {
     const client = await clerkClient()

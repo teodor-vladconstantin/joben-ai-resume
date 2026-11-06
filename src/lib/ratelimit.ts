@@ -212,6 +212,30 @@ export function getRedisClient(): Redis | null {
   return redis
 }
 
+// Account deletion (GDPR art. 17): remove every Redis key that embeds the user id.
+// Best-effort; the keys expire on their own within a month anyway.
+export async function purgeUserRateLimitData(userId: string): Promise<void> {
+  if (!redis) return
+  const patterns = [`tokens:${userId}:*`, `features:${userId}:*`, `flags:${userId}:*`, `blocked:${userId}:*`]
+  try {
+    await redis.del(`plan:${userId}`)
+    for (const match of patterns) {
+      let cursor = '0'
+      do {
+        const [next, keys] = await redis.scan(cursor, { match, count: 100 })
+        if (keys.length > 0) await redis.del(...keys)
+        cursor = String(next)
+      } while (cursor !== '0')
+    }
+  } catch (error) {
+    logRedisFailure('Could not purge user rate-limit data', {
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      source: 'ratelimit.purgeUserRateLimitData',
+    })
+  }
+}
+
 // Call after any write to users.plan / pro_expires_at / stripe_subscription_id
 // so usage meters reflect the change immediately. Best-effort.
 export async function invalidatePlanCache(userId: string): Promise<void> {

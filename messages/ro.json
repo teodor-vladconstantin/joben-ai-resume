@@ -429,7 +429,7 @@
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
     "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
-    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "consentLabel": "Am cel puțin 16 ani și sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
     "steps": {
       "upload": "Încărcare",
       "scan": "Scanare",
@@ -452,7 +452,7 @@
     "eyebrow": "Cont nou",
     "heading": "Creează-ți contul gratuit",
     "subheading": "Îți repari CV-ul, îl adaptezi pentru joburi și scrii scrisori de intenție, totul într-un singur loc.",
-    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "consentLabel": "Am cel puțin 16 ani și sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
     "acceptToContinue": "Bifează căsuța de mai sus ca să continui la formularul de înregistrare.",
     "rateLimited": "Prea multe încercări din rețeaua ta. Încearcă din nou mai târziu."
   },
@@ -2009,5 +2009,13 @@
     "termsPrefix": "Condițiile dreptului de retragere sunt în ",
     "termsLink": "Termenii și Condițiile",
     "termsSuffix": " (secțiunea 7)."
+  },
+  "TermsReacceptance": {
+    "title": "Am actualizat Termenii și Politica de Confidențialitate",
+    "body": "Pentru a continua să folosești Joben, confirmă că ai citit versiunile actualizate.",
+    "label": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "accept": "Accept și continui",
+    "settings": "Mergi la Setări (export sau ștergere cont)",
+    "error": "Nu am putut salva acceptarea. Încearcă din nou."
   }
 }

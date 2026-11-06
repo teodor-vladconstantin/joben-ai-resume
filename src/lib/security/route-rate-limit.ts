@@ -6,7 +6,7 @@
 // Design: INCR + EXPIRE on first hit. The race between two concurrent first
 // calls is acceptable: at worst the key keeps the original TTL.
 
-import { createHash } from 'crypto'
+import { createHash, createHmac } from 'crypto'
 import { getRedisClient } from '@/lib/ratelimit'
 
 export type RouteRateLimitOptions = {
@@ -85,6 +85,16 @@ export async function checkRouteRateLimit(opts: RouteRateLimitOptions): Promise<
 }
 
 /**
+ * Pseudonymous IP digest. With IP_HASH_SECRET set it is a keyed HMAC, so the
+ * small IPv4 space cannot be enumerated to reverse it. Without the secret it
+ * falls back to a plain SHA-256 (weaker), so set the secret in production.
+ */
+export function hashIp(ip: string, secret: string | undefined = process.env.IP_HASH_SECRET): string {
+  const digest = secret ? createHmac('sha256', secret).update(ip) : createHash('sha256').update(ip)
+  return digest.digest('hex').slice(0, 16)
+}
+
+/**
  * Best-effort identifier resolver: prefer the authenticated userId, then
  * a hashed X-Forwarded-For client IP (hashed so raw IPs are never stored
  * as Redis key names), finally a string literal so the limiter still
@@ -94,7 +104,7 @@ export function resolveRateLimitIdentity(req: Request, userId?: string | null): 
   if (userId) return `u:${userId}`
   const xff = req.headers.get('x-forwarded-for') || ''
   const ip = xff.split(',')[0]?.trim()
-  if (ip) return `ip:${createHash('sha256').update(ip).digest('hex').slice(0, 16)}`
+  if (ip) return `ip:${hashIp(ip)}`
   return 'ip:unknown'
 }
 

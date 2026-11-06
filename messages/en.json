@@ -429,7 +429,7 @@
     "scanning": "Scanning your resume...",
     "scanButton": "Scan My Resume, Free",
     "scanDisclaimer": "1 free scan a day · no signup · your file is discarded after the scan",
-    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "consentLabel": "I am at least 16 years old and I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
     "steps": {
       "upload": "Upload",
       "scan": "Scan",
@@ -452,7 +452,7 @@
     "eyebrow": "Sign up",
     "heading": "Create your free account",
     "subheading": "Fix your resume, tailor it to jobs and write cover letters, all in one place.",
-    "consentLabel": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "consentLabel": "I am at least 16 years old and I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
     "acceptToContinue": "Tick the box above to continue to the sign-up form.",
     "rateLimited": "Too many attempts from your network. Please try again later."
   },
@@ -2009,5 +2009,13 @@
     "termsPrefix": "The conditions of the right of withdrawal are in the ",
     "termsLink": "Terms and Conditions",
     "termsSuffix": " (section 7)."
+  },
+  "TermsReacceptance": {
+    "title": "We updated the Terms and the Privacy Policy",
+    "body": "To keep using Joben, confirm that you have read the updated versions.",
+    "label": "I agree to the <terms>Terms and Conditions</terms> and the <privacy>Privacy Policy</privacy>.",
+    "accept": "Accept and continue",
+    "settings": "Go to Settings (export or delete account)",
+    "error": "We could not save your acceptance. Please try again."
   }
 }
