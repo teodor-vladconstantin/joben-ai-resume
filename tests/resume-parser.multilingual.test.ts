@@ -505,7 +505,7 @@ describe('resume parser multilingual support', () => {
     const input = [
       'Andrei Gheorghe',
       'Inginer Software Senior',
-      'andrei.gheorghe@email.ro',
+      'andrei@example.com',
       '+40 723 456 789',
       'Bucuresti, Romania',
       'linkedin.com/in/andreigheorghe',
@@ -559,7 +559,7 @@ describe('resume parser multilingual support', () => {
     // Personal
     expect(parsed.personal.firstName).toBe('Andrei')
     expect(parsed.personal.lastName).toBe('Gheorghe')
-    expect(parsed.personal.email).toBe('andrei.gheorghe@email.ro')
+    expect(parsed.personal.email).toBe('andrei@example.com')
     expect(parsed.personal.location).toContain('Bucuresti')
     expect(parsed.personal.linkedin).toContain('andreigheorghe')
 

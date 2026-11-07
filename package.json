@@ -2,6 +2,7 @@
   "name": "joben-resume",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -53,7 +54,7 @@
     "next-themes": "^0.4.6",
     "pdfjs-dist": "^6.3.289",
     "posthog-js": "^1.369.5",
-    "posthog-node": "^5.39.1",
+    "posthog-node": "^5.63.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.91.0",

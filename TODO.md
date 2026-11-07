@@ -226,7 +226,7 @@
     Dockerfile-urile originale, neschimbate, via `docker-compose.prod.yml` (identic cu Hetzner —
     Oracle fiind un VM real, nu serverless, e cea mai apropiată migrare 1:1). Zero cod Next.js
     modificat.
-  - Infra creată (tenancy `dukuconstantin`, regiune `eu-amsterdam-1`): VCN + subnet public +
+  - Infra creată (tenancy `<tenancy>`, regiune `eu-amsterdam-1`): VCN + subnet public +
     internet gateway + security list (porturi 22/3001/8000) + instanță `VM.Standard.A1.Flex`
     (2 OCPU/12GB, Ubuntu 24.04 ARM) — **prinsă din prima încercare** (capacitatea A1.Flex e
     notoriu instabilă, nu era garantat). IP public: `158.178.149.78`. SSH key dedicată:
@@ -803,6 +803,7 @@
 
 
 ## Done
+- [DONE] 2026-11-06 posthog-node 5.39.1 -> 5.63.1 (aceeași versiune majoră; @posthog/ai 8.16.3 o folosește deduplicat). tsc/lint curate, 399 teste. Verificare după deploy pe Vercel: evenimentele server vin din 5.63.x.
 - [DONE] 2026-10-16 SEO foundation + GA4 measurement (PR #18-#22 in main); ghid ro (/ro/ghiduri/cv-citit-corect-de-ats) + en (/en/guides/cv-readable-by-ats) cu hreflang: metadata/JSON-LD/robots/FAQ/ghid ro; GTM-MJ5VPX6J (v5) cu tag G-PGLHWSE720 + evenimente ats_scan_completed, sign_up_started, begin_checkout, purchase (server-side Measurement Protocol din webhook-ul Stripe, doar cu gaClientId din _ga, adică cu consimțământ; env GA4_MEASUREMENT_ID + GA4_MP_API_SECRET în Vercel); Consent Mode default din localStorage; dimensiuni Plan/Source/Grade + metrica ATS Score; GA4 legat de Search Console; indexare ghid cerută. Rămas: marcat key events (sign_up_started, begin_checkout) în GA4 după ce apar în Admin > Events (~24h), IndexNow (cere proiect OpenSEO), ghid en.
 - [DONE] Security audit fixes on fix/security-audit (H2-H4, M1-M8, L1/L2/L4/L5/L6/L8/L9); H1 secret rotation and L3/L7 left to owner
 - [DONE] 2026-10-02 Date de identificare firmă (TETA ABC SRL, CUI, Nr. Reg. Com., sediu social, hello@joben.eu) în footer + Termeni, Confidențialitate, Cookies: `company` în src/lib/content.ts, `CompanyDetails` în src/components/layout/, `Footer.companyLine` în messages.
@@ -877,7 +878,7 @@
 - [DONE] Enforced Upstash API monthly limits on AI endpoints (analyze, tailor, improve-bullet, cover-letter) with plan-aware caps
 - [DONE] Hardened GOD MODE resolution via Clerk session email hint so admin keeps unlimited plan capabilities even if DB email is stale
 - [DONE] Builder desktop layout fixed with stable column widths and non-squeezing preview pane
-- [DONE] Added GOD MODE override for user@example.com with full plan access
+- [DONE] Added GOD MODE override for <GOD_MODE_EMAILS> with full plan access
 - [DONE] Fix Experience tab visual shrink by stabilizing tab width and scrollbar gutter in builder editor
 - [DONE] Centralized plan definitions and enforced per-plan quotas (Free: 3 resumes, 1 export) plus AI gating by plan
 - [DONE] Full roadmap closure: phases 0-6 implemented with tests, observability, analytics, and operational documentation

@@ -1,5 +1,27 @@
 # Joben Resume
 
+## Ce este
+Joben este o aplicatie web (SaaS) care ajuta utilizatorii sa isi construiasca un CV optimizat pentru sistemele ATS: constructor de CV, scor ATS, recenzie si imbunatatire cu AI, scrisori de intentie, export PDF si abonamente platite. Este un proiect al Teta ABC SRL.
+
+## Pentru cine
+Persoane aflate in cautarea unui job (in special pe piata din Romania, interfata RO/EN) si recrutori care vor CV-uri usor de parsat de ATS.
+
+## Stack
+Next.js (App Router), TypeScript, Supabase (Postgres), Clerk (auth), Stripe (plati), Resend (email), Upstash (rate limiting), Anthropic (AI), serviciu LaTeX (Node) si serviciu de parsare CV (Python), PostHog/Sentry pentru observabilitate.
+
+## Cum rulezi local
+1. `npm install`
+2. `cp .env.example .env.local` si completeaza valorile (chei de test, niciodata chei live). Lista completa: `.env.prod.example`.
+3. `npx supabase start && npx supabase db push`
+4. `npm run dev` (aplicatia porneste pe http://localhost:3000)
+
+Detalii (teste, Stripe, cron, depanare) mai jos.
+
+## Licenta
+MIT, vezi `LICENSE`. Copyright (c) 2026 Teta ABC SRL.
+
+---
+
 Joben Resume is an AI-assisted resume builder SaaS built with Next.js App Router, TypeScript, Supabase, Clerk, Stripe, Resend, Upstash, and Anthropic.
 
 ## Core Features

@@ -45,7 +45,7 @@
 ## Status Update (2026-04-18)
 
 ### Livrat azi
-- GOD MODE hardening pentru admin: rezolvarea planului accepta acum email hint din Clerk session claims, nu doar email din tabela users. Astfel user@example.com primeste consistent plan Recruiting (capabilitati nelimitate).
+- GOD MODE hardening pentru admin: rezolvarea planului accepta acum email hint din Clerk session claims, nu doar email din tabela users. Astfel <GOD_MODE_EMAILS> primeste consistent plan Recruiting (capabilitati nelimitate).
 - Control cost AI cu Upstash: adaugat limiter centralizat pe endpoint-uri scumpe (`/api/analyze`, `/api/tailor`, `/api/improve-bullet`, `/api/cover-letter`) prin sliding window zilnic, cu limite per plan.
 - Plan-aware behavior: `recruiting` ramane nelimitat pentru a nu bloca adminul; `pro` si `free` au cap-uri explicite pe endpoint.
 - Rutele de create/export resume folosesc acum acelasi email hint pentru rezolvare plan, astfel GOD MODE ramane stabil inclusiv pe export-uri.

@@ -76,10 +76,10 @@ describe('claimAnonymousScan', () => {
     const { claimAnonymousScan } = await import('@/lib/anonymous-scan-claim')
     results.push({ data: { id: SCAN }, error: null }, { data: { id: SCAN, posthog_distinct_id: null }, error: null })
 
-    const claim = await claimAnonymousScan({ userId: 'user_1', scanId: null, email: 'ioana.stan@gmail.com', emailVerified: true })
+    const claim = await claimAnonymousScan({ userId: 'user_1', scanId: null, email: 'user@example.com', emailVerified: true })
 
     expect(claim).toEqual({ scanId: SCAN, by: 'email', analyticsDistinctId: null })
-    expect(calls).toContainEqual(['eq', ['email', 'ioana.stan@gmail.com']])
+    expect(calls).toContainEqual(['eq', ['email', 'user@example.com']])
   })
 
   it('never interpolates an email with filter-syntax characters into the scan-id filter', async () => {
