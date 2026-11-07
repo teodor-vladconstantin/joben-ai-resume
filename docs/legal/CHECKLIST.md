@@ -19,10 +19,11 @@ Joben nu este declarat "100% conform". Documentele de mai jos sunt un punct de p
 4. Confirmă secretele `CRON_SECRET` / `PROD_APP_URL` și rulează workflow-ul de retenție o dată.
 5. Stripe Dashboard: URL termeni `https://joben.eu/ro/terms`; verifică textul de renunțare la retragere pentru Pass.
 6. Programează avocat (LAWYER-QUESTIONS.md) și contabil (TAX-QUESTIONS.md).
-7. Decide mutarea Supabase în UE (SUPABASE-EU-MIGRATION.md).
+7. Supabase: mutat în UE pe 2026-11-07 (vezi SUPABASE-EU-MIGRATION.md). Proiectul vechi `ResumeAIMax` (us-east-1) rămâne neatins; pune-l pe pauză după ~7 zile de funcționare stabilă. Actualizează și `.env.local` local la valorile proiectului nou.
 8. Revizuiește diff-ul `Withdrawal` și cu avocatul înainte de PR merge.
 
 ## Adăugat ulterior
+- Automatizare: la fiecare schimbare legală (intrare nouă în `LEGAL_CHANGELOG`) toți utilizatorii primesc un email o singură dată și li se cere reacceptarea (docs/legal/LEGAL-CHANGE-PROCESS.md). Migrația `20261107120000_add_legal_notice_deliveries.sql` e aplicată în proiectul EU.
 - Anonimizare opțională a contactului (email, telefon, linkuri) înainte de scoring: `AI_REDACT_CONTACT=true` (analyze și ATS checker). Activează după ce compari scorurile pe câteva CV-uri; numele și adresa nu sunt redactate.
 - Export PDF în Settings (`/api/account/export?format=pdf`), rezumat lizibil; JSON rămâne copia completă.
 - Migrațiile au fost aplicate în producție (inclusiv `legal_acceptances`).

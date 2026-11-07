@@ -5,7 +5,7 @@ Verificat 2026-11-07 pe paginile oficiale ale furnizorilor (citate scurte, făr�
 | Procesator | DPA incorporat automat? | Acțiune | Transfer declarat de furnizor | Pagină oficială |
 |---|---|---|---|---|
 | Anthropic | Da: DPA "incorporated into these Terms by reference" (Commercial Terms §C) | Niciuna. Verifică ZDR și dacă modelul e "covered". | SCC 2021/914 (Module 2/3) | anthropic.com/legal/data-processing-addendum |
-| Supabase | Da: face parte din Terms of Service; acceptarea Termenilor are efectul semnării SCC (§12.2) | Niciuna pentru DPA. Importator: Supabase Pte. Ltd. | SCC 2021/914 | supabase.com/legal/dpa |
+| Supabase | Da: face parte din Terms of Service; acceptarea Termenilor are efectul semnării SCC (§12.2) | Niciuna pentru DPA. Datele sunt acum în eu-central-1 (Frankfurt). Importator: Supabase Pte. Ltd. | SCC 2021/914 | supabase.com/legal/dpa |
 | Clerk | Da: "incorporated into and forms part of the Agreement" | Niciuna (Termenii Clerk nu au fost citiți integral). | DPF (certificat), SCC ca rezervă | clerk.com/legal/dpa |
 | Stripe | Da: incorporat prin referință în acord | Niciuna; Data Transfers Addendum inclus. | DPF, SCC, UK IDTA | stripe.com/legal/dpa |
 | Resend | Da, obligatoriu la intrarea în acord; copie executată în dashboard | Descarcă copia din dashboard și arhiveaz-o. | DPF, SCC | resend.com/legal/dpa |

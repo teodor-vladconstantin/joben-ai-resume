@@ -13,6 +13,7 @@ export const OTHER_OWNED_TABLES = [
   { table: 'email_events', column: 'user_clerk_id' },
   { table: 'product_events', column: 'user_clerk_id' },
   { table: 'legal_acceptances', column: 'user_clerk_id' },
+  { table: 'legal_notice_deliveries', column: 'user_clerk_id' },
   { table: 'anonymous_scans', column: 'claimed_by' },
   // Both sides of a referral: who this user invited and who invited them.
   { table: 'referrals', column: 'referrer_id' },

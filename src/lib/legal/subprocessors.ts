@@ -23,7 +23,7 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     name: 'Supabase',
     purpose: { ro: 'Bază de date a aplicației', en: 'Application database' },
     data: { ro: 'Cont, CV-uri, scrisori, analize, evenimente de produs', en: 'Account, CVs, cover letters, analyses, product events' },
-    location: { ro: 'AWS, regiunea US-East (SUA)', en: 'AWS, US-East region (USA)' },
+    location: { ro: 'AWS, regiunea eu-central-1 (Germania, UE)', en: 'AWS, eu-central-1 region (Germany, EU)' },
   },
   {
     name: 'Clerk',

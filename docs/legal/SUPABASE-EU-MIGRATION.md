@@ -1,5 +1,9 @@
 # Runbook: mutarea Supabase în regiune UE
 
+**Stare: EFECTUAT 2026-11-07.** Proiect nou `joben-eu` (ref `lqspalmezsjpuxxsuscy`, AWS eu-central-1 Frankfurt) în organizația "Duku's projects". Schema = cele 32 de migrații rulate în SQL editor (înregistrate în `supabase_migrations.schema_migrations`), datele copiate tabel cu tabel (17 tabele, numere de rânduri identice, inclusiv 48 de utilizatori), variabilele `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` înlocuite în Vercel (Production, Preview, Development) și producția redeploy-ată. Verificat: o scriere de test prin `joben.eu` a ajuns în proiectul EU și nu în cel vechi. Proiectul vechi (`vdgjxejunpfxvnpxyazq`, us-east-1) este păstrat intact ca rollback; pune-l pe pauză după ~7 zile și apoi șterge-l.
+
+Mai jos rămâne planul original, pentru referință.
+
 Motiv: proiectul actual este în AWS us-east-1; toate CV-urile ies din SEE. O regiune UE (ex. eu-central-1 Frankfurt) simplifică transferurile. Regiunea unui proiect Supabase nu se schimbă pe loc: se creează un proiect nou și se migrează datele. Nu am acces la dashboard; pașii sunt pentru owner. Notă din memoria proiectului: redenumește `.env.local` înainte de comenzi `supabase` și nu folosi `--debug`.
 
 ## Pregătire

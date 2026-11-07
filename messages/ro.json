@@ -948,7 +948,7 @@
       "metaTitle": "Politica de confidențialitate",
       "metaDescription": "Cum prelucrează Joben datele tale personale și datele din CV: scopuri, temeiuri legale, destinatari, termene de păstrare și drepturile tale conform RGPD.",
       "heading": "Politica de Confidențialitate",
-      "lastUpdated": "6 noiembrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "intro": "Această politică explică ce date prelucrăm când folosești Joben, de ce le prelucrăm, cu cine le partajăm, cât timp le păstrăm și ce drepturi ai.",
       "breadcrumbLabel": "Politica de Confidențialitate",
       "footerPrefix": "Citește ",
@@ -969,11 +969,11 @@
         },
         {
           "title": "4. Cu cine partajăm datele",
-          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS SUA-Est)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate.\n\nLista furnizorilor, cu scopul și locația fiecăruia, se află pe pagina Subprocesatori din subsolul site-ului."
+          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS eu-central-1, Germania)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate.\n\nLista furnizorilor, cu scopul și locația fiecăruia, se află pe pagina Subprocesatori din subsolul site-ului."
         },
         {
           "title": "5. Transferuri în afara Spațiului Economic European",
-          "content": "Unii furnizori (Supabase, Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle) prelucrează date în Statele Unite sau în alte state din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
+          "content": "Unii furnizori (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle). Supabase stochează datele în Germania (UE); accesul de asistență din afara SEE se bazează pe clauzele contractuale standard prelucrează date în Statele Unite sau în alte state din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
         },
         {
           "title": "6. Cât timp păstrăm datele",
@@ -1017,7 +1017,7 @@
       "metaTitle": "Termeni și condiții",
       "metaDescription": "Termenii și condițiile Joben: folosirea serviciului, planuri și plăți, dreptul de retragere, utilizarea AI, răspunderea și soluționarea litigiilor.",
       "heading": "Termeni și Condiții",
-      "lastUpdated": "22 octombrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "intro": "Te rugăm să citești acești termeni înainte de a folosi Joben. Ei formează contractul dintre tine și TETA ABC SRL.",
       "breadcrumbLabel": "Termeni și Condiții",
       "footerPrefix": "Citește ",
@@ -1223,7 +1223,7 @@
       "metaTitle": "Politica de rambursare și dreptul de retragere | Joben",
       "metaDescription": "Cum te retragi dintr-un contract Joben în 14 zile, cum funcționează rambursarea și ce se întâmplă cu Pass-ul Interviu și cu abonamentele.",
       "heading": "Politica de rambursare și dreptul de retragere",
-      "lastUpdated": "6 noiembrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "intro": "Această pagină explică dreptul tău de retragere de 14 zile, cum îl exerciți și cum rambursăm sumele. Face parte din Termenii și Condițiile.",
       "breadcrumbLabel": "Rambursări și retragere",
       "footerPrefix": "Citește ",
@@ -1261,7 +1261,7 @@
       ]
     },
     "subprocessors": {
-      "lastUpdated": "6 noiembrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "metaTitle": "Subprocesatori și furnizori de date | Joben",
       "metaDescription": "Lista furnizorilor care prelucrează date personale pentru Joben, cu scopul, datele și locația fiecăruia.",
       "heading": "Subprocesatori și furnizori de date",
