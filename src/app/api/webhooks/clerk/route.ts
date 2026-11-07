@@ -255,7 +255,7 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
         user_clerk_id: id,
         doc_version: consentFields.tos_version,
         source: 'signup',
-        ip_hash: consentFields.signup_ip_hash ?? null,
+        ip_hash: consentFields.signup_ip_hash && consentFields.signup_ip_hash !== 'unknown' ? consentFields.signup_ip_hash : null,
         accepted_at: consentFields.tos_accepted_at,
       })
       if (acceptanceError) {
