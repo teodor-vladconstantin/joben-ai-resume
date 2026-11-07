@@ -1,20 +1,20 @@
-# Checklist DPA cu procesatorii (acțiune manuală)
+# Checklist DPA cu procesatorii
 
-Pentru fiecare: (1) DPA acceptat/semnat și arhivat, (2) mecanism de transfer (DPF/SCC), (3) lista subprocesatorilor, (4) regiune setată, (5) notificare incident. Bifează și notează data.
+Verificat 2026-11-07 pe paginile oficiale ale furnizorilor (citate scurte, fără semnătură necesară acolo unde DPA face parte din termeni). Nu este aviz juridic. Pentru fiecare: DPA incorporat sau acceptat, mecanism de transfer, regiune.
 
-| Procesator | DPA | Cum se obține | Regiune/transfer de verificat | Stare |
+| Procesator | DPA incorporat automat? | Acțiune | Transfer declarat de furnizor | Pagină oficială |
 |---|---|---|---|---|
-| Anthropic | Commercial Terms + DPA | Console / termenii comerciali | SUA; verifică ZDR și dacă modelul folosit e "covered" | [ ] |
-| Supabase | DPA | dashboard org > Legal / supabase.com/legal/dpa | proiect în us-east-1; vezi SUPABASE-EU-MIGRATION.md | [ ] |
-| Clerk | DPA | clerk.com/legal/dpa | SUA, DPF | [ ] |
-| Stripe | DPA incorporat în Services Agreement | Dashboard > Settings > Compliance | rol dublu (procesator + operator) | [ ] |
-| Resend | DPA | resend.com/legal/dpa | regiune cont (SUA/UE) | [ ] |
-| Upstash | DPA | upstash.com/trust | alege regiune UE pentru Redis | [ ] |
-| Vercel | DPA | vercel.com/legal/dpa | funcții în regiune UE (fra1) dacă e posibil | [ ] |
-| Oracle Cloud (VPS) | DPA | contract OCI | regiunea VPS, retenția fișierelor temporare | [ ] |
-| Sentry | DPA | sentry.io/legal/dpa | instanța UE | [ ] |
-| PostHog | DPA | posthog.com/dpa | instanța UE | [ ] |
-| Google (GA4/GTM) | Data Processing Terms | Admin GA4 > Data collection | retenție 14 luni, anonimizare IP | [ ] |
-| Contabil | acord de confidențialitate/DPA | cu contabilul | acces la facturi | [ ] |
+| Anthropic | Da: DPA "incorporated into these Terms by reference" (Commercial Terms §C) | Niciuna. Verifică ZDR și dacă modelul e "covered". | SCC 2021/914 (Module 2/3) | anthropic.com/legal/data-processing-addendum |
+| Supabase | Da: face parte din Terms of Service; acceptarea Termenilor are efectul semnării SCC (§12.2) | Niciuna pentru DPA. Importator: Supabase Pte. Ltd. | SCC 2021/914 | supabase.com/legal/dpa |
+| Clerk | Da: "incorporated into and forms part of the Agreement" | Niciuna (Termenii Clerk nu au fost citiți integral). | DPF (certificat), SCC ca rezervă | clerk.com/legal/dpa |
+| Stripe | Da: incorporat prin referință în acord | Niciuna; Data Transfers Addendum inclus. | DPF, SCC, UK IDTA | stripe.com/legal/dpa |
+| Resend | Da, obligatoriu la intrarea în acord; copie executată în dashboard | Descarcă copia din dashboard și arhiveaz-o. | DPF, SCC | resend.com/legal/dpa |
+| Vercel | Parțial: DPA vizează planurile Enterprise și Pro; Hobby nu e menționat | Joben este pe Hobby: cere DPA în scris la suport sau treci pe Pro. [DE VERIFICAT DE AVOCAT] | SCC 2021 | vercel.com/legal/dpa |
+| Sentry | Nu: acceptare electronică explicită | **Acțiune manuală:** acceptă DPA din Sentry (articolul "How do I sign your Data Processing Addendum"). | DPF, SCC | sentry.io/legal/dpa |
+| PostHog | Nedeterminat (pagina nu a putut fi citită) | Verifică în Settings > Organization sau cere DPA. | De confirmat | posthog.com/dpa |
+| Google (GA4 prin GTM) | Nu automat: acceptare prin clic în contul GA4 | **Acțiune manuală:** GA4 Admin > Account settings > Data processing terms: acceptă. | SCC/alte | business.safety.google |
+| Upstash | Nedeterminat (PDF) | Citește trust.upstash.com/dpa și confirmă. | De confirmat | upstash.com/trust/dpa.pdf |
+| Oracle Cloud (VPS) | Necitibil (HTTP 403) | Citește OCI DPA în consola Oracle. | De confirmat | oracle.com/legal/data-processing-agreement |
+| Contabil | Acord de confidențialitate | Cu contabilul. | n/a | n/a |
 
-Arhivă recomandată: folder privat `legal/dpa/` în afara repo-ului, cu PDF și data acceptării.
+Prioritate: Sentry, GA4 și Vercel (Hobby), apoi PostHog, Upstash, Oracle. Arhivă: folder privat `legal/dpa/` în afara repo-ului.
