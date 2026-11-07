@@ -20,8 +20,14 @@ export type Messages = {
     logIn: string
     getStartedFree: string
     createNew: string
+    features: string
+    guides: string
+    logInCta: string
+    checkCv: string
+    menu: string
   }
   Home: {
+    heroKeywords: string
     heroPrefix: string
     heroRotatingWords: string[]
     heroSuffix: string
@@ -71,6 +77,17 @@ export type Messages = {
     faqSubheading: string
     faqOpen: string
     faqClose: string
+    landing: {
+      pill: string
+      ctaSecondary: string
+      trust: string[]
+      how: { eyebrow: string; title: string; steps: { title: string; text: string }[] }
+      features: { eyebrow: string; title: string; items: { title: string; text: string }[] }
+      why: { eyebrow: string; title: string; items: { title: string; text: string }[] }
+      pricingMore: string
+      faqMore: string
+      cta: { title: string; text: string }
+    }
   }
   Pricing: {
     heading: string
@@ -101,6 +118,12 @@ export type Messages = {
       emailGeneric: string
       emailNetwork: string
     }
+    steps: { upload: string; scan: string; result: string }
+    scanningMessages: string[]
+    scanningTitle: string
+    scanningHint: string
+    stepOf: string
+    appCta: string
     wantRewriting: string
     proPrice: string
     proPricePeriod: string
@@ -173,6 +196,7 @@ export type Messages = {
     companyHeading: string
     companyBody: string // {legalName} {cui} {regCom} {address}
   }
+  ResumeWizard: Record<string, unknown>
   Grade: {
     labels: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
     descriptions: Record<'Poor' | 'Fair' | 'Good' | 'Excellent', string>
@@ -217,6 +241,10 @@ export type Messages = {
       noResumesYet: string
       createAnother: string
       createNew: string
+      nameColumn: string
+      typeColumn: string
+      updatedColumn: string
+      scoreColumn: string
     }
     weeklyGoals: {
       title: string
@@ -261,6 +289,8 @@ export type Messages = {
     tagline: string
     productHeading: string
     legalHeading: string
+    companyHeading: string
+    companyLinks: { href: string; label: string }[]
     productLinks: { href: string; label: string }[]
     legalLinks: { href: string; label: string }[]
     salBadgeAlt: string
@@ -276,9 +306,20 @@ export type Messages = {
     acceptAll: string
     settingsLink: string
   }
+  Withdrawal: Record<
+    | 'metaTitle' | 'metaDescription' | 'heading' | 'intro' | 'nameLabel' | 'emailLabel' | 'contractLabel'
+    | 'contractPlaceholder' | 'withdrawButton' | 'reviewTitle' | 'reviewBody' | 'confirmButton' | 'backButton'
+    | 'doneTitle' | 'doneBody' | 'error' | 'termsPrefix' | 'termsLink' | 'termsSuffix',
+    string
+  >
   Legal: {
     privacy: LegalPolicy
     terms: LegalPolicy
+    refunds: LegalPolicy
+    subprocessors: LegalPolicy & {
+      tableHeaders: { name: string; purpose: string; data: string; location: string }
+      optionalLabel: string
+    }
     cookies: LegalPolicy & {
       necessaryHeading: string
       necessaryBody: string

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Navbar } from '@/components/ui/Navbar'
+import { AppNav } from '@/components/shell/AppNav'
 import { ProfileCompletion } from '@/components/dashboard/ProfileCompletion'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { WeeklyGoals } from '@/components/dashboard/WeeklyGoals'
@@ -9,12 +8,15 @@ import { RecentDocuments } from '@/components/dashboard/RecentDocuments'
 import { currentUser } from '@clerk/nextjs/server'
 import { Plus, FileSearch, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 import { getMessages, getTranslations } from 'next-intl/server'
 
 import { getLatestClaimedAtsScan, getLatestReviewSummary, getRecentDocuments, getUserDashboardStats } from '@/lib/actions/db'
 import { AtsScanCard } from '@/components/dashboard/AtsScanCard'
 import { AtsScanCardPending } from '@/components/dashboard/AtsScanCardPending'
 import { MobileHandoffCard } from '@/components/dashboard/MobileHandoffCard'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
+import { getOnboardingState } from '@/lib/onboarding/actions'
 import { selectAtsScanCardState } from '@/lib/ats-scan-card'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
@@ -70,6 +72,7 @@ export default async function DashboardPage({
   const { upgrade, pass } = await searchParams
   const messages = (await getMessages({ locale })) as unknown as Messages
   const d = messages.Dashboard
+  const tNav = await getTranslations({ locale, namespace: 'Nav' })
   const tGrade = await getTranslations({ locale, namespace: 'Grade' })
   const gradeLabel = (grade: string | undefined | null, fallback: string) =>
     grade && grade in messages.Grade.labels ? tGrade(`labels.${grade}`) : fallback
@@ -87,6 +90,7 @@ export default async function DashboardPage({
     upgrade === 'success' && pass === '14d' && user?.id ? await getPassNoticeText(user.id, locale) : null
 
   const stats = await getUserDashboardStats(userId)
+  const onboarding = await getOnboardingState()
   const recentDocs = await getRecentDocuments(userId)
   const latestReview = await getLatestReviewSummary(userId)
   const atsScanCard = selectAtsScanCardState({
@@ -120,10 +124,10 @@ export default async function DashboardPage({
         return (
           <Link key={index} href={action.href} className={`${
             action.isPrimary
-              ? 'bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong)'
-              : 'bg-(--surface) border border-(--border) text-(--foreground) hover:border-(--accent)'
-          } p-6 font-bold flex items-center justify-between transition-colors duration-150 ease-out`} suppressHydrationWarning>
-            <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-(--muted)'}`} />
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'bg-card rounded-lg border border-border text-foreground hover:border-primary shadow-card'
+          } p-5 font-medium flex items-center justify-between transition-colors duration-150 ease-out`} suppressHydrationWarning>
+            <span>{action.label}</span> <Icon className={`w-6 h-6 ${action.isPrimary ? '' : 'text-muted-foreground'}`} />
           </Link>
         );
       })}
@@ -131,50 +135,56 @@ export default async function DashboardPage({
   )
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
+    <div className="min-h-screen flex flex-col">
+      <AppNav />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
-          <div className="mb-8" suppressHydrationWarning>
-            <h1 className="text-3xl font-bold text-(--foreground) mb-2">{greeting}, {firstName}</h1>
-            <p className="text-(--muted)">{d.subGreeting}</p>
+        <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" suppressHydrationWarning>
+            <div>
+              <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{greeting}, {firstName}</h1>
+              <p className="text-muted-foreground">{d.subGreeting}</p>
+            </div>
+            <Link href="/resumes/new" className={`w-full justify-center sm:w-auto ${buttonVariants('primary', 'md')}`}>
+              <Plus className="size-4" /> {tNav('createNew')}
+            </Link>
           </div>
 
           {passNoticeText ? (
-            <p role="status" className="mb-8 border-l-2 border-(--accent) bg-(--surface) px-4 py-3 text-sm text-(--foreground)">
+            <p role="status" className="mb-8 border-l-2 border-primary bg-card px-4 py-3 text-sm text-foreground">
               {passNoticeText}
             </p>
           ) : null}
           {isNewUser && user?.id && <MobileHandoffCard />}
-          {atsScanCard.kind === 'card' && <AtsScanCard scan={atsScanCard.scan} locale={locale} />}
+          {atsScanCard.kind === 'card' && (
+            <div data-tour="dashboard-ats">
+              <AtsScanCard scan={atsScanCard.scan} locale={locale} />
+            </div>
+          )}
           {atsScanCard.kind === 'pending' && <AtsScanCardPending />}
-          <ProfileCompletion stats={stats} />
+          <ProfileCompletion stats={stats} dismissed={onboarding.checklistDismissedAt !== null} />
           {isNewUser && quickActions}
-          <ReferralCard className="mb-8" />
+          <div data-tour="dashboard-referral"><ReferralCard className="mb-8" /></div>
           {!isNewUser && <RedeemCodeCard currentPlan={currentPlan} />}
           {!isNewUser && <StatCards stats={stats} />}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Industry Benchmark */}
-            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-2">{d.industryBenchmark.title}</h3>
-              <p className="text-sm text-(--muted) mb-6">{d.industryBenchmark.description}</p>
+            <div className="bg-card p-6 rounded-lg border border-border" suppressHydrationWarning>
+              <h3 className="text-base font-semibold text-foreground mb-2">{d.industryBenchmark.title}</h3>
+              <p className="text-sm text-muted-foreground mb-6">{d.industryBenchmark.description}</p>
               {hasReviewData ? (
                 <BenchmarkChart userScore={totalScore} />
               ) : (
-                <div className="h-48 flex items-center justify-center border border-dashed border-(--border) text-(--muted) text-sm">
+                <div className="h-48 flex items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground text-sm">
                   {d.industryBenchmark.noData}
                 </div>
               )}
             </div>
 
             {/* Score Breakdown */}
-            <div className="bg-(--surface) p-6 border border-(--border)" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-6">{d.scoreBreakdown.title}</h3>
+            <div className="bg-card p-6 rounded-lg border border-border" suppressHydrationWarning>
+              <h3 className="text-base font-semibold text-foreground mb-6">{d.scoreBreakdown.title}</h3>
               {hasReviewData ? (
                 <>
                   <div className="space-y-5">
@@ -184,23 +194,23 @@ export default async function DashboardPage({
                        return (
                          <div key={i}>
                            <div className="flex justify-between gap-3 text-sm mb-1">
-                             <span className="text-(--foreground)">{item.label}</span>
-                             <span className="text-(--muted) font-mono tabular-nums">{score}/{item.max}</span>
+                             <span className="text-foreground">{item.label}</span>
+                             <span className="text-muted-foreground tabular-nums">{score}/{item.max}</span>
                            </div>
-                           <div className="w-full bg-(--border) h-1 mb-1">
-                             <div className="bg-(--accent) h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
+                           <div className="w-full bg-border h-1 mb-1">
+                             <div className="bg-primary h-1" style={{ width: `${Math.min((score/item.max)*100, 100)}%` }}></div>
                            </div>
-                             {isWarning && <p className="text-xs text-(--foreground) border-l-2 border-(--foreground) pl-1.5">{d.scoreBreakdown.warningMatch}</p>}
+                             {isWarning && <p className="text-xs text-foreground border-l-2 border-foreground pl-1.5">{d.scoreBreakdown.warningMatch}</p>}
                          </div>
                        );
                      })}
                   </div>
-                  <p className="mt-4 text-xs text-(--muted)">{d.scoreBreakdown.latestGradePrefix}{gradeLabel(latestReview?.grade, d.scoreBreakdown.unknownGrade)}</p>
-                  <Link href="/ai-review" className="inline-block mt-2 text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.scoreBreakdown.cta}</Link>
+                  <p className="mt-4 text-xs text-muted-foreground">{d.scoreBreakdown.latestGradePrefix}{gradeLabel(latestReview?.grade, d.scoreBreakdown.unknownGrade)}</p>
+                  <Link href="/ai-review" className="inline-block mt-2 text-foreground text-sm font-medium border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">{d.scoreBreakdown.cta}</Link>
                 </>
               ) : (
                 <div className="min-h-50 grid place-items-center">
-                  <div className="w-full border border-dashed border-(--border) px-4 py-10 text-center text-sm text-(--muted)">
+                  <div className="w-full rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
                     {d.scoreBreakdown.noData}
                   </div>
                 </div>
@@ -214,21 +224,21 @@ export default async function DashboardPage({
           {/* Bottom cards: 3-wide normally, 2-wide for isNewUser since Weekly Goals is hidden */}
           <div className={`grid grid-cols-1 ${isNewUser ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
             {/* Your Score */}
-            <div className="bg-(--surface) p-6 border border-(--border) flex flex-col" suppressHydrationWarning>
-              <h3 className="text-lg font-bold text-(--foreground) mb-6 w-full text-left">{d.yourScore.title}</h3>
+            <div className="bg-card p-6 rounded-lg border border-border flex flex-col" suppressHydrationWarning>
+              <h3 className="text-base font-semibold text-foreground mb-6 w-full text-left">{d.yourScore.title}</h3>
               {hasReviewData ? (
                 <>
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none tabular-nums text-(--foreground)">{totalScore}</span>
-                  <div className="mt-3 h-1 w-full bg-(--border)">
-                    <div className="h-full bg-(--accent)" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
+                  <span className="text-(length:--text-score) font-bold leading-none tabular-nums text-foreground">{totalScore}</span>
+                  <div className="mt-3 h-1 w-full bg-border">
+                    <div className="h-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, totalScore))}%` }} />
                   </div>
-                  <p className="mt-4 text-(--foreground) font-bold text-sm">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
-                  <p className="text-(--muted) text-xs mb-4">{latestReviewLabel}</p>
-                  <Link href="/ai-review" className="inline-block self-start text-(--foreground) text-sm font-medium border-b border-transparent hover:border-(--accent) transition-colors duration-150 ease-out">{d.yourScore.cta}</Link>
+                  <p className="mt-4 text-foreground font-bold text-sm">{gradeLabel(latestReview?.grade, tGrade('labels.Good'))}</p>
+                  <p className="text-muted-foreground text-xs mb-4">{latestReviewLabel}</p>
+                  <Link href="/ai-review" className="inline-block self-start text-foreground text-sm font-medium border-b border-transparent hover:border-primary transition-colors duration-150 ease-out">{d.yourScore.cta}</Link>
                 </>
               ) : (
-                <div className="w-full grow flex flex-col items-center justify-center text-center text-(--muted)">
-                  <span className="font-mono text-(length:--text-score) font-bold leading-none text-(--border)">{d.yourScore.noDataSub}</span>
+                <div className="w-full grow flex flex-col items-center justify-center text-center text-muted-foreground">
+                  <span className="text-(length:--text-score) font-bold leading-none text-border">{d.yourScore.noDataSub}</span>
                   <p className="mt-4 text-sm">{d.yourScore.noData}</p>
                 </div>
               )}
@@ -239,6 +249,7 @@ export default async function DashboardPage({
           </div>
 
           <RecentDocuments recentDocs={recentDocs} />
+          <TourLauncher tourId="dashboard" />
         </main>
       </div>
     </div>

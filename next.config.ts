@@ -29,27 +29,24 @@ if (missing.length > 0) {
 // 'unsafe-eval' is development-only. X-XSS-Protection is intentionally
 // omitted: it is deprecated and can introduce XSS in legacy browsers.
 //
-// Clerk supports a CNAME proxy (e.g. `clerk.joben.eu`) that does NOT match
-// the default `*.clerk.com` / `*.clerk.accounts.dev` wildcards. Production
-// uses such a proxy, so we read it from env so any future re-host only
-// needs a Vercel env update — no code change.
-const CLERK_PROXY_DOMAIN =
-  process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
-  process.env.NEXT_PUBLIC_CLERK_FRONTEND_API ||
-  'https://clerk.joben.eu'
-const CLERK_PROXY_HOST = (() => {
-  try {
-    const u = new URL(CLERK_PROXY_DOMAIN)
-    return `${u.protocol}//${u.host}`
-  } catch {
-    return 'https://clerk.joben.eu'
-  }
-})()
+// Clerk loads from the clerk.joben.eu CNAME (allowed below). An in-app proxy
+// would need clerkMiddleware `frontendApiProxy` plus `proxyUrl`, not a plain rewrite.
+
+// The PostHog toolbar (opened from the PostHog app on this site) loads from the app
+// host and sends its own telemetry to internal-cf. Visitor tracking goes through
+// /ingest (same origin) and needs none of these.
+const POSTHOG_TOOLBAR_HOSTS = [
+  'https://eu.posthog.com',
+  'https://eu-assets.i.posthog.com',
+  'https://internal-cf.posthog.com',
+]
 
 const SECURITY_HEADERS = [
   // Pages and the Markdown variant share URLs (see src/proxy.ts), so caches must key on Accept.
   { key: 'Vary', value: 'Accept' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Lets the Sentry browser profiler start (Chrome only).
+  { key: 'Document-Policy', value: 'js-profiling' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.stripe.com")' },
@@ -79,7 +76,9 @@ const SECURITY_HEADERS = [
         ...(process.env.NODE_ENV === 'production' ? [] : ["'unsafe-eval'"]),
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
-        CLERK_PROXY_HOST,
+        // Clerk frontend API CNAME (serves clerk-js and the auth API).
+        'https://clerk.joben.eu',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -90,7 +89,8 @@ const SECURITY_HEADERS = [
         "'unsafe-inline'",
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
-        CLERK_PROXY_HOST,
+        'https://clerk.joben.eu',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://www.googletagmanager.com',
@@ -100,11 +100,11 @@ const SECURITY_HEADERS = [
         "'self'",
         'https://*.clerk.com',
         'https://*.clerk.accounts.dev',
-        CLERK_PROXY_HOST,
+        'https://clerk.joben.eu',
         'https://*.supabase.co',
         'wss://*.supabase.co',
         'https://eu.i.posthog.com',
-        'https://eu-assets.i.posthog.com',
+        ...POSTHOG_TOOLBAR_HOSTS,
         'https://*.ingest.sentry.io',
         'https://api.stripe.com',
         'https://www.googletagmanager.com',
@@ -116,7 +116,7 @@ const SECURITY_HEADERS = [
         'frame-src',
         "'self'",
         'https://*.clerk.com',
-        CLERK_PROXY_HOST,
+        'https://clerk.joben.eu',
         'https://challenges.cloudflare.com',
         'https://js.stripe.com',
         'https://hooks.stripe.com',
@@ -192,13 +192,24 @@ const nextConfig: NextConfig = {
       )
     )
     return [
+      // www is not a served host: one canonical origin. HTTP -> HTTPS is handled by the platform (plus HSTS above).
+      {
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: 'www.joben.eu' }],
+        destination: 'https://joben.eu/:path*',
+        statusCode: 301 as const,
+      },
       ...cvRedirects,
       // English cover letters moved from the Romanian segment to /cover-letter.
       { source: '/en/scrisoare-intentie/:slug', destination: '/en/cover-letter/:slug', statusCode: 301 as const },
       { source: '/:locale(ro|en)/cv/:path*', destination: '/:locale/resume-examples', statusCode: 301 as const },
       // The instant checker was folded into the single ATS checker (lead magnet).
-      { source: '/:locale(ro|en)/verificare-cv', destination: '/:locale/free-ats-checker', statusCode: 301 as const },
-      { source: '/verificare-cv', destination: '/ro/free-ats-checker', statusCode: 301 as const },
+      { source: '/ro/verificare-cv', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      { source: '/en/verificare-cv', destination: '/en/free-ats-checker', statusCode: 301 as const },
+      { source: '/verificare-cv', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      // Romanian slug only exists under /ro; English keeps /free-ats-checker.
+      { source: '/ro/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
+      { source: '/en/verificare-cv-ats', destination: '/en/free-ats-checker', statusCode: 301 as const },
     ]
   },
   async rewrites() {

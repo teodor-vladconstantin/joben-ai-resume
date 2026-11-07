@@ -5,4 +5,6 @@ import * as Sentry from '@sentry/nextjs'
 export function enableSentryReplay(): void {
   if (typeof window === 'undefined' || Sentry.getReplay()) return
   Sentry.addIntegration(Sentry.replayIntegration())
+  // Same consent gate: profiling samples the visitor's JS call stacks.
+  Sentry.addIntegration(Sentry.browserProfilingIntegration())
 }

@@ -16,11 +16,28 @@ export const posthogAi = new PostHog(token || 'phc_disabled', {
   disabled: !token,
 })
 
-// Tracing must never fail the AI call it observes.
+// Spread into every request made through the wrapper. The client-level
+// privacyMode above already redacts prompts and completions (the wrapper reads
+// client.options.privacyMode); the per-request flag keeps that true even if the
+// client option stops being honored after a library upgrade.
+export const POSTHOG_AI_PRIVATE = { posthogPrivacyMode: true } as const
+
+const FLUSH_TIMEOUT_MS = 1500
+
+// Tracing must never fail or slow the AI call it observes: a flush that errors
+// or takes longer than FLUSH_TIMEOUT_MS is abandoned and the caller carries on.
 export async function flushPostHogAi(): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    await posthogAi.flush()
+    await Promise.race([
+      posthogAi.flush(),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, FLUSH_TIMEOUT_MS)
+      }),
+    ])
   } catch {
     // observability only
+  } finally {
+    if (timer) clearTimeout(timer)
   }
 }

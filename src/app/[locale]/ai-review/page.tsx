@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Navbar } from '@/components/ui/Navbar'
+import { AppNav } from '@/components/shell/AppNav'
 import { buttonVariants } from '@/components/ui/Button'
 import { History, Star, TrendingUp, Upload, Target, Gauge, Search, Loader2 } from 'lucide-react'
 import { AILoadingState } from '@/components/ui/AILoadingState'
@@ -12,6 +11,7 @@ import { UpgradeBanner } from '@/components/ui/UpgradeBanner'
 import { importPdfClientSide } from '@/lib/pdf-import'
 import { resumeToPlainText } from '@/lib/resume-text'
 import { useServerError } from '@/hooks/useServerError'
+import { TourLauncher } from '@/components/onboarding/TourLauncher'
 
 type ResumeItem = {
   id: string
@@ -216,41 +216,38 @@ export default function AIReviewPage() {
   )
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
+    <div className="min-h-screen flex flex-col">
+      <AppNav />
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
 
-        <main className="grow pt-24 lg:pt-10 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
+        <main className="grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-(--container-max) mx-auto w-full">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-(--foreground) mb-2">{t('pageTitle')}</h1>
-            <p className="text-(--muted)">{t('pageSubtitle')}</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t('pageTitle')}</h1>
+            <p className="text-muted-foreground">{t('pageSubtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) mb-6 md:grid-cols-4 md:divide-y-0 md:divide-x">
+          <div className="grid grid-cols-1 rounded-lg overflow-hidden border border-border divide-y divide-border mb-6 md:grid-cols-4 md:divide-y-0 md:divide-x">
             <div className="p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Target className="w-4 h-4 text-(--muted)" /> {t('targetScoreLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{targetScore}<span className="font-sans text-sm text-(--muted) ml-2">+ {t('hireZoneSuffix')}</span></p>
+              <p className="text-xs text-muted-foreground flex items-center gap-2"><Target className="w-4 h-4 text-muted-foreground" /> {t('targetScoreLabel')}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{targetScore}<span className="font-sans text-sm text-muted-foreground ml-2">+ {t('hireZoneSuffix')}</span></p>
             </div>
             <div className="p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Star className="w-4 h-4 text-(--muted)" /> {t('yourBestLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{bestScore}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-2"><Star className="w-4 h-4 text-muted-foreground" /> {t('yourBestLabel')}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{bestScore}</p>
             </div>
             <div className="p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><History className="w-4 h-4 text-(--muted)" /> {t('reviewsLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{reviews.length}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-2"><History className="w-4 h-4 text-muted-foreground" /> {t('reviewsLabel')}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{reviews.length}</p>
             </div>
             <div className="p-4">
-              <p className="text-xs text-(--muted) flex items-center gap-2"><Gauge className="w-4 h-4 text-(--muted)" /> {t('avgScoreLabel')}</p>
-              <p className="font-mono text-3xl font-bold tabular-nums text-(--foreground) mt-2">{averageScore}<span className="font-sans text-sm text-(--muted)"> {t('outOf100')}</span></p>
+              <p className="text-xs text-muted-foreground flex items-center gap-2"><Gauge className="w-4 h-4 text-muted-foreground" /> {t('avgScoreLabel')}</p>
+              <p className="text-3xl font-bold tabular-nums text-foreground mt-2">{averageScore}<span className="font-sans text-sm text-muted-foreground"> {t('outOf100')}</span></p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <div className="border border-(--border) bg-(--surface) p-5">
-              <h3 className="text-(--foreground) font-bold mb-4 flex items-center gap-2"><Upload className="w-4 h-4 text-(--muted)" /> {t('uploadNewResume')}</h3>
+            <div className="rounded-lg border border-border bg-card p-5">
+              <h3 className="text-foreground font-bold mb-4 flex items-center gap-2"><Upload className="w-4 h-4 text-muted-foreground" /> {t('uploadNewResume')}</h3>
               <input
                 ref={uploadInputRef}
                 type="file"
@@ -266,11 +263,12 @@ export default function AIReviewPage() {
               />
               <div
                 role="button"
+                data-tour="ai-upload"
                 tabIndex={0}
-                className={`border border-dashed p-8 text-center transition-colors duration-150 ease-out ${
+                className={`rounded-lg border border-dashed p-8 text-center transition-colors duration-150 ease-out ${
                   isDraggingUpload
-                    ? 'border-(--accent) bg-(--accent-muted)'
-                    : 'border-(--border) hover:border-(--accent)'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary'
                 }`}
                 onClick={() => uploadInputRef.current?.click()}
                 onKeyDown={(e) => {
@@ -296,31 +294,33 @@ export default function AIReviewPage() {
                   }
                 }}
               >
-                <Upload className="mx-auto w-6 h-6 text-(--muted) mb-3" />
-                <p className="text-(--foreground) font-semibold">{t('dropzoneText')}</p>
-                <p className="text-xs text-(--muted)">{t('dropzoneHint')}</p>
+                <Upload className="mx-auto w-6 h-6 text-muted-foreground mb-3" />
+                <p className="text-foreground font-semibold">{t('dropzoneText')}</p>
+                <p className="text-xs text-muted-foreground">{t('dropzoneHint')}</p>
                 {isProcessingUpload ? (
-                  <p className="mt-3 inline-flex items-center gap-2 text-sm text-(--muted)">
+                  <p className="mt-3 inline-flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" /> {t('readingPdf')}
                   </p>
                 ) : null}
                 {!isProcessingUpload && uploadedFileName ? (
-                  <p className="mt-3 text-sm text-(--foreground)">{t('readyFile', { fileName: uploadedFileName })}</p>
+                  <p className="mt-3 text-sm text-foreground">{t('readyFile', { fileName: uploadedFileName })}</p>
                 ) : null}
               </div>
               <textarea
+                data-tour="ai-jd"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                className="mt-4 w-full h-24 bg-(--surface) border border-(--border) rounded-sm px-4 py-2 text-(--foreground) resize-none transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+                className="mt-4 w-full h-24 bg-card border border-border rounded-sm px-4 py-2 text-foreground resize-none transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
                 placeholder={t('jobDescriptionPlaceholder')}
               />
-              {error ? <p className="text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2 mt-3">{error}</p> : null}
+              {error ? <p className="text-sm text-foreground border-l-2 border-foreground pl-2 mt-3">{error}</p> : null}
               {isAnalyzing ? (
                 <div className="mt-4">
                   <AILoadingState stage="analyzing" />
                 </div>
               ) : (
                 <button
+                  data-tour="ai-start"
                   onClick={() => void handleAnalyze()}
                   disabled={isProcessingUpload}
                   className={`mt-4 inline-flex items-center gap-2 disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
@@ -330,37 +330,37 @@ export default function AIReviewPage() {
               )}
             </div>
 
-            <div className="border border-(--border) bg-(--surface) p-5">
-              <h3 className="text-(--foreground) font-bold mb-3">{t('industryBenchmark')}</h3>
-              <div className="h-56 border border-(--border) flex items-center justify-center">
+            <div className="rounded-lg border border-border bg-card p-5">
+              <h3 className="text-foreground font-bold mb-3">{t('industryBenchmark')}</h3>
+              <div className="h-56 rounded-lg border border-border flex items-center justify-center">
                 <div className="text-center">
-                  <TrendingUp className="mx-auto h-8 w-8 text-(--muted) mb-2" />
-                  <p className="text-(--muted)">{t('benchmarkStat')}</p>
-                  <p className="text-(--foreground) text-sm mt-2 font-semibold">{t('seeHowToImprove')}</p>
+                  <TrendingUp className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">{t('benchmarkStat')}</p>
+                  <p className="text-foreground text-sm mt-2 font-semibold">{t('seeHowToImprove')}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="border border-(--border) bg-(--surface) p-5">
+          <div data-tour="ai-history" className="rounded-lg border border-border bg-card p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-              <h3 className="text-xl font-bold text-(--foreground)">{t('reviewExistingResume')}</h3>
+              <h3 className="text-xl font-bold text-foreground">{t('reviewExistingResume')}</h3>
               <div className="relative w-full max-w-sm">
-                <Search className="w-4 h-4 text-(--muted) absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('searchPlaceholder')}
-                  className="w-full rounded-sm border border-(--border) bg-(--surface) py-2 pl-10 pr-3 text-sm text-(--foreground) transition-colors duration-150 ease-out focus:border-(--accent) focus:outline-none"
+                  className="w-full rounded-sm border border-border bg-card py-2 pl-10 pr-3 text-sm text-foreground transition-colors duration-150 ease-out focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
             {isLoadingList || visibleResumes.length === 0 ? (
-              <div className="border border-dashed border-(--border) p-6 text-center text-sm text-(--muted)">
+              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                 {isLoadingList ? t('loadingResumes') : t('noResumesFound')}
               </div>
             ) : (
-              <div className="grid grid-cols-1 border border-(--border) divide-y divide-(--border) md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-3">
+              <div className="grid grid-cols-1 rounded-lg overflow-hidden border border-border divide-y divide-border md:grid-cols-2 md:divide-y-0 md:divide-x lg:grid-cols-3">
                 {visibleResumes.map((resume) => {
                   const resumeReviews = reviews
                     .filter((review) => review.resume_id === resume.id)
@@ -371,13 +371,13 @@ export default function AIReviewPage() {
                   const latestScore = scoreHistory.at(-1) ?? Number(latestReview?.score || 0)
                   return (
                     <div key={resume.id} className="p-4">
-                      <p className="text-(--foreground) font-semibold truncate">{resume.title || t('untitled')}</p>
+                      <p className="text-foreground font-semibold truncate">{resume.title || t('untitled')}</p>
                       {hasReviews ? (
-                        <p className="text-xs text-(--muted) mt-1 flex items-center gap-1 flex-wrap">
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 flex-wrap">
                           {t('scoreValue', { score: latestScore })}
                         </p>
                       ) : (
-                        <p className="text-xs text-(--muted) mt-1">{t('notReviewedYet')}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t('notReviewedYet')}</p>
                       )}
                       <div className="mt-3 flex gap-2">
                         {hasReviews && latestReview && (
@@ -402,6 +402,7 @@ export default function AIReviewPage() {
               </div>
             )}
           </div>
+          <TourLauncher tourId="aiReview" />
         </main>
       </div>
 

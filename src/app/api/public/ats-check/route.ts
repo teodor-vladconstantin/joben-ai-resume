@@ -1,4 +1,5 @@
 import { Anthropic } from '@posthog/ai/anthropic'
+import * as Sentry from '@sentry/nextjs'
 import { z } from 'zod'
 import { randomUUID } from 'crypto'
 import { NextResponse } from 'next/server'
@@ -8,6 +9,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { maybeRedactContact } from '@/lib/security/redact-contact'
 import { hasExpectedSignature } from '@/lib/security/file-signature'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
@@ -17,8 +19,8 @@ import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { normalizeAtsScanScores } from '@/lib/ai-review-validation'
 import { extractTextFromPdf, PdfTextExtractError } from '@/lib/pdf-text-extract'
 import { extractTextFromDocx, DocxTextExtractError } from '@/lib/docx-text-extract'
-import { capturePostHogEvent, toBrowserDistinctId } from '@/lib/posthog-server'
-import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
+import { capturePostHogEvent, toBrowserDistinctId, toBrowserSessionId } from '@/lib/posthog-server'
+import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { sendAnonymousScanReportEmailIfEligible } from '@/lib/anonymous-scan-emails'
 import { toAnonScanEmailLocale, type AnonScanEmailLocale } from '@/lib/resend'
 
@@ -30,11 +32,13 @@ export const maxDuration = 30
 // into `anonymous_scans` (see migration 20260816000000). Uploaded PDF/DOCX
 // bytes and extracted text are never written to disk or a DB.
 const ANTHROPIC_TIMEOUT_MS = 30_000
-const anthropic = new Anthropic({
+// Sentry gen_ai spans: tokens, latency and errors only. Resume text and
+// completions stay out (same policy as posthogAi privacyMode).
+const anthropic = Sentry.instrumentAnthropicAiClient(new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
   posthog: posthogAi,
-})
+}), { recordInputs: false, recordOutputs: false })
 const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5'
 
 // SECURITY: align with the in-builder upload guard (5 MB). Both formats are
@@ -238,6 +242,7 @@ export async function POST(req: Request) {
     // visitor accepted analytics cookies, so its presence IS the consent
     // signal. It links AI traces and server-side events to the browser history.
     const browserDistinctId = toBrowserDistinctId(formData.get('distinctId'))
+    const browserSessionId = toBrowserSessionId(formData.get('sessionId'))
     const file = formData.get('file')
     if (!(file instanceof File)) {
       return withDeviceCookie(
@@ -312,7 +317,7 @@ export async function POST(req: Request) {
       fileBytes = null
     }
 
-    const safeResumeText = sanitizeForPrompt(rawText, { maxChars: MAX_RESUME_CHARS })
+    const safeResumeText = maybeRedactContact(sanitizeForPrompt(rawText, { maxChars: MAX_RESUME_CHARS }))
     rawText = ''
 
     if (safeResumeText.length < MIN_RESUME_CHARS) {
@@ -389,6 +394,7 @@ export async function POST(req: Request) {
         ...(browserDistinctId ? { posthogDistinctId: browserDistinctId } : {}),
         posthogTraceId: traceId,
         posthogProperties: { $ai_session_id: `ats-${deviceId}` },
+        ...POSTHOG_AI_PRIVATE,
       }) as { content: Array<{ type: string; text?: string }> }
 
       await flushPostHogAi()
@@ -494,7 +500,7 @@ export async function POST(req: Request) {
     }
     await capturePostHogEvent(
       browserDistinctId
-        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId } }
+        ? { distinctId: browserDistinctId, event: 'anonymous_ats_check_completed', properties: { ...scanStats, scanId, ...(browserSessionId ? { $session_id: browserSessionId } : {}) } }
         : { distinctId: `anon:${ipHash || 'unknown'}`, event: 'anonymous_ats_check_completed', properties: scanStats }
     )
 

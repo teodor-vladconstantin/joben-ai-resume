@@ -1,7 +1,7 @@
 "use client"
 
-import { Link } from '@/i18n/navigation'
 import { useAuth } from '@clerk/nextjs'
+import { AppLink } from '@/components/ui/AppLink'
 import { pushGtmEvent } from '@/lib/gtm-events'
 
 type AuthAwareSignupLinkProps = {
@@ -24,12 +24,12 @@ export function AuthAwareSignupLink({
   const href = isLoaded && isSignedIn ? signedInHref : signedOutHref
 
   return (
-    <Link
+    <AppLink
       href={href}
       className={className}
       onClick={ctaId ? () => pushGtmEvent('cta_click', { cta_id: ctaId, destination: href }) : undefined}
     >
       {children}
-    </Link>
+    </AppLink>
   )
 }

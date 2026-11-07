@@ -181,7 +181,7 @@ function ToolbarButton({ children, onPress, label, shortcut }: ToolbarButtonProp
       aria-label={`${label} (${shortcut})`}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onPress}
-      className="inline-flex h-6 w-6 items-center justify-center border border-(--border) bg-(--surface) text-(--muted) transition-colors duration-150 ease-out hover:border-(--accent) hover:text-(--foreground) focus:border-(--accent) focus:outline-none"
+      className="inline-flex h-6 w-6 items-center justify-center border border-border bg-card text-muted-foreground transition-colors duration-150 ease-out hover:border-primary hover:text-foreground focus:border-primary focus:outline-none"
     >
       {children}
     </button>

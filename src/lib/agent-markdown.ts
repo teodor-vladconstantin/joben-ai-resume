@@ -1,4 +1,5 @@
 import { siteConfig } from '@/lib/content'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import messagesRo from '../../messages/ro.json'
 import messagesEn from '../../messages/en.json'
 
@@ -9,7 +10,7 @@ export type MdLocale = (typeof LOCALES)[number]
 // under a locale (or at the root) is a 404.
 const KNOWN_SEGMENTS = new Set([
   'pricing', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sign-in', 'sign-up',
-  'resume-examples', 'free-ats-checker', 'scrisoare-intentie', 'cover-letter', 'ghiduri', 'guides', 'glosar', 'glossary', 'sabloane-cv', 'cv-templates', 'comparatii', 'compare', 'dashboard', 'resumes', 'cover-letters',
+  'resume-examples', 'free-ats-checker', 'verificare-cv-ats', 'scrisoare-intentie', 'cover-letter', 'ghiduri', 'guides', 'glosar', 'glossary', 'sabloane-cv', 'cv-templates', 'comparatii', 'compare', 'dashboard', 'resumes', 'cover-letters',
   'ai-review', 'feedback', 'settings', 'sentry-example-page',
 ])
 
@@ -62,7 +63,7 @@ export function homeMarkdown(locale: MdLocale): string {
 ## Pages
 
 - [Pricing](${base}/pricing)
-- [Free ATS checker](${base}/free-ats-checker)
+- [Free ATS checker](${base}${atsCheckerPath(locale)})
 - [Resume examples](${base}/resume-examples)
 - [About](${base}/about)
 - [Contact](${base}/contact)

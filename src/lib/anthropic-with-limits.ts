@@ -1,6 +1,7 @@
 import { Anthropic } from '@posthog/ai/anthropic'
+import * as Sentry from '@sentry/nextjs'
 import type AnthropicOriginal from '@anthropic-ai/sdk'
-import { flushPostHogAi, posthogAi } from '@/lib/posthog-ai'
+import { flushPostHogAi, POSTHOG_AI_PRIVATE, posthogAi } from '@/lib/posthog-ai'
 import { randomUUID } from 'crypto'
 import {
   checkAndReserveTokens,
@@ -20,11 +21,13 @@ import { withCurrentDateContext } from '@/lib/ai-system-prompt'
 // SECURITY: CLAUDE.md High #6 — cap the provider call at 30 s so a slow
 // upstream cannot tie up Next.js request handlers indefinitely.
 const ANTHROPIC_TIMEOUT_MS = 30_000
-const anthropic = new Anthropic({
+// Sentry gen_ai spans: tokens, latency and errors only. Resume text and
+// completions stay out (same policy as posthogAi privacyMode).
+const anthropic = Sentry.instrumentAnthropicAiClient(new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
   timeout: ANTHROPIC_TIMEOUT_MS,
   posthog: posthogAi,
-})
+}), { recordInputs: false, recordOutputs: false })
 const primaryClaudeModel = 'claude-haiku-5-5'
 const fallbackClaudeModel = 'claude-haiku-4-5-20251001'
 const defaultClaudeModel = process.env.ANTHROPIC_MODEL || primaryClaudeModel
@@ -93,6 +96,9 @@ function buildResetMonthLabel(resetAt: string): string {
 }
 
 function throwRateLimit(payload: RateLimitError): never {
+  Sentry.metrics.count('ai.limit_hit', 1, {
+    attributes: { limit_type: payload.limitType, feature: payload.feature ?? 'none' },
+  })
   throw new RateLimitExceededError(payload)
 }
 
@@ -127,6 +133,7 @@ async function createMessage(
     posthogDistinctId: observability.distinctId,
     posthogTraceId: observability.traceId,
     posthogProperties: { $ai_session_id: `process-${process.pid}` },
+    ...POSTHOG_AI_PRIVATE,
   }) as Message
 
   await flushPostHogAi()
@@ -294,6 +301,11 @@ export async function callAnthropicWithLimits(params: {
   const usedOutputTokens = response.usage?.output_tokens ?? 0
 
   await recordTokenUsage(params.userId, usedInputTokens, usedOutputTokens)
+
+  // Low-cardinality attributes only (feature, direction); never user ids.
+  const feature = params.feature ?? 'none'
+  Sentry.metrics.distribution('ai.tokens', usedInputTokens, { attributes: { feature, direction: 'input' } })
+  Sentry.metrics.distribution('ai.tokens', usedOutputTokens, { attributes: { feature, direction: 'output' } })
 
   if (params.feature) {
     await incrementFeatureCounter(params.userId, params.feature)

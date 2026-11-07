@@ -6,9 +6,7 @@ import { getRedisClient } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 
-// Bump when Terms/Privacy copy materially changes so historical consent
-// records stay attributable to the version the user actually agreed to.
-const TOS_VERSION = '2026-10-22'
+import { LEGAL_VERSION as TOS_VERSION } from '@/lib/legal/versions'
 
 const SIGNUP_CONSENT_RATE_LIMIT_PER_HOUR = 6
 

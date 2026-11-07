@@ -3,11 +3,11 @@ import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { TrackedLink } from '@/components/ui/TrackedLink'
 import { Navbar } from '@/components/ui/Navbar'
-import { Eyebrow } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
+import { PageHero } from '@/components/marketing/section'
 import { buttonVariants } from '@/components/ui/Button'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
+import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { siteConfig } from '@/lib/content'
 import { GUIDE_SEGMENT, guidePath, guidesOfKind, kindOf, type Guide, type GuideKind } from '@/data/guides'
 import { routing, type AppLocale } from '@/i18n/routing'
@@ -141,34 +141,36 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
   }
 
   return (
-    <div className="min-h-screen bg-(--background) text-(--foreground)">
+    <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={jsonLd} />
       <Navbar />
 
-      <main className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto pt-32 pb-24 space-y-12">
-        <header className="space-y-4">
-          <Eyebrow>{kindCopy.eyebrow}</Eyebrow>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-(--foreground)">{content.title}</h1>
-          <p className="text-xs text-(--muted) font-mono">
-            {copy.updated}: <time dateTime={guide.dateModified}>{guide.dateModified}</time>
-          </p>
-        </header>
-
-        <Card radius="lg" className="p-6 sm:p-8 space-y-2">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-(--muted)">{copy.answerLabel}</p>
-          <p className="text-lg leading-relaxed text-(--foreground)">{content.answer}</p>
-        </Card>
+      <main>
+        <PageHero
+          eyebrow={kindCopy.eyebrow}
+          title={content.title}
+          intro={
+            <span className="text-sm">
+              {copy.updated}: <time dateTime={guide.dateModified}>{guide.dateModified}</time>
+            </span>
+          }
+        />
+        <div className="mx-auto w-full max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
+        <div className="rounded-lg border border-border border-l-4 border-l-primary bg-card p-6 sm:p-8 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">{copy.answerLabel}</p>
+          <p className="text-lg leading-relaxed">{content.answer}</p>
+        </div>
 
         {content.sections.map((section) => (
           <section key={section.heading} className="space-y-4">
-            <h2 className="text-2xl font-bold text-(--foreground)">{section.heading}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{section.heading}</h2>
             {section.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="text-(--muted) leading-relaxed">
+              <p key={paragraph} className="text-muted-foreground leading-relaxed">
                 {paragraph}
               </p>
             ))}
             {section.items && (
-              <ul className="list-disc pl-5 space-y-2 text-(--muted) leading-relaxed">
+              <ul className="list-disc pl-5 space-y-2 text-muted-foreground leading-relaxed">
                 {section.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -178,24 +180,24 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
         ))}
 
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-(--foreground)">{copy.faqHeading}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{copy.faqHeading}</h2>
           {content.faq.map((item) => (
-            <div key={item.question} className="space-y-2">
-              <h3 className="font-bold text-(--foreground)">{item.question}</h3>
-              <p className="text-(--muted) leading-relaxed">{item.answer}</p>
+            <div key={item.question} className="rounded-lg border border-border bg-card p-5 space-y-2">
+              <h3 className="font-semibold text-foreground">{item.question}</h3>
+              <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
             </div>
           ))}
         </section>
 
-        <div className="p-6 rounded-2xl border border-(--border) bg-(--surface) flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-border bg-card p-6 shadow-card sm:flex-row sm:items-center">
           <div>
-            <h2 className="font-bold text-lg text-(--foreground)">{copy.ctaHeading}</h2>
-            <p className="text-xs text-(--muted) mt-1">{copy.ctaBody}</p>
+            <h2 className="text-lg font-bold">{copy.ctaHeading}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{copy.ctaBody}</p>
           </div>
           <TrackedLink
-            href="/free-ats-checker"
+            href={atsCheckerPath(locale)}
             ctaId={`${kind}_ats_cta`}
-            className={`shrink-0 ${buttonVariants('primary', 'md')} text-sm font-semibold flex items-center gap-1.5`}
+            className={`shrink-0 ${buttonVariants('primary', 'md')}`}
           >
             <span>{copy.ctaButton}</span>
             <ArrowRight className="h-4 w-4" />
@@ -203,23 +205,24 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
         </div>
         {related.length > 0 && (
           <nav aria-label={kindCopy.related} className="space-y-3">
-            <h2 className="text-lg font-bold text-(--foreground)">{kindCopy.related}</h2>
+            <h2 className="text-lg font-bold text-foreground">{kindCopy.related}</h2>
             <ul className="space-y-2">
               {related.map((g) => (
                 <li key={g.content[locale].slug}>
-                  <Link href={guidePath(locale, g)} className="text-(--foreground) underline underline-offset-4">
+                  <Link href={guidePath(locale, g)} className="text-foreground underline underline-offset-4 hover:text-primary">
                     {g.content[locale].title}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href={`/${GUIDE_SEGMENT[kind][locale]}`} className="text-(--muted) underline underline-offset-4">
+                <Link href={`/${GUIDE_SEGMENT[kind][locale]}`} className="text-muted-foreground underline underline-offset-4">
                   {kindCopy.hub}
                 </Link>
               </li>
             </ul>
           </nav>
         )}
+        </div>
       </main>
     </div>
   )

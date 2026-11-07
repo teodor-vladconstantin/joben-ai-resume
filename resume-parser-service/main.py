@@ -392,7 +392,7 @@ def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     # If header explicitly mentions projects, it's a project
     if header_text and PROJECT_SECTION_PATTERN.search(header_text):
         if verbose:
-            logger.info(f"    -> YES (header mentions project): '{entry_name}'")
+            logger.info(f"    -> YES (header mentions project)")
         return True
 
     # If this entry looks like a full work experience (company + role) and has dates,
@@ -402,14 +402,14 @@ def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     has_dates = bool(entry.get("start_date") or entry.get("end_date"))
     if has_company and has_role and has_dates:
         if verbose:
-            logger.info(f"    -> NO (full work exp): '{entry_name}' (company={has_company}, role={has_role}, dates={has_dates})")
+            logger.info(f"    -> NO (full work exp): (company={has_company}, role={has_role}, dates={has_dates})")
         return False
 
     # Candidate text for signals
     candidate_text = " ".join(filter(None, [header_text, description_text]))
     if not candidate_text.strip():
         if verbose:
-            logger.info(f"    -> NO (no text): '{entry_name}'")
+            logger.info(f"    -> NO (no text)")
         return False
 
     # If description explicitly mentions projects keywords and we also detect technologies or a URL,
@@ -420,7 +420,7 @@ def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
         has_verbs = has_project_verbs(candidate_text)
         result = has_url or has_tech or has_verbs
         if verbose:
-            logger.info(f"    -> {'YES' if result else 'NO'} (desc mentions projects, url={has_url}, tech={has_tech}, verbs={has_verbs}): '{entry_name}'")
+            logger.info(f"    -> {'YES' if result else 'NO'} (desc mentions projects, url={has_url}, tech={has_tech}, verbs={has_verbs})")
         return result
 
     # If description contains strong project verbs (built, developed, prototype) and we detect
@@ -430,11 +430,11 @@ def looks_like_project_entry(entry: dict, verbose: bool = False) -> bool:
     has_tech = bool(extract_technologies(candidate_text))
     if has_verbs and (has_url or has_tech):
         if verbose:
-            logger.info(f"    -> YES (verbs + tech/url): '{entry_name}' (verbs={has_verbs}, url={has_url}, tech={has_tech})")
+            logger.info(f"    -> YES (verbs + tech/url): (verbs={has_verbs}, url={has_url}, tech={has_tech})")
         return True
 
     if verbose:
-        logger.info(f"    -> NO (no signals): '{entry_name}'")
+        logger.info(f"    -> NO (no signals)")
     return False
 
 
@@ -1402,7 +1402,7 @@ async def parse_resume(
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
 
     try:
-        logger.info(f"Parsing file: {file.filename}")
+        logger.info("Parsing uploaded file")
         documents = await parser.aload_data(
             io.BytesIO(content),
             extra_info={"file_name": file.filename},

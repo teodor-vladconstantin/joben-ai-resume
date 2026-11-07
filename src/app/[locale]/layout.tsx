@@ -2,13 +2,15 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { Poppins, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { localeAlternates } from '@/lib/locale-alternates'
 import { clerkAppearance } from '@/lib/clerk-appearance'
+import { CLERK_PROXY_ENABLED, CLERK_PROXY_PATH } from '@/lib/clerk-proxy'
+import { APP_ORIGIN, SITE_ORIGIN } from '@/lib/app-origin'
 import { validateEnv } from '@/lib/env'
 import { siteConfig, BUILD_TIME } from '@/lib/content'
 import { organizationJsonLd } from '@/lib/structured-data'
@@ -17,11 +19,12 @@ import { ClientProviders } from '@/components/ClientProviders'
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
+import { TranslateSafeDom } from '@/components/TranslateSafeDom'
 import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
 validateEnv()
 
-const hankenGrotesk = Hanken_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-hanken-grotesk' })
+const poppins = Poppins({ subsets: ['latin', 'latin-ext'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-poppins' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-jetbrains-mono' })
 
 export function generateStaticParams() {
@@ -73,6 +76,11 @@ export async function generateMetadata({
       title,
       description,
       images: ['/og-image.png'],
+    },
+    verification: {
+      other: {
+        'msvalidate.01': '91BCBAAFCF33FC0C507005367378DAA3',
+      },
     },
   }
 }
@@ -158,9 +166,12 @@ export default async function RootLayout({
       signUpUrl={`/${locale}/sign-up`}
       signInFallbackRedirectUrl={`/${locale}/dashboard`}
       signUpFallbackRedirectUrl={`/${locale}/dashboard`}
+      proxyUrl={CLERK_PROXY_ENABLED ? CLERK_PROXY_PATH : undefined}
+      // Split hosts: sign-out on app.joben.eu returns to the marketing site.
+      {...(APP_ORIGIN && { afterSignOutUrl: SITE_ORIGIN, allowedRedirectOrigins: [APP_ORIGIN, SITE_ORIGIN] })}
     >
       <html lang={locale} suppressHydrationWarning>
-        <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} bg-(--background) text-(--foreground) min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
+        <body className={`${poppins.variable} ${jetbrainsMono.variable} bg-background text-foreground min-h-screen flex flex-col font-sans`} suppressHydrationWarning>
           <Script
             id="motion-init"
             strategy="beforeInteractive"
@@ -195,6 +206,7 @@ export default async function RootLayout({
             }}
           />
           <NextIntlClientProvider locale={locale}>
+            <TranslateSafeDom />
             <ClientProviders>
               {children}
             </ClientProviders>

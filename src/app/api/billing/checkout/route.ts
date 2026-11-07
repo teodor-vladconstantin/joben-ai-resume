@@ -8,7 +8,8 @@ import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { getStripeClient, isStripeConfigured } from '@/lib/stripe'
 import { checkoutRequestSchema } from '@/lib/validation/schemas'
-import { PASS_14D_PRICE_BANI } from '@/lib/content'
+import { PASS_14D_PRICE_CENTS } from '@/lib/content'
+import { APP_ORIGIN } from '@/lib/app-origin'
 
 export const runtime = 'nodejs'
 
@@ -147,8 +148,8 @@ export async function POST(req: Request) {
         ? { price: stripePriceId, quantity: 1 }
         : {
             price_data: {
-              currency: 'ron',
-              unit_amount: PASS_14D_PRICE_BANI,
+              currency: 'usd',
+              unit_amount: PASS_14D_PRICE_CENTS,
               product_data: { name: copy.name, description: copy.description },
             },
             quantity: 1,
@@ -158,7 +159,7 @@ export async function POST(req: Request) {
         mode: isPass ? 'payment' : 'subscription',
         line_items: [lineItem],
         locale,
-        success_url: `${appUrl}/${locale}/dashboard?upgrade=success${isPass ? '&pass=14d' : ''}`,
+        success_url: `${APP_ORIGIN || appUrl}/${locale}/dashboard?upgrade=success${isPass ? '&pass=14d' : ''}`,
         cancel_url: `${appUrl}/${locale}/pricing?upgrade=cancelled`,
         metadata: {
           userId,

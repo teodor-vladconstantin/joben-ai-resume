@@ -10,7 +10,7 @@ export function CookieSettingsLink() {
     <button
       type="button"
       onClick={openCookieSettings}
-      className="text-sm text-(--muted) transition-colors duration-150 ease-out hover:text-(--foreground)"
+      className="text-sm text-muted-foreground transition-colors duration-150 ease-out hover:text-foreground"
     >
       {t('settingsLink')}
     </button>

@@ -3,6 +3,17 @@ import createMiddleware from 'next-intl/middleware'
 import { NextResponse } from 'next/server'
 import { routing } from '@/i18n/routing'
 import { resolveMarkdownTarget, wantsMarkdown } from '@/lib/agent-markdown'
+import { CLERK_PROXY_ENABLED, CLERK_PROXY_PATH } from '@/lib/clerk-proxy'
+import { APP_ORIGIN, SHARED_COOKIE_DOMAIN, SITE_ORIGIN, isAppPath } from '@/lib/app-origin'
+
+// Two hosts, one deployment: joben.eu serves the marketing/SEO pages and
+// app.joben.eu the account pages. The split is active only when both origins
+// are configured and differ, so local dev and preview URLs stay single-host.
+const appHost = APP_ORIGIN ? new URL(APP_ORIGIN).host : ''
+const siteHost = SITE_ORIGIN ? new URL(SITE_ORIGIN).host : ''
+const splitHosts = Boolean(appHost && siteHost && appHost !== siteHost)
+// Shared parent domain (".joben.eu") so cookies set on one host reach the other.
+const cookieDomain = SHARED_COOKIE_DOMAIN
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -24,6 +35,23 @@ const isProtectedRoute = createRouteMatcher([
 const isUnlocalizedRoute = createRouteMatcher(['/api(.*)', '/parse(.*)', '/ingest(.*)', '/monitoring(.*)', '/md(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
+  if (splitHosts && req.method === 'GET' && !isUnlocalizedRoute(req)) {
+    const { pathname, search } = req.nextUrl
+    const host = req.headers.get('host')
+    if (host === siteHost && isAppPath(pathname)) {
+      return NextResponse.redirect(`${APP_ORIGIN}${pathname}${search}`)
+    }
+    if (host === appHost && !isAppPath(pathname)) {
+      // The app has no landing page: its root is the dashboard, which sends
+      // signed-out visitors to sign-in. Anything else is a marketing page.
+      const rootLocale = pathname.match(/^\/(ro|en)?\/?$/)
+      if (rootLocale) {
+        return NextResponse.redirect(`${APP_ORIGIN}/${rootLocale[1] ?? routing.defaultLocale}/dashboard`)
+      }
+      return NextResponse.redirect(`${SITE_ORIGIN}${pathname}${search}`)
+    }
+  }
+
   if (isProtectedRoute(req)) {
     // Redirect to our own embedded sign-in page, not Clerk's hosted portal.
     const { userId } = await auth()
@@ -61,12 +89,14 @@ export default clerkMiddleware(async (auth, req) => {
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60,
       path: '/',
+      domain: cookieDomain,
     })
   }
 
   return res
-})
+}, { frontendApiProxy: { enabled: CLERK_PROXY_ENABLED, path: CLERK_PROXY_PATH } })
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)'],
+  // /__clerk is listed on its own: its script URLs contain dots, which the first pattern skips.
+  matcher: ['/((?!_next|.*\\..*).*)', '/__clerk/(.*)'],
 }

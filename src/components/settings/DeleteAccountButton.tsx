@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useClerk, useReverification } from '@clerk/nextjs'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { APP_ORIGIN, SITE_ORIGIN, originHref } from '@/lib/app-origin'
 
 export function DeleteAccountButton() {
   const [open, setOpen] = useState(false)
@@ -14,6 +15,7 @@ export function DeleteAccountButton() {
   const [error, setError] = useState<string | null>(null)
   const { signOut } = useClerk()
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations('SettingsPage.dangerZone')
   // Prompts for re-verification when the server answers with a Clerk reverification error.
   const requestDelete = useReverification(() =>
@@ -32,8 +34,10 @@ export function DeleteAccountButton() {
       if (!response || !response.ok) {
         throw new Error('Deletion failed')
       }
-      await signOut()
-      router.push('/')
+      // The app host has no landing page, so with the split on the user ends on the marketing site.
+      const home = APP_ORIGIN && SITE_ORIGIN ? originHref(SITE_ORIGIN, locale, '/') : null
+      await signOut(home ? { redirectUrl: home } : undefined)
+      if (!home) router.push('/')
     } catch {
       setError(t('errorMessage'))
       setDeleting(false)
@@ -43,14 +47,14 @@ export function DeleteAccountButton() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-(--muted)">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Trash2 size={14} />
           {t('deleteAccountLabel')}
         </div>
         <Button
           variant="secondary"
           size="sm"
-          className="border-(--foreground)"
+          className="border-foreground"
           onClick={() => setOpen(true)}
         >
           {t('deleteAccountButton')}
@@ -58,10 +62,10 @@ export function DeleteAccountButton() {
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title={t('modalTitle')}>
-        <p className="text-sm text-(--muted)">
+        <p className="text-sm text-muted-foreground">
           {t('modalBody')}
         </p>
-        {error ? <p className="mt-3 text-sm text-(--foreground) border-l-2 border-(--foreground) pl-2">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-foreground border-l-2 border-foreground pl-2">{error}</p> : null}
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={deleting}>
             {t('cancel')}
@@ -69,7 +73,7 @@ export function DeleteAccountButton() {
           <Button
             variant="secondary"
             size="sm"
-            className="border-(--foreground)"
+            className="border-foreground"
             onClick={handleDelete}
             disabled={deleting}
           >

@@ -43,6 +43,12 @@ function emit(level: LogLevel, message: string, context?: LogContext) {
   }
 
   const line = JSON.stringify(payload)
+
+  // Structured Sentry log: the context keys become searchable attributes
+  // (requestId, userId, route, ...) and the log is linked to the active trace.
+  // Keep context to ids and counts; never put resume text or emails in it.
+  Sentry.logger[level](message, context)
+
   if (level === 'error') {
     console.error(line)
     // These are caught-and-handled errors (the client only ever sees the

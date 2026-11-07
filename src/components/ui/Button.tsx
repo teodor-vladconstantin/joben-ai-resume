@@ -1,40 +1,54 @@
 import * as React from 'react'
+import { Slot } from '@radix-ui/react-slot'
+import { cva } from 'class-variance-authority'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
-export type ButtonSize = 'sm' | 'md' | 'lg'
+import { cn } from '@/lib/cn'
 
-const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  // Accent only ever appears as a fill with the fixed --accent-ink text on
-  // top — not --foreground, which flips light/dark and would fail contrast
-  // in dark mode (see the --accent-ink comment in globals.css).
-  primary:
-    'bg-(--accent) text-(--accent-ink) hover:bg-(--accent-strong)',
-  secondary:
-    'bg-transparent text-(--foreground) border border-(--border) hover:border-(--accent)',
-  ghost:
-    'bg-transparent text-(--foreground)/75 hover:text-(--foreground)',
-}
+const variants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground shadow-card hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground shadow-card hover:bg-destructive/90',
+        outline: 'border border-input bg-background shadow-card hover:bg-accent hover:text-accent-foreground',
+        secondary: 'border border-border bg-secondary text-secondary-foreground hover:bg-secondary/70',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-brand underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-5 py-2',
+        sm: 'h-8 px-3 text-xs',
+        lg: 'h-12 px-8 text-base',
+        icon: 'h-9 w-9',
+      },
+    },
+    defaultVariants: { variant: 'default', size: 'default' },
+  },
+)
 
-const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: 'px-4 py-2 text-[13px] gap-1.5',
-  md: 'px-6 py-3 text-sm gap-2',
-  lg: 'px-8 py-4 text-lg gap-2',
-}
+// 'primary' and 'md' are the legacy names still used by older call sites; migrate them to default.
+export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'primary'
+export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon' | 'md'
 
-export function buttonVariants(variant: ButtonVariant = 'primary', size: ButtonSize = 'md'): string {
-  return `inline-flex items-center justify-center rounded-none font-medium transition-colors duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]}`
+export function buttonVariants(variant: ButtonVariant = 'default', size: ButtonSize = 'default', className?: string): string {
+  return variants({
+    variant: variant === 'primary' ? 'default' : variant,
+    size: size === 'md' ? 'default' : size,
+    className,
+  })
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
+  asChild?: boolean
 }
 
-export function Button({ variant = 'primary', size = 'md', className = '', ...props }: ButtonProps) {
-  return (
-    <button
-      className={`${buttonVariants(variant, size)} ${className}`.trim()}
-      {...props}
-    />
-  )
-}
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant, size, className, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'button'
+    return <Comp ref={ref} className={cn(buttonVariants(variant, size), className)} {...props} />
+  },
+)
+Button.displayName = 'Button'

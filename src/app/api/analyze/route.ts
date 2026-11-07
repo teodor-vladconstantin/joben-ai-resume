@@ -6,6 +6,7 @@ import {
   MessageParam,
 } from '@/lib/anthropic-with-limits'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
+import { maybeRedactContact } from '@/lib/security/redact-contact'
 import { clampAnalysisScores, verifyAnalysisAgainstSource } from '@/lib/ai-review-validation'
 import { stripFalsePositiveIssues } from '@/lib/ats-issue-guardrails'
 import { outputLanguageRule, RENDERED_TEXT_RULE, RESUME_LANGUAGE_RULE } from '@/lib/ai-system-prompt'
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
     // SECURITY: CLAUDE.md High #3 — neutralize prompt injection + hard cap.
     // 10k chopped long CVs mid-sentence; 15k stays under the estimator's
     // 4000-token resume budget (~16k chars).
-    const safeResume = sanitizeForPrompt(body.resumeText, { maxChars: 15_000 })
+    const safeResume = maybeRedactContact(sanitizeForPrompt(body.resumeText, { maxChars: 15_000 }))
     const safeJobDescription = sanitizeForPrompt(body.jobDescription, { maxChars: 10_000 })
 
     if (!safeResume) {

@@ -52,3 +52,15 @@ describe('checkRouteRateLimit failure modes', () => {
     vi.doUnmock('@/lib/ratelimit')
   })
 })
+
+describe('hashIp', () => {
+  it('is a 16-hex digest that changes with the secret and hides the raw IP', async () => {
+    const { hashIp } = await import('@/lib/security/route-rate-limit')
+    const plain = hashIp('203.0.113.9', undefined)
+    const keyed = hashIp('203.0.113.9', 'secret')
+    expect(plain).toMatch(/^[0-9a-f]{16}$/)
+    expect(keyed).toMatch(/^[0-9a-f]{16}$/)
+    expect(keyed).not.toBe(plain)
+    expect(hashIp('203.0.113.9', 'secret')).toBe(keyed)
+  })
+})
