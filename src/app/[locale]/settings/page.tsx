@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
-import { redirect } from '@/i18n/navigation'
+import { Link, redirect } from '@/i18n/navigation'
 import { AppNav } from '@/components/shell/AppNav'
 import { AccountUserButton } from '@/components/settings/AccountUserButton'
 import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
@@ -82,7 +82,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                   </div>
                   <Badge variant="muted">{t('managedByClerk')}</Badge>
                 </div>
-                <ExportDataButton label={t('account.exportData')} buttonLabel={t('account.exportDataButton')} />
+                <ExportDataButton label={t('account.exportData')} buttonLabel={t('account.exportDataButton')} pdfButtonLabel={t('account.exportDataPdfButton')} />
               </div>
             </div>
 
@@ -116,6 +116,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                     <ManageBillingButton hasSubscription={hasSubscription} />
                   </div>
                 ) : null}
+                <Link href="/withdrawal" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">{t('billing.withdraw')}</Link>
               </div>
             </div>
 

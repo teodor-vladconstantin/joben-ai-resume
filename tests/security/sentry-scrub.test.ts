@@ -32,3 +32,17 @@ describe('browser noise filters', () => {
     expect(matches(BROWSER_NOISE_URLS, 'app:///_next/static/chunks/main.js')).toBe(false)
   })
 })
+
+describe('scrubSentryEvent', () => {
+  it('strips body, cookies and credential headers', async () => {
+    const { scrubSentryEvent } = await import('@/lib/security/sentry-scrub')
+    const event = scrubSentryEvent({
+      request: { data: 'cv text', cookies: { a: 'b' }, headers: { Cookie: 'x', Authorization: 'y', 'User-Agent': 'ua' } },
+    } as never) as { request: { data: string; cookies: object; headers: Record<string, string> } }
+    expect(event.request.data).toBe('[Stripped]')
+    expect(event.request.cookies).toEqual({})
+    expect(event.request.headers.Cookie).toBe('[Stripped]')
+    expect(event.request.headers.Authorization).toBe('[Stripped]')
+    expect(event.request.headers['User-Agent']).toBe('ua')
+  })
+})

@@ -306,9 +306,20 @@ export type Messages = {
     acceptAll: string
     settingsLink: string
   }
+  Withdrawal: Record<
+    | 'metaTitle' | 'metaDescription' | 'heading' | 'intro' | 'nameLabel' | 'emailLabel' | 'contractLabel'
+    | 'contractPlaceholder' | 'withdrawButton' | 'reviewTitle' | 'reviewBody' | 'confirmButton' | 'backButton'
+    | 'doneTitle' | 'doneBody' | 'error' | 'termsPrefix' | 'termsLink' | 'termsSuffix',
+    string
+  >
   Legal: {
     privacy: LegalPolicy
     terms: LegalPolicy
+    refunds: LegalPolicy
+    subprocessors: LegalPolicy & {
+      tableHeaders: { name: string; purpose: string; data: string; location: string }
+      optionalLabel: string
+    }
     cookies: LegalPolicy & {
       necessaryHeading: string
       necessaryBody: string

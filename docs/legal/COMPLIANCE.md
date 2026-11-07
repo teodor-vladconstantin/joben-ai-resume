@@ -4,7 +4,7 @@ Last review: 2026-10-22. Copy lives in `messages/{ro,en}.json` under `Legal.*` a
 Not legal advice. Have a Romanian lawyer validate before relying on it.
 
 ## Framework applied
-- GDPR (EU) 2016/679, Law 190/2018 (age of digital consent 16), Law 506/2004 art. 4(5) cookies and art. 12 commercial email, Directive 2002/58/EC.
+- GDPR (EU) 2016/679, GDPR art. 8 (age of digital consent 16; Law 190/2018 sets no lower age, see SOURCES.md), Law 506/2004 art. 4(5) cookies and art. 12 commercial email, Directive 2002/58/EC.
 - Consumer: GEO 34/2014 (distance contracts, withdrawal 14 days), Directive 2019/770 (digital services conformity), Law 193/2000 + Directive 93/13 (unfair terms), ANPC / SAL (the EU ODR platform closed 2025-07-20).
 - AI Act art. 50 transparency (applies from 2026-08-02): users are told results come from an AI system.
 - ANSPDCP enforces art. 4(5) actively (2025-2026 fines of 5,000 to 30,000 lei for non-essential cookies without prior consent).

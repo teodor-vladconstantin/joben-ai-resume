@@ -17,6 +17,8 @@ export const RETENTION_RULES: readonly RetentionRule[] = [
   { table: 'webhook_events', days: 365 },
   { table: 'feedback', days: 730 },
   { table: 'social_leads', days: 90 },
+  // Proof of exercised withdrawal: general 3-year limitation period (Privacy section 6).
+  { table: 'withdrawal_requests', days: 1095 },
 ]
 
 export function retentionCutoff(days: number, now: Date = new Date()): string {

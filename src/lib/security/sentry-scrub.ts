@@ -47,5 +47,14 @@ export function scrubSentryEvent<T extends ErrorEvent | TransactionEvent>(event:
   if (event.request?.data) {
     event.request.data = '[Stripped]'
   }
+  if (event.request?.cookies) {
+    event.request.cookies = {}
+  }
+  if (event.request?.headers) {
+    const headers = event.request.headers as Record<string, string>
+    for (const name of Object.keys(headers)) {
+      if (/^(cookie|authorization|x-clerk-.*)$/i.test(name)) headers[name] = '[Stripped]'
+    }
+  }
   return event
 }

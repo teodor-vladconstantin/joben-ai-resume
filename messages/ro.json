@@ -429,7 +429,7 @@
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
     "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
-    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "consentLabel": "Am cel puțin 16 ani și sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
     "steps": {
       "upload": "Încărcare",
       "scan": "Scanare",
@@ -452,7 +452,7 @@
     "eyebrow": "Cont nou",
     "heading": "Creează-ți contul gratuit",
     "subheading": "Îți repari CV-ul, îl adaptezi pentru joburi și scrii scrisori de intenție, totul într-un singur loc.",
-    "consentLabel": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "consentLabel": "Am cel puțin 16 ani și sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
     "acceptToContinue": "Bifează căsuța de mai sus ca să continui la formularul de înregistrare.",
     "rateLimited": "Prea multe încercări din rețeaua ta. Încearcă din nou mai târziu."
   },
@@ -576,12 +576,20 @@
         "label": "Politica de Cookie-uri"
       },
       {
-        "href": "https://anpc.ro",
-        "label": "ANPC"
+        "href": "/refunds",
+        "label": "Rambursări și retragere"
       },
       {
-        "href": "https://ec.europa.eu/consumers/odr",
-        "label": "SOL (soluționarea online a litigiilor)"
+        "href": "/subprocessors",
+        "label": "Subprocesatori"
+      },
+      {
+        "href": "/withdrawal",
+        "label": "Retrage-te din contract"
+      },
+      {
+        "href": "https://anpc.ro",
+        "label": "ANPC"
       }
     ],
     "salBadgeAlt": "SAL (Soluționarea Alternativă a Litigiilor) - ANPC",
@@ -940,7 +948,7 @@
       "metaTitle": "Politica de confidențialitate",
       "metaDescription": "Cum prelucrează Joben datele tale personale și datele din CV: scopuri, temeiuri legale, destinatari, termene de păstrare și drepturile tale conform RGPD.",
       "heading": "Politica de Confidențialitate",
-      "lastUpdated": "22 octombrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "intro": "Această politică explică ce date prelucrăm când folosești Joben, de ce le prelucrăm, cu cine le partajăm, cât timp le păstrăm și ce drepturi ai.",
       "breadcrumbLabel": "Politica de Confidențialitate",
       "footerPrefix": "Citește ",
@@ -953,23 +961,23 @@
         },
         {
           "title": "2. Datele pe care le prelucrăm, scopurile și temeiurile legale",
-          "content": "Fiecare categorie de date are un scop și un temei legal precis:\n\n- Date de cont (adresa de email, prenume, nume, metoda de autentificare gestionată de Clerk, inclusiv numele, emailul și poza de profil primite de la Google dacă te autentifici cu Google, limba aleasă, data și versiunea Termenilor acceptați): creăm și securizăm contul și dovedim acceptarea Termenilor. Temei: executarea contractului (art. 6 alin. 1 lit. b RGPD) și interesul nostru legitim de a dovedi acceptarea termenilor (art. 6 alin. 1 lit. f).\n- Conținutul tău (CV-uri, scrisori de intenție, texte lipite în editor, fișiere încărcate pentru import, analize și rezultate AI): furnizăm funcțiile pentru care ai creat contul. Temei: executarea contractului.\n- Date de plată (ID client, abonament și plată în Stripe, planul ales, codurile promoționale folosite): procesăm plățile și păstrăm evidențele contabile. Numărul cardului este introdus direct la Stripe și nu ajunge la noi. Temei: executarea contractului și obligația legală de evidență contabilă (art. 6 alin. 1 lit. b și c).\n- Verificatorul ATS gratuit fără cont: fișierul CV este analizat în memorie și nu este salvat. Păstrăm scorul, raportul generat (categorii și probleme găsite), limba, un hash al adresei IP, un identificator aleatoriu al dispozitivului din cookie-ul jb_atsdid și, dacă o introduci, adresa de email. Scopuri: livrarea raportului, limita zilnică anti-abuz și asocierea raportului cu contul tău dacă îți creezi unul. Temei: măsuri la cererea ta înainte de contract (art. 6 alin. 1 lit. b) pentru raport, interes legitim pentru protecția împotriva abuzului (lit. f) și consimțământul tău pentru emailurile ulterioare descrise mai jos.\n- Emailuri de serviciu (confirmări, raport, facturi, notificări despre cont sau abonament): temei executarea contractului. Emailuri ulterioare către vizitatorii verificatorului ATS fără cont (până la 2, după 48 de ore și după 7 zile): temei consimțământul tău (art. 6 alin. 1 lit. a RGPD și art. 12 din Legea nr. 506/2004), exprimat la trimiterea adresei. Emailuri despre funcții similare către utilizatorii cu cont: temei interesul legitim și art. 12 alin. 2 din Legea nr. 506/2004. Fiecare email conține un link de dezabonare. După dezabonare păstrăm adresa într-o listă de suprimare ca să respectăm refuzul.\n- Programul de recomandări (codul de recomandare, legătura dintre persoana care invită și persoana invitată, data, zilele Pro acordate): acordăm recompensele și aplicăm limitele programului. Temei: executarea contractului și interesul legitim de a preveni abuzul.\n- Securitate și diagnosticare (jurnale tehnice, identificatori de cerere, mesaje de eroare, adresa IP în rapoartele de eroare, hash de IP pentru limitarea cererilor): protejăm serviciul, prevenim abuzul și remediem erori. Temei: interesul legitim (art. 6 alin. 1 lit. f) și obligația de securitate din art. 32 RGPD.\n- Analiză de utilizare și înregistrări ale sesiunii (PostHog, Google Analytics, Sentry Replay): înțelegem cum este folosit produsul. Temei: exclusiv consimțământul tău (art. 6 alin. 1 lit. a RGPD și art. 4 alin. 5 din Legea nr. 506/2004). Fără acord, aceste instrumente nu se încarcă.\n- Feedback și corespondență (adresa de email și mesajul pe care ni le trimiți): răspundem și îmbunătățim produsul. Temei: interesul legitim și, după caz, executarea contractului.\n\nDatele de cont sunt necesare pentru a crea un cont. Fără ele nu putem furniza serviciul. Analizele opționale și emailurile ulterioare din verificatorul ATS depind exclusiv de alegerea ta."
+          "content": "Fiecare categorie de date are un scop și un temei legal precis:\n\n- Date de cont (adresa de email, prenume, nume, metoda de autentificare gestionată de Clerk, inclusiv numele, emailul și poza de profil primite de la Google dacă te autentifici cu Google, limba aleasă, data și versiunea Termenilor acceptați): creăm și securizăm contul și dovedim acceptarea Termenilor. Temei: executarea contractului (art. 6 alin. 1 lit. b RGPD) și interesul nostru legitim de a dovedi acceptarea termenilor (art. 6 alin. 1 lit. f).\n- Conținutul tău (CV-uri, scrisori de intenție, texte lipite în editor, fișiere încărcate pentru import, analize și rezultate AI): furnizăm funcțiile pentru care ai creat contul. Temei: executarea contractului.\n- Date de plată (ID client, abonament și plată în Stripe, planul ales, codurile promoționale folosite): procesăm plățile și păstrăm evidențele contabile. Numărul cardului este introdus direct la Stripe și nu ajunge la noi. Temei: executarea contractului și obligația legală de evidență contabilă (art. 6 alin. 1 lit. b și c).\n- Verificatorul ATS gratuit fără cont: fișierul CV este analizat în memorie și nu este salvat. Păstrăm scorul, raportul generat (categorii și probleme găsite), limba, un hash al adresei IP, un identificator aleatoriu al dispozitivului din cookie-ul jb_atsdid și, dacă o introduci, adresa de email. Scopuri: livrarea raportului, limita zilnică anti-abuz și asocierea raportului cu contul tău dacă îți creezi unul. Temei: măsuri la cererea ta înainte de contract (art. 6 alin. 1 lit. b) pentru raport, interes legitim pentru protecția împotriva abuzului (lit. f) și consimțământul tău pentru emailurile ulterioare descrise mai jos.\n- Emailuri de serviciu (confirmări, raport, facturi, notificări despre cont sau abonament): temei executarea contractului. Emailuri ulterioare către vizitatorii verificatorului ATS fără cont (până la 2, după 48 de ore și după 7 zile): temei consimțământul tău (art. 6 alin. 1 lit. a RGPD și art. 12 din Legea nr. 506/2004), exprimat la trimiterea adresei. Emailuri despre funcții similare către utilizatorii cu cont: temei interesul legitim și art. 12 alin. 2 din Legea nr. 506/2004. Fiecare email conține un link de dezabonare. După dezabonare păstrăm adresa într-o listă de suprimare ca să respectăm refuzul.\n- Declarații de retragere (nume, email, contractul indicat, data și ora, contul dacă ești autentificat, hash de IP): înregistrăm și confirmăm retragerea ta din contract. Temei: obligație legală (OUG nr. 34/2014) și interes legitim pentru dovada exercitării dreptului.\n- Programul de recomandări (codul de recomandare, legătura dintre persoana care invită și persoana invitată, data, zilele Pro acordate): acordăm recompensele și aplicăm limitele programului. Temei: executarea contractului și interesul legitim de a preveni abuzul.\n- Securitate și diagnosticare (jurnale tehnice, identificatori de cerere, mesaje de eroare, adresa IP în rapoartele de eroare, hash de IP pentru limitarea cererilor): protejăm serviciul, prevenim abuzul și remediem erori. Temei: interesul legitim (art. 6 alin. 1 lit. f) și obligația de securitate din art. 32 RGPD.\n- Analiză de utilizare și înregistrări ale sesiunii (PostHog, Google Analytics, Sentry Replay): înțelegem cum este folosit produsul. Temei: exclusiv consimțământul tău (art. 6 alin. 1 lit. a RGPD și art. 4 alin. 5 din Legea nr. 506/2004). Fără acord, aceste instrumente nu se încarcă.\n- Feedback și corespondență (adresa de email și mesajul pe care ni le trimiți): răspundem și îmbunătățim produsul. Temei: interesul legitim și, după caz, executarea contractului.\n\nDatele de cont sunt necesare pentru a crea un cont. Fără ele nu putem furniza serviciul. Analizele opționale și emailurile ulterioare din verificatorul ATS depind exclusiv de alegerea ta."
         },
         {
           "title": "3. Procesarea prin inteligență artificială",
-          "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la un job, scrisoarea de intenție, rescrierea punctelor, importul unui fișier CV), trimitem textul relevant și, la import, fișierul către Anthropic (modelele Claude), furnizorul nostru de AI, exclusiv pentru a genera rezultatul cerut. Nu trimitem datele contului (email, ID de utilizator). Textul CV-ului conține însă ceea ce ai scris tu în el, inclusiv numele și datele de contact. Conform condițiilor comerciale ale API-ului Anthropic, datele trimise prin API nu sunt folosite pentru antrenarea modelelor. Anthropic șterge intrările și ieșirile API în cel mult 30 de zile, cu excepția cazurilor în care legea sau aplicarea politicii sale de utilizare impun o păstrare mai lungă.\n\nNu folosim CV-urile tale pentru a antrena modele proprii sau ale altora.\n\nScorul ATS, evaluările și sugestiile sunt estimări orientative generate automat. Ele nu produc efecte juridice asupra ta, nu sunt trimise angajatorilor și nu constituie decizii bazate exclusiv pe prelucrare automată în sensul art. 22 RGPD. Tu decizi ce folosești din ele. Rezultatele sunt generate de un sistem de inteligență artificială și pot conține erori, de aceea trebuie verificate înainte de utilizare.\n\nTe rugăm să nu incluzi în CV date din categorii speciale (sănătate, convingeri religioase sau politice, origine etnică, viață sexuală). Dacă alegi totuși să le incluzi, le prelucrăm doar pentru a-ți furniza serviciul, pe baza consimțământului tău explicit (art. 9 alin. 2 lit. a RGPD), pe care îl poți retrage ștergând informația sau contul."
+          "content": "Când folosești o funcție AI (analiza CV-ului, adaptarea la un job, scrisoarea de intenție, rescrierea punctelor, importul unui fișier CV), trimitem textul relevant și, la import, fișierul către Anthropic (modelele Claude), furnizorul nostru de AI, exclusiv pentru a genera rezultatul cerut. Nu trimitem datele contului (email, ID de utilizator). Textul CV-ului conține însă ceea ce ai scris tu în el, inclusiv numele și datele de contact. Conform condițiilor comerciale ale API-ului Anthropic, datele trimise prin API nu sunt folosite pentru antrenarea modelelor. Anthropic șterge intrările și ieșirile API în cel mult 30 de zile, cu excepția cazurilor în care legea sau aplicarea politicii sale de utilizare impun o păstrare mai lungă.\n\nNu folosim CV-urile tale pentru a antrena modele proprii sau ale altora.\n\nScorul ATS, evaluările și sugestiile sunt estimări orientative generate automat. Ele nu produc efecte juridice asupra ta, nu sunt trimise angajatorilor și nu constituie decizii bazate exclusiv pe prelucrare automată în sensul art. 22 RGPD. Tu decizi ce folosești din ele. Rezultatele sunt generate de un sistem de inteligență artificială și pot conține erori, de aceea trebuie verificate înainte de utilizare.\n\nTe rugăm să nu incluzi în CV date din categorii speciale (sănătate, convingeri religioase sau politice, origine etnică, viață sexuală). Dacă alegi totuși să le incluzi, le prelucrăm doar pentru a-ți furniza serviciul, pe baza consimțământului tău explicit (art. 9 alin. 2 lit. a RGPD), pe care îl poți retrage ștergând informația sau contul.\n\nLa importul unui fișier CV, fișierul este citit mai întâi de serverul nostru de procesare (Oracle Cloud Infrastructure), care extrage textul și, pentru structurare, îl trimite către Anthropic."
         },
         {
           "title": "4. Cu cine partajăm datele",
-          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS SUA-Est)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate."
+          "content": "Nu vindem datele tale și nu le folosim pentru publicitate. Le partajăm doar cu furnizori care acționează ca persoane împuternicite, pe baza unor acorduri de prelucrare a datelor, și numai în măsura necesară:\n\n- Clerk (autentificare și gestionarea conturilor, SUA)\n- Supabase (baza de date și stocarea conținutului din cont, regiunea AWS eu-central-1, Germania)\n- Anthropic (procesare AI, SUA)\n- Stripe (plăți; acționează și ca operator independent pentru prevenirea fraudei și obligațiile sale legale, SUA/UE)\n- Resend (livrarea emailurilor tranzacționale și a celor ulterioare, SUA)\n- Upstash (limitarea ratei de cereri, cache)\n- Vercel (găzduirea aplicației și metrici de performanță agregate, fără cookie-uri, SUA)\n- Oracle Cloud Infrastructure (server VPS pentru parsarea fișierelor CV și generarea PDF-urilor)\n- Sentry (monitorizarea erorilor, instanță în UE; Sentry Replay doar cu consimțământ)\n- PostHog (analiză de produs și înregistrări ale sesiunii, instanță în UE, doar cu consimțământ)\n- Google Ireland Limited (Google Analytics 4 prin Google Tag Manager, doar cu consimțământ)\n\nPutem comunica date și autorităților, când legea ne obligă, precum și consultanților profesionali (contabil, avocat) supuși obligației de confidențialitate.\n\nLista furnizorilor, cu scopul și locația fiecăruia, se află pe pagina Subprocesatori din subsolul site-ului."
         },
         {
           "title": "5. Transferuri în afara Spațiului Economic European",
-          "content": "Unii furnizori (Supabase, Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle) prelucrează date în Statele Unite sau în alte state din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
+          "content": "Unii furnizori (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle). Supabase stochează datele în Germania (UE); accesul de asistență din afara SEE se bazează pe clauzele contractuale standard prelucrează date în Statele Unite sau în alte state din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
         },
         {
           "title": "6. Cât timp păstrăm datele",
-          "content": "- Cont, CV-uri, scrisori de intenție și analize AI: cât timp contul este activ. La ștergerea contului din Setări, datele sunt șterse imediat din baza de date activă, iar copiile de siguranță ale furnizorului dispar în cel mult 30 de zile.\n- Conturi inactive: le ștergem după 24 de luni fără autentificare, cu un email de avertizare trimis cu 30 de zile înainte. Conturile cu abonament activ nu intră în această ștergere.\n- Scanări ATS fără cont: 90 de zile, dacă nu sunt asociate unui cont. Dacă îți creezi cont, scanarea devine parte din contul tău.\n- Token-ul de acceptare a termenilor la înregistrare: 30 de zile.\n- Jurnale de emailuri trimise, evenimente de produs și jurnale de webhook: 12 luni.\n- Mesaje de feedback: 24 de luni.\n- Evidențe de plată și facturare: perioadele prevăzute de Legea contabilității nr. 82/1991 (între 5 și 10 ani), la noi și la Stripe.\n- Lista de suprimare a emailurilor (adrese dezabonate): cât este necesar ca să respectăm refuzul tău, doar adresa și motivul.\n- Programul de recomandări: cât timp există conturile implicate.\n- Postări publice monitorizate (secțiunea 12): 90 de zile.\n- Rapoarte de erori (Sentry): aproximativ 90 de zile. Date de limitare a cererilor (Upstash): de la câteva ore până la o lună.\n- Date de analiză: evenimente PostHog 12 luni, înregistrări ale sesiunii PostHog 30 de zile, date Google Analytics cel mult 14 luni."
+          "content": "- Cont, CV-uri, scrisori de intenție și analize AI: cât timp contul este activ. La ștergerea contului din Setări, datele sunt șterse imediat din baza de date activă, iar copiile de siguranță ale furnizorului dispar în cel mult 30 de zile.\n- Conturi inactive: le ștergem după 24 de luni fără autentificare, cu un email de avertizare trimis cu 30 de zile înainte. Conturile cu abonament activ nu intră în această ștergere.\n- Scanări ATS fără cont: 90 de zile, dacă nu sunt asociate unui cont. Dacă îți creezi cont, scanarea devine parte din contul tău.\n- Token-ul de acceptare a termenilor la înregistrare: 30 de zile.\n- Jurnale de emailuri trimise, evenimente de produs și jurnale de webhook: 12 luni.\n- Mesaje de feedback: 24 de luni.\n- Evidențe de plată și facturare: perioadele prevăzute de Legea contabilității nr. 82/1991 (între 5 și 10 ani), la noi și la Stripe.\n- Lista de suprimare a emailurilor (adrese dezabonate): cât este necesar ca să respectăm refuzul tău, doar adresa și motivul.\n- Declarații de retragere: 3 ani de la primire (termenul general de prescripție).\n- Programul de recomandări: cât timp există conturile implicate.\n- Postări publice monitorizate (secțiunea 12): 90 de zile.\n- Rapoarte de erori (Sentry): aproximativ 90 de zile. Date de limitare a cererilor (Upstash): de la câteva ore până la o lună.\n- Date de analiză: evenimente PostHog 12 luni, înregistrări ale sesiunii PostHog 30 de zile, date Google Analytics cel mult 14 luni."
         },
         {
           "title": "7. Drepturile tale",
@@ -985,7 +993,7 @@
         },
         {
           "title": "10. Minori",
-          "content": "Joben se adresează persoanelor de cel puțin 16 ani, vârsta consimțământului digital în România. Nu colectăm cu bună știință date de la persoane sub această vârstă. Dacă ai motive să crezi că un minor ne-a furnizat date, scrie-ne la privacy@joben.eu și le ștergem."
+          "content": "Joben se adresează persoanelor de cel puțin 16 ani (pragul din art. 8 RGPD, aplicabil în România). Nu colectăm cu bună știință date de la persoane sub această vârstă. Dacă ai motive să crezi că un minor ne-a furnizat date, scrie-ne la privacy@joben.eu și le ștergem."
         },
         {
           "title": "11. Linkuri către alte site-uri",
@@ -1009,7 +1017,7 @@
       "metaTitle": "Termeni și condiții",
       "metaDescription": "Termenii și condițiile Joben: folosirea serviciului, planuri și plăți, dreptul de retragere, utilizarea AI, răspunderea și soluționarea litigiilor.",
       "heading": "Termeni și Condiții",
-      "lastUpdated": "22 octombrie 2026",
+      "lastUpdated": "7 noiembrie 2026",
       "intro": "Te rugăm să citești acești termeni înainte de a folosi Joben. Ei formează contractul dintre tine și TETA ABC SRL.",
       "breadcrumbLabel": "Termeni și Condiții",
       "footerPrefix": "Citește ",
@@ -1042,7 +1050,7 @@
         },
         {
           "title": "7. Dreptul de retragere și rambursări",
-          "content": "Dacă ești consumator, ai dreptul să te retragi din contractul încheiat la distanță în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014). Pentru a te retrage, trimite-ne o declarație clară la hello@joben.eu, indicând numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014. Îți confirmăm primirea și îți rambursăm sumele plătite în cel mult 14 zile, prin aceeași metodă de plată.\n\nDacă ai cerut ca accesul să înceapă imediat în perioada de retragere, la retragere plătești o sumă proporțională cu perioada de acces folosită până atunci, iar restul se rambursează.\n\nLa Pass-ul Interviu de 14 zile, la finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere în măsura în care legea (art. 16 din OUG nr. 34/2014) permite această excepție. În situația în care excepția nu s-ar aplica, se aplică regulile de mai sus.\n\nÎn afara dreptului de retragere și a drepturilor din garanția legală, sumele plătite pentru perioada de acces deja începută nu se rambursează. Dacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne și îl remediem sau îți rambursăm proporțional, conform legii."
+          "content": "Dacă ești consumator, ai dreptul să te retragi din contractul încheiat la distanță în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014). Pentru a te retrage, folosește funcția «Retrage-te din contract aici» de la /withdrawal (link în subsolul fiecărei pagini) sau trimite-ne o declarație clară la hello@joben.eu, indicând numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014. Îți confirmăm primirea și îți rambursăm sumele plătite în cel mult 14 zile, prin aceeași metodă de plată.\n\nDacă ai cerut ca accesul să înceapă imediat în perioada de retragere, la retragere plătești o sumă proporțională cu perioada de acces folosită până atunci, iar restul se rambursează.\n\nLa Pass-ul Interviu de 14 zile, la finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere în măsura în care legea (art. 16 din OUG nr. 34/2014) permite această excepție. În situația în care excepția nu s-ar aplica, se aplică regulile de mai sus.\n\nÎn afara dreptului de retragere și a drepturilor din garanția legală, sumele plătite pentru perioada de acces deja începută nu se rambursează. Dacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne și îl remediem sau îți rambursăm proporțional, conform legii."
         },
         {
           "title": "8. Utilizare acceptabilă",
@@ -1208,6 +1216,75 @@
         {
           "title": "Contact",
           "content": "Întrebări despre cookie-uri: privacy@joben.eu."
+        }
+      ]
+    },
+    "refunds": {
+      "metaTitle": "Politica de rambursare și dreptul de retragere | Joben",
+      "metaDescription": "Cum te retragi dintr-un contract Joben în 14 zile, cum funcționează rambursarea și ce se întâmplă cu Pass-ul Interviu și cu abonamentele.",
+      "heading": "Politica de rambursare și dreptul de retragere",
+      "lastUpdated": "7 noiembrie 2026",
+      "intro": "Această pagină explică dreptul tău de retragere de 14 zile, cum îl exerciți și cum rambursăm sumele. Face parte din Termenii și Condițiile.",
+      "breadcrumbLabel": "Rambursări și retragere",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica de Confidențialitate",
+      "footerSuffix": " pentru modul în care tratăm datele tale.",
+      "sections": [
+        {
+          "title": "1. Dreptul de retragere în 14 zile",
+          "content": "Dacă ești consumator și cumperi un plan plătit Joben online, ai dreptul să te retragi din contract în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014).\n\nDreptul se aplică și când cumperi un serviciu digital, cu excepțiile din secțiunile 3 și 4."
+        },
+        {
+          "title": "2. Cum te retragi",
+          "content": "Cel mai simplu: deschide pagina «Retrage-te din contract aici» (link în subsolul fiecărei pagini și în Setări), completează numele, adresa de email și, dacă vrei, comanda, apoi apasă butonul de confirmare. Primești pe email o confirmare cu data și ora primirii. Funcția este disponibilă pe toată durata perioadei de retragere (art. 111 din OUG nr. 34/2014).\n\nPoți să ne scrii și la hello@joben.eu, cu numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014."
+        },
+        {
+          "title": "3. Pass-ul Interviu de 14 zile",
+          "content": "Pass-ul oferă acces Pro imediat. La finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere, în măsura în care legea permite această excepție (art. 16 din OUG nr. 34/2014).\n\nDacă excepția nu se aplică în cazul tău, se aplică regulile din secțiunea 2 și din secțiunea 5."
+        },
+        {
+          "title": "4. Abonamentele Pro și Plan Recrutare",
+          "content": "Abonamentele încep imediat, la cererea ta. Dacă te retragi în primele 14 zile, plătești o sumă proporțională cu perioada de acces folosită până la retragere, iar restul se rambursează. Retragerea oprește și reînnoirile viitoare."
+        },
+        {
+          "title": "5. Cum și când rambursăm",
+          "content": "Îți confirmăm primirea declarației de retragere și rambursăm sumele cuvenite în cel mult 14 zile de la primirea ei, prin aceeași metodă de plată folosită la comandă (Stripe), fără costuri suplimentare pentru tine."
+        },
+        {
+          "title": "6. Alte situații",
+          "content": "Sumele plătite pentru o perioadă de acces deja începută se rambursează doar în cadrul dreptului de retragere și al drepturilor din garanția legală pentru conținut digital și servicii digitale (OUG nr. 141/2021).\n\nDacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne la hello@joben.eu și îl remediem sau îți rambursăm proporțional, conform legii."
+        },
+        {
+          "title": "7. Reclamații",
+          "content": "Pentru orice problemă scrie-ne la hello@joben.eu. Ca consumator poți apela și la ANPC (anpc.ro) sau la o entitate de soluționare alternativă a litigiilor (SAL) listată pe anpc.ro. Aceste căi sunt opționale și nu îți afectează dreptul de a te adresa instanței."
+        }
+      ]
+    },
+    "subprocessors": {
+      "lastUpdated": "7 noiembrie 2026",
+      "metaTitle": "Subprocesatori și furnizori de date | Joben",
+      "metaDescription": "Lista furnizorilor care prelucrează date personale pentru Joben, cu scopul, datele și locația fiecăruia.",
+      "heading": "Subprocesatori și furnizori de date",
+      "intro": "Joben folosește furnizorii de mai jos pentru a-ți oferi serviciul. Ei prelucrează datele în numele nostru, pe baza unor acorduri de prelucrare a datelor.",
+      "breadcrumbLabel": "Subprocesatori",
+      "tableHeaders": {
+        "name": "Furnizor",
+        "purpose": "Scop",
+        "data": "Date",
+        "location": "Locație"
+      },
+      "optionalLabel": "Se încarcă doar cu consimțământul tău.",
+      "footerPrefix": "Citește ",
+      "footerLinkLabel": "Politica de Confidențialitate",
+      "footerSuffix": " pentru transferurile în afara SEE și garanțiile aplicate.",
+      "sections": [
+        {
+          "title": "Transferuri în afara SEE",
+          "content": "Unii furnizori prelucrează date în Statele Unite sau în alte țări din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind cadrul UE-SUA pentru confidențialitatea datelor, pentru furnizorii certificați, sau pe clauzele contractuale standard (Decizia (UE) 2021/914). Poți cere o copie a garanțiilor la privacy@joben.eu."
+        },
+        {
+          "title": "Modificări ale listei",
+          "content": "Actualizăm această pagină când adăugăm sau schimbăm un furnizor. Data ultimei actualizări apare în partea de sus."
         }
       ]
     }
@@ -1545,7 +1622,8 @@
       "description": "Gestionează-ți profilul și detaliile contului.",
       "emailSettings": "Setări email",
       "exportData": "Exportă-ți datele",
-      "exportDataButton": "Exportă Datele"
+      "exportDataButton": "Exportă Datele",
+      "exportDataPdfButton": "Export PDF"
     },
     "billing": {
       "title": "Facturare",
@@ -1553,7 +1631,8 @@
       "currentPlan": "Plan curent",
       "subscription": "Abonament",
       "plan": "Plan",
-      "grantActiveUntil": "Pass/Pro activ până la {date}"
+      "grantActiveUntil": "Pass/Pro activ până la {date}",
+      "withdraw": "Retrage-te din contract aici"
     },
     "notifications": {
       "title": "Notificări",
@@ -1910,5 +1989,37 @@
       "create": "Nu am putut crea CV-ul. Încearcă din nou.",
       "limit": "Ai atins limita de CV-uri salvate din planul tău."
     }
+  },
+  "Withdrawal": {
+    "metaTitle": "Retragere din contract",
+    "metaDescription": "Funcția de retragere din contractul Joben în 14 zile, conform OUG 34/2014: completezi datele, confirmi și primești confirmare pe email.",
+    "heading": "Retragere din contract",
+    "intro": "Dacă ești consumator, te poți retrage din contractul încheiat cu Joben în 14 zile de la încheierea lui, fără să motivezi decizia. Completează datele de mai jos, apoi confirmă. Primești pe email o confirmare cu data și ora primirii.",
+    "nameLabel": "Numele tău complet",
+    "emailLabel": "Adresa de email (a contului sau a comenzii)",
+    "contractLabel": "Contract sau comandă (opțional)",
+    "contractPlaceholder": "De exemplu planul Pro sau numărul comenzii Stripe",
+    "withdrawButton": "Retrage-te din contract aici",
+    "reviewTitle": "Verifică și confirmă",
+    "reviewBody": "Eu, {name} ({email}), mă retrag din contractul privind serviciile Joben.",
+    "confirmButton": "Confirmă retragerea aici",
+    "backButton": "Înapoi",
+    "doneTitle": "Am primit declarația ta de retragere",
+    "doneBody": "Ți-am trimis o confirmare la {email}. Rambursăm sumele plătite în cel mult 14 zile, prin aceeași metodă de plată.",
+    "error": "Nu am putut trimite declarația. Încearcă din nou sau scrie-ne la hello@joben.eu.",
+    "termsPrefix": "Condițiile dreptului de retragere sunt în ",
+    "termsLink": "Termenii și Condițiile",
+    "termsSuffix": " (secțiunea 7)."
+  },
+  "TermsReacceptance": {
+    "title": "Am actualizat Termenii și Politica de Confidențialitate",
+    "body": "Pentru a continua să folosești Joben, confirmă că ai citit versiunile actualizate.",
+    "label": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
+    "accept": "Accept și continui",
+    "settings": "Mergi la Setări (export sau ștergere cont)",
+    "error": "Nu am putut salva acceptarea. Încearcă din nou."
+  },
+  "AiNotice": {
+    "text": "Scorul și sugestiile de mai jos sunt generate de un sistem de inteligență artificială. Sunt estimări orientative și pot conține erori, verifică-le înainte de a le folosi."
   }
 }

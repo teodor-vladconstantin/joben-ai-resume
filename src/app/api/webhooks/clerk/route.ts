@@ -250,6 +250,19 @@ async function handleClerkWebhook(req: Request, claimCtx: WebhookClaimContext) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }
 
+    if (consentFields.tos_version) {
+      const { error: acceptanceError } = await supabase.from('legal_acceptances').insert({
+        user_clerk_id: id,
+        doc_version: consentFields.tos_version,
+        source: 'signup',
+        ip_hash: consentFields.signup_ip_hash && consentFields.signup_ip_hash !== 'unknown' ? consentFields.signup_ip_hash : null,
+        accepted_at: consentFields.tos_accepted_at,
+      })
+      if (acceptanceError) {
+        logger.warn('Signup acceptance history insert failed', { requestId, route: '/api/webhooks/clerk', eventId: svixId, userId: id, error: acceptanceError.message })
+      }
+    }
+
     if (!(await attributeReferral(id, evt.data.unsafe_metadata?.ref, primaryEmail, { requestId, eventId: svixId }))) {
       return jsonWithRequestId({ error: clientErrorMessage('server') }, 500, requestId)
     }

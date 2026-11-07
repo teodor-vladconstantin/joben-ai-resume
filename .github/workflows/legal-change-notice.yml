@@ -1,0 +1,43 @@
+name: Legal Change Notice
+
+# Emails every user once when the Terms, Privacy or Cookie Policy version changes
+# (LEGAL_CHANGELOG in src/lib/legal/versions.ts). The endpoint is idempotent, so
+# the daily schedule is the safety net and the push trigger only makes it faster.
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'src/lib/legal/versions.ts'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Wait for the deployment after a push
+        if: github.event_name == 'push'
+        run: sleep 360
+
+      - name: Trigger /api/cron/legal-change-notice until nobody is left
+        run: |
+          for i in $(seq 1 15); do
+            status=$(curl -s -o response.json -w "%{http_code}" -X POST "${{ secrets.PROD_APP_URL }}/api/cron/legal-change-notice" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+            echo "HTTP $status"
+            cat response.json
+            echo
+            [ "$status" = "200" ] || exit 1
+            remaining=$(python3 -c "import json;print(json.load(open('response.json')).get('remaining',0))")
+            [ "$remaining" = "0" ] && break
+            sleep 5
+          done
+          {
+            echo "### Legal change notice"
+            echo '```json'
+            cat response.json
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
