@@ -1,10 +1,11 @@
 import { renderSlide, slideSchema } from '@/lib/social-slide'
 
-export const runtime = 'edge'
+// Node runtime: the Edge bundle (next/og + fonts) is over the 1 MB Edge Function limit of the plan.
+export const runtime = 'nodejs'
 
 const noStore = { 'Cache-Control': 'no-store' }
 
-// Edge has no node:crypto; constant-time compare so the token can't be guessed byte by byte.
+// Constant-time compare so the token can't be guessed byte by byte.
 function sameToken(a: string, b: string) {
   if (a.length !== b.length) return false
   let diff = 0

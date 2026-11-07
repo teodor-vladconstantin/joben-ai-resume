@@ -169,6 +169,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/public/ats-check': PDF_EXTRACTION_TRACE_INCLUDES,
     '/api/public/ats-fast-check': PDF_EXTRACTION_TRACE_INCLUDES,
+    '/api/social/slide': ['./src/assets/fonts/**/*'],
   },
   async headers() {
     return [
