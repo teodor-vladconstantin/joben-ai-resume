@@ -10,11 +10,11 @@ Verificat 2026-11-07 pe paginile oficiale ale furnizorilor (citate scurte, făr�
 | Stripe | Da: incorporat prin referință în acord | Niciuna; Data Transfers Addendum inclus. | DPF, SCC, UK IDTA | stripe.com/legal/dpa |
 | Resend | Da, obligatoriu la intrarea în acord; copie executată în dashboard | Descarcă copia din dashboard și arhiveaz-o. | DPF, SCC | resend.com/legal/dpa |
 | Vercel | Parțial: DPA vizează planurile Enterprise și Pro; Hobby nu e menționat | Joben este pe Hobby: cere DPA în scris la suport sau treci pe Pro. [DE VERIFICAT DE AVOCAT] | SCC 2021 | vercel.com/legal/dpa |
-| Sentry | Nu: acceptare electronică explicită | **Acțiune manuală:** acceptă DPA din Sentry (articolul "How do I sign your Data Processing Addendum"). | DPF, SCC | sentry.io/legal/dpa |
+| Sentry | Nu: acceptare electronică explicită | **Făcut 2026-11-07:** DPA v5.1.0 acceptat în joben.sentry.io > Settings > Legal & Compliance (regiune de stocare UE). | DPF, SCC | sentry.io/legal/dpa |
 | PostHog | Nedeterminat (pagina nu a putut fi citită) | Verifică în Settings > Organization sau cere DPA. | De confirmat | posthog.com/dpa |
-| Google (GA4 prin GTM) | Nu automat: acceptare prin clic în contul GA4 | **Acțiune manuală:** GA4 Admin > Account settings > Data processing terms: acceptă. | SCC/alte | business.safety.google |
+| Google (GA4 prin GTM) | Nu automat: acceptare prin clic în contul GA4 | **Deja acceptat 2024-04-03** (GA4 Admin > Account settings > Data Processing Terms, cont 308940066). | SCC/alte | business.safety.google |
 | Upstash | Nedeterminat (PDF) | Citește trust.upstash.com/dpa și confirmă. | De confirmat | upstash.com/trust/dpa.pdf |
 | Oracle Cloud (VPS) | Necitibil (HTTP 403) | Citește OCI DPA în consola Oracle. | De confirmat | oracle.com/legal/data-processing-agreement |
 | Contabil | Acord de confidențialitate | Cu contabilul. | n/a | n/a |
 
-Prioritate: Sentry, GA4 și Vercel (Hobby), apoi PostHog, Upstash, Oracle. Arhivă: folder privat `legal/dpa/` în afara repo-ului.
+Prioritate rămasă: Vercel (Hobby), apoi PostHog, Upstash, Oracle. Arhivă: folder privat `legal/dpa/` în afara repo-ului.
