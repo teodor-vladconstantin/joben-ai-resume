@@ -3,7 +3,7 @@ import { sendGaPurchase } from '@/lib/ga-mp'
 import { getGaClientId } from '@/lib/gtm-events'
 import { checkoutRequestSchema } from '@/lib/validation/schemas'
 
-const purchase = { clientId: '123456789.987654321', transactionId: 'cs_1', plan: 'pass_14d', value: 39, currency: 'RON' }
+const purchase = { clientId: '123456789.987654321', transactionId: 'cs_1', plan: 'pass_14d', value: 8, currency: 'USD' }
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -28,7 +28,7 @@ describe('sendGaPurchase', () => {
     expect(url).toContain('measurement_id=G-TEST')
     const body = JSON.parse(init.body)
     expect(body.client_id).toBe(purchase.clientId)
-    expect(body.events[0]).toMatchObject({ name: 'purchase', params: { transaction_id: 'cs_1', value: 39, currency: 'RON' } })
+    expect(body.events[0]).toMatchObject({ name: 'purchase', params: { transaction_id: 'cs_1', value: 8, currency: 'USD' } })
   })
 
   it('swallows network errors so the webhook never fails on analytics', async () => {

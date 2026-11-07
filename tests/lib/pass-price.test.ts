@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import ro from '../../messages/ro.json'
 import en from '../../messages/en.json'
-import { PASS_14D_PRICE_BANI, pricingPlanMeta } from '@/lib/content'
+import { PASS_14D_PRICE_CENTS, pricingPlanMeta } from '@/lib/content'
 
 describe('14-day pass price', () => {
-  it('keeps the advertised RON price in sync with the Stripe amount', () => {
+  it('keeps the advertised USD price in sync with the Stripe amount', () => {
     const passIndex = pricingPlanMeta.findIndex((meta) => meta.planId === 'pass_14d')
-    const expected = `${PASS_14D_PRICE_BANI / 100} RON`
+    const expected = `$${PASS_14D_PRICE_CENTS / 100}`
     for (const messages of [ro, en]) {
       expect(messages.Pricing.plans[passIndex].price).toBe(expected)
       expect(messages.Billing.buyPass).toContain(expected)

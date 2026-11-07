@@ -71,7 +71,7 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
         offers: {
           '@type': 'Offer',
           price: '0',
-          priceCurrency: 'RON',
+          priceCurrency: 'USD',
         },
       },
     ],

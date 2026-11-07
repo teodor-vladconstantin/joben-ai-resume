@@ -6,7 +6,7 @@
     },
     "pricing": {
       "title": "Prețuri și planuri pentru CV cu AI",
-      "description": "Planuri Gratuit, Pro și Recrutare, plus Pass Interviu de 14 zile la 39 RON, plată unică. Începi gratuit și treci la upgrade când ai nevoie de AI."
+      "description": "Planuri Gratuit, Pro și Recrutare, plus Pass Interviu de 14 zile la $8, plată unică. Începi gratuit și treci la upgrade când ai nevoie de AI."
     },
     "atsChecker": {
       "title": "Verificare CV ATS Gratuită: Analiză AI, Fără Cont",
@@ -180,7 +180,7 @@
       }
     ],
     "pricingTeaserHeading": "Cât costă Joben?",
-    "pricingTeaserSubheading": "Începi gratuit, cu 1 CV salvat și 5 exporturi PDF. Pass-ul Interviu de 14 zile costă 39 RON, o singură plată, iar Pro ridică limitele lunare.",
+    "pricingTeaserSubheading": "Începi gratuit, cu 1 CV salvat și 5 exporturi PDF. Pass-ul Interviu de 14 zile costă $8, o singură plată, iar Pro ridică limitele lunare.",
     "faqHeading": "Întrebări Frecvente",
     "faqSubheading": "Tot ce trebuie să știi înainte să îți construiești următorul CV.",
     "faqOpen": "Deschide",
@@ -268,7 +268,7 @@
           },
           {
             "title": "Gândit pentru România",
-            "text": "Prețuri în RON, interfață în română și suport pentru obiceiurile locale de CV."
+            "text": "Interfață în română și suport pentru obiceiurile locale de CV."
           }
         ]
       },
@@ -288,7 +288,7 @@
       {
         "name": "Gratuit",
         "description": "Ideal pentru prima ta aplicație lustruită.",
-        "price": "0 RON",
+        "price": "$0",
         "pricePeriod": "/pe viață",
         "features": [
           "Editor de CV manual",
@@ -309,7 +309,7 @@
       {
         "name": "Pass Interviu (14 Zile)",
         "description": "Ideal pentru sprint-ul de aplicare și interviuri din următoarele 2 săptămâni.",
-        "price": "39 RON",
+        "price": "$8",
         "pricePeriod": "/plată unică",
         "features": [
           "Acces complet Pro timp de 14 zile",
@@ -323,13 +323,13 @@
           "Suport prioritar prin email"
         ],
         "excludedFeatures": [],
-        "cta": "Ia Pass-ul (39 RON)",
+        "cta": "Ia Pass-ul ($8)",
         "badge": "Plată unică, 14 zile"
       },
       {
         "name": "Pro",
         "description": "Pentru cei care caută activ un job și aplică constant.",
-        "price": "59 RON",
+        "price": "$12",
         "pricePeriod": "/lună",
         "features": [
           "Tot ce e în Gratuit, plus:",
@@ -347,7 +347,7 @@
       {
         "name": "Plan Recrutare",
         "description": "Plan pe 6 luni pentru aplicații în volum mare.",
-        "price": "299 RON",
+        "price": "$60",
         "pricePeriod": "/6 luni",
         "features": [
           "Tot ce e inclus în Pro",
@@ -402,7 +402,7 @@
       "unreadable": "Nu am putut citi textul din fișier. Încarcă un PDF sau DOCX cu text selectabil."
     },
     "wantRewriting": "Vrei rescriere automată a punctelor slabe?",
-    "proPrice": "59 RON",
+    "proPrice": "$12",
     "proPricePeriod": "/lună",
     "whatToFix": "Ce ai de reparat",
     "reportSentTo": "Raport trimis la {email}.",
@@ -534,7 +534,7 @@
     },
     {
       "question": "Cum funcționează Pass-ul Interviu de 14 zile?",
-      "answer": "Plătești o singură dată 39 RON și primești acces Pro timp de 14 zile de la plată. Pass-ul nu se reînnoiește automat, iar la expirare contul revine la planul Gratuit, cu limitele lui. Dacă mai cumperi un pass cât timp e activ, zilele se adaugă. La plată soliciți începerea imediată a accesului și confirmi că pierzi dreptul de retragere de 14 zile în măsura în care legea permite această excepție. Detaliile sunt în Termeni, secțiunea 7."
+      "answer": "Plătești o singură dată $8 și primești acces Pro timp de 14 zile de la plată. Pass-ul nu se reînnoiește automat, iar la expirare contul revine la planul Gratuit, cu limitele lui. Dacă mai cumperi un pass cât timp e activ, zilele se adaugă. La plată soliciți începerea imediată a accesului și confirmi că pierzi dreptul de retragere de 14 zile în măsura în care legea permite această excepție. Detaliile sunt în Termeni, secțiunea 7."
     },
     {
       "question": "Ce se întâmplă cu datele din CV-ul meu?",
@@ -654,7 +654,7 @@
     "somethingWentWrong": "Ceva nu a mers bine. Încearcă din nou.",
     "manageBilling": "Gestionează Facturarea",
     "upgradeToPro": "Treci la Pro",
-    "buyPass": "Pass 14 zile (39 RON)",
+    "buyPass": "Pass 14 zile ($8)",
     "alreadyActive": "Planul acesta este deja activ pe contul tău.",
     "checkoutUnavailable": "Plățile sunt temporar indisponibile. Încearcă din nou mai târziu.",
     "passSuccess": "Plata a fost primită. Pass-ul tău Pro este activ până la {date}.",
@@ -1046,7 +1046,7 @@
         },
         {
           "title": "6. Planuri, prețuri și plăți",
-          "content": "Prețurile sunt afișate în RON pe pagina de prețuri și la finalizarea comenzii. Prețurile afișate sunt finale; furnizorul nu este plătitor de TVA. Plățile se procesează prin Stripe, iar confirmarea comenzii și documentul de plată ajung pe emailul tău.\n\n- Planul Gratuit are limitele afișate și nu implică plată.\n- Pass-ul Interviu de 14 zile este o plată unică, fără reînnoire automată, și oferă acces Pro timp de 14 zile.\n- Planurile Pro (lunar) și Plan Recrutare (6 luni) sunt abonamente care se reînnoiesc automat la sfârșitul fiecărei perioade facturate, cu prețul afișat la comandă, până la anulare.\n\nPoți anula un abonament oricând din Setări (portalul de facturare Stripe) sau ștergând contul. Anularea oprește reînnoirile viitoare, iar accesul continuă până la sfârșitul perioadei deja plătite. Dacă modificăm prețul unui abonament, te anunțăm cu cel puțin 30 de zile înainte, iar noul preț se aplică de la următoarea reînnoire; poți anula înainte.\n\nLimitele lunare de utilizare AI din fiecare plan sunt cele afișate. Codurile promoționale și zilele Pro din programul de recomandări sunt personale, nu au valoare în bani și le putem refuza sau retrage în caz de abuz. Putem modifica sau încheia programul de recomandări, iar recompensele deja acordate rămân valabile."
+          "content": "Prețurile sunt afișate în dolari americani (USD) pe pagina de prețuri și la finalizarea comenzii. Emitentul cardului poate converti suma în moneda ta locală. Prețurile afișate sunt finale; furnizorul nu este plătitor de TVA. Plățile se procesează prin Stripe, iar confirmarea comenzii și documentul de plată ajung pe emailul tău.\n\n- Planul Gratuit are limitele afișate și nu implică plată.\n- Pass-ul Interviu de 14 zile este o plată unică, fără reînnoire automată, și oferă acces Pro timp de 14 zile.\n- Planurile Pro (lunar) și Plan Recrutare (6 luni) sunt abonamente care se reînnoiesc automat la sfârșitul fiecărei perioade facturate, cu prețul afișat la comandă, până la anulare.\n\nPoți anula un abonament oricând din Setări (portalul de facturare Stripe) sau ștergând contul. Anularea oprește reînnoirile viitoare, iar accesul continuă până la sfârșitul perioadei deja plătite. Dacă modificăm prețul unui abonament, te anunțăm cu cel puțin 30 de zile înainte, iar noul preț se aplică de la următoarea reînnoire; poți anula înainte.\n\nLimitele lunare de utilizare AI din fiecare plan sunt cele afișate. Codurile promoționale și zilele Pro din programul de recomandări sunt personale, nu au valoare în bani și le putem refuza sau retrage în caz de abuz. Putem modifica sau încheia programul de recomandări, iar recompensele deja acordate rămân valabile."
         },
         {
           "title": "7. Dreptul de retragere și rambursări",

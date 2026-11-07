@@ -45,7 +45,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
         offers: {
           '@type': 'Offer',
           price: '0',
-          priceCurrency: 'RON',
+          priceCurrency: 'USD',
         },
       },
       {
