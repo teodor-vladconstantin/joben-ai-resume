@@ -82,7 +82,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                   </div>
                   <Badge variant="muted">{t('managedByClerk')}</Badge>
                 </div>
-                <ExportDataButton label={t('account.exportData')} buttonLabel={t('account.exportDataButton')} />
+                <ExportDataButton label={t('account.exportData')} buttonLabel={t('account.exportDataButton')} pdfButtonLabel={t('account.exportDataPdfButton')} />
               </div>
             </div>
 

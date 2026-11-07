@@ -1622,7 +1622,8 @@
       "description": "Gestionează-ți profilul și detaliile contului.",
       "emailSettings": "Setări email",
       "exportData": "Exportă-ți datele",
-      "exportDataButton": "Exportă Datele"
+      "exportDataButton": "Exportă Datele",
+      "exportDataPdfButton": "Export PDF"
     },
     "billing": {
       "title": "Facturare",

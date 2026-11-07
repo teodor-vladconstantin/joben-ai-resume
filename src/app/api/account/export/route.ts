@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { apiError } from '@/lib/api-response'
 import { getRequestId, logger } from '@/lib/logger'
+import { renderAccountExportPdf } from '@/lib/account-export-pdf'
 
 export async function GET(req: Request) {
   const requestId = getRequestId(req)
@@ -56,7 +57,37 @@ export async function GET(req: Request) {
     withdrawalRequests: withdrawals.data,
   }
 
-  const filename = `joben-data-export-${new Date().toISOString().slice(0, 10)}.json`
+  const stamp = new Date().toISOString().slice(0, 10)
+
+  if (new URL(req.url).searchParams.get('format') === 'pdf') {
+    try {
+      const pdfBytes = await renderAccountExportPdf({
+        exportedAt: exportPayload.exportedAt,
+        account: exportPayload.account,
+        resumes: exportPayload.resumes,
+        coverLetters: exportPayload.coverLetters,
+        aiReviews: exportPayload.aiReviews,
+        resumeAnalyses: exportPayload.resumeAnalyses,
+        feedback: exportPayload.feedback,
+        legalAcceptances: exportPayload.legalAcceptances,
+        withdrawalRequests: exportPayload.withdrawalRequests,
+        referralsMade: exportPayload.referralsMade,
+        referralsReceived: exportPayload.referralsReceived,
+      })
+      return new NextResponse(pdfBytes, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="joben-data-export-${stamp}.pdf"`,
+        },
+      })
+    } catch (error) {
+      logger.error('Data export PDF failed', { requestId, userId, error: error instanceof Error ? error.message : 'Unknown error' })
+      return apiError('Could not generate your data export.', 500, requestId)
+    }
+  }
+
+  const filename = `joben-data-export-${stamp}.json`
 
   return new NextResponse(JSON.stringify(exportPayload, null, 2), {
     status: 200,

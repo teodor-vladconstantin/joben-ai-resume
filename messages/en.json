@@ -1622,7 +1622,8 @@
       "description": "Manage your profile and account details.",
       "emailSettings": "Email settings",
       "exportData": "Export my data",
-      "exportDataButton": "Export My Data"
+      "exportDataButton": "Export My Data",
+      "exportDataPdfButton": "Export PDF"
     },
     "billing": {
       "title": "Billing",

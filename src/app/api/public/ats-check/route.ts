@@ -9,6 +9,7 @@ import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
 import { checkRouteRateLimit, resolveRateLimitIdentity } from '@/lib/security/route-rate-limit'
 import { sanitizeForPrompt } from '@/lib/security/prompt-sanitizer'
+import { maybeRedactContact } from '@/lib/security/redact-contact'
 import { hasExpectedSignature } from '@/lib/security/file-signature'
 import { isDisposableEmailDomain } from '@/lib/security/disposable-email'
 import { ClaudeJsonParseError, parseClaudeJsonText } from '@/lib/claude-json'
@@ -316,7 +317,7 @@ export async function POST(req: Request) {
       fileBytes = null
     }
 
-    const safeResumeText = sanitizeForPrompt(rawText, { maxChars: MAX_RESUME_CHARS })
+    const safeResumeText = maybeRedactContact(sanitizeForPrompt(rawText, { maxChars: MAX_RESUME_CHARS }))
     rawText = ''
 
     if (safeResumeText.length < MIN_RESUME_CHARS) {

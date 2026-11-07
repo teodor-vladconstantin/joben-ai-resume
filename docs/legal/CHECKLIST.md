@@ -22,11 +22,15 @@ Joben nu este declarat "100% conform". Documentele de mai jos sunt un punct de p
 7. Decide mutarea Supabase în UE (SUPABASE-EU-MIGRATION.md).
 8. Revizuiește diff-ul `Withdrawal` și cu avocatul înainte de PR merge.
 
+## Adăugat ulterior
+- Anonimizare opțională a contactului (email, telefon, linkuri) înainte de scoring: `AI_REDACT_CONTACT=true` (analyze și ATS checker). Activează după ce compari scorurile pe câteva CV-uri; numele și adresa nu sunt redactate.
+- Export PDF în Settings (`/api/account/export?format=pdf`), rezumat lizibil; JSON rămâne copia completă.
+- Migrațiile au fost aplicate în producție (inclusiv `legal_acceptances`).
+
 ## Deschis (cod)
-- Anonimizare opțională a câmpurilor de contact înainte de Claude (M2), sub feature flag, cu test de calitate.
 - Ștergerea persoanei din PostHog la ștergerea contului (necesită cheie API personală).
 - Jurnal server-side pentru consimțământul de cookie-uri (M9) și consimțământ separat pentru marketing (M10).
-- Export PDF (acum JSON); test automat de izolare între useri (M7); nota AI în scrisori și adaptare la job.
+- test automat de izolare între useri (M7); nota AI în scrisori și adaptare la job.
 - Coadă de reîncercare pentru ștergerea utilizatorului din Clerk (acum doar logat).
 - Verificarea Sentry `sendDefaultPii: true` pe server/edge (cookie-urile sunt acum eliminate).
 - Textul OUG 34/2014 pentru plata proporțională și exceptiile de la retragere (numerotare neverificată).
