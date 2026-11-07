@@ -1,7 +1,7 @@
 // Copy for the template-download email sequence (confirmation + 5 steps).
 // Step offsets count days from the lead's double opt-in confirmation.
 // Step 5 is the only one with an offer: the existing 14-day Interview Pass
-// (PASS_14D_PRICE_BANI), no discount code.
+// (PASS_14D_PRICE_CENTS), no discount code.
 import type { AnonScanEmailLocale } from '@/lib/resend'
 
 export type TemplateSequenceStep = 1 | 2 | 3 | 4 | 5
@@ -69,10 +69,10 @@ export const TEMPLATE_SEQUENCE_COPY: Record<AnonScanEmailLocale, Record<Template
       ctaPath: '/sign-up',
     },
     5: {
-      subject: 'Two weeks of Pro for your job search: 39 RON',
+      subject: 'Two weeks of Pro for your job search: $8',
       heading: 'The 14-day Interview Pass covers a full application sprint.',
       body: [
-        'The Interview Pass gives you 14 days of Pro access for 39 RON, paid once with no automatic renewal. Use it for AI tailoring, extra exports and cover letters while you apply.',
+        'The Interview Pass gives you 14 days of Pro access for $8, paid once with no automatic renewal. Use it for AI tailoring, extra exports and cover letters while you apply.',
         'This is the last email in this series. Your free tools stay available either way.',
       ],
       cta: 'See the Interview Pass',
@@ -121,10 +121,10 @@ export const TEMPLATE_SEQUENCE_COPY: Record<AnonScanEmailLocale, Record<Template
       ctaPath: '/sign-up',
     },
     5: {
-      subject: 'Două săptămâni de Pro pentru căutarea ta de job: 39 RON',
+      subject: 'Două săptămâni de Pro pentru căutarea ta de job: $8',
       heading: 'Pass-ul de Interviu de 14 zile acoperă un sprint complet de aplicări.',
       body: [
-        'Pass-ul de Interviu îți dă 14 zile de acces Pro pentru 39 RON, plătite o singură dată, fără reînnoire automată. Îl folosești pentru adaptare cu AI, exporturi suplimentare și scrisori de intenție cât timp aplici.',
+        'Pass-ul de Interviu îți dă 14 zile de acces Pro pentru $8, plătite o singură dată, fără reînnoire automată. Îl folosești pentru adaptare cu AI, exporturi suplimentare și scrisori de intenție cât timp aplici.',
         'Este ultimul email din această serie. Uneltele gratuite rămân disponibile oricum.',
       ],
       cta: 'Vezi Pass-ul de Interviu',

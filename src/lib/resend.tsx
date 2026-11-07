@@ -494,14 +494,14 @@ const PASS_DAY10_COPY: Record<AnonScanEmailLocale, {
     subject: (days) => `Your Interview Pass ends in ${days} ${days === 1 ? 'day' : 'days'}`,
     heading: 'Keep your Pro tools while you apply.',
     body: (days) => `Your 14-day Interview Pass has ${days} ${days === 1 ? 'day' : 'days'} left. After that your account returns to the free plan.`,
-    pitch: 'Pro is 59 RON per month and you can cancel any time. Your resumes, tailored versions and cover letters stay exactly where they are.',
+    pitch: 'Pro is $12 per month and you can cancel any time. Your resumes, tailored versions and cover letters stay exactly where they are.',
     cta: 'See Pro',
   },
   ro: {
     subject: (days) => `Pass-ul tău de Interviu se încheie în ${days} ${days === 1 ? 'zi' : 'zile'}`,
     heading: 'Păstrează uneltele Pro cât timp aplici.',
     body: (days) => `Pass-ul tău de Interviu de 14 zile mai are ${days} ${days === 1 ? 'zi' : 'zile'}. După aceea contul revine la planul gratuit.`,
-    pitch: 'Pro costă 59 RON pe lună și îl poți anula oricând. CV-urile, versiunile adaptate și scrisorile tale rămân exact unde sunt.',
+    pitch: 'Pro costă $12 pe lună și îl poți anula oricând. CV-urile, versiunile adaptate și scrisorile tale rămân exact unde sunt.',
     cta: 'Vezi Pro',
   },
 }

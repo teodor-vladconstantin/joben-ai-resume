@@ -6,7 +6,7 @@
     },
     "pricing": {
       "title": "Pricing and Plans for the AI Resume Builder",
-      "description": "Free, Pro and Recruiting plans, plus a one-time 14-day Interview Pass (39 RON). Start free and upgrade when you need the AI features."
+      "description": "Free, Pro and Recruiting plans, plus a one-time 14-day Interview Pass ($8). Start free and upgrade when you need the AI features."
     },
     "atsChecker": {
       "title": "Free ATS Resume Checker: AI Analysis, No Signup",
@@ -180,7 +180,7 @@
       }
     ],
     "pricingTeaserHeading": "How much does Joben cost?",
-    "pricingTeaserSubheading": "You start free, with 1 saved resume and 5 PDF exports. The 14-day Interview Pass costs 39 RON, paid once, and Pro raises the monthly limits.",
+    "pricingTeaserSubheading": "You start free, with 1 saved resume and 5 PDF exports. The 14-day Interview Pass costs $8, paid once, and Pro raises the monthly limits.",
     "faqHeading": "Frequently Asked Questions",
     "faqSubheading": "Everything you need to know before building your next resume.",
     "faqOpen": "Open",
@@ -268,7 +268,7 @@
           },
           {
             "title": "Made for Romania",
-            "text": "Prices in RON, a Romanian interface and support for local resume habits."
+            "text": "A Romanian interface and support for local resume habits."
           }
         ]
       },
@@ -288,20 +288,20 @@
       {
         "name": "Free",
         "description": "Best for building your first polished application.",
-        "price": "0 RON",
+        "price": "$0",
         "pricePeriod": "/forever",
         "features": [
           "Manual resume builder",
-          "Save 1 CV",
+          "Save 1 resume",
           "5 PDF exports",
           "3 AI cover letters / month",
-          "3 resume-tailoring runs (CV vs JD) / month",
+          "3 resume-tailoring runs (resume vs JD) / month",
           "15 AI bullet rewrites / month",
           "1 basic ATS-optimized template"
         ],
         "excludedFeatures": [
           "Priority email support",
-          "Save up to 3 CVs",
+          "Save up to 3 resumes",
           "Full template library"
         ],
         "cta": "Start Free"
@@ -309,15 +309,15 @@
       {
         "name": "Interview Pass (14 Days)",
         "description": "Ideal for your 2-week active job application and interview sprint.",
-        "price": "39 RON",
+        "price": "$8",
         "pricePeriod": "/one-time",
         "features": [
           "Full Pro access for 14 days",
           "One-time payment for 14 days",
-          "Save up to 3 CVs",
+          "Save up to 3 resumes",
           "Unlimited PDF exports",
           "60 AI cover letters / month",
-          "60 resume-tailoring runs (CV vs JD) / month",
+          "60 resume-tailoring runs (resume vs JD) / month",
           "200 AI bullet rewrites / month",
           "100 AI resume reviews / month",
           "Priority email support"
@@ -329,14 +329,14 @@
       {
         "name": "Pro",
         "description": "For active job seekers applying consistently.",
-        "price": "59 RON",
+        "price": "$12",
         "pricePeriod": "/month",
         "features": [
           "Everything in Free, plus:",
-          "Save up to 3 CVs",
+          "Save up to 3 resumes",
           "Unlimited PDF exports",
           "60 AI cover letters / month",
-          "60 resume-tailoring runs (CV vs JD) / month",
+          "60 resume-tailoring runs (resume vs JD) / month",
           "200 AI bullet rewrites / month",
           "100 AI resume reviews / month",
           "Priority email support"
@@ -347,13 +347,13 @@
       {
         "name": "Recruiting Plan",
         "description": "6-month plan for high-volume applications.",
-        "price": "299 RON",
+        "price": "$60",
         "pricePeriod": "/6 months",
         "features": [
           "Everything in Pro included",
-          "Save up to 15 CVs",
+          "Save up to 15 resumes",
           "300 AI cover letters / month",
-          "300 resume-tailoring runs (CV vs JD) / month",
+          "300 resume-tailoring runs (resume vs JD) / month",
           "1,000 AI bullet rewrites / month",
           "Unlimited PDF exports",
           "Full template library access",
@@ -402,7 +402,7 @@
       "unreadable": "We could not read text from this file. Upload a PDF or DOCX with selectable text."
     },
     "wantRewriting": "Want automatic rewriting of your weak points?",
-    "proPrice": "59 RON",
+    "proPrice": "$12",
     "proPricePeriod": "/month",
     "whatToFix": "What to fix",
     "reportSentTo": "Report sent to {email}.",
@@ -534,7 +534,7 @@
     },
     {
       "question": "How does the 14-day Interview Pass work?",
-      "answer": "You pay 39 RON once and get Pro access for 14 days from payment. The pass does not auto-renew, and when it expires your account returns to the Free plan and its limits. Buying another pass while one is active adds the days on top. At checkout you request that access starts immediately and confirm that you lose the 14-day right of withdrawal to the extent the law allows this exception. Details are in the Terms, section 7."
+      "answer": "You pay $8 once and get Pro access for 14 days from payment. The pass does not auto-renew, and when it expires your account returns to the Free plan and its limits. Buying another pass while one is active adds the days on top. At checkout you request that access starts immediately and confirm that you lose the 14-day right of withdrawal to the extent the law allows this exception. Details are in the Terms, section 7."
     },
     {
       "question": "What happens to the data in my resume?",
@@ -654,7 +654,7 @@
     "somethingWentWrong": "Something went wrong. Please try again.",
     "manageBilling": "Manage Billing",
     "upgradeToPro": "Upgrade to Pro",
-    "buyPass": "14-day Pass (39 RON)",
+    "buyPass": "14-day Pass ($8)",
     "alreadyActive": "This plan is already active on your account.",
     "checkoutUnavailable": "Payments are temporarily unavailable. Please try again later.",
     "passSuccess": "Payment received. Your Pro pass is active until {date}.",
@@ -1046,7 +1046,7 @@
         },
         {
           "title": "6. Plans, prices and payments",
-          "content": "Prices are shown in RON on the pricing page and at checkout. Displayed prices are final; the provider is not a VAT payer. Payments are processed by Stripe, and the order confirmation and payment document reach your email.\n\n- The Free plan has the limits shown and involves no payment.\n- The 14-day Interview Pass is a one-off payment, with no automatic renewal, and gives Pro access for 14 days.\n- The Pro (monthly) and Recruiting Plan (6 months) plans are subscriptions that renew automatically at the end of each billing period, at the price shown at checkout, until cancelled.\n\nYou can cancel a subscription at any time in Settings (the Stripe billing portal) or by deleting your account. Cancelling stops future renewals, and access continues until the end of the period already paid. If we change the price of a subscription, we notify you at least 30 days in advance and the new price applies from the next renewal; you can cancel before then.\n\nMonthly AI usage limits in each plan are those shown. Promo codes and Pro days from the referral programme are personal, have no cash value and we may refuse or withdraw them in case of abuse. We may change or end the referral programme, and rewards already granted stay valid."
+          "content": "Prices are shown in US dollars (USD) on the pricing page and at checkout. Your card issuer may convert the amount into your local currency. Displayed prices are final; the provider is not a VAT payer. Payments are processed by Stripe, and the order confirmation and payment document reach your email.\n\n- The Free plan has the limits shown and involves no payment.\n- The 14-day Interview Pass is a one-off payment, with no automatic renewal, and gives Pro access for 14 days.\n- The Pro (monthly) and Recruiting Plan (6 months) plans are subscriptions that renew automatically at the end of each billing period, at the price shown at checkout, until cancelled.\n\nYou can cancel a subscription at any time in Settings (the Stripe billing portal) or by deleting your account. Cancelling stops future renewals, and access continues until the end of the period already paid. If we change the price of a subscription, we notify you at least 30 days in advance and the new price applies from the next renewal; you can cancel before then.\n\nMonthly AI usage limits in each plan are those shown. Promo codes and Pro days from the referral programme are personal, have no cash value and we may refuse or withdraw them in case of abuse. We may change or end the referral programme, and rewards already granted stay valid."
         },
         {
           "title": "7. Right of withdrawal and refunds",

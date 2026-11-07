@@ -227,7 +227,7 @@ describe('POST /api/billing/checkout', () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled()
   })
 
-  it('sells the 14-day pass as a one-time 39 RON card payment with withdrawal consent', async () => {
+  it('sells the 14-day pass as a one-time $8 USD card payment with withdrawal consent', async () => {
     const { POST } = await import('@/app/api/billing/checkout/route')
 
     const response = await POST(makeRequest({ plan: 'pass_14d', locale: 'en' }))
@@ -248,8 +248,8 @@ describe('POST /api/billing/checkout', () => {
         line_items: [
           expect.objectContaining({
             price_data: expect.objectContaining({
-              currency: 'ron',
-              unit_amount: 3900,
+              currency: 'usd',
+              unit_amount: 800,
               product_data: expect.objectContaining({ name: 'Joben Interview Pass (14 days)' }),
             }),
           }),

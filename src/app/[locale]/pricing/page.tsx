@@ -81,7 +81,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
         offers: {
           '@type': 'Offer',
           price: priceAmount(plan.price),
-          priceCurrency: 'RON',
+          priceCurrency: 'USD',
           url: `${siteConfig.url}/${locale}/pricing`,
           availability: 'https://schema.org/InStock',
         },

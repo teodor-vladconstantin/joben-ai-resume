@@ -14,9 +14,9 @@ export const siteConfig = {
 // needing a CMS or a database write on every deploy.
 export const BUILD_TIME = new Date().toISOString();
 
-// 14-day pass price in bani (39.00 RON). Used for the Stripe price_data
-// fallback; tests/lib/pass-price.test.ts keeps the "39 RON" copy in sync.
-export const PASS_14D_PRICE_BANI = 3900
+// 14-day pass price in cents ($8.00 USD). Used for the Stripe price_data
+// fallback; tests/lib/pass-price.test.ts keeps the "$8" copy in sync.
+export const PASS_14D_PRICE_CENTS = 800
 
 // Non-text plan behavior, kept locale-independent. Merge by array index with
 // the translated `Pricing.plans` array from messages/{locale}.json, which
