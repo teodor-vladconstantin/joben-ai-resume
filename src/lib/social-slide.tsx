@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { ImageResponse } from 'next/og'
 import { z } from 'zod'
 
@@ -192,15 +194,14 @@ function Body({ p }: { p: SlideParams }) {
   }
 }
 
-// Literal URLs only: the bundler resolves `new URL('<literal>', import.meta.url)` statically,
-// a template string makes every call read the same file.
-const load = (r: Promise<Response>) => r.then((x) => x.arrayBuffer())
+// Read from disk on the Node runtime; next.config.ts traces src/assets/fonts into /api/social/slide.
+const font = (file: string) => readFile(path.join(process.cwd(), 'src/assets/fonts', file))
 const fontFiles = () =>
   Promise.all([
-    load(fetch(new URL('../assets/fonts/inter-latin-400.woff', import.meta.url))),
-    load(fetch(new URL('../assets/fonts/inter-latin-700.woff', import.meta.url))),
-    load(fetch(new URL('../assets/fonts/inter-latin-ext-400.woff', import.meta.url))),
-    load(fetch(new URL('../assets/fonts/inter-latin-ext-700.woff', import.meta.url))),
+    font('inter-latin-400.woff'),
+    font('inter-latin-700.woff'),
+    font('inter-latin-ext-400.woff'),
+    font('inter-latin-ext-700.woff'),
   ])
 
 export async function renderSlide(p: SlideParams) {
