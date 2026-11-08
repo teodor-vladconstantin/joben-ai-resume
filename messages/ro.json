@@ -1017,7 +1017,7 @@
       "metaTitle": "Termeni și condiții",
       "metaDescription": "Termenii și condițiile Joben: folosirea serviciului, planuri și plăți, dreptul de retragere, utilizarea AI, răspunderea și soluționarea litigiilor.",
       "heading": "Termeni și Condiții",
-      "lastUpdated": "7 noiembrie 2026",
+      "lastUpdated": "8 noiembrie 2026",
       "intro": "Te rugăm să citești acești termeni înainte de a folosi Joben. Ei formează contractul dintre tine și TETA ABC SRL.",
       "breadcrumbLabel": "Termeni și Condiții",
       "footerPrefix": "Citește ",
@@ -1050,7 +1050,7 @@
         },
         {
           "title": "7. Dreptul de retragere și rambursări",
-          "content": "Dacă ești consumator, ai dreptul să te retragi din contractul încheiat la distanță în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014). Pentru a te retrage, folosește funcția «Retrage-te din contract aici» de la /withdrawal (link în subsolul fiecărei pagini) sau trimite-ne o declarație clară la hello@joben.eu, indicând numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014. Îți confirmăm primirea și îți rambursăm sumele plătite în cel mult 14 zile, prin aceeași metodă de plată.\n\nDacă ai cerut ca accesul să înceapă imediat în perioada de retragere, la retragere plătești o sumă proporțională cu perioada de acces folosită până atunci, iar restul se rambursează.\n\nLa Pass-ul Interviu de 14 zile, la finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere în măsura în care legea (art. 16 din OUG nr. 34/2014) permite această excepție. În situația în care excepția nu s-ar aplica, se aplică regulile de mai sus.\n\nÎn afara dreptului de retragere și a drepturilor din garanția legală, sumele plătite pentru perioada de acces deja începută nu se rambursează. Dacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne și îl remediem sau îți rambursăm proporțional, conform legii."
+          "content": "Dacă ești consumator, ai dreptul să te retragi din contractul încheiat la distanță în 14 zile de la încheierea lui, fără să motivezi decizia (art. 9 din OUG nr. 34/2014). Pentru a te retrage, folosește funcția «Retrage-te din contract aici» de la /withdrawal (link în subsolul fiecărei pagini) sau trimite-ne o declarație clară la hello@joben.eu, indicând numele, adresa de email a contului și comanda. Poți folosi modelul de formular de retragere din OUG nr. 34/2014. Îți confirmăm primirea și îți rambursăm sumele plătite în cel mult 14 zile, prin aceeași metodă de plată.\n\nTe poți retrage dintr-un plan plătit cu rambursare doar dacă nu ai consumat nicio resursă, adică nu ai folosit nicio acțiune AI, analiză, rescriere, import sau export inclusă în plan. Odată ce ai consumat o resursă, suma plătită nu se rambursează, în măsura în care legea permite.\n\nLa Pass-ul Interviu de 14 zile, la finalizarea comenzii în Stripe îți exprimi acordul expres pentru începerea imediată a accesului și confirmi că iei la cunoștință că pierzi dreptul de retragere în măsura în care legea (art. 16 din OUG nr. 34/2014) permite această excepție. În situația în care excepția nu s-ar aplica, se aplică regulile de mai sus.\n\nÎn afara dreptului de retragere și a drepturilor din garanția legală, sumele plătite pentru perioada de acces deja începută nu se rambursează. Dacă un serviciu plătit nu a funcționat conform descrierii, scrie-ne și îl remediem sau îți rambursăm proporțional, conform legii."
         },
         {
           "title": "8. Utilizare acceptabilă",
@@ -1244,7 +1244,7 @@
         },
         {
           "title": "4. Abonamentele Pro și Plan Recrutare",
-          "content": "Abonamentele încep imediat, la cererea ta. Dacă te retragi în primele 14 zile, plătești o sumă proporțională cu perioada de acces folosită până la retragere, iar restul se rambursează. Retragerea oprește și reînnoirile viitoare."
+          "content": "Abonamentele încep imediat, la cererea ta. Te poți retrage cu rambursare în primele 14 zile doar dacă nu ai consumat nicio resursă (acțiuni AI, analize, rescrieri, importuri sau exporturi); odată ce ai consumat o resursă, suma plătită nu se rambursează, în măsura în care legea permite. Retragerea oprește și reînnoirile viitoare."
         },
         {
           "title": "5. Cum și când rambursăm",

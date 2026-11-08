@@ -1017,7 +1017,7 @@
       "metaTitle": "Terms and Conditions",
       "metaDescription": "Joben terms and conditions: using the service, plans and payments, the right of withdrawal, AI use, liability and dispute resolution.",
       "heading": "Terms and Conditions",
-      "lastUpdated": "7 November 2026",
+      "lastUpdated": "8 November 2026",
       "intro": "Please read these terms before using Joben. They form the contract between you and TETA ABC SRL.",
       "breadcrumbLabel": "Terms and Conditions",
       "footerPrefix": "Read our ",
@@ -1050,7 +1050,7 @@
         },
         {
           "title": "7. Right of withdrawal and refunds",
-          "content": "If you are a consumer, you have the right to withdraw from a contract concluded at a distance within 14 days of its conclusion, without giving a reason (Art. 9 of Government Emergency Ordinance no. 34/2014). To withdraw, use the \"Withdraw from contract here\" function at /withdrawal (link in the footer of every page) or send us a clear statement at hello@joben.eu stating your name, your account email and the order. You may use the model withdrawal form in GEO no. 34/2014. We confirm receipt and refund the amounts paid within 14 days at most, using the same payment method.\n\nIf you asked for access to start immediately during the withdrawal period, on withdrawal you pay an amount proportionate to the access period used up to then, and the rest is refunded.\n\nFor the 14-day Interview Pass, at Stripe checkout you give your express consent to access starting immediately and acknowledge that you lose the right of withdrawal to the extent the law (Art. 16 of GEO no. 34/2014) allows this exception. If the exception does not apply, the rules above apply.\n\nApart from the right of withdrawal and statutory guarantee rights, amounts paid for an access period that has already started are not refunded. If a paid service did not work as described, write to us and we will fix it or refund proportionately, as the law requires."
+          "content": "If you are a consumer, you have the right to withdraw from a contract concluded at a distance within 14 days of its conclusion, without giving a reason (Art. 9 of Government Emergency Ordinance no. 34/2014). To withdraw, use the \"Withdraw from contract here\" function at /withdrawal (link in the footer of every page) or send us a clear statement at hello@joben.eu stating your name, your account email and the order. You may use the model withdrawal form in GEO no. 34/2014. We confirm receipt and refund the amounts paid within 14 days at most, using the same payment method.\n\nYou can withdraw from a paid plan and receive a refund only if you have not consumed any resources, meaning you have not used any AI action, analysis, rewrite, import or export included in the plan. Once any resource has been consumed, the amount paid is not refunded, to the extent the law allows.\n\nFor the 14-day Interview Pass, at Stripe checkout you give your express consent to access starting immediately and acknowledge that you lose the right of withdrawal to the extent the law (Art. 16 of GEO no. 34/2014) allows this exception. If the exception does not apply, the rules above apply.\n\nApart from the right of withdrawal and statutory guarantee rights, amounts paid for an access period that has already started are not refunded. If a paid service did not work as described, write to us and we will fix it or refund proportionately, as the law requires."
         },
         {
           "title": "8. Acceptable use",
@@ -1244,7 +1244,7 @@
         },
         {
           "title": "4. Pro and Recruiting Plan subscriptions",
-          "content": "Subscriptions start immediately at your request. If you withdraw within the first 14 days, you pay an amount proportionate to the access used until you withdrew, and the rest is refunded. Withdrawing also stops future renewals."
+          "content": "Subscriptions start immediately at your request. You can withdraw with a refund within the first 14 days only if you have not consumed any resources (AI actions, analyses, rewrites, imports or exports); once a resource has been consumed, the amount paid is not refunded, to the extent the law allows. Withdrawing also stops future renewals."
         },
         {
           "title": "5. How and when we refund",
