@@ -211,6 +211,10 @@ const nextConfig: NextConfig = {
       // Romanian slug only exists under /ro; English keeps /free-ats-checker.
       { source: '/ro/free-ats-checker', destination: '/ro/verificare-cv-ats', statusCode: 301 as const },
       { source: '/en/verificare-cv-ats', destination: '/en/free-ats-checker', statusCode: 301 as const },
+      // Crawled by Google and 404: the locale switcher kept the path across locales, and the
+      // glossary link had no locale prefix. Both targets exist (200).
+      { source: '/en/ghiduri/cv-dupa-o-pauza-in-cariera', destination: '/en/guides/resume-after-a-career-gap', statusCode: 301 as const },
+      { source: '/glossary/how-to-ask-for-interview-feedback', destination: '/en/glossary/how-to-ask-for-interview-feedback', statusCode: 301 as const },
     ]
   },
   async rewrites() {

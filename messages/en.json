@@ -297,6 +297,7 @@
           "3 AI cover letters / month",
           "3 resume-tailoring runs (resume vs JD) / month",
           "15 AI bullet rewrites / month",
+          "10 AI resume reviews / month",
           "1 basic ATS-optimized template"
         ],
         "excludedFeatures": [
@@ -510,7 +511,7 @@
   "Faq": [
     {
       "question": "Is Joben really free to start?",
-      "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, and 15 bullet rewrites/month."
+      "answer": "Yes. Free includes 1 saved CV, 5 PDF exports, 3 cover letters/month, 3 CV-tailoring runs/month, 15 bullet rewrites/month, and 10 AI resume reviews/month."
     },
     {
       "question": "What is an ATS and what does it do with my resume?",
