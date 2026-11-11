@@ -38,14 +38,14 @@ export const ATS_SEO_RO = {
       heading: 'Ce este gratuit și ce vine după?',
       paragraphs: [
         'Scanarea, scorul, punctajul pe categorii și prima problemă sunt gratuite și nu cer cont. Limita este o scanare gratuită pe zi. Restul listei de probleme se deschide după ce introduci un email, iar raportul ajunge în inbox împreună cu până la 2 emailuri ulterioare cu sfaturi pentru CV, de la care te poți dezabona oricând. Emailul este opțional pentru a vedea scorul.',
-        'Planul Gratuit al contului include 1 CV salvat, 5 exporturi PDF și 15 rescrieri AI de puncte pe lună. Evaluarea AI completă a CV-ului din cont folosește 5 categorii. Pass Interviu costă $8, plată unică pentru 14 zile de acces Pro, fără reînnoire automată, iar Pro costă $12 pe lună. Prețurile sunt finale, iar furnizorul nu este plătitor de TVA.',
+        'Planul Gratuit al contului include 1 CV salvat, 5 exporturi PDF, 15 rescrieri AI de puncte și 10 evaluări AI ale CV-ului pe lună. Evaluarea AI completă din cont folosește 5 categorii. Pass Interviu costă $8, plată unică pentru 14 zile de acces Pro, fără reînnoire automată, iar Pro costă $12 pe lună. Prețurile sunt finale, iar furnizorul nu este plătitor de TVA.',
       ],
     },
     {
       heading: 'Ce se întâmplă cu fișierul tău?',
       paragraphs: [
         'Fișierul încărcat este procesat în memoria serverului, pe durata unei singure cereri. Joben extrage textul, iar fișierul nu este scris pe disc sau în baza de date. Textul extras este trimis furnizorului de AI (Anthropic), care întoarce analiza.',
-        'Rezultatul scanării (scorul, categoriile și problemele găsite) se păstrează într-o înregistrare anonimă, folosită pentru raportul pe email. Înregistrările care nu sunt asociate unui cont se șterg după 90 de zile. Detaliile se găsesc în Politica de Confidențialitate.',
+        'Rezultatul scanării (scorul, categoriile și problemele găsite) se păstrează într-o înregistrare folosită pentru raportul pe email. Dacă introduci un email, acesta se păstrează în aceeași înregistrare, alături de un hash al adresei IP și un identificator aleatoriu al dispozitivului, folosite pentru limita zilnică. Înregistrarea se șterge după 90 de zile, dacă nu o revendică un cont. Dacă îți creezi cont, scanarea devine parte din contul tău. Detaliile se găsesc în Politica de Confidențialitate.',
       ],
     },
     {

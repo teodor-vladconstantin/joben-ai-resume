@@ -297,6 +297,7 @@
           "3 scrisori de intenție AI / lună",
           "3 adaptări de CV (CV vs job description) / lună",
           "15 rescrieri AI de puncte / lună",
+          "10 evaluări AI ale CV-ului / lună",
           "1 șablon de bază optimizat ATS"
         ],
         "excludedFeatures": [
@@ -510,7 +511,7 @@
   "Faq": [
     {
       "question": "Joben e chiar gratuit la început?",
-      "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună și 15 rescrieri de puncte/lună."
+      "answer": "Da. Planul Gratuit include 1 CV salvat, 5 exporturi PDF, 3 scrisori de intenție/lună, 3 adaptări de CV/lună, 15 rescrieri de puncte/lună și 10 evaluări AI ale CV-ului/lună."
     },
     {
       "question": "Ce este un ATS și ce face cu CV-ul meu?",
