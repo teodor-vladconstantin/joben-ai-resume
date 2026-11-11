@@ -44,7 +44,7 @@ export const ATS_SEO_RO = {
     {
       heading: 'Ce se întâmplă cu fișierul tău?',
       paragraphs: [
-        'Joben nu salvează fișierul încărcat. Serverul îl citește în memorie pe durata unei singure cereri, extrage textul și nu scrie fișierul pe disc sau în baza de date. Textul extras este trimis furnizorului de AI (Anthropic), care întoarce analiza.',
+        'Fișierul încărcat este procesat în memoria serverului, pe durata unei singure cereri. Joben extrage textul, iar fișierul nu este scris pe disc sau în baza de date. Textul extras este trimis furnizorului de AI (Anthropic), care întoarce analiza.',
         'Rezultatul scanării (scorul, categoriile și problemele găsite) se păstrează într-o înregistrare anonimă, folosită pentru raportul pe email. Înregistrările care nu sunt asociate unui cont se șterg după 90 de zile. Detaliile se găsesc în Politica de Confidențialitate.',
       ],
     },
