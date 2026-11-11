@@ -8,6 +8,9 @@ import { routing, type AppLocale } from '@/i18n/routing'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { AtsCheckerSeoContent } from '@/components/seo/AtsCheckerSeoContent'
+import { ATS_SEO_RO } from '@/data/ats-checker-seo-ro'
+import { siteConfig } from '@/lib/content'
 
 export async function generateMetadata({
   params,
@@ -53,6 +56,9 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
   const messages = (await getMessages({ locale })) as unknown as Messages
   const { Common, AtsChecker: atsChecker } = messages
 
+  // The explainer, answer block and FAQ are Romanian-only (brief 02); /en keeps the bare tool.
+  const isRo = locale === 'ro'
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -62,18 +68,31 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
       ]),
       {
         '@type': 'WebApplication',
-        name: 'Joben Free ATS Resume Checker',
+        name: isRo ? 'Verificare CV ATS Joben' : 'Joben Free ATS Resume Checker',
+        url: `${siteConfig.url}/${locale}${atsCheckerPath(locale)}`,
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Any',
         description: atsChecker.subheading,
         inLanguage: locale,
-        dateModified: '2026-10-14',
+        dateModified: '2026-11-11',
         offers: {
           '@type': 'Offer',
           price: '0',
           priceCurrency: 'USD',
         },
       },
+      ...(isRo
+        ? [
+            {
+              '@type': 'FAQPage',
+              mainEntity: ATS_SEO_RO.faq.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: { '@type': 'Answer', text: item.answer },
+              })),
+            },
+          ]
+        : []),
     ],
   }
 
@@ -91,9 +110,13 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
             {atsChecker.subheading}
           </p>
+          {isRo && (
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">{ATS_SEO_RO.answer}</p>
+          )}
         </div>
 
         <FreeAtsCheckerClient />
+        {isRo && <AtsCheckerSeoContent />}
       </main>
     </div>
   )

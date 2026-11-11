@@ -47,7 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: { ro: '/refunds', en: '/refunds' }, lastModified: '2026-11-06', changeFrequency: 'yearly', priority: 0.3 },
     { path: { ro: '/subprocessors', en: '/subprocessors' }, lastModified: '2026-11-06', changeFrequency: 'yearly', priority: 0.3 },
     { path: { ro: '/resume-examples', en: '/resume-examples' }, lastModified: MERGED_ROLE_PAGES_UPDATED, changeFrequency: 'monthly', priority: 0.7 },
-    { path: { ro: '/verificare-cv-ats', en: '/free-ats-checker' }, lastModified: '2026-10-14', changeFrequency: 'monthly', priority: 0.9 },
+    { path: { ro: '/verificare-cv-ats', en: '/free-ats-checker' }, lastModified: '2026-11-11', changeFrequency: 'monthly', priority: 0.9 },
     { path: { ro: '/sabloane-cv', en: '/cv-templates' }, lastModified: '2026-10-16', changeFrequency: 'monthly', priority: 0.8 },
   ];
 

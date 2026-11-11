@@ -10,7 +10,7 @@
     },
     "atsChecker": {
       "title": "Verificare CV ATS Gratuită: Analiză AI, Fără Cont",
-      "description": "Verificare CV gratuită cu analiză AI în câteva secunde: scor de la 0 la 100, 4 categorii și soluții concrete. Fără cont, fără card, o scanare pe zi."
+      "description": "Încarcă CV-ul în PDF sau DOCX și primești un scor ATS de la 0 la 100 și primul punct de reparat, gratuit, fără cont. Vezi ce citește un ATS din fișierul tău."
     },
     "resumeExamplesHub": {
       "title": "Exemple de CV și Cuvinte Cheie ATS pe Roluri",
@@ -428,7 +428,7 @@
     "neverRequired": "Nu e niciodată obligatoriu, îți vezi scorul oricum.",
     "scanning": "Îți scanăm CV-ul...",
     "scanButton": "Scanează-mi CV-ul, Gratuit",
-    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul e șters după scanare",
+    "scanDisclaimer": "1 scanare gratuită pe zi · fără cont · fișierul nu e salvat",
     "consentLabel": "Am cel puțin 16 ani și sunt de acord cu <terms>Termenii și Condițiile</terms> și cu <privacy>Politica de Confidențialitate</privacy>.",
     "steps": {
       "upload": "Încărcare",
