@@ -803,6 +803,7 @@
 
 
 ## Done
+- [DONE] 2026-11-13 Editor CV: clicurile repetate pe "+ Adaugă Punct" nu mai adaugă puncte goale (focus pe punctul gol existent), "+ Adaugă Rol" adaugă un rol gol cu placeholder (nu text precompletat) și nu dublează un rol gol, elementul nou clipește scurt. Editorul e blocat cât se încarcă un CV salvat. tsc/lint curate, 511 teste.
 - [DONE] 2026-11-06 posthog-node 5.39.1 -> 5.63.1 (aceeași versiune majoră; @posthog/ai 8.16.3 o folosește deduplicat). tsc/lint curate, 399 teste. Verificare după deploy pe Vercel: evenimentele server vin din 5.63.x.
 - [DONE] 2026-10-16 SEO foundation + GA4 measurement (PR #18-#22 in main); ghid ro (/ro/ghiduri/cv-citit-corect-de-ats) + en (/en/guides/cv-readable-by-ats) cu hreflang: metadata/JSON-LD/robots/FAQ/ghid ro; GTM-MJ5VPX6J (v5) cu tag G-PGLHWSE720 + evenimente ats_scan_completed, sign_up_started, begin_checkout, purchase (server-side Measurement Protocol din webhook-ul Stripe, doar cu gaClientId din _ga, adică cu consimțământ; env GA4_MEASUREMENT_ID + GA4_MP_API_SECRET în Vercel); Consent Mode default din localStorage; dimensiuni Plan/Source/Grade + metrica ATS Score; GA4 legat de Search Console; indexare ghid cerută. Rămas: marcat key events (sign_up_started, begin_checkout) în GA4 după ce apar în Admin > Events (~24h), IndexNow (cere proiect OpenSEO), ghid en.
 - [DONE] Security audit fixes on fix/security-audit (H2-H4, M1-M8, L1/L2/L4/L5/L6/L8/L9); H1 secret rotation and L3/L7 left to owner

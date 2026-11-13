@@ -1342,10 +1342,7 @@
       "bulletPlaceholder": "Descrie impactul măsurabil",
       "bulletToolbarLabel": "Formatare punct",
       "deleteBulletButton": "Șterge",
-      "confirmDelete": "Sigur vrei să ștergi această intrare de experiență?",
-      "newRoleTitle": "Rol Nou",
-      "newRoleCompany": "Numele Companiei",
-      "newRoleDescription": "Descrie impactul și realizările tale."
+      "confirmDelete": "Sigur vrei să ștergi această intrare de experiență?"
     },
     "ai": {
       "aiDraft": "Ciornă AI",
