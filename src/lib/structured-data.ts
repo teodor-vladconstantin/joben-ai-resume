@@ -30,6 +30,7 @@ export function organizationJsonLd() {
       'https://www.linkedin.com/company/jobeneu/',
       'https://www.instagram.com/joben.eu',
       'https://www.facebook.com/people/Jobeneu/100066505480256/',
+      'https://www.tiktok.com/@getjoben.eu',
       'https://www.producthunt.com/products/joben',
     ],
     contactPoint: {
