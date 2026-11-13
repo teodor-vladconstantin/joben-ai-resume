@@ -1342,10 +1342,7 @@
       "bulletPlaceholder": "Describe measurable impact",
       "bulletToolbarLabel": "Bullet formatting",
       "deleteBulletButton": "Del",
-      "confirmDelete": "Are you sure you want to delete this experience entry?",
-      "newRoleTitle": "New Role",
-      "newRoleCompany": "Company Name",
-      "newRoleDescription": "Describe your impact and achievements."
+      "confirmDelete": "Are you sure you want to delete this experience entry?"
     },
     "ai": {
       "aiDraft": "AI Draft",

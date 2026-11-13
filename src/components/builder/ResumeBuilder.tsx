@@ -256,6 +256,17 @@ function getBulletFieldKey(experienceId: string, bulletIndex: number): string {
   return `${experienceId}:${bulletIndex}`
 }
 
+function isBlankExperience(entry: ExperienceEntry): boolean {
+  return (
+    !entry.title.trim() &&
+    !entry.company.trim() &&
+    entry.startYear === undefined &&
+    entry.endYear === undefined &&
+    !entry.isCurrent &&
+    getExperienceBullets(entry).every((bullet) => !bullet.trim())
+  )
+}
+
 function normalizeProjectEntry(entry: Partial<ProjectEntry>): ProjectEntry {
   const description = entry.description || ''
   // Bullets are a derived view of the description — re-deriving every time keeps the
@@ -396,7 +407,8 @@ export function ResumeBuilder() {
   const t = useTranslations('Builder')
   const serverError = useServerError()
   const importInputRef = useRef<HTMLInputElement | null>(null)
-  const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
+  // Bullet textareas keyed by getBulletFieldKey, role title inputs by role id.
+  const focusFieldRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData)
   // The blank form, or exactly what was loaded from the DB. Autosave skips
@@ -439,7 +451,8 @@ export function ResumeBuilder() {
   const [summaryDraftClaims, setSummaryDraftClaims] = useState<string[]>([])
   const [summaryClaimsConfirmed, setSummaryClaimsConfirmed] = useState(false)
   const [summaryGenerationError, setSummaryGenerationError] = useState<string | null>(null)
-  const [pendingBulletScrollKey, setPendingBulletScrollKey] = useState<string | null>(null)
+  const [pendingFocusKey, setPendingFocusKey] = useState<string | null>(null)
+  const [flashedFieldKey, setFlashedFieldKey] = useState<string | null>(null)
   const creationSourceRef = useRef<'import' | 'scratch'>('scratch')
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
@@ -625,19 +638,30 @@ export function ResumeBuilder() {
   }, [isLoading, searchParams, resumeData.experience, t])
 
   useEffect(() => {
-    if (!pendingBulletScrollKey) return
+    if (!pendingFocusKey) return
 
     const frameId = requestAnimationFrame(() => {
-      const targetField = bulletFieldRefs.current[pendingBulletScrollKey]
+      const targetField = focusFieldRefs.current[pendingFocusKey]
       if (targetField) {
         targetField.scrollIntoView({ behavior: 'smooth', block: 'center' })
         targetField.focus()
       }
-      setPendingBulletScrollKey(null)
+      setPendingFocusKey(null)
     })
 
     return () => cancelAnimationFrame(frameId)
-  }, [pendingBulletScrollKey])
+  }, [pendingFocusKey])
+
+  useEffect(() => {
+    if (!flashedFieldKey) return
+    const timer = setTimeout(() => setFlashedFieldKey(null), 1500)
+    return () => clearTimeout(timer)
+  }, [flashedFieldKey])
+
+  const focusAndFlashField = (key: string) => {
+    setPendingFocusKey(key)
+    setFlashedFieldKey(key)
+  }
 
   const persistResume = useCallback(async () => {
     setSaveStatus('saving')
@@ -906,30 +930,26 @@ export function ResumeBuilder() {
   }, [])
 
   const addExperienceBullet = (experienceId: string) => {
-    let nextKey: string | null = null
+    const experience = resumeData.experience.find((exp) => exp.id === experienceId)
+    if (!experience) return
+
+    const bullets = getExperienceBullets(experience)
+    const lastIndex = bullets.length - 1
+    // A repeat click returns the user to the empty bullet instead of stacking more.
+    if (lastIndex >= 0 && !bullets[lastIndex].trim()) {
+      focusAndFlashField(getBulletFieldKey(experienceId, lastIndex))
+      return
+    }
 
     setResumeData((prev) => ({
       ...prev,
       experience: prev.experience.map((exp) =>
-        exp.id === experienceId
-          ? (() => {
-              const nextBullets = [...getExperienceBullets(exp), '']
-              nextKey = getBulletFieldKey(exp.id, nextBullets.length - 1)
-
-              return {
-                ...exp,
-                bullets: nextBullets,
-              }
-            })()
-          : exp
+        exp.id === experienceId ? { ...exp, bullets: [...getExperienceBullets(exp), ''] } : exp
       ),
     }))
 
     clearBulletDraftsForExperience(experienceId)
-
-    if (nextKey) {
-      setPendingBulletScrollKey(nextKey)
-    }
+    focusAndFlashField(getBulletFieldKey(experienceId, bullets.length))
   }
 
   const removeExperienceBullet = (experienceId: string, bulletIndex: number) => {
@@ -965,19 +985,27 @@ export function ResumeBuilder() {
   }
 
   const handleAddRole = () => {
-    const newRole = {
+    const firstRole = resumeData.experience[0]
+    // A repeat click returns the user to the blank role instead of stacking more.
+    if (firstRole && isBlankExperience(firstRole)) {
+      focusAndFlashField(firstRole.id)
+      return
+    }
+
+    const newRole: ExperienceEntry = {
       id: `exp_${Date.now()}`,
-      title: t('experience.newRoleTitle'),
-      company: t('experience.newRoleCompany'),
-      period: 'Start - End',
-      description: t('experience.newRoleDescription'),
-      bullets: [t('experience.newRoleDescription')],
+      title: '',
+      company: '',
+      period: '',
+      description: '',
+      bullets: [''],
     }
 
     setResumeData((prevData) => ({
       ...prevData,
       experience: [newRole, ...prevData.experience],
     }))
+    focusAndFlashField(newRole.id)
   }
 
   const visibleDynamicSections = useMemo(() => {
@@ -1673,6 +1701,12 @@ export function ResumeBuilder() {
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
+          {/* Edits made before loadResume finishes would be replaced by the loaded data. */}
+          <fieldset
+            disabled={isLoading && !isCreateMode}
+            aria-busy={isLoading && !isCreateMode}
+            className="min-w-0 transition-opacity disabled:opacity-60"
+          >
           {activeTab === 'personal' && (
             <div className="space-y-4" suppressHydrationWarning>
               <h2 className="text-xl font-bold text-foreground mb-6">{t('personal.heading')}</h2>
@@ -1860,7 +1894,13 @@ export function ResumeBuilder() {
                   .reduce((sum, e) => sum + getExperienceBullets(e).length, 0)
 
                 return (
-                 <div key={exp.id} className="bg-card border border-border rounded-md p-4 hover:border-primary/90/60 transition-colors" suppressHydrationWarning>
+                 <div
+                   key={exp.id}
+                   className={`bg-card border rounded-md p-4 hover:border-primary/90/60 transition-colors ${
+                     flashedFieldKey === exp.id ? 'border-primary ring-2 ring-primary/30' : 'border-border'
+                   }`}
+                   suppressHydrationWarning
+                 >
                    <div className="flex items-center justify-between gap-2 mb-3" suppressHydrationWarning>
                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t('experience.entryLabel')}</p>
                      <div className="flex gap-2" suppressHydrationWarning>
@@ -1876,6 +1916,9 @@ export function ResumeBuilder() {
 
                    <div className="space-y-2">
                      <input
+                       ref={(node) => {
+                         focusFieldRefs.current[exp.id] = node
+                       }}
                        value={exp.title}
                        onChange={(e) => updateExperienceMetaField(exp.id, 'title', e.target.value)}
                        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/90 focus:outline-none"
@@ -1914,8 +1957,8 @@ export function ResumeBuilder() {
 
                        {experienceBullets.map((bullet, bulletIndex) => {
                          const globalIdx = globalBulletOffset + bulletIndex
-                         const isHighlighted = highlightedBulletIndex === globalIdx
                          const draftKey = getBulletFieldKey(exp.id, bulletIndex)
+                         const isHighlighted = highlightedBulletIndex === globalIdx || flashedFieldKey === draftKey
                          const draftState = bulletDraftStates[draftKey]
                          const hasDraft = Boolean(draftState?.draft?.trim())
                          return (
@@ -1929,7 +1972,7 @@ export function ResumeBuilder() {
                              <span className="pt-9 text-muted-foreground">•</span>
                              <RichTextarea
                                ref={(node) => {
-                                 bulletFieldRefs.current[draftKey] = node
+                                 focusFieldRefs.current[draftKey] = node
                                }}
                                data-bullet-global-index={globalIdx}
                                value={bullet}
@@ -2216,6 +2259,7 @@ export function ResumeBuilder() {
               )}
             </div>
           ) : null}
+          </fieldset>
         </div>
         
         <div data-tour="editor-export" className="shrink-0 p-4 border-t border-border bg-background flex justify-between items-center gap-4" suppressHydrationWarning>
