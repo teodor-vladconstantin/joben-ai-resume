@@ -4,14 +4,15 @@ import { getMessages } from 'next-intl/server'
 import { LegalDocPage, legalDocMetadata } from '@/components/legal/LegalDocPage'
 import { SUBPROCESSORS } from '@/lib/legal/subprocessors'
 import type { AppLocale } from '@/i18n/routing'
+import { enableRequestLocale } from '@/i18n/request-locale'
 import type { Messages } from '@/i18n/messages'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: AppLocale }> }): Promise<Metadata> {
-  return legalDocMetadata((await params).locale, 'subprocessors')
+  return legalDocMetadata(enableRequestLocale((await params).locale), 'subprocessors')
 }
 
 export default async function SubprocessorsPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
-  const { locale } = await params
+  const locale = enableRequestLocale((await params).locale)
   const messages = (await getMessages({ locale })) as unknown as Messages
   const headers = messages.Legal.subprocessors.tableHeaders
   const optional = messages.Legal.subprocessors.optionalLabel
