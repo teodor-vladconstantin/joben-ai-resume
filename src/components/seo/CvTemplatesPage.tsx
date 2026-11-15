@@ -100,9 +100,9 @@ const COPY: Record<
   },
   en: {
     eyebrow: 'CV templates',
-    title: 'Free ATS-friendly CV templates',
+    title: 'Free CV templates in Word (DOCX), ATS-friendly',
     description:
-      'Download free CV templates in DOCX: classic, for students and for career changers. Single column, no tables, in Romanian and English.',
+      'Free CV templates to download in Word (DOCX): classic, student and career change. ATS-friendly, single column, in English and Romanian. Fill in and export to PDF.',
     answer:
       'The templates below are free DOCX files with a single column, no tables or text boxes, standard headings and contact details in the body of the page. You open them in Word or Google Docs, replace the text in brackets and export to a PDF with selectable text. Each comes in a Romanian and an English version.',
     updated: 'Updated',
