@@ -198,7 +198,7 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         has: [{ type: 'host' as const, value: 'www.joben.eu' }],
         destination: 'https://joben.eu/:path*',
-        statusCode: 301 as const,
+        permanent: true, // 308: keeps the method, the query string (UTM) is forwarded by Next
       },
       ...cvRedirects,
       // English cover letters moved from the Romanian segment to /cover-letter.

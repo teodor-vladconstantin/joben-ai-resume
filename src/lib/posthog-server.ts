@@ -15,6 +15,8 @@ type CapturePostHogEventInput = {
 async function withPostHogClient(label: string, send: (client: PostHog) => void): Promise<void> {
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
   if (!apiKey) return
+  // Previews and local dev must not write to the production project.
+  if ((process.env.VERCEL_ENV ?? process.env.NODE_ENV) !== 'production') return
 
   const client = new PostHog(apiKey, {
     host: POSTHOG_HOST,

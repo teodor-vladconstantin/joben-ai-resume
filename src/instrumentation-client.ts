@@ -13,7 +13,10 @@ const posthogProjectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 // Skip init entirely on localhost so local testing never pollutes production
 // analytics. `next build` (including Vercel preview builds) always sets
 // NODE_ENV=production, so this only excludes `next dev`.
-if (posthogProjectToken && process.env.NODE_ENV === 'production') {
+// Only joben.eu and its subdomains report: localhost and *.vercel.app previews never do.
+const isProductionHost = /(^|\.)joben\.eu$/.test(window.location.hostname)
+
+if (posthogProjectToken && process.env.NODE_ENV === 'production' && isProductionHost) {
   posthog.init(posthogProjectToken, {
     api_host: '/ingest',
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,

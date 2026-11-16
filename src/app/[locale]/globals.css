@@ -395,3 +395,13 @@ body {
 .driver-popover.joben-tour .driver-popover-arrow-side-right { border-right-color: var(--surface); }
 .driver-popover.joben-tour .driver-popover-arrow-side-top { border-top-color: var(--surface); }
 .driver-popover.joben-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--surface); }
+
+/* Soft pulse on the ATS scan CTA button. */
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(44, 184, 122, 0.45); }
+  50% { box-shadow: 0 0 0 8px rgba(44, 184, 122, 0); }
+}
+.cta-pulse { animation: cta-pulse 2.4s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cta-pulse { animation: none; }
+}

@@ -13,6 +13,7 @@ import { PlanCta } from '@/components/pricing/PlanCta'
 import { useServerError } from '@/hooks/useServerError'
 import { pushGtmEvent } from '@/lib/gtm-events'
 import { Link } from '@/i18n/navigation'
+import { takePendingScanFile } from '@/lib/pending-scan-file'
 
 const legalLinkClass = 'text-foreground underline decoration-border underline-offset-2 hover:decoration-primary transition-colors duration-150 ease-out'
 
@@ -59,6 +60,10 @@ function consentedDistinctId(): string | null {
 
 // Fires for clicks on any link/button inside a CTA card, whatever component
 // renders it (AuthAwareSignupLink, PlanCta).
+function fromParam(): string | null {
+  return new URLSearchParams(window.location.search).get('from')
+}
+
 function isCtaClick(event: React.MouseEvent): boolean {
   return event.target instanceof Element && Boolean(event.target.closest('a, button'))
 }
@@ -138,6 +143,15 @@ export function FreeAtsCheckerClient() {
   const [reportError, setReportError] = useState<string | null>(null)
   const freeCtaRef = useRef<HTMLDivElement | null>(null)
 
+  // Funnel step 1, with the CTA that sent the visitor here (?from=hero, sticky, ...).
+  // A file dropped on the homepage hero arrives through the pending-file slot.
+  useEffect(() => {
+    posthog.capture('checker_viewed', { locale, from: fromParam() })
+    const dropped = takePendingScanFile()
+    if (dropped) handleFile(dropped)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
+  }, [])
+
   // One ats_result_viewed per rendered result. The score comes back on the
   // same URL, so without this a result view is indistinguishable from the
   // upload pageview.
@@ -199,6 +213,7 @@ export function FreeAtsCheckerClient() {
     }
 
     posthog.capture('ats_file_selected', { extension, sizeKb: Math.round(selected.size / 1024) })
+    posthog.capture('file_selected', { extension, locale, from: fromParam() })
     setFile(selected)
   }
 
@@ -211,6 +226,7 @@ export function FreeAtsCheckerClient() {
 
     const hasEmail = Boolean(email.trim())
     posthog.capture('ats_scan_started', { hasEmail })
+    posthog.capture('scan_submitted', { hasEmail, locale, from: fromParam() })
 
     try {
       const formData = new FormData()
@@ -562,7 +578,10 @@ export function FreeAtsCheckerClient() {
         <input
           type="checkbox"
           checked={acceptedTerms}
-          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          onChange={(e) => {
+            setAcceptedTerms(e.target.checked)
+            if (e.target.checked) posthog.capture('terms_checked', { locale, from: fromParam() })
+          }}
           className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border bg-card accent-primary"
         />
         <span>

@@ -19,6 +19,7 @@ import { ClientProviders } from '@/components/ClientProviders'
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
+import { AtsScanCta } from '@/components/AtsScanCta'
 import { TranslateSafeDom } from '@/components/TranslateSafeDom'
 import { CONSENT_MODE_DEFAULT_SCRIPT } from '@/lib/consent-mode'
 
@@ -211,6 +212,7 @@ export default async function RootLayout({
               {children}
             </ClientProviders>
             <ConditionalFooter footer={<SiteFooter />} />
+            <AtsScanCta variant="sticky-mobile" location="sticky" />
             <CookieConsentBanner />
           </NextIntlClientProvider>
         </body>

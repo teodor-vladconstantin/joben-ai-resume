@@ -1927,6 +1927,15 @@
     "pending": "Your account is still being set up. Your referral link will appear here shortly, so refresh the page in a moment.",
     "loading": "Loading your referral link"
   },
+  "AtsScanCta": {
+    "headline": "Check your resume for free",
+    "sub": "ATS score in 10 seconds, no account needed.",
+    "button": "Scan my resume",
+    "dropHint": "Drop your file here or choose one. PDF or DOCX.",
+    "exampleScore": "Example ATS score",
+    "afterTitle": "Now check it",
+    "afterText": "Upload your finished resume and see your ATS score in 10 seconds."
+  },
   "TemplateGate": {
     "title": "Download the free template",
     "body": "Enter your email and the download starts right away.",
