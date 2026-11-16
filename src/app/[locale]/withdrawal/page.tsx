@@ -5,6 +5,7 @@ import { WithdrawalForm } from '@/components/legal/WithdrawalForm'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import type { AppLocale } from '@/i18n/routing'
+import { enableRequestLocale } from '@/i18n/request-locale'
 import { localeAlternates } from '@/lib/locale-alternates'
 
 export async function generateMetadata({
@@ -12,7 +13,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: AppLocale }>
 }): Promise<Metadata> {
-  const { locale } = await params
+  const locale = enableRequestLocale((await params).locale)
   const t = await getTranslations({ locale, namespace: 'Withdrawal' })
   return {
     title: t('metaTitle'),
@@ -22,7 +23,7 @@ export async function generateMetadata({
 }
 
 export default async function WithdrawalPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
-  const { locale } = await params
+  const locale = enableRequestLocale((await params).locale)
   const t = await getTranslations({ locale, namespace: 'Withdrawal' })
 
   return (

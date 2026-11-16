@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import type { AppLocale } from '@/i18n/routing'
+import { enableRequestLocale } from '@/i18n/request-locale'
 import { localeAlternates } from '@/lib/locale-alternates'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -15,7 +16,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: AppLocale }>
 }): Promise<Metadata> {
-  const { locale } = await params
+  const locale = enableRequestLocale((await params).locale)
   const t = await getTranslations({ locale, namespace: 'Legal.privacy' })
   const title = t('metaTitle')
   const description = t('metaDescription')
@@ -42,7 +43,7 @@ export async function generateMetadata({
 }
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: AppLocale }> }) {
-  const { locale } = await params
+  const locale = enableRequestLocale((await params).locale)
   const t = await getTranslations({ locale, namespace: 'Common' })
   const messages = (await getMessages({ locale })) as unknown as Messages
   const privacy = messages.Legal.privacy
