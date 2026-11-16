@@ -132,7 +132,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
   const syncPlanFromSubscription = async (
     customerId: string,
     subscription: Stripe.Subscription,
-    paymentCapture?: { amount: number | null; currency: string | null }
+    paymentCapture?: { amount: number | null }
   ): Promise<Response | null> => {
     const { data: user, error: userLookupError } = await supabase
       .from('users')
@@ -215,7 +215,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         await capturePostHogEvent({
           distinctId: user.clerk_id,
           event: 'payment_completed',
-          properties: { plan: 'recruiting', amount: paymentCapture.amount, currency: paymentCapture.currency },
+          properties: { plan: 'recruiting', amount: paymentCapture.amount },
         })
       }
 
@@ -253,7 +253,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
       await capturePostHogEvent({
         distinctId: user.clerk_id,
         event: 'payment_completed',
-        properties: { plan, amount: paymentCapture.amount, currency: paymentCapture.currency },
+        properties: { plan, amount: paymentCapture.amount },
       })
     }
 
@@ -336,7 +336,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
           await capturePostHogEvent({
             distinctId: userId,
             event: 'payment_completed',
-            properties: { plan: planId || 'pass_14d', amount: session.amount_total ?? null, currency: session.currency ?? null },
+            properties: { plan: planId || 'pass_14d', amount: session.amount_total ?? null },
           })
         }
 
@@ -346,7 +346,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
             transactionId: session.id,
             plan: planId || 'pro',
             value: (session.amount_total ?? 0) / 100,
-            currency: (session.currency ?? 'usd').toUpperCase(),
+            currency: (session.currency ?? 'ron').toUpperCase(),
           })
         }
 
@@ -475,7 +475,6 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         if (subscription) {
           const response = await syncPlanFromSubscription(invoice.customer, subscription, {
             amount: invoice.amount_paid ?? null,
-            currency: invoice.currency ?? null,
           })
           if (response) {
             return response
