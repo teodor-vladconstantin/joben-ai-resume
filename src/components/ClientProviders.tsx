@@ -8,9 +8,8 @@ import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { ScrollProgress } from '@/components/motion/ScrollProgress'
 import { GridOverlay } from '@/components/motion/GridOverlay'
 
-// GA4 is configured inside the GTM container (not here) — add a
-// "Google Analytics: GA4 Configuration" tag pointed at G-FBR6C4DH8B
-// with an "All Pages" trigger in the GTM UI.
+// GA4 is configured inside the GTM container (not here): the container sends
+// to G-PGLHWSE720 through its Google tag destination and GA4 event tags.
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
