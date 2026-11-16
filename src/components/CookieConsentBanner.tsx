@@ -11,6 +11,11 @@ import { enableSentryReplay } from '@/lib/sentry-replay'
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false)
   const t = useTranslations('CookieConsent')
+  // Marks <html> while the banner is open so the sticky ATS bar can hide itself (see globals.css).
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-cookie-banner-open', visible)
+    return () => document.documentElement.removeAttribute('data-cookie-banner-open')
+  }, [visible])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount read of localStorage, not a subscribable external store
