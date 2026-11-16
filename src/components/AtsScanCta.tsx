@@ -153,7 +153,7 @@ function StickyMobile() {
     <>
       {/* In-flow spacer so the fixed bar never covers the footer. */}
       <div className="h-16 shrink-0 md:hidden" aria-hidden />
-      <div style={{ bottom: 'var(--cookie-banner-h, 0px)' }} className="fixed inset-x-0 z-40 flex transition-[bottom] duration-150 ease-out motion-reduce:transition-none items-center justify-between gap-3 border-t border-border bg-card/95 px-4 py-3 backdrop-blur md:hidden">
+      <div className="ats-sticky fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-4 py-3 backdrop-blur md:hidden">
         <p className="min-w-0 text-sm font-semibold leading-tight">{t('headline')}</p>
         <Link href={href} onClick={track} className={`shrink-0 ${GREEN_BUTTON}`}>
           {t('button')}

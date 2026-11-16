@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppLink } from '@/components/ui/AppLink'
 import { useTranslations } from 'next-intl'
 import posthog from 'posthog-js'
@@ -11,25 +11,10 @@ import { enableSentryReplay } from '@/lib/sentry-replay'
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false)
   const t = useTranslations('CookieConsent')
-  const bannerRef = useRef<HTMLDivElement>(null)
-
-  // Publishes the banner height as --cookie-banner-h so fixed bars (the sticky ATS CTA)
-  // can sit above it; reset to 0 when the banner is closed.
+  // Marks <html> while the banner is open so the sticky ATS bar can hide itself (see globals.css).
   useEffect(() => {
-    const root = document.documentElement
-    const el = bannerRef.current
-    if (!visible || !el) {
-      root.style.setProperty('--cookie-banner-h', '0px')
-      return
-    }
-    const publish = () => root.style.setProperty('--cookie-banner-h', `${el.offsetHeight}px`)
-    publish()
-    const observer = new ResizeObserver(publish)
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      root.style.setProperty('--cookie-banner-h', '0px')
-    }
+    document.documentElement.toggleAttribute('data-cookie-banner-open', visible)
+    return () => document.documentElement.removeAttribute('data-cookie-banner-open')
   }, [visible])
 
   useEffect(() => {
@@ -61,7 +46,6 @@ export function CookieConsentBanner() {
 
   return (
     <div
-      ref={bannerRef}
       role="dialog"
       aria-label={t('ariaLabel')}
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card px-4 py-4 sm:px-6"

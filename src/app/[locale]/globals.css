@@ -405,3 +405,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cta-pulse { animation: none; }
 }
+
+/* The sticky ATS bar stays out of the way while the cookie banner is open. */
+html[data-cookie-banner-open] .ats-sticky { display: none; }
