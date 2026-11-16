@@ -1927,6 +1927,15 @@
     "pending": "Contul tău se pregătește. Linkul de recomandare apare aici în curând, așa că reîncarcă pagina peste câteva momente.",
     "loading": "Se încarcă linkul de recomandare"
   },
+  "AtsScanCta": {
+    "headline": "Verifică-ți CV-ul gratuit",
+    "sub": "Scor ATS în 10 secunde, fără cont.",
+    "button": "Scanează CV-ul",
+    "dropHint": "Trage fișierul aici sau alege-l. PDF sau DOCX.",
+    "exampleScore": "Exemplu de scor ATS",
+    "afterTitle": "Acum verifică-l",
+    "afterText": "Încarcă CV-ul completat și vezi scorul ATS în 10 secunde."
+  },
   "TemplateGate": {
     "title": "Descarcă șablonul gratuit",
     "body": "Lasă-ne adresa ta de email și descărcarea pornește imediat.",

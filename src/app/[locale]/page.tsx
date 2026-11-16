@@ -13,6 +13,7 @@ import { ResumeFindingsCard } from '@/components/landing/ResumeFindingsCard'
 import { CtaCard, FaqList, Section, wrap } from '@/components/marketing/section'
 import type { Messages } from '@/i18n/messages'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { AtsScanCta } from '@/components/AtsScanCta'
 
 const featureIcons = [Gauge, Sparkles, Target, Mail, LayoutTemplate, FileDown, Languages, ShieldCheck]
 
@@ -90,6 +91,7 @@ export default async function Home({ params }: { params: Promise<{ locale: AppLo
                 </AuthAwareSignupLink>
                 <a href="#how" className={buttonVariants('outline', 'lg')}>{lp.ctaSecondary}</a>
               </div>
+              <AtsScanCta variant="hero-upload" location="hero" />
             </div>
             <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-pop sm:p-5">
               <ResumeScoreCard

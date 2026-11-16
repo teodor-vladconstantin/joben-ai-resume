@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { TrackedLink } from '@/components/ui/TrackedLink'
 import { TemplateDownloadGate } from '@/components/seo/TemplateDownloadGate'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { AtsScanCta } from '@/components/AtsScanCta'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { siteConfig } from '@/lib/content'
@@ -247,6 +248,7 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
           }
         />
         <div className={cn(wrap, 'space-y-12 py-12 sm:py-16')}>
+        <AtsScanCta variant="card" location="card_templates" />
         <div className="rounded-lg border border-border border-l-4 border-l-primary bg-card p-6 sm:p-8">
           <p className="text-lg leading-relaxed">{copy.answer}</p>
         </div>

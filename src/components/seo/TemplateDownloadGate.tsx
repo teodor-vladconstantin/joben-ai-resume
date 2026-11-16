@@ -9,6 +9,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { buttonVariants } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
+import { AtsScanCta } from '@/components/AtsScanCta'
 import { pushGtmEvent } from '@/lib/gtm-events'
 import { useServerError } from '@/hooks/useServerError'
 
@@ -82,6 +83,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   const serverError = useServerError()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
+  const [downloaded, setDownloaded] = useState(false)
   const [email, setEmail] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [marketingConsent, setMarketingConsent] = useState(false)
@@ -133,6 +135,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   function handleClick() {
     if (gatePassed()) {
       startDownload(href, ctaId)
+      setDownloaded(true)
       return
     }
     setOpen(true)
@@ -170,6 +173,7 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
       pushGtmEvent('generate_lead', { source: 'template_gate' })
       setOpen(false)
       startDownload(href, ctaId)
+      setDownloaded(true)
     } catch {
       setError(t('error'))
     } finally {
@@ -182,6 +186,11 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
       <button type="button" className={className} onClick={handleClick}>
         {children}
       </button>
+      {downloaded ? (
+        <div className="basis-full">
+          <AtsScanCta variant="card" location="dupa_download" />
+        </div>
+      ) : null}
       <Modal open={open} onClose={() => setOpen(false)} title={t('title')} maxWidth="md">
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <p className="text-sm text-muted-foreground">{t('body')}</p>

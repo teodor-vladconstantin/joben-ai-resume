@@ -17,6 +17,20 @@ const cookieDomain = SHARED_COOKIE_DOMAIN
 
 const intlMiddleware = createMiddleware(routing)
 
+// True when the highest-weighted language in Accept-Language is English.
+function prefersEnglish(header: string | null): boolean {
+  if (!header) return false
+  const [top] = header
+    .split(',')
+    .map((part) => {
+      const [tag, q] = part.trim().split(';q=')
+      return { tag: tag.toLowerCase(), q: q ? Number(q) : 1 }
+    })
+    .filter((l) => l.tag && l.tag !== '*' && l.q > 0)
+    .sort((a, b) => b.q - a.q)
+  return Boolean(top && (top.tag === 'en' || top.tag.startsWith('en-')))
+}
+
 const isProtectedRoute = createRouteMatcher([
   '/(ro|en)/dashboard(.*)',
   '/(ro|en)/resumes(.*)',
@@ -74,6 +88,17 @@ export default clerkMiddleware(async (auth, req) => {
       url.pathname = target.kind === 'home' ? `/md/home-${target.locale}` : '/md/not-found'
       return NextResponse.rewrite(url)
     }
+  }
+
+  // Unprefixed URLs ("/", "/free-ats-checker") are not canonical pages. Visitors whose
+  // browser prefers English go to /en; everyone else (and crawlers, which send no
+  // Accept-Language) falls through to next-intl, which sends them to /ro.
+  if (req.method === 'GET' && !/^\/(ro|en)(\/|$)/.test(req.nextUrl.pathname) && prefersEnglish(req.headers.get('accept-language'))) {
+    const url = req.nextUrl.clone()
+    url.pathname = `/en${req.nextUrl.pathname === '/' ? '' : req.nextUrl.pathname}`
+    const redirect = NextResponse.redirect(url) // 307: depends on the header, must not be cached as permanent
+    redirect.headers.set('Vary', 'Accept, Accept-Language')
+    return redirect
   }
 
   const res = intlMiddleware(req)
