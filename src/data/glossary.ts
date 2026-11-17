@@ -209,7 +209,8 @@ const BASE_GLOSSARY: Guide[] = [
       ],
     },
   ),
-  term(
+  {
+    ...term(
     {
       slug: 'cuvinte-cheie-in-cv',
       title: 'Ce sunt cuvintele cheie din CV?',
@@ -243,36 +244,165 @@ const BASE_GLOSSARY: Guide[] = [
     },
     {
       slug: 'resume-keywords',
-      title: 'What are resume keywords?',
-      description: 'Resume keywords are the skills, tools and terms from a job posting that recruiters search for. How to choose and use them.',
+      title: 'Resume Keywords: 8 Industry Lists and Free ATS Check',
+      description:
+        'What resume keywords are, how to find them in a job posting, lists for 8 industries and how ATS scanners match them. Check your resume free.',
       answer:
-        'Resume keywords are the skills, tools, certifications and titles from a posting that a recruiter or ATS searches for. Choose them from the posting\'s must-haves and place them in your experience bullets, next to what you did with them.',
+        "Resume keywords are the skills, tools, certifications and job titles a job posting asks for, the same terms a recruiter types into the ATS search. To find them, read the posting's requirements and responsibilities and note every term listed as a must-have or repeated more than once. Use that exact wording in your summary, skills section and experience bullets, next to what you did with it.",
+      ctaLocation: 'guide_keywords',
       sections: [
         {
-          heading: 'How do I choose them?',
+          heading: 'How do you find keywords in a job posting?',
           paragraphs: [
-            'Mark what appears under the must-haves or more than once in the posting. Use the exact wording and, for terms with a short and a long form, include both.',
+            'The posting is the keyword list. The employer wrote down what they will search for, so your job is to pull those terms out and check which ones you can honestly claim.',
+          ],
+          items: [
+            'Copy the posting into a document and highlight the job title, required skills, tools, certifications and degrees.',
+            'Count repeats. A term that appears in the title, the requirements and the responsibilities is a top keyword.',
+            'Split must-haves from nice-to-haves. Must-haves go into your resume first.',
+            'Write down both forms of abbreviations, for example Search Engine Optimization (SEO) or Certified Public Accountant (CPA).',
+            'Compare two or three similar postings. Terms that show up in all of them are the core keywords for the role.',
+            'Keep only the terms you can back up with real experience. Each one may come up in the interview.',
           ],
         },
         {
-          heading: 'What is keyword stuffing?',
+          heading: 'What types of resume keywords are there?',
           paragraphs: [
-            'Filling a resume with terms that have no context. Recruiters spot it easily and interviews ask for examples. A keyword only has value attached to an achievement.',
+            'Hard skills are teachable, measurable abilities such as financial modeling or patient assessment. They carry the most weight in an ATS search because recruiters filter on them.',
+            'Soft skills such as negotiation or attention to detail matter to the person reading the resume. Show them through a result in a bullet point, since a bare list of soft skills says little.',
+            'Tools are the software, platforms and equipment named in the posting: Salesforce, SAP, AutoCAD, Epic. Add job titles, certifications and degrees on top, written the way the posting writes them.',
+          ],
+        },
+        {
+          heading: 'IT and software resume keywords',
+          paragraphs: ['Postings in IT name specific languages, frameworks and practices. Match the version and spelling they use.'],
+          items: [
+            'Hard skills: software development, REST APIs, cloud architecture, CI/CD, unit testing, system design, data modeling, cybersecurity, Agile, Scrum.',
+            'Soft skills: problem solving, code review, technical communication, mentoring, cross-functional collaboration.',
+            'Tools: Python, Java, JavaScript, TypeScript, React, SQL, AWS, Azure, Docker, Kubernetes, Git, Jira.',
+          ],
+        },
+        {
+          heading: 'Sales resume keywords',
+          paragraphs: ['Sales postings ask for numbers. Pair each keyword with a quota, revenue or pipeline figure from your own record.'],
+          items: [
+            'Hard skills: lead generation, prospecting, cold calling, pipeline management, account management, contract negotiation, quota attainment, B2B sales, upselling, sales forecasting.',
+            'Soft skills: relationship building, persuasion, active listening, resilience, objection handling.',
+            'Tools: Salesforce, HubSpot CRM, Pipedrive, LinkedIn Sales Navigator, Outreach, Gong.',
+          ],
+        },
+        {
+          heading: 'Marketing resume keywords',
+          paragraphs: ['Marketing roles vary a lot between content, performance and brand. Take the channel names straight from the posting.'],
+          items: [
+            'Hard skills: SEO, SEM, content marketing, email marketing, paid social, marketing automation, A/B testing, conversion rate optimization, campaign management, market research.',
+            'Soft skills: creativity, copywriting, storytelling, analytical thinking, project coordination.',
+            'Tools: Google Analytics 4, Google Ads, Meta Ads Manager, HubSpot, Mailchimp, Semrush, Canva, WordPress.',
+          ],
+        },
+        {
+          heading: 'Finance and accounting resume keywords',
+          paragraphs: ['Finance postings often list standards and certifications. Write them in full once, then use the abbreviation.'],
+          items: [
+            'Hard skills: financial analysis, financial modeling, budgeting, forecasting, accounts payable, accounts receivable, reconciliation, month-end close, IFRS, GAAP, audit, tax compliance.',
+            'Soft skills: attention to detail, accuracy, confidentiality, deadline management, stakeholder communication.',
+            'Tools: Microsoft Excel (pivot tables, XLOOKUP), SAP, Oracle NetSuite, QuickBooks, Power BI.',
+          ],
+        },
+        {
+          heading: 'HR resume keywords',
+          paragraphs: ['HR postings mix process terms with local employment law. Use the names of the systems you actually ran.'],
+          items: [
+            'Hard skills: talent acquisition, full-cycle recruiting, onboarding, employee relations, performance management, compensation and benefits, payroll, HR policies, labor law compliance, workforce planning.',
+            'Soft skills: interpersonal communication, conflict resolution, discretion, empathy, coaching.',
+            'Tools: Workday, BambooHR, SAP SuccessFactors, Greenhouse, LinkedIn Recruiter.',
+          ],
+        },
+        {
+          heading: 'Healthcare resume keywords',
+          paragraphs: ['Healthcare postings screen on licenses and clinical skills first. Put your license and its status where the posting asks for it.'],
+          items: [
+            'Hard skills: patient care, patient assessment, medication administration, infection control, care planning, triage, vital signs monitoring, clinical documentation, BLS, ACLS.',
+            'Soft skills: compassion, bedside manner, teamwork, composure under pressure, patient education.',
+            'Tools: Epic, Cerner, electronic health records (EHR), infusion pumps, telemetry monitors.',
+          ],
+        },
+        {
+          heading: 'Engineering resume keywords',
+          paragraphs: ['Engineering postings name the discipline, the standards and the software. Mirror all three.'],
+          items: [
+            'Hard skills: mechanical design, CAD modeling, finite element analysis (FEA), root cause analysis, lean manufacturing, Six Sigma, quality control, technical drawings, project engineering, ISO 9001.',
+            'Soft skills: analytical thinking, precision, safety awareness, cross-team coordination, technical writing.',
+            'Tools: AutoCAD, SolidWorks, CATIA, MATLAB, ANSYS, PLC programming.',
+          ],
+        },
+        {
+          heading: 'Administrative resume keywords',
+          paragraphs: ['Administrative postings reward breadth. List the office tasks and software from the posting that you handle every day.'],
+          items: [
+            'Hard skills: calendar management, scheduling, data entry, records management, travel coordination, office administration, invoicing, meeting minutes, front desk operations.',
+            'Soft skills: organization, multitasking, written communication, reliability, customer service.',
+            'Tools: Microsoft Office 365, Outlook, Excel, Google Workspace, Zoom, Microsoft Teams.',
+          ],
+        },
+        {
+          heading: 'How ATS scanners read keywords',
+          paragraphs: [
+            'An ATS first extracts the text of your resume and splits it into fields such as job titles, employers, dates, education and skills. Recruiters then search and filter those fields with the terms from the posting. Some systems also rank applicants by how closely the resume matches the posting.',
+            "Matching rules differ from system to system. Many look for the exact phrase, some also catch plurals or close variants, and few understand that two different words mean the same thing. The safe approach is to use the posting's exact wording at least once and to write abbreviations in both forms.",
+            'Here is how a few lines from one posting compare with lines from a resume:',
+          ],
+          table: {
+            headers: ['Posting asks for', 'Resume says', 'Likely result'],
+            rows: [
+              ['3+ years of experience with Salesforce', 'Managed a 120-account pipeline in Salesforce from 2021 to 2025', 'Match: the tool and the years are both there'],
+              ['Search engine optimization (SEO)', 'Grew organic traffic through SEO', 'Partial: write "search engine optimization (SEO)" once so both searches find it'],
+              ['Stakeholder management', 'Worked with many different teams', 'No match: the phrase from the posting is missing'],
+              ['Excel (pivot tables, VLOOKUP)', 'Advanced Excel: pivot tables, XLOOKUP', 'Partial: Excel and pivot tables match, VLOOKUP is missing'],
+              ["Bachelor's degree in Accounting", 'BSc Accounting', 'Depends on the system: add "Bachelor of Science in Accounting"'],
+            ],
+          },
+        },
+        {
+          heading: 'Where do you put keywords on a resume?',
+          paragraphs: ['Spread the keywords across the sections a recruiter reads and the ATS indexes.'],
+          items: [
+            'Headline or target title: the job title from the posting, if it describes your work.',
+            'Summary: the job title plus two or three must-have skills.',
+            'Skills section: hard skills and tools, grouped and written as the posting writes them.',
+            'Experience bullets: each key skill next to a result, for example "Cut month-end close from 8 to 5 days using NetSuite".',
+            'Certifications and education: full names, with the abbreviation in brackets.',
           ],
         },
       ],
       faq: [
         {
+          question: 'What are keywords in a resume?',
+          answer: 'They are the skills, tools, certifications and job titles from a job posting that a recruiter searches for in the ATS. A resume that uses the same terms shows up in more searches and reads as a closer fit.',
+        },
+        {
+          question: 'How many keywords should a resume have?',
+          answer: 'There is no fixed number. Cover every must-have from the posting that you can back up, plus the nice-to-haves you really have. For most postings that means 10 to 20 terms, each used in context.',
+        },
+        {
+          question: 'Do keywords for resume scanners need to match exactly?',
+          answer: "It is safer if they do. Many ATS searches look for the exact phrase, so use the posting's wording at least once and include both the full form and the abbreviation.",
+        },
+        {
           question: 'Can I hide keywords in white text?',
           answer: 'It is not worth it. Modern systems and recruiters detect the trick, and the risk is a rejected application.',
         },
         {
-          question: 'How many keywords are enough?',
-          answer: 'Those in the must-haves, placed in the context of your experience. The number depends on the posting.',
+          question: 'Should I change keywords for every application?',
+          answer: 'Yes. Keep one base resume and adjust the summary, skills and bullet order for each posting so its must-have terms appear. Your experience stays the same; the wording and emphasis change.',
+        },
+        {
+          question: 'How do I check which keywords my resume is missing?',
+          answer: 'Run your resume through a free ATS checker. It shows how a parser reads the file and which parts need work, so you can fix them before you apply.',
         },
       ],
     },
-  ),
+  ), dateModified: '2026-11-17' },
   term(
     {
       slug: 'cv-cronologic',

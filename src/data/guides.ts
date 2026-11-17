@@ -4,6 +4,7 @@
 // metadata, Article + FAQPage JSON-LD, the direct-answer block, the sitemap
 // entries and the llms.txt links are all generated from it.
 import type { AppLocale } from '@/i18n/routing'
+import type { AtsCtaLocation } from '@/components/AtsScanCta'
 import { MORE_GUIDES } from './guides-more'
 import { GLOSSARY } from './glossary'
 import { COMPARISONS } from './comparisons'
@@ -16,6 +17,8 @@ export interface GuideSection {
   heading: string
   paragraphs: string[]
   items?: string[]
+  /** Rendered as a table after the paragraphs and items. */
+  table?: { headers: string[]; rows: string[][] }
 }
 
 export interface GuideContent {
@@ -29,6 +32,8 @@ export interface GuideContent {
   sections: GuideSection[]
   /** Rendered visibly AND emitted as FAQPage JSON-LD. */
   faq: { question: string; answer: string }[]
+  /** Shows the AtsScanCta card under the direct answer and after the first section. */
+  ctaLocation?: AtsCtaLocation
 }
 
 export interface Guide {

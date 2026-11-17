@@ -27,6 +27,8 @@ const COPY: Record<
   {
     eyebrow: string
     title: string
+    /** <title> when it should differ from the H1. Kept <= 52 chars so "| Joben" stays under 60. */
+    metaTitle?: string
     description: string
     answer: string
     updated: string
@@ -102,8 +104,9 @@ const COPY: Record<
   en: {
     eyebrow: 'CV templates',
     title: 'Free CV templates in Word (DOCX), ATS-friendly',
+    metaTitle: 'Free CV Templates (Word) + Free ATS Resume Check',
     description:
-      'Free CV templates to download in Word (DOCX): classic, student and career change. ATS-friendly, single column, in English and Romanian. Fill in and export to PDF.',
+      'Download free ATS-friendly CV templates in Word, then upload your resume for a free ATS score in 10 seconds. No account needed. English and Romanian.',
     answer:
       'The templates below are free DOCX files with a single column, no tables or text boxes, standard headings and contact details in the body of the page. You open them in Word or Google Docs, replace the text in brackets and export to a PDF with selectable text. Each comes in a Romanian and an English version.',
     updated: 'Updated',
@@ -158,8 +161,9 @@ const path = (locale: AppLocale) => `/${locale}/${CV_TEMPLATES_SEGMENT[locale]}`
 
 export function cvTemplatesMetadata(locale: AppLocale): Metadata {
   const copy = COPY[locale]
+  const title = copy.metaTitle ?? copy.title
   return {
-    title: copy.title,
+    title,
     description: copy.description,
     alternates: {
       canonical: path(locale),
@@ -169,7 +173,7 @@ export function cvTemplatesMetadata(locale: AppLocale): Metadata {
       },
     },
     openGraph: {
-      title: copy.title,
+      title,
       description: copy.description,
       url: path(locale),
       siteName: 'Joben',
@@ -177,7 +181,7 @@ export function cvTemplatesMetadata(locale: AppLocale): Metadata {
       locale: copy.ogLocale,
       type: 'website',
     },
-    twitter: { card: 'summary_large_image', title: copy.title, description: copy.description, images: ['/og-image.png'] },
+    twitter: { card: 'summary_large_image', title, description: copy.description, images: ['/og-image.png'] },
   }
 }
 
@@ -185,7 +189,7 @@ export function CvTemplatesPage({ locale }: { locale: AppLocale }) {
   setRequestLocale(locale)
   const copy = COPY[locale]
   const other: AppLocale = locale === 'ro' ? 'en' : 'ro'
-  const guideSlugs = ['cv-citit-corect-de-ats', 'cv-fara-experienta', 'cv-pentru-schimbare-de-cariera']
+  const guideSlugs = ['cv-citit-corect-de-ats', 'cv-fara-experienta', 'cv-pentru-schimbare-de-cariera', 'cuvinte-cheie-in-cv']
   const guideLinks = guideSlugs.flatMap((slug) => GUIDES.filter((g) => g.content.ro.slug === slug))
 
   const jsonLd = {
