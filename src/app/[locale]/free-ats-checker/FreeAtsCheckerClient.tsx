@@ -145,10 +145,22 @@ export function FreeAtsCheckerClient() {
 
   // Funnel step 1, with the CTA that sent the visitor here (?from=hero, sticky, ...).
   // A file dropped on the homepage hero arrives through the pending-file slot.
+  // Capture is a no-op before consent, so a visitor who accepts cookies after
+  // landing gets the view sent right after $opt_in. At most once per view.
   useEffect(() => {
-    posthog.capture('checker_viewed', { locale, from: fromParam() })
+    let viewSent = false
+    const sendView = () => {
+      if (viewSent || !posthog.__loaded || !posthog.has_opted_in_capturing()) return
+      viewSent = true
+      posthog.capture('checker_viewed', { locale, from: fromParam() })
+    }
+    sendView()
+    const off = posthog.on('eventCaptured', (event: { event?: string }) => {
+      if (event?.event === '$opt_in') sendView()
+    })
     const dropped = takePendingScanFile()
     if (dropped) handleFile(dropped)
+    return off
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
   }, [])
 
