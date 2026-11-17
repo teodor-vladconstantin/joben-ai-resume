@@ -1548,6 +1548,10 @@
       "boldPlaceholder": "text aldin",
       "italicPlaceholder": "text cursiv",
       "underlinePlaceholder": "text subliniat"
+    },
+    "mobileView": {
+      "edit": "Editează",
+      "preview": "Previzualizare"
     }
   },
   "CoverLetterBuilder": {

@@ -386,6 +386,9 @@ function isValidResumeFile(file: File): boolean {
   return ALLOWED_TYPES.includes(file.type)
 }
 
+// 210 mm at 96 dpi.
+const A4_WIDTH_PX = 794
+
 function getPdfImportCount(data: ResumeData): number {
   const count = data.importMeta?.pdfImportsCount ?? 0
   return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0
@@ -398,6 +401,10 @@ export function ResumeBuilder() {
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const bulletFieldRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const [activeTab, setActiveTab] = useState('experience')
+  // Below lg the form and the preview do not fit side by side, so only one is shown.
+  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit')
+  const previewRef = useRef<HTMLDivElement | null>(null)
+  const [previewScale, setPreviewScale] = useState(1)
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData)
   // The blank form, or exactly what was loaded from the DB. Autosave skips
   // while resumeData is still this object: opening a resume used to PATCH
@@ -1518,11 +1525,40 @@ export function ResumeBuilder() {
     setIsGeneratingSummary(false)
   }
 
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    // Fires when the pane is shown (hidden -> visible) and on rotation or resize.
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === 0) return
+      const narrow = window.matchMedia('(max-width: 1023px)').matches
+      setPreviewScale(narrow ? Math.min(1, el.clientWidth / A4_WIDTH_PX) : 1)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div className="w-full h-full min-h-0 flex flex-col lg:min-w-315 lg:flex-row print:block" suppressHydrationWarning>
+      <div role="tablist" className="shrink-0 grid grid-cols-2 gap-1 border-b border-border bg-card p-2 lg:hidden print:hidden">
+        {(['edit', 'preview'] as const).map((view) => (
+          <button
+            key={view}
+            type="button"
+            role="tab"
+            aria-selected={mobileView === view}
+            onClick={() => setMobileView(view)}
+            className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors duration-150 ease-out ${
+              mobileView === view ? 'bg-primary/10 text-foreground border border-border' : 'text-muted-foreground border border-transparent'
+            }`}
+          >
+            {t(`mobileView.${view}`)}
+          </button>
+        ))}
+      </div>
       {/* Editor Sidebar */}
       <div
-        className="w-full min-h-0 bg-card border-r border-border flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden z-10 lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden"
+        className={`${mobileView === 'preview' ? 'hidden lg:flex' : 'flex'} w-full min-h-0 grow bg-card border-r border-border flex-col overflow-hidden z-10 lg:grow-0 lg:h-full lg:w-115 lg:min-w-115 lg:max-w-115 lg:shrink-0 print:hidden`}
         suppressHydrationWarning
       >
         <input
@@ -1541,7 +1577,7 @@ export function ResumeBuilder() {
         />
         <div
           data-tour="editor-tabs"
-          className="shrink-0 border-b border-border px-4 pt-5 pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
+          className="shrink-0 border-b border-border px-3 py-2 lg:px-4 lg:pt-5 lg:pb-4 flex items-center gap-2.5 overflow-x-auto overflow-y-hidden custom-scrollbar tabs-scrollbar scroll-smooth"
           suppressHydrationWarning
           style={{ scrollbarGutter: 'stable both-edges' }}
         >
@@ -1560,16 +1596,19 @@ export function ResumeBuilder() {
           ))}
         </div>
 
-        <div className="shrink-0 p-4 pt-5 border-b border-border space-y-3">
-          <TemplateSwitcher
-            value={resumeData.template}
-            onChange={(value) =>
-              setResumeData((prev) => ({
-                ...prev,
-                template: value,
-              }))
-            }
-          />
+        <div className="shrink-0 p-3 lg:p-4 lg:pt-5 border-b border-border space-y-3">
+          {/* One template today, so on a phone the card only takes space from the form. */}
+          <div className="hidden lg:block">
+            <TemplateSwitcher
+              value={resumeData.template}
+              onChange={(value) =>
+                setResumeData((prev) => ({
+                  ...prev,
+                  template: value,
+                }))
+              }
+            />
+          </div>
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => setIsAddModalOpen(true)}
@@ -1677,7 +1716,7 @@ export function ResumeBuilder() {
             <div className="space-y-4" suppressHydrationWarning>
               <h2 className="text-xl font-bold text-foreground mb-6">{t('personal.heading')}</h2>
               {/* Form fields would be controlled components, omitted for brevity */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">{t('personal.firstNameLabel')}</label>
                   <input type="text" value={resumeData.personal.firstName} onChange={(e) => updatePersonalField('firstName', e.target.value)} className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground focus:outline-none focus:border-primary/90 transition-colors" placeholder={t('personal.firstNamePlaceholder')} />
@@ -1691,7 +1730,7 @@ export function ResumeBuilder() {
                 <label className="text-sm font-medium text-muted-foreground">{t('personal.jobTitleLabel')}</label>
                 <input type="text" value={resumeData.personal.title} onChange={(e) => updatePersonalField('title', e.target.value)} className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground focus:outline-none focus:border-primary/90 transition-colors" placeholder={t('personal.jobTitlePlaceholder')} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">{t('personal.emailLabel')}</label>
                   <input type="email" value={resumeData.personal.email} onChange={(e) => updatePersonalField('email', e.target.value)} className="w-full bg-card border border-border rounded-sm px-4 py-2 text-foreground focus:outline-none focus:border-primary/90 transition-colors" placeholder={t('personal.emailPlaceholder')} />
@@ -2237,11 +2276,21 @@ export function ResumeBuilder() {
       </div>
 
       {/* Live Preview Pane */}
-      <div data-tour="editor-preview" className="grow min-w-0 bg-background h-full flex flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto" suppressHydrationWarning>
+      <div data-tour="editor-preview" className={`${mobileView === 'edit' ? 'hidden lg:flex' : 'flex'} grow min-h-0 min-w-0 bg-background lg:h-full flex-col p-4 lg:p-8 overflow-hidden relative print:p-0 print:block print:bg-white print:h-auto`} suppressHydrationWarning>
         {/* Mock A4 Paper Preview */}
-        <div className="h-full w-full max-w-230 bg-white border border-border mx-auto overflow-y-auto print:border-0 print:w-full print:max-w-none print:overflow-visible print:h-auto">
-          <HarvardTemplate data={resumeData} />
+        <div ref={previewRef} className="min-h-0 grow w-full max-w-230 bg-white border border-border mx-auto overflow-y-auto print:border-0 print:w-full print:max-w-none print:overflow-visible print:h-auto">
+          {/* On a phone the page is drawn at A4 width and zoomed out, so it looks like the exported PDF. */}
+          <div style={previewScale < 1 ? { width: A4_WIDTH_PX, zoom: previewScale } : undefined}>
+            <HarvardTemplate data={resumeData} />
+          </div>
         </div>
+        <button
+          onClick={exportAsLatexPdf}
+          disabled={isExportingPdf || isImportingPdf}
+          className={`mt-3 w-full shrink-0 lg:hidden print:hidden disabled:cursor-not-allowed disabled:opacity-60 ${buttonVariants('primary', 'md')}`}
+        >
+          <Download className="w-4 h-4" /> {isExportingPdf ? t('actions.exporting') : t('actions.exportPdf')}
+        </button>
         <div className="absolute top-3 right-4 text-xs text-muted-foreground bg-card border border-border px-2 py-1 print:hidden" suppressHydrationWarning>
           {isLoading && !isCreateMode ? t('status.loading') : saveStatus === 'saving' ? t('status.saving') : saveStatus === 'saved' ? t('status.saved') : saveStatus === 'error' ? t('status.saveFailed') : ''}
         </div>
