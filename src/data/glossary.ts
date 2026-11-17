@@ -213,32 +213,161 @@ const BASE_GLOSSARY: Guide[] = [
     ...term(
     {
       slug: 'cuvinte-cheie-in-cv',
-      title: 'Ce sunt cuvintele cheie din CV?',
-      description: 'Cuvintele cheie din CV sunt competențele, uneltele și termenii din anunț după care caută recrutorul. Cum le alegi și le folosești.',
+      title: 'Cuvinte cheie în CV: liste pe 8 domenii și ATS',
+      description:
+        'Ce sunt cuvintele cheie din CV, cum le găsești în anunț, liste pe 8 domenii și cum le potrivește un ATS. Verifică gratuit CV-ul tău.',
       answer:
-        'Cuvintele cheie din CV sunt competențele, uneltele, certificările și titlurile din anunț după care caută recrutorul sau ATS-ul. Le alegi din cerințele obligatorii ale anunțului și le pui în punctele de la experiență, lângă ce ai făcut cu ele.',
+        'Cuvintele cheie din CV sunt competențele, uneltele, certificările și titlurile de post cerute în anunț, aceiași termeni pe care recrutorul îi caută în ATS. Le găsești în secțiunile de cerințe și responsabilități ale anunțului: notează tot ce apare la cerințe obligatorii sau de mai multe ori. Folosește apoi exact aceeași formulare în rezumat, la competențe și în punctele de la experiență, lângă ce ai făcut concret.',
+      ctaLocation: 'guide_keywords',
       sections: [
         {
-          heading: 'Cum le aleg?',
+          heading: 'Cum găsești cuvintele cheie în anunțul de job?',
           paragraphs: [
-            'Marchează ce apare la cerințele obligatorii sau de mai multe ori în anunț. Folosește formularea exactă și, la termenii cu formă scurtă și lungă, pe amândouă.',
+            'Anunțul este lista de cuvinte cheie. Angajatorul a scris deja ce va căuta, așa că treaba ta este să extragi termenii și să verifici pe care îi poți susține cu experiență reală.',
+          ],
+          items: [
+            'Copiază anunțul într-un document și marchează titlul postului, competențele cerute, uneltele, certificările și studiile.',
+            'Numără repetările. Un termen care apare în titlu, la cerințe și la responsabilități este un cuvânt cheie principal.',
+            'Separă cerințele obligatorii de cele care sunt un avantaj. Cele obligatorii intră primele în CV.',
+            'Notează abrevierile în ambele forme, de exemplu Search Engine Optimization (SEO) sau Expert Contabil (CECCAR).',
+            'Compară două sau trei anunțuri similare. Termenii care apar în toate sunt cuvintele cheie de bază ale rolului.',
+            'Păstrează doar termenii pe care îi poți dovedi. Oricare dintre ei poate apărea la interviu.',
           ],
         },
         {
-          heading: 'Ce este keyword stuffing?',
+          heading: 'Ce tipuri de cuvinte cheie există?',
           paragraphs: [
-            'Umplerea CV-ului cu termeni fără context. Recrutorul o recunoaște ușor și la interviu ți se cer exemple. Un cuvânt cheie are valoare doar atașat unei realizări.',
+            'Competențele tehnice (hard skills) se învață și se măsoară: modelare financiară, evaluarea pacientului, proiectare CAD. Ele contează cel mai mult în căutarea din ATS, pentru că recrutorii filtrează după ele.',
+            'Competențele personale (soft skills), precum negocierea sau atenția la detalii, contează pentru omul care citește CV-ul. Arată-le printr-un rezultat într-un punct de la experiență, pentru că o listă simplă de calități spune puțin.',
+            'Uneltele sunt programele, platformele și echipamentele numite în anunț: Salesforce, SAP, AutoCAD, Excel. Adaugă titlurile de post, certificările și diplomele, scrise exact ca în anunț.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în IT',
+          paragraphs: ['Anunțurile din IT numesc limbaje, framework-uri și practici precise. Folosește versiunea și scrierea din anunț.'],
+          items: [
+            'Hard skills: dezvoltare software, REST API, arhitectură cloud, CI/CD, teste unitare, design de sistem, modelarea datelor, securitate cibernetică, Agile, Scrum.',
+            'Soft skills: rezolvarea problemelor, code review, comunicare tehnică, mentorat, colaborare între echipe.',
+            'Unelte: Python, Java, JavaScript, TypeScript, React, SQL, AWS, Azure, Docker, Kubernetes, Git, Jira.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în vânzări',
+          paragraphs: ['Anunțurile de vânzări cer cifre. Pune lângă fiecare cuvânt cheie un target, o cifră de afaceri sau un pipeline din experiența ta.'],
+          items: [
+            'Hard skills: generare de lead-uri, prospectare, cold calling, gestionarea pipeline-ului, key account management, negocierea contractelor, îndeplinirea targetului, vânzări B2B, upselling, prognoza vânzărilor.',
+            'Soft skills: construirea relațiilor, persuasiune, ascultare activă, reziliență, gestionarea obiecțiilor.',
+            'Unelte: Salesforce, HubSpot CRM, Pipedrive, LinkedIn Sales Navigator, Microsoft Dynamics.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în marketing',
+          paragraphs: ['Rolurile de marketing diferă mult între content, performance și brand. Ia numele canalelor direct din anunț.'],
+          items: [
+            'Hard skills: SEO, SEM, content marketing, email marketing, social media plătit, marketing automation, testare A/B, optimizarea conversiei, management de campanii, cercetare de piață.',
+            'Soft skills: creativitate, copywriting, storytelling, gândire analitică, coordonare de proiecte.',
+            'Unelte: Google Analytics 4, Google Ads, Meta Ads Manager, HubSpot, Mailchimp, Semrush, Canva, WordPress.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în finanțe și contabilitate',
+          paragraphs: ['Anunțurile din finanțe cer des standarde și certificări. Scrie-le o dată complet, apoi folosește abrevierea.'],
+          items: [
+            'Hard skills: analiză financiară, modelare financiară, bugetare, prognoză, furnizori, clienți, reconcilieri, închidere de lună, IFRS, raportare fiscală, audit, declarații ANAF.',
+            'Soft skills: atenție la detalii, acuratețe, confidențialitate, respectarea termenelor, comunicare cu departamentele.',
+            'Unelte: Microsoft Excel (tabele pivot, XLOOKUP), SAP, Oracle NetSuite, Saga, WinMentor, Power BI.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în resurse umane',
+          paragraphs: ['Anunțurile de HR combină termeni de proces cu legislația muncii. Numește sistemele pe care chiar le-ai folosit.'],
+          items: [
+            'Hard skills: recrutare, recrutare end-to-end, onboarding, relații cu angajații, managementul performanței, compensații și beneficii, salarizare, REVISAL, Codul muncii, planificarea personalului.',
+            'Soft skills: comunicare interpersonală, rezolvarea conflictelor, discreție, empatie, coaching.',
+            'Unelte: Workday, BambooHR, SAP SuccessFactors, Charisma HCM, LinkedIn Recruiter.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în sănătate',
+          paragraphs: ['Anunțurile din sănătate filtrează întâi după aviz și competențe clinice. Trece avizul de liberă practică și statutul lui unde le cere anunțul.'],
+          items: [
+            'Hard skills: îngrijirea pacientului, evaluarea pacientului, administrarea medicației, prevenirea infecțiilor, plan de îngrijire, triaj, monitorizarea funcțiilor vitale, documentație medicală, BLS, ACLS.',
+            'Soft skills: compasiune, comunicare cu pacientul, lucru în echipă, calm sub presiune, educația pacientului.',
+            'Unelte: fișa electronică a pacientului, sisteme informatice de spital (HIS), injectomate, monitoare de funcții vitale.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV în inginerie',
+          paragraphs: ['Anunțurile de inginerie numesc domeniul, standardele și programele. Reia-le pe toate trei.'],
+          items: [
+            'Hard skills: proiectare mecanică, modelare CAD, analiză cu elemente finite (FEA), analiza cauzei principale, lean manufacturing, Six Sigma, controlul calității, desen tehnic, management de proiect tehnic, ISO 9001.',
+            'Soft skills: gândire analitică, precizie, atenție la siguranță, coordonare între echipe, documentare tehnică.',
+            'Unelte: AutoCAD, SolidWorks, CATIA, MATLAB, ANSYS, programare PLC.',
+          ],
+        },
+        {
+          heading: 'Cuvinte cheie pentru CV administrativ',
+          paragraphs: ['Anunțurile administrative cer varietate. Listează sarcinile de birou și programele din anunț pe care le folosești zilnic.'],
+          items: [
+            'Hard skills: gestionarea agendei, programări, introducere de date, arhivare, organizarea deplasărilor, administrare birou, facturare, minute de ședință, registratură, recepție.',
+            'Soft skills: organizare, lucru pe mai multe sarcini, comunicare scrisă, seriozitate, orientare spre client.',
+            'Unelte: Microsoft Office 365, Outlook, Excel, Google Workspace, Zoom, Microsoft Teams.',
+          ],
+        },
+        {
+          heading: 'Cum citește un ATS cuvintele cheie?',
+          paragraphs: [
+            'Un ATS extrage întâi textul din CV și îl împarte în câmpuri: funcții, angajatori, perioade, studii, competențe. Recrutorul caută și filtrează apoi în aceste câmpuri cu termenii din anunț. Unele sisteme ordonează și candidații după cât de bine se potrivește CV-ul cu anunțul.',
+            'Regulile de potrivire diferă de la un sistem la altul. Multe caută expresia exactă, unele recunosc și pluralul sau forme apropiate, puține înțeleg că două cuvinte diferite înseamnă același lucru. Varianta sigură este să folosești cel puțin o dată formularea exactă din anunț și să scrii abrevierile în ambele forme.',
+            'Iată cum se compară câteva rânduri dintr-un anunț cu rânduri dintr-un CV:',
+          ],
+          table: {
+            headers: ['Anunțul cere', 'CV-ul spune', 'Rezultat probabil'],
+            rows: [
+              ['Minimum 3 ani experiență cu Salesforce', 'Am gestionat 120 de conturi în Salesforce între 2021 și 2025', 'Potrivire: unealta și anii apar amândouă'],
+              ['Search engine optimization (SEO)', 'Am crescut traficul organic prin SEO', 'Parțial: scrie o dată „search engine optimization (SEO)” ca să te găsească ambele căutări'],
+              ['Managementul relației cu stakeholderii', 'Am lucrat cu multe echipe diferite', 'Fără potrivire: expresia din anunț lipsește'],
+              ['Excel (tabele pivot, VLOOKUP)', 'Excel avansat: tabele pivot, XLOOKUP', 'Parțial: Excel și tabele pivot se potrivesc, VLOOKUP lipsește'],
+              ['Studii superioare economice', 'Licență ASE, Contabilitate', 'Depinde de sistem: adaugă „Studii superioare economice, Facultatea de Contabilitate (ASE)”'],
+            ],
+          },
+        },
+        {
+          heading: 'Unde pui cuvintele cheie în CV?',
+          paragraphs: ['Distribuie cuvintele cheie în secțiunile pe care le citește recrutorul și le indexează ATS-ul.'],
+          items: [
+            'Titlul CV-ului: denumirea postului din anunț, dacă descrie ce faci.',
+            'Rezumat: titlul postului plus două sau trei competențe obligatorii.',
+            'Competențe: hard skills și unelte, grupate și scrise ca în anunț.',
+            'Experiență: fiecare competență importantă lângă un rezultat, de exemplu „Am redus închiderea de lună de la 8 la 5 zile în SAP”.',
+            'Certificări și studii: denumirea completă, cu abrevierea în paranteză.',
           ],
         },
       ],
       faq: [
         {
+          question: 'Ce sunt cuvintele cheie dintr-un CV?',
+          answer: 'Sunt competențele, uneltele, certificările și titlurile de post din anunț după care caută recrutorul în ATS. Un CV care folosește aceiași termeni apare în mai multe căutări și pare mai potrivit pentru rol.',
+        },
+        {
+          question: 'Câte cuvinte cheie trebuie să aibă un CV?',
+          answer: 'Nu există un număr fix. Acoperă toate cerințele obligatorii pe care le poți susține, plus avantajele pe care chiar le ai. La majoritatea anunțurilor asta înseamnă 10 până la 20 de termeni, fiecare folosit în context.',
+        },
+        {
+          question: 'Cuvintele cheie trebuie să fie identice cu cele din anunț?',
+          answer: 'E mai sigur așa. Multe căutări din ATS caută expresia exactă, deci folosește formularea din anunț cel puțin o dată și scrie atât forma completă, cât și abrevierea.',
+        },
+        {
           question: 'Pot ascunde cuvinte cheie cu text alb?',
           answer: 'Nu merită. Sistemele moderne și recrutorii detectează trucul, iar riscul este respingerea candidaturii.',
         },
         {
-          question: 'Câte cuvinte cheie ajung?',
-          answer: 'Cele din cerințele obligatorii, în contextul experienței tale. Numărul depinde de anunț.',
+          question: 'Schimb cuvintele cheie la fiecare aplicare?',
+          answer: 'Da. Păstrează un CV de bază și ajustează rezumatul, competențele și ordinea punctelor pentru fiecare anunț, ca să apară termenii obligatorii. Experiența rămâne aceeași; se schimbă formularea și accentul.',
+        },
+        {
+          question: 'Cum verific ce cuvinte cheie îi lipsesc CV-ului meu?',
+          answer: 'Trece CV-ul printr-un verificator ATS gratuit. Vezi cum citește parserul fișierul și ce părți trebuie reparate, înainte să aplici.',
         },
       ],
     },

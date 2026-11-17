@@ -123,7 +123,7 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
           <p className="mt-8 text-center text-sm text-muted-foreground">
             {isRo ? 'Nu știi ce cuvinte cheie să pui în CV? ' : 'Not sure which keywords your resume needs? '}
             <Link href={guidePath(locale, keywordsGuide)} className="text-foreground underline underline-offset-4 hover:text-primary">
-              {isRo ? 'Vezi cum le alegi din anunț' : 'See keyword lists for 8 industries'}
+              {isRo ? 'Vezi liste pe 8 domenii' : 'See keyword lists for 8 industries'}
             </Link>
           </p>
         )}
