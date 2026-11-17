@@ -1548,6 +1548,10 @@
       "boldPlaceholder": "bold text",
       "italicPlaceholder": "italic text",
       "underlinePlaceholder": "underlined text"
+    },
+    "mobileView": {
+      "edit": "Edit",
+      "preview": "Preview"
     }
   },
   "CoverLetterBuilder": {
