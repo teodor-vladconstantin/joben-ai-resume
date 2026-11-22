@@ -11,6 +11,8 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { AtsCheckerSeoContent } from '@/components/seo/AtsCheckerSeoContent'
 import { ATS_SEO_RO } from '@/data/ats-checker-seo-ro'
 import { siteConfig } from '@/lib/content'
+import { Link } from '@/i18n/navigation'
+import { getGuide, guidePath } from '@/data/guides'
 
 export async function generateMetadata({
   params,
@@ -58,6 +60,7 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
 
   // The explainer, answer block and FAQ are Romanian-only (brief 02); /en keeps the bare tool.
   const isRo = locale === 'ro'
+  const keywordsGuide = getGuide('ro', 'cuvinte-cheie-in-cv', 'glossary')
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -116,6 +119,14 @@ export default async function FreeAtsCheckerPage({ params }: { params: Promise<{
         </div>
 
         <FreeAtsCheckerClient />
+        {keywordsGuide && (
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {isRo ? 'Nu știi ce cuvinte cheie să pui în CV? ' : 'Not sure which keywords your resume needs? '}
+            <Link href={guidePath(locale, keywordsGuide)} className="text-foreground underline underline-offset-4 hover:text-primary">
+              {isRo ? 'Vezi liste pe 8 domenii' : 'See keyword lists for 8 industries'}
+            </Link>
+          </p>
+        )}
         {isRo && <AtsCheckerSeoContent />}
       </main>
     </div>

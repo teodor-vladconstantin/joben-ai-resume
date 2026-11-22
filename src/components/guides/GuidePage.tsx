@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
@@ -6,6 +7,7 @@ import { Navbar } from '@/components/ui/Navbar'
 import { PageHero } from '@/components/marketing/section'
 import { buttonVariants } from '@/components/ui/Button'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { AtsScanCta } from '@/components/AtsScanCta'
 import { breadcrumbJsonLd } from '@/lib/structured-data'
 import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { siteConfig } from '@/lib/content'
@@ -160,9 +162,11 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">{copy.answerLabel}</p>
           <p className="text-lg leading-relaxed">{content.answer}</p>
         </div>
+        {content.ctaLocation && <AtsScanCta variant="card" location={content.ctaLocation} />}
 
-        {content.sections.map((section) => (
-          <section key={section.heading} className="space-y-4">
+        {content.sections.map((section, index) => (
+          <Fragment key={section.heading}>
+          <section className="space-y-4">
             <h2 className="text-2xl font-bold text-foreground">{section.heading}</h2>
             {section.paragraphs.map((paragraph) => (
               <p key={paragraph} className="text-muted-foreground leading-relaxed">
@@ -176,7 +180,31 @@ export function GuidePage({ locale, guide }: { locale: AppLocale; guide: Guide }
                 ))}
               </ul>
             )}
+            {section.table && (
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-card text-foreground">
+                    <tr>
+                      {section.table.headers.map((h) => (
+                        <th key={h} scope="col" className="p-3 font-semibold">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="text-muted-foreground">
+                    {section.table.rows.map((row) => (
+                      <tr key={row.join('|')} className="border-t border-border align-top">
+                        {row.map((cell, i) => (
+                          <td key={i} className="p-3">{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
+          {index === 0 && content.ctaLocation && <AtsScanCta variant="card" location={content.ctaLocation} />}
+          </Fragment>
         ))}
 
         <section className="space-y-6">

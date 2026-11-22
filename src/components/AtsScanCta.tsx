@@ -10,7 +10,7 @@ import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { isAppPath } from '@/lib/app-origin'
 import { setPendingScanFile } from '@/lib/pending-scan-file'
 
-export type AtsCtaLocation = 'hero' | 'card_templates' | 'sticky' | 'dupa_download'
+export type AtsCtaLocation = 'hero' | 'card_templates' | 'sticky' | 'dupa_download' | 'guide_keywords'
 type Variant = 'card' | 'hero-upload' | 'sticky-mobile'
 
 const GREEN_BUTTON =
