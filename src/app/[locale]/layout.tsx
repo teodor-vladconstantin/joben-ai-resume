@@ -47,7 +47,6 @@ export async function generateMetadata({
     // Child pages set a bare title; the template appends the brand once.
     title: { default: title, template: '%s | Joben' },
     description,
-    keywords: ['AI resume builder', 'free resume maker', 'ATS resume format', 'CV builder', 'joben', 'resume templates', 'best AI resume builder'],
     authors: [{ name: 'Joben' }],
     creator: 'Joben',
     alternates: localeAlternates(locale, ''),

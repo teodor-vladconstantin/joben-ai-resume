@@ -193,6 +193,13 @@ const nextConfig: NextConfig = {
       )
     )
     return [
+      // Bare www checker URL: one hop to the final English page (must precede the generic www rule).
+      {
+        source: '/free-ats-checker',
+        has: [{ type: 'host' as const, value: 'www.joben.eu' }],
+        destination: 'https://joben.eu/en/free-ats-checker',
+        statusCode: 301 as const,
+      },
       // www is not a served host: one canonical origin. HTTP -> HTTPS is handled by the platform (plus HSTS above).
       {
         source: '/:path*',
