@@ -62,7 +62,7 @@
       "Bot"
     ],
     "heroSuffix": " Ever Reads It.",
-    "subheading": "ATS systems reject resumes with the wrong format, regardless of the candidate's experience. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
+    "subheading": "Screening systems can filter out badly formatted resumes, even when the candidate has the required experience. Joben scores your resume 0-100, rewrites weak bullet points with AI, and tells you exactly what to fix before your next application.",
     "cta": "Check My ATS Score. It's Free",
     "features": [
       "No account needed",
@@ -1973,8 +1973,8 @@
     "button": "Scan my resume",
     "dropHint": "Drop your file here or choose one. PDF or DOCX.",
     "exampleScore": "Example ATS score",
-    "afterTitle": "Now check it",
-    "afterText": "Upload your finished resume and see your ATS score in 10 seconds."
+    "afterTitle": "Find what's holding your CV back. Let AI rewrite the weak parts.",
+    "afterButton": "Check my CV for free"
   },
   "TemplateGate": {
     "title": "Download the free template",

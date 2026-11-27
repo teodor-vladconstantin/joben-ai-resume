@@ -6,6 +6,7 @@ import { ScanReportBody, SimpleBody } from '@/emails/bodies'
 import { isEmailSuppressed } from '@/lib/email-suppression'
 import { isUnsubscribeConfigured, signUnsubscribeToken } from '@/lib/email-unsubscribe-token'
 import {
+  TEMPLATE_24H_COPY,
   TEMPLATE_SEQUENCE_COPY,
   TEMPLATE_SEQUENCE_FOOTER,
   type TemplateSequenceStep,
@@ -525,6 +526,30 @@ export async function sendPassDay10Email(input: {
         paragraphs={[copy.body(input.daysLeft), copy.pitch]}
         ctaHref={href}
         ctaLabel={copy.cta}
+      />
+    ),
+  })
+}
+
+export async function sendTemplate24hEmail(input: {
+  to: string
+  locale: AnonScanEmailLocale
+}): Promise<EmailResult> {
+  const copy = TEMPLATE_24H_COPY[input.locale]
+  const params = new URLSearchParams({ utm_source: 'email', utm_medium: 'lifecycle', utm_campaign: 'template_24h' })
+
+  return sendEmail({
+    from: automationFromEmail,
+    to: input.to,
+    subject: copy.subject,
+    unsubscribeLabel: UNSUBSCRIBE_LABEL[input.locale],
+    body: (
+      <SimpleBody
+        heading={copy.heading}
+        paragraphs={[...copy.body]}
+        ctaHref={`${appUrl}/${input.locale}${atsCheckerPath(input.locale)}?${params.toString()}`}
+        ctaLabel={copy.cta}
+        note={TEMPLATE_SEQUENCE_FOOTER[input.locale]}
       />
     ),
   })

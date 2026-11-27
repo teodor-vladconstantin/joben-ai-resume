@@ -63,6 +63,9 @@ function gatePassed(): boolean {
   }
 }
 
+// One post-download block per page: the latest download owns it.
+const DOWNLOAD_EVENT = 'joben-template-download'
+
 function startDownload(href: string, ctaId: string) {
   pushGtmEvent('cta_click', { cta_id: ctaId, destination: href })
   posthog.capture('template_downloaded', { cta_id: ctaId, destination: href })
@@ -72,6 +75,7 @@ function startDownload(href: string, ctaId: string) {
   document.body.appendChild(link)
   link.click()
   link.remove()
+  window.dispatchEvent(new CustomEvent(DOWNLOAD_EVENT, { detail: ctaId }))
 }
 
 // Download button for a CV template. The first download asks for an email and
@@ -91,6 +95,12 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   const [error, setError] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const captchaRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onDownload = (event: Event) => setDownloaded((event as CustomEvent<string>).detail === ctaId)
+    window.addEventListener(DOWNLOAD_EVENT, onDownload)
+    return () => window.removeEventListener(DOWNLOAD_EVENT, onDownload)
+  }, [ctaId])
 
   // Without a site key (local dev) the server skips the check, so the button
   // must not wait for a token that will never come. In production the server
@@ -135,7 +145,6 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
   function handleClick() {
     if (gatePassed()) {
       startDownload(href, ctaId)
-      setDownloaded(true)
       return
     }
     setOpen(true)
@@ -173,7 +182,6 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
       pushGtmEvent('generate_lead', { source: 'template_gate' })
       setOpen(false)
       startDownload(href, ctaId)
-      setDownloaded(true)
     } catch {
       setError(t('error'))
     } finally {
@@ -187,8 +195,8 @@ export function TemplateDownloadGate({ href, ctaId, templateId, className, child
         {children}
       </button>
       {downloaded ? (
-        <div className="basis-full">
-          <AtsScanCta variant="card" location="dupa_download" />
+        <div className="order-last basis-full">
+          <AtsScanCta variant="card" location="template_download" />
         </div>
       ) : null}
       <Modal open={open} onClose={() => setOpen(false)} title={t('title')} maxWidth="md">

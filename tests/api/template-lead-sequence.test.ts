@@ -23,6 +23,7 @@ vi.mock('@/lib/supabase/server', () => ({
           eq: () => chain,
           not: () => chain,
           gte: () => chain,
+          lt: () => chain,
           limit: () => Promise.resolve({ data: state.leads, error: null }),
         }
         return chain

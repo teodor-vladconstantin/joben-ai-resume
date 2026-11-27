@@ -133,6 +133,32 @@ export const TEMPLATE_SEQUENCE_COPY: Record<AnonScanEmailLocale, Record<Template
   },
 }
 
+// Leads captured from this moment get the single 24h email below
+// (api/cron/template-lead-24h). Older leads finish the series above.
+// Move it to the deploy date if the merge happens later.
+export const TEMPLATE_24H_LAUNCH_AT = '2026-11-28T00:00:00Z'
+
+export const TEMPLATE_24H_COPY: Record<AnonScanEmailLocale, Omit<StepCopy, 'ctaPath'>> = {
+  en: {
+    subject: "Find what's holding your CV back",
+    heading: "Find what's holding your CV back.",
+    body: [
+      'You downloaded a CV template from Joben. Once you have filled it in, upload it to the free checker.',
+      'You get a score from 0 to 100 and see what to fix first. No account needed.',
+    ],
+    cta: 'Check my CV for free',
+  },
+  ro: {
+    subject: 'Află ce îți trage CV-ul în jos',
+    heading: 'Află ce îți trage CV-ul în jos.',
+    body: [
+      'Ai descărcat un șablon de CV de pe Joben. După ce îl completezi, încarcă-l în verificatorul gratuit.',
+      'Primești un scor de la 0 la 100 și vezi ce ai de reparat mai întâi. Fără cont.',
+    ],
+    cta: 'Verifică-mi CV-ul gratuit',
+  },
+}
+
 export const TEMPLATE_SEQUENCE_FOOTER: Record<AnonScanEmailLocale, string> = {
   en: 'You are receiving this because you downloaded a CV template on joben.eu and agreed to tips by email.',
   ro: 'Primești acest email pentru că ai descărcat un șablon de CV pe joben.eu și ai acceptat sfaturi pe email.',

@@ -1,4 +1,5 @@
 import type Stripe from 'stripe'
+import { createHash } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { getRequestId, jsonWithRequestId, logger } from '@/lib/logger'
 import { clientErrorMessage } from '@/lib/security/client-error'
@@ -23,6 +24,34 @@ function revokePassExpiry(current: string, now = Date.now()): string {
 
 function isDuplicateEventError(error: { code?: string } | null): boolean {
   return error?.code === '23505'
+}
+
+// One uuid per paid Stripe object (invoice or checkout session), shaped as UUIDv5.
+function paymentEventUuid(paymentId: string): string {
+  const h = createHash('sha256').update(`payment_completed:${paymentId}`).digest('hex')
+  const variant = ((parseInt(h[16], 16) & 0x3) | 0x8).toString(16)
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${variant}${h.slice(17, 20)}-${h.slice(20, 32)}`
+}
+
+// The only place payment_completed is sent. webhook_events already drops a
+// replayed event; the uuid covers a retry after a failure later in the handler.
+// amount is in minor units (bani), as Stripe reports it.
+async function capturePaymentCompleted(input: {
+  paymentId: string
+  clerkId: string
+  plan: string
+  amount: number
+  currency: string
+  mode: 'payment' | 'subscription'
+  eventCreated: number
+}): Promise<void> {
+  await capturePostHogEvent({
+    distinctId: input.clerkId,
+    event: 'payment_completed',
+    properties: { plan: input.plan, amount: input.amount, currency: input.currency, mode: input.mode },
+    uuid: paymentEventUuid(input.paymentId),
+    timestamp: new Date(input.eventCreated * 1000),
+  })
 }
 
 function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' | 'pro' | 'recruiting' {
@@ -131,8 +160,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
 
   const syncPlanFromSubscription = async (
     customerId: string,
-    subscription: Stripe.Subscription,
-    paymentCapture?: { amount: number | null }
+    subscription: Stripe.Subscription
   ): Promise<Response | null> => {
     const { data: user, error: userLookupError } = await supabase
       .from('users')
@@ -211,14 +239,6 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         eventType: event.type,
       })
 
-      if (paymentCapture && user.clerk_id) {
-        await capturePostHogEvent({
-          distinctId: user.clerk_id,
-          event: 'payment_completed',
-          properties: { plan: 'recruiting', amount: paymentCapture.amount },
-        })
-      }
-
       return null
     }
 
@@ -248,14 +268,6 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
       return jsonWithRequestId({ error: 'Webhook Error: database update failed' }, 500, requestId)
     }
     if (user.clerk_id) await invalidatePlanCache(user.clerk_id)
-
-    if (paymentCapture && user.clerk_id) {
-      await capturePostHogEvent({
-        distinctId: user.clerk_id,
-        event: 'payment_completed',
-        properties: { plan, amount: paymentCapture.amount },
-      })
-    }
 
     return null
   }
@@ -331,12 +343,17 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         }
 
         // Subscriptions report payment_completed from invoice.paid; only
-        // one-time payments (the pass) have no invoice event.
-        if (session.mode === 'payment') {
-          await capturePostHogEvent({
-            distinctId: userId,
-            event: 'payment_completed',
-            properties: { plan: planId || 'pass_14d', amount: session.amount_total ?? null },
+        // one-time payments (the pass) have no invoice event. A 100% promotion
+        // code (no_payment_required) is not a payment.
+        if (session.mode === 'payment' && session.payment_status === 'paid') {
+          await capturePaymentCompleted({
+            paymentId: session.id,
+            clerkId: userId,
+            plan: planId || 'pass_14d',
+            amount: session.amount_total ?? 0,
+            currency: session.currency ?? 'ron',
+            mode: 'payment',
+            eventCreated,
           })
         }
 
@@ -473,9 +490,48 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
         }
 
         if (subscription) {
-          const response = await syncPlanFromSubscription(invoice.customer, subscription, {
-            amount: invoice.amount_paid ?? null,
-          })
+          // Independent of the plan sync: Stripe can deliver this before the
+          // checkout event links the customer, or after a newer event made it stale.
+          if (invoice.amount_paid > 0) {
+            let clerkId: string | null = subscription.metadata?.userId || null
+            if (!clerkId) {
+              // Subscriptions created before checkout stored userId on them.
+              const { data: payer, error: payerError } = await supabase
+                .from('users')
+                .select('clerk_id')
+                .eq('stripe_customer_id', invoice.customer)
+                .maybeSingle()
+              if (payerError) {
+                logger.error('Stripe invoice payer lookup failed', {
+                  requestId,
+                  route: '/api/webhooks/stripe',
+                  eventId: event.id,
+                  error: payerError.message,
+                })
+                return jsonWithRequestId({ error: 'Webhook Error: database lookup failed' }, 500, requestId)
+              }
+              clerkId = payer?.clerk_id ?? null
+            }
+            if (clerkId) {
+              const priceId = subscription.items?.data?.[0]?.price?.id
+              await capturePaymentCompleted({
+                paymentId: invoice.id ?? event.id,
+                clerkId,
+                plan: resolvePlanFromPriceId(priceId) === 'recruiting' ? 'recruiting' : 'pro',
+                amount: invoice.amount_paid,
+                currency: invoice.currency,
+                mode: 'subscription',
+                eventCreated,
+              })
+            } else {
+              logger.warn('Stripe invoice has no known user, payment not tracked', {
+                requestId,
+                route: '/api/webhooks/stripe',
+                eventId: event.id,
+              })
+            }
+          }
+          const response = await syncPlanFromSubscription(invoice.customer, subscription)
           if (response) {
             return response
           }

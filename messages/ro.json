@@ -62,7 +62,7 @@
       "Robot"
     ],
     "heroSuffix": " să apuce să îl citească.",
-    "subheading": "Sistemele de evaluare resping automat CV-uri formatate greșit, indiferent de experiența candidatului. Joben îți evaluează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
+    "subheading": "Sistemele de evaluare pot filtra CV-uri formatate greșit, chiar și când candidatul are experiența cerută. Joben îți evaluează CV-ul de la 0 la 100, rescrie cu AI punctele slabe și îți spune exact ce ai de reparat înainte de următoarea aplicație.",
     "cta": "Verifică Scorul ATS. E Gratuit",
     "features": [
       "Fără cont",
@@ -1973,8 +1973,8 @@
     "button": "Scanează CV-ul",
     "dropHint": "Trage fișierul aici sau alege-l. PDF sau DOCX.",
     "exampleScore": "Exemplu de scor ATS",
-    "afterTitle": "Acum verifică-l",
-    "afterText": "Încarcă CV-ul completat și vezi scorul ATS în 10 secunde."
+    "afterTitle": "Află ce îți trage CV-ul în jos. AI‑ul îți rescrie punctele slabe.",
+    "afterButton": "Verifică-mi CV-ul gratuit"
   },
   "TemplateGate": {
     "title": "Descarcă șablonul gratuit",
