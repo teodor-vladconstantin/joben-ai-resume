@@ -28,6 +28,7 @@ type Lead = {
   id: string
   email: string
   locale: string | null
+  created_at: string
   email_confirmed_at: string
 }
 
@@ -47,11 +48,9 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('template_leads')
-      .select('id, email, locale, email_confirmed_at')
+      .select('id, email, locale, created_at, email_confirmed_at')
       .eq('marketing_consent', true)
       .not('email_confirmed_at', 'is', null)
-      // Newer leads get the single 24h email instead of this series.
-      .lt('created_at', TEMPLATE_24H_LAUNCH_AT)
       .gte('email_confirmed_at', new Date(now - MAX_AGE_DAYS * DAY_MS).toISOString())
       .limit(options.limit)
 
@@ -88,7 +87,11 @@ export async function POST(request: Request) {
     for (const lead of eligible) {
       const ageDays = Math.floor((now - new Date(lead.email_confirmed_at).getTime()) / DAY_MS)
 
+      // Newer leads get the 24h email (api/cron/template-lead-24h) in place of step 1.
+      const has24hEmail = Date.parse(lead.created_at) >= Date.parse(TEMPLATE_24H_LAUNCH_AT)
+
       for (const step of TEMPLATE_SEQUENCE_STEPS) {
+        if (step === 1 && has24hEmail) continue
         if (ageDays < TEMPLATE_SEQUENCE_OFFSET_DAYS[step]) break
 
         const sourceEventId = `template-seq-${step}:${lead.id}`
