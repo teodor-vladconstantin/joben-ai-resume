@@ -66,6 +66,15 @@ function resolvePlanFromSubscription(subscription: Stripe.Subscription): 'free' 
   return plan === 'recruiting' ? 'recruiting' : 'pro'
 }
 
+// Events arrive in the webhook endpoint's API version, which can be older than
+// the SDK's: before 2025-03-31 the subscription sat directly on the invoice.
+async function invoiceSubscription(stripe: Stripe, invoice: Stripe.Invoice): Promise<Stripe.Subscription | null> {
+  const legacy = invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }
+  const ref = invoice.parent?.subscription_details?.subscription ?? legacy.subscription
+  if (typeof ref === 'string') return stripe.subscriptions.retrieve(ref)
+  return ref ?? null
+}
+
 function isStaleEvent(lastProcessedAt: number | null | undefined, incomingEventCreated: number): boolean {
   return typeof lastProcessedAt === 'number' && lastProcessedAt > incomingEventCreated
 }
@@ -458,14 +467,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
       if (typeof invoice.customer === 'string') {
-        const subscriptionRef = invoice.parent?.subscription_details?.subscription
-        let subscription: Stripe.Subscription | null = null
-
-        if (typeof subscriptionRef === 'string') {
-          subscription = await stripe.subscriptions.retrieve(subscriptionRef)
-        } else if (subscriptionRef) {
-          subscription = subscriptionRef
-        }
+        const subscription = await invoiceSubscription(stripe, invoice)
 
         if (subscription) {
           const response = await syncPlanFromSubscription(invoice.customer, subscription)
@@ -480,14 +482,7 @@ async function handleStripeWebhook(req: Request, claimCtx: WebhookClaimContext) 
     if (event.type === 'invoice.paid') {
       const invoice = event.data.object as Stripe.Invoice
       if (typeof invoice.customer === 'string') {
-        const subscriptionRef = invoice.parent?.subscription_details?.subscription
-        let subscription: Stripe.Subscription | null = null
-
-        if (typeof subscriptionRef === 'string') {
-          subscription = await stripe.subscriptions.retrieve(subscriptionRef)
-        } else if (subscriptionRef) {
-          subscription = subscriptionRef
-        }
+        const subscription = await invoiceSubscription(stripe, invoice)
 
         if (subscription) {
           // Independent of the plan sync: Stripe can deliver this before the

@@ -573,6 +573,19 @@ describe('POST /api/webhooks/stripe', () => {
       expect(second.timestamp).toEqual(first.timestamp)
     })
 
+    // The live endpoint is on API 2024-06-20: no `parent`, a top-level `subscription`.
+    it('subscription: tracked from an invoice in the older API shape', async () => {
+      subscriptionsRetrieveMock.mockResolvedValue(subscription({ metadata: { userId: 'user_1' } }))
+
+      await deliver('invoice.paid', invoice({ parent: undefined, subscription: 'sub_1' }))
+
+      expect(subscriptionsRetrieveMock).toHaveBeenCalledWith('sub_1')
+      expect(capturePostHogEventMock.mock.calls[0][0]).toMatchObject({
+        distinctId: 'user_1',
+        properties: { plan: 'pro', amount: 5900, currency: 'ron', mode: 'subscription' },
+      })
+    })
+
     it('a zero invoice is not a payment', async () => {
       subscriptionsRetrieveMock.mockResolvedValue(subscription({ metadata: { userId: 'user_1' } }))
 
