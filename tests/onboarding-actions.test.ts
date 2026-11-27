@@ -21,7 +21,15 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }))
 
-import { dismissChecklist, getOnboardingState, markTourSeen } from '@/lib/onboarding/actions'
+import {
+  dismissChecklist,
+  dismissSurvey,
+  getOnboardingState,
+  getSurveyState,
+  markSurveyShown,
+  markTourSeen,
+  saveSurveyAnswer,
+} from '@/lib/onboarding/actions'
 
 beforeEach(() => {
   authMock.mockReset()
@@ -93,6 +101,51 @@ describe('markTourSeen', () => {
     authMock.mockResolvedValue({ userId: 'user_1' })
     maybeSingleMock.mockResolvedValue({ data: null, error: { message: 'boom' } })
     await markTourSeen('dashboard')
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('signup survey actions', () => {
+  beforeEach(() => {
+    authMock.mockResolvedValue({ userId: 'user_1' })
+    maybeSingleMock.mockResolvedValue({ data: { onboarding: {} }, error: null })
+  })
+
+  it('hides the card when the read fails or the visitor is signed out', async () => {
+    maybeSingleMock.mockResolvedValue({ data: null, error: { message: 'boom' } })
+    expect(await getSurveyState()).toBeNull()
+    authMock.mockResolvedValue({ userId: null })
+    expect(await getSurveyState()).toBeNull()
+  })
+
+  it('saves a valid answer for the caller only', async () => {
+    expect(await saveSurveyAnswer('source', 'reddit')).toBe(true)
+    expect(eqMock).toHaveBeenCalledWith('clerk_id', 'user_1')
+    expect(upsertMock).toHaveBeenCalledWith(
+      {
+        clerk_id: 'user_1',
+        onboarding: { survey: { answers: { source: { choice: 'reddit', at: expect.any(String) } } } },
+      },
+      { onConflict: 'clerk_id' }
+    )
+  })
+
+  it('rejects an invalid answer without touching the database', async () => {
+    expect(await saveSurveyAnswer('source', 'tiktok')).toBe(false)
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
+  it('reports a failed write', async () => {
+    upsertMock.mockResolvedValue({ error: { message: 'boom' } })
+    expect(await saveSurveyAnswer('source', 'reddit')).toBe(false)
+    expect(await dismissSurvey()).toBe(false)
+  })
+
+  it('reports only the first view', async () => {
+    expect(await markSurveyShown('ro')).toBe(true)
+    maybeSingleMock.mockResolvedValue({ data: { onboarding: { survey: { shownAt: 'a' } } }, error: null })
+    upsertMock.mockClear()
+    expect(await markSurveyShown('ro')).toBe(false)
     expect(upsertMock).not.toHaveBeenCalled()
   })
 })

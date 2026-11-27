@@ -914,6 +914,45 @@
       "item4": "Exportă primul tău PDF",
       "close": "Închide"
     },
+    "signupSurvey": {
+      "close": "Închide",
+      "save": "Salvează",
+      "otherPlaceholder": "Spune-ne mai multe (opțional)",
+      "thanksTitle": "Mulțumim!",
+      "thanksBody": "Răspunsul tău ne ajută să facem Joben mai util.",
+      "error": "Nu am putut salva răspunsul. Încearcă din nou.",
+      "questions": {
+        "source": "De unde ai auzit de Joben?",
+        "intent": "Ce vrei să faci pe Joben?",
+        "goal": "Care e obiectivul tău în următoarele 30 de zile?"
+      },
+      "choices": {
+        "source": {
+          "reddit": "Reddit",
+          "linkedin": "LinkedIn",
+          "friend": "Un prieten sau coleg",
+          "google": "Căutare Google",
+          "ai": "ChatGPT sau alt AI",
+          "university": "Universitate sau centru de carieră",
+          "other": "Altceva"
+        },
+        "intent": {
+          "ats_check": "Să verific dacă CV-ul meu trece de ATS",
+          "rewrite_bullets": "Să-mi rescriu punctele din CV",
+          "english_cv": "Să-mi adaptez CV-ul în engleză",
+          "new_cv": "Să creez un CV de la zero",
+          "specific_job": "Să mă pregătesc pentru un job anume",
+          "other": "Altceva"
+        },
+        "goal": {
+          "first_internship": "Primul internship",
+          "first_job": "Primul job",
+          "new_job": "Un job nou, am deja experiență",
+          "interview": "Am un interviu și mă pregătesc",
+          "other": "Altceva"
+        }
+      }
+    },
     "redeemCode": {
       "heading": "Activează un Cod de Acces",
       "subtext": "Activează accesul special instant. Codul nu ține cont de majuscule.",
