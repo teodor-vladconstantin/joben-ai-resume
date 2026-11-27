@@ -10,7 +10,7 @@ with f as (
     exists(select 1 from public.email_events e where lower(e.email) = o.email and e.email_type like 'template%'
            and e.status in ('processing', 'sent', 'suppressed')) as emailed
   from public.template_leads o
-  where o.marketing_consent and o.created_at < '2026-11-28T00:00:00Z'
+  where o.marketing_consent and o.created_at < '2026-11-27T19:30:00Z'
 )
 select
   (select count(*) from public.template_leads) as all_leads,

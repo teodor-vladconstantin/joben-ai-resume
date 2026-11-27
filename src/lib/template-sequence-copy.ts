@@ -135,8 +135,8 @@ export const TEMPLATE_SEQUENCE_COPY: Record<AnonScanEmailLocale, Record<Template
 
 // Leads captured from this moment get the single 24h email below
 // (api/cron/template-lead-24h). Older leads finish the series above.
-// Move it to the deploy date if the merge happens later.
-export const TEMPLATE_24H_LAUNCH_AT = '2026-11-28T00:00:00Z'
+// Set to the production deploy of this change.
+export const TEMPLATE_24H_LAUNCH_AT = '2026-11-27T19:30:00Z'
 
 export const TEMPLATE_24H_COPY: Record<AnonScanEmailLocale, Omit<StepCopy, 'ctaPath'>> = {
   en: {
