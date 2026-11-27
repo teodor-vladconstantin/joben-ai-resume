@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-type Lead = { id: string; email: string; locale: string | null; email_confirmed_at: string }
+type Lead = { id: string; email: string; locale: string | null; created_at: string; email_confirmed_at: string }
 
 const state = vi.hoisted(() => ({
   leads: [] as Lead[],
@@ -23,7 +23,6 @@ vi.mock('@/lib/supabase/server', () => ({
           eq: () => chain,
           not: () => chain,
           gte: () => chain,
-          lt: () => chain,
           limit: () => Promise.resolve({ data: state.leads, error: null }),
         }
         return chain
@@ -50,6 +49,7 @@ vi.mock('@/lib/supabase/server', () => ({
 
 import { POST } from '@/app/api/cron/template-lead-sequence/route'
 import {
+  TEMPLATE_24H_LAUNCH_AT,
   TEMPLATE_SEQUENCE_COPY,
   TEMPLATE_SEQUENCE_STEPS,
 } from '@/lib/template-sequence-copy'
@@ -59,8 +59,11 @@ const lead = (id: string, ageDays: number, email = `${id}@example.com`): Lead =>
   id,
   email,
   locale: 'ro',
+  // Older than the 24h email unless a test says otherwise.
+  created_at: '2026-11-01T00:00:00Z',
   email_confirmed_at: new Date(Date.now() - ageDays * DAY - 60_000).toISOString(),
 })
+const newLead = (id: string, ageDays: number): Lead => ({ ...lead(id, ageDays), created_at: TEMPLATE_24H_LAUNCH_AT })
 
 function cron(auth = 'Bearer secret') {
   return new Request('http://localhost/api/cron/template-lead-sequence', { method: 'POST', headers: { authorization: auth } })
@@ -107,6 +110,18 @@ describe('POST /api/cron/template-lead-sequence', () => {
     state.locks.add('template-seq-1:d')
     await POST(cron())
     expect(state.sendMock).not.toHaveBeenCalled()
+  })
+
+  it('leaves step 1 of newer leads to the 24h email', async () => {
+    state.leads = [newLead('g', 0), newLead('h', 1)]
+    await POST(cron())
+    expect(state.sendMock).not.toHaveBeenCalled()
+  })
+
+  it('still gives newer leads the rest of the series, Pass offer included', async () => {
+    state.leads = [newLead('i', 20)]
+    for (let run = 0; run < 6; run += 1) await POST(cron())
+    expect(state.sendMock.mock.calls.map((c) => c[0].step)).toEqual([2, 3, 4, 5])
   })
 
   it('skips leads that already have an account', async () => {
