@@ -396,6 +396,7 @@
     "errors": {
       "fileType": "Only .pdf and .docx files are supported.",
       "fileSize": "File exceeds the 5 MB limit.",
+      "fileRead": "We could not read the file. Save it to your device and choose it again.",
       "generic": "Something went wrong. Please try again.",
       "networkScan": "Could not reach the scanner. Check your connection and try again.",
       "emailGeneric": "Could not send the report. Please try again.",
