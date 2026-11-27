@@ -17,5 +17,6 @@ Operator: TETA ABC SRL (CUI 22404824, J2007001135104). Contact: privacy@joben.eu
 | 11 | Recomandări | recompense | art. 6(1)(b), (f) | utilizatori | cod, legătură invitator-invitat | Supabase | SUA | cât timp conturile există |
 | 12 | Feedback | răspuns, îmbunătățire | art. 6(1)(f) | utilizatori | email, mesaj | Supabase | SUA | 24 luni |
 | 13 | Monitorizare postări publice | identificare discuții relevante | art. 6(1)(f) | terți | postare publică, autor public | Supabase | SUA | 90 zile |
+| 14 | Întrebări opționale în dashboard | cum ajung utilizatorii la produs și de ce au nevoie | art. 6(1)(f); art. 6(1)(a) pentru trimiterea în PostHog | utilizatori | sursă, scop, obiectiv, text liber (doar Supabase), limbă, momente | Supabase, PostHog (UE) | UE | cât timp contul este activ |
 
 Măsuri tehnice și organizatorice: vezi AUDIT.md §1-§6 (RLS, hash IP cu HMAC, acces prin service role doar server-side, scrub Sentry, retenție automată, export și ștergere self-service). Evidența transferurilor: pagina /subprocessors.
