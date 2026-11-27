@@ -240,9 +240,22 @@ export function FreeAtsCheckerClient() {
     posthog.capture('ats_scan_started', { hasEmail })
     posthog.capture('scan_submitted', { hasEmail, locale, from: fromParam() })
 
+    // Some Android pickers hand over a file the browser cannot stream (cloud
+    // storage), which surfaces as a bare network error. Reading it first sends
+    // bytes from memory, or names the problem so the visitor can act on it.
+    let upload: Blob
+    try {
+      upload = new Blob([await file.arrayBuffer()], { type: file.type })
+    } catch (error) {
+      posthog.capture('ats_scan_failed', { status: 0, reason: 'file_read', detail: String(error) })
+      setError(t('errors.fileRead'))
+      setIsScanning(false)
+      return
+    }
+
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', upload, file.name)
       formData.append('locale', locale)
       if (hasEmail) {
         formData.append('email', email.trim())
@@ -293,8 +306,8 @@ export function FreeAtsCheckerClient() {
       setResult(payload.result)
       setScanId(payload.scanId ?? null)
       setEmailSentTo(payload.emailSent ? email.trim() : null)
-    } catch {
-      posthog.capture('ats_scan_failed', { status: 0, reason: 'network' })
+    } catch (error) {
+      posthog.capture('ats_scan_failed', { status: 0, reason: 'network', detail: String(error) })
       setError(t('errors.networkScan'))
     }
 

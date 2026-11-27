@@ -396,6 +396,7 @@
     "errors": {
       "fileType": "Sunt acceptate doar fișiere .pdf și .docx.",
       "fileSize": "Fișierul depășește limita de 5 MB.",
+      "fileRead": "Nu am putut citi fișierul. Salvează-l pe dispozitiv și alege-l din nou.",
       "generic": "Ceva nu a mers bine. Încearcă din nou.",
       "networkScan": "Nu am putut contacta scanner-ul. Verifică-ți conexiunea și încearcă din nou.",
       "emailGeneric": "Nu am putut trimite raportul. Încearcă din nou.",
