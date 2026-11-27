@@ -1,0 +1,20 @@
+name: Template Lead 24h Email
+
+# Hourly (Vercel Hobby crons run once a day at most). Dry run, counts only,
+# until the repository variable TEMPLATE_24H_SEND is set to 'true'.
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+jobs:
+  template-lead-24h:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger /api/cron/template-lead-24h
+        env:
+          DRY_RUN: ${{ vars.TEMPLATE_24H_SEND == 'true' && 'false' || 'true' }}
+        run: |
+          curl -sf -X POST "${{ secrets.PROD_APP_URL }}/api/cron/template-lead-24h?dryRun=$DRY_RUN" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

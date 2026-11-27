@@ -170,6 +170,9 @@ export async function POST(req: Request) {
         customer: customerId,
         customer_email: customerId ? undefined : email,
         allow_promotion_codes: true,
+        // Read back by the webhook from invoice.paid, which can arrive before
+        // the customer is linked to the user.
+        ...(isPass ? {} : { subscription_data: { metadata: { userId } } }),
         ...(isPass
           ? {
               payment_method_types: ['card' as const],

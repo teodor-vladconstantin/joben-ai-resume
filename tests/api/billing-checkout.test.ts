@@ -201,7 +201,11 @@ describe('POST /api/billing/checkout', () => {
 
     expect(response.status).toBe(200)
     expect(sessionsCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ mode: 'subscription', customer: 'cus_1' })
+      expect.objectContaining({
+        mode: 'subscription',
+        customer: 'cus_1',
+        subscription_data: { metadata: { userId: 'user_123' } },
+      })
     )
   })
 

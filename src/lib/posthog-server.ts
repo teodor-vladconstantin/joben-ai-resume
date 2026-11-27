@@ -7,6 +7,9 @@ type CapturePostHogEventInput = {
   distinctId: string
   event: string
   properties?: Record<string, unknown>
+  // Same uuid + timestamp on a resend: PostHog keeps one copy of the event.
+  uuid?: string
+  timestamp?: Date
 }
 
 // Serverless route handlers can freeze/exit right after responding, so each
@@ -51,6 +54,8 @@ export async function capturePostHogEvent(input: CapturePostHogEventInput): Prom
       distinctId: input.distinctId,
       event: input.event,
       properties: input.properties,
+      uuid: input.uuid,
+      timestamp: input.timestamp,
     })
   })
 }

@@ -10,7 +10,7 @@ import { atsCheckerPath } from '@/lib/ats-checker-path'
 import { isAppPath } from '@/lib/app-origin'
 import { setPendingScanFile } from '@/lib/pending-scan-file'
 
-export type AtsCtaLocation = 'hero' | 'card_templates' | 'sticky' | 'dupa_download' | 'guide_keywords'
+export type AtsCtaLocation = 'hero' | 'card_templates' | 'sticky' | 'template_download' | 'guide_keywords'
 type Variant = 'card' | 'hero-upload' | 'sticky-mobile'
 
 const GREEN_BUTTON =
@@ -127,16 +127,42 @@ function HeroUpload({ location }: { location: AtsCtaLocation }) {
 
 function Card({ location }: { location: AtsCtaLocation }) {
   const t = useTranslations('AtsScanCta')
+  const locale = useLocale()
   const { href, track } = useCtaHref(location)
-  const afterDownload = location === 'dupa_download'
+  const ref = useRef<HTMLDivElement>(null)
+  const afterDownload = location === 'template_download'
+
+  // The post-download block sits under the clicked card, so bring it on screen
+  // (clear of the phone's bottom bar) and count a view only once it is visible.
+  useEffect(() => {
+    const el = ref.current
+    if (!afterDownload || !el) return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        observer.disconnect()
+        posthog.capture('template_cta_viewed', { locale })
+      },
+      { threshold: 0.5 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [afterDownload, locale])
+
+  function handleClick() {
+    track()
+    if (afterDownload) posthog.capture('template_cta_clicked', { locale })
+  }
+
   return (
-    <div className="flex w-full flex-col items-start justify-between gap-4 rounded-xl bg-gradient-to-br from-[#0f3d2b] to-[#16643f] p-5 text-white sm:flex-row sm:items-center">
+    <div ref={ref} className="flex w-full flex-col items-start justify-between gap-4 rounded-xl bg-gradient-to-br from-[#0f3d2b] to-[#16643f] p-5 text-white sm:flex-row sm:items-center">
       <div>
         <p className="text-lg font-bold">{afterDownload ? t('afterTitle') : t('headline')}</p>
-        <p className="mt-1 text-sm text-white/80">{afterDownload ? t('afterText') : t('sub')}</p>
+        {afterDownload ? null : <p className="mt-1 text-sm text-white/80">{t('sub')}</p>}
       </div>
-      <Link href={href} onClick={track} className={`shrink-0 ${GREEN_BUTTON}`}>
-        {t('button')} <ArrowRight className="size-4" aria-hidden />
+      <Link href={href} onClick={handleClick} className={`shrink-0 ${GREEN_BUTTON}`}>
+        {afterDownload ? t('afterButton') : t('button')} <ArrowRight className="size-4" aria-hidden />
       </Link>
     </div>
   )

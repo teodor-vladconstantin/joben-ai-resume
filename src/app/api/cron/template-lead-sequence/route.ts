@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sendTemplateSequenceEmail, toAnonScanEmailLocale } from '@/lib/resend'
 import {
+  TEMPLATE_24H_LAUNCH_AT,
   TEMPLATE_SEQUENCE_OFFSET_DAYS,
   TEMPLATE_SEQUENCE_STEPS,
   type TemplateSequenceStep,
@@ -49,6 +50,8 @@ export async function POST(request: Request) {
       .select('id, email, locale, email_confirmed_at')
       .eq('marketing_consent', true)
       .not('email_confirmed_at', 'is', null)
+      // Newer leads get the single 24h email instead of this series.
+      .lt('created_at', TEMPLATE_24H_LAUNCH_AT)
       .gte('email_confirmed_at', new Date(now - MAX_AGE_DAYS * DAY_MS).toISOString())
       .limit(options.limit)
 

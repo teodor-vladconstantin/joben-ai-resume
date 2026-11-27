@@ -514,6 +514,107 @@ describe('POST /api/webhooks/stripe', () => {
     expect(updateCalls[0]?.payload.plan).toBe('free')
   })
 
+  describe('payment_completed', () => {
+    const invoice = (extra: Record<string, unknown> = {}) => ({
+      id: 'in_1',
+      customer: 'cus_1',
+      parent: { subscription_details: { subscription: 'sub_1' } },
+      amount_paid: 5900,
+      currency: 'ron',
+      ...extra,
+    })
+    const subscription = (extra: Record<string, unknown> = {}) => ({
+      id: 'sub_1',
+      customer: 'cus_1',
+      status: 'active',
+      items: { data: [{ price: { id: 'price_pro_dummy' } }] },
+      ...extra,
+    })
+
+    async function deliver(type: string, object: Record<string, unknown>) {
+      const event = makeEvent(type, object)
+      constructEventMock.mockReturnValue(event)
+      const { POST } = await import('@/app/api/webhooks/stripe/route')
+      return POST(makeRequest(event))
+    }
+
+    it('subscription: tracked from metadata even before the customer is linked', async () => {
+      subscriptionsRetrieveMock.mockResolvedValue(subscription({ metadata: { userId: 'user_9' } }))
+      makeSupabase({ users: {} })
+
+      await deliver('invoice.paid', invoice())
+
+      expect(capturePostHogEventMock).toHaveBeenCalledTimes(1)
+      expect(capturePostHogEventMock.mock.calls[0][0]).toMatchObject({
+        distinctId: 'user_9',
+        event: 'payment_completed',
+        properties: { plan: 'pro', amount: 5900, currency: 'ron', mode: 'subscription' },
+      })
+    })
+
+    it('subscription: older ones resolve the Clerk id by customer, even on a stale event', async () => {
+      subscriptionsRetrieveMock.mockResolvedValue(subscription())
+      makeSupabase({ users: { cus_1: { id: 'row_1', clerk_id: 'user_1', stripe_last_event_created: 9_999_999_999 } } })
+
+      await deliver('invoice.paid', invoice())
+
+      expect(capturePostHogEventMock.mock.calls[0][0]).toMatchObject({ distinctId: 'user_1' })
+    })
+
+    it('the same invoice always gets the same uuid and timestamp', async () => {
+      subscriptionsRetrieveMock.mockResolvedValue(subscription({ metadata: { userId: 'user_1' } }))
+
+      await deliver('invoice.paid', invoice())
+      await deliver('invoice.paid', invoice())
+
+      const [first, second] = capturePostHogEventMock.mock.calls.map((call) => call[0])
+      expect(first.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+      expect(second.uuid).toBe(first.uuid)
+      expect(second.timestamp).toEqual(first.timestamp)
+    })
+
+    it('a zero invoice is not a payment', async () => {
+      subscriptionsRetrieveMock.mockResolvedValue(subscription({ metadata: { userId: 'user_1' } }))
+
+      await deliver('invoice.paid', invoice({ amount_paid: 0 }))
+
+      expect(capturePostHogEventMock).not.toHaveBeenCalled()
+    })
+
+    it('one-time: reports plan, amount, currency and mode', async () => {
+      makeSupabase({ users: { user_1: { id: 'row_1', plan: 'free', pro_expires_at: null } } })
+
+      await deliver('checkout.session.completed', {
+        id: 'cs_1',
+        metadata: { userId: 'user_1', planId: 'pass_14d' },
+        mode: 'payment',
+        payment_status: 'paid',
+        amount_total: 3900,
+        currency: 'ron',
+      })
+
+      expect(capturePostHogEventMock.mock.calls[0][0]).toMatchObject({
+        distinctId: 'user_1',
+        properties: { plan: 'pass_14d', amount: 3900, currency: 'ron', mode: 'payment' },
+      })
+    })
+
+    it('one-time: a 100% promotion code grants the pass without a payment event', async () => {
+      const { updateCalls } = makeSupabase({ users: { user_1: { id: 'row_1', plan: 'free', pro_expires_at: null } } })
+
+      await deliver('checkout.session.completed', {
+        id: 'cs_2',
+        metadata: { userId: 'user_1', planId: 'pass_14d' },
+        mode: 'payment',
+        payment_status: 'no_payment_required',
+        amount_total: 0,
+      })
+
+      expect(updateCalls).toHaveLength(1)
+      expect(capturePostHogEventMock).not.toHaveBeenCalled()
+    })
+  })
+
   describe('14-day pass', () => {
     const DAY_MS = 24 * 60 * 60 * 1000
 
