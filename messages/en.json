@@ -1013,7 +1013,7 @@
         },
         {
           "title": "5. Transfers outside the European Economic Area",
-          "content": "Some providers (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle). Supabase stores the data in Germany (EU); support access from outside the EEA relies on the Standard Contractual Clauses process data in the United States or in other countries outside the EEA. Transfers rely on the European Commission adequacy decision on the EU-US Data Privacy Framework for certified providers or, failing that, on the Standard Contractual Clauses (Decision (EU) 2021/914), supplemented by additional measures where needed.\n\nYou can request a copy of the applicable safeguards by writing to privacy@joben.eu."
+          "content": "Some providers (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle) process data in the United States or in other countries outside the EEA. Supabase stores the data in Germany (EU); support access from outside the EEA relies on the Standard Contractual Clauses. Transfers rely on the European Commission adequacy decision on the EU-US Data Privacy Framework for certified providers or, failing that, on the Standard Contractual Clauses (Decision (EU) 2021/914), supplemented by additional measures where needed.\n\nYou can request a copy of the applicable safeguards by writing to privacy@joben.eu."
         },
         {
           "title": "6. How long we keep data",

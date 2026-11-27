@@ -1013,7 +1013,7 @@
         },
         {
           "title": "5. Transferuri în afara Spațiului Economic European",
-          "content": "Unii furnizori (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle). Supabase stochează datele în Germania (UE); accesul de asistență din afara SEE se bazează pe clauzele contractuale standard prelucrează date în Statele Unite sau în alte state din afara SEE. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
+          "content": "Unii furnizori (Clerk, Anthropic, Stripe, Resend, Vercel, Google, Oracle) prelucrează date în Statele Unite sau în alte state din afara SEE. Supabase stochează datele în Germania (UE); accesul de asistență din afara SEE se bazează pe clauzele contractuale standard. Transferurile se bazează pe decizia de adecvare a Comisiei Europene privind Cadrul UE-SUA de confidențialitate a datelor pentru furnizorii certificați sau, în lipsa ei, pe Clauzele Contractuale Standard (Decizia (UE) 2021/914), completate cu măsuri suplimentare unde este necesar.\n\nPoți cere o copie a garanțiilor aplicabile scriind la privacy@joben.eu."
         },
         {
           "title": "6. Cât timp păstrăm datele",
