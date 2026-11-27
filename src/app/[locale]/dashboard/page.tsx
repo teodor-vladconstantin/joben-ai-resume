@@ -16,7 +16,8 @@ import { AtsScanCard } from '@/components/dashboard/AtsScanCard'
 import { AtsScanCardPending } from '@/components/dashboard/AtsScanCardPending'
 import { MobileHandoffCard } from '@/components/dashboard/MobileHandoffCard'
 import { TourLauncher } from '@/components/onboarding/TourLauncher'
-import { getOnboardingState } from '@/lib/onboarding/actions'
+import { SignupSurveyCard } from '@/components/dashboard/SignupSurveyCard'
+import { getOnboardingState, getSurveyState } from '@/lib/onboarding/actions'
 import { selectAtsScanCardState } from '@/lib/ats-scan-card'
 import { readAtsSignupAttribution } from '@/lib/ats-attribution'
 import { BenchmarkChart } from '@/components/dashboard/BenchmarkChart'
@@ -91,6 +92,7 @@ export default async function DashboardPage({
 
   const stats = await getUserDashboardStats(userId)
   const onboarding = await getOnboardingState()
+  const survey = await getSurveyState()
   const recentDocs = await getRecentDocuments(userId)
   const latestReview = await getLatestReviewSummary(userId)
   const atsScanCard = selectAtsScanCardState({
@@ -155,6 +157,7 @@ export default async function DashboardPage({
               {passNoticeText}
             </p>
           ) : null}
+          {survey && !survey.closed && <SignupSurveyCard answered={survey.answered} shown={survey.shown} />}
           {isNewUser && user?.id && <MobileHandoffCard />}
           {atsScanCard.kind === 'card' && (
             <div data-tour="dashboard-ats">

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import en from '../../messages/en.json'
+import ro from '../../messages/ro.json'
 import {
   MAX_SURVEY_TEXT,
+  QUESTION_ORDER,
+  SURVEY_CHOICES,
   parseSurvey,
   validateAnswer,
   withSurveyAnswer,
@@ -20,6 +24,16 @@ describe('validateAnswer', () => {
     expect(validateAnswer('source', 'other', `  ${'a'.repeat(300)}  `)?.text).toHaveLength(MAX_SURVEY_TEXT)
     expect(validateAnswer('source', 'other', '   ')).toEqual({ question: 'source', choice: 'other' })
     expect(validateAnswer('source', 'reddit', 'x')).toEqual({ question: 'source', choice: 'reddit' })
+  })
+})
+
+describe('survey copy', () => {
+  it.each([en, ro])('has a label for every question and choice', (messages) => {
+    const copy = messages.Dashboard.signupSurvey
+    for (const question of QUESTION_ORDER) {
+      expect(copy.questions[question]).toBeTruthy()
+      expect(Object.keys(copy.choices[question])).toEqual([...SURVEY_CHOICES[question]])
+    }
   })
 })
 

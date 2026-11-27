@@ -914,6 +914,45 @@
       "item4": "Export your first PDF",
       "close": "Dismiss"
     },
+    "signupSurvey": {
+      "close": "Dismiss",
+      "save": "Save",
+      "otherPlaceholder": "Tell us more (optional)",
+      "thanksTitle": "Thank you!",
+      "thanksBody": "Your answer helps us make Joben more useful.",
+      "error": "We could not save your answer. Please try again.",
+      "questions": {
+        "source": "Where did you hear about Joben?",
+        "intent": "What do you want to do on Joben?",
+        "goal": "What is your goal for the next 30 days?"
+      },
+      "choices": {
+        "source": {
+          "reddit": "Reddit",
+          "linkedin": "LinkedIn",
+          "friend": "A friend or colleague",
+          "google": "Google search",
+          "ai": "ChatGPT or another AI",
+          "university": "University or career center",
+          "other": "Something else"
+        },
+        "intent": {
+          "ats_check": "Check if my resume passes ATS",
+          "rewrite_bullets": "Rewrite my resume bullet points",
+          "english_cv": "Adapt my resume to English",
+          "new_cv": "Build a resume from scratch",
+          "specific_job": "Prepare for a specific job",
+          "other": "Something else"
+        },
+        "goal": {
+          "first_internship": "My first internship",
+          "first_job": "My first job",
+          "new_job": "A new job, I already have experience",
+          "interview": "I have an interview and I am preparing",
+          "other": "Something else"
+        }
+      }
+    },
     "redeemCode": {
       "heading": "Redeem Access Code",
       "subtext": "Activate special access instantly. Code is case-insensitive.",
